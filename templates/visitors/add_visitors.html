@@ -1,0 +1,128 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+		</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Visitor
+				</span>
+				 <span class="float-md-right">
+
+
+     </span>
+
+			</span>
+
+
+</div>
+    </div>
+<br><br>
+<div class="row">
+  <div class="col-sm-6 offset-sm-3">
+    <form action="{% url 'add_visitor' %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="id_name">Name:</label>
+        {{ form.name }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_phone">Phone:</label>
+        {{ form.phone }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">Email:</label>
+        {{ form.email }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_company">Company:</label>
+        {{ form.company }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_address">Address:</label>
+        {{ form.address }}
+      </div>
+       <div class="form-group">
+        <label for="id_meeting_person">Meeting Person:</label>
+        {{ form.meeting_person }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_purpose">Purpose:</label>
+        {{ form.purpose }}
+      </div>
+
+      <div class="form-group">
+        <label for="check_in_time">Check-In-Time:</label>
+        {{ form.check_in_time }}
+      </div>
+
+      <div class="form-group">
+        <label for="check_out_time">Check-Out-Time:</label>
+        {{ form.check_out_time }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_photo">Photo:</label>
+        <input type="file" id="webcam-photo" accept="image/*" capture="user" class="form-control-file">
+        <br>
+        <img id="captured-photo" alt="Captured Photo" style="display: none;">
+        <canvas id="photo-canvas" style="display: none;"></canvas>
+        <button type="button" id="capture-btn" class="btn btn-primary">Capture Photo</button>
+      </div>
+
+      {{ form.visitors_school }}
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // JavaScript code to capture photo from webcam
+  document.addEventListener("DOMContentLoaded", function() {
+    var video = document.createElement("video");
+    var canvas = document.getElementById("photo-canvas");
+    var capturedPhoto = document.getElementById("captured-photo");
+    var captureBtn = document.getElementById("capture-btn");
+    var webcamPhotoInput = document.getElementById("webcam-photo");
+
+    // Check if getUserMedia is supported
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch(function(error) {
+          console.log("Error accessing webcam:", error);
+        });
+    }
+
+    // Capture photo from webcam
+    captureBtn.addEventListener("click", function() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to image and display
+      var photoDataUrl = canvas.toDataURL("image/jpeg");
+      capturedPhoto.src = photoDataUrl;
+      capturedPhoto.style.display = "block";
+      webcamPhotoInput.value = photoDataUrl;
+    });
+  });
+</script>
+
+{% endblock %}

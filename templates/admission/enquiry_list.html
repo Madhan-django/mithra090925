@@ -1,0 +1,105 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Enquiries
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'add_enquiry' %}" class="btn btn-sm btn-outline-light">
+                       New Enquiry</a>
+     </span>
+
+</div>
+    </div>
+            <div class="row">
+            <div class="col-md  text-left">
+                <form action="{% url 'search_enquiry' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table">
+                        <tr>
+                         <td><select name="searchby" id="searchby" class="form-control">
+                     <option value="enq_date" >Date YYYY-MM-DD</option>
+                     <option value="enq_student">Student Name</option>
+                     <option value="enq_name">Enquirer Name</option>
+                </select></td>
+                            <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
+                            <td><button type="submit" class="btn btn-success" >Search</button></td>
+
+                        </tr>
+                    </table>
+
+
+                    </form>
+            </div>
+
+<br>
+
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Name </th>
+      <th>Enquiry Date</th>
+      <th>Follow Up Date</th>
+      <th>Class</th>
+      <th>Mobile Number</th>
+      <th>Actions </th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for enq in data %}
+
+    <tr align="center">
+
+      <td>{{enq.enq_student}}</td>
+      <td>{{enq.enq_date}}</td>
+      <td>{{enq.enq_followup}}</td>
+      <td>{{enq.enq_class}}</td>
+      <td>{{enq.enq_mob}}</td>
+        <td>
+          <form action="{% url 'update_enquiry' enq.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+
+
+          <form action="{% url 'del_enquiry' enq.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+
+
+{% endblock %}
+

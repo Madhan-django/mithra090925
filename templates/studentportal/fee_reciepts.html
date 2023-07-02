@@ -1,0 +1,50 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+<br><br>
+{% if data %}
+<div class="table-responsive">
+  <table class="table table-bordered">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Student Name </th>
+      <th>Reciept Date </th>
+      <th>Reciept Invoice</th>
+      <th>Payment Type</th>
+      <th>Total</th>
+      <th>Paid Amount</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+   {% for frm in data %}
+    <tr align="center">
+      <td>{{frm.reciept_inv.stud_name}}</td>
+      <td>{{frm.reciept_date}}</td>
+      <td>{{frm.reciept_inv}}</td>
+      <td>{{frm.payment_type}}</td>
+      <td>{{frm.total}}</td>
+      <td>{{frm.paid_amt}}</td>
+
+        <td>
+
+          <form action="{% url 'student_reprint_reciept' frm.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-primary" value="Re-Print Reciept">
+          </form>
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+{% endblock %}
+
+
+

@@ -1,0 +1,49 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+{% load static %}
+<div class="col-11">
+<form action ="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>First Name :</label>{{form.first_name }}<br>
+          <label>Last Name :</label>{{form.last_name }}<br>
+          <label>Admission Number :</label>{{form.admn_no}}<br>
+          <label>Date of Birth :</label>{{form.dob_date }}<br>
+          <label>Phone/Mobile :</label>{{form.phone }}<br>
+          <label>Email  :</label>{{form.email}}<br>
+          <label>Address :</label>{{form.address}}<br>
+          <label>Date of Admission : </label>{{form.admn_date}}<br>
+          <label>Religion :</label>{{form.religion}}<br>
+          <label>Caste :</label>{{form.caste}}<br>
+          <label>Blood Group :</label>{{form.blood_group}}<br>
+          <label>Father's Name :</label>{{form.father_name}}<br>
+          <label>Mother's Name :</label>{{form.mother_name}}<br>
+          <label>Father's Occupation :</label>{{form.father_occupation}}<br>
+          <label>Mother's Occupation :</label>{{form.mother_occupation}}<br>
+          <label>Photo :&nbsp; </label>
+
+         {{form.student_photo}}
+
+
+          <br>
+          <label>Roll Number :</label>{{form.roll_no}}<br>
+          <label>Class :</label>{{form.class_name}}<br>
+
+
+
+
+          <label>Section :</label>{{form.secs}}<br>
+
+
+          <label>Academic Year :</label>{{form.ac_year}}
+
+
+
+        <br>
+          <label>School Student :</label>{{form.school_student}}<br>
+          <label>Student Status :</label>{{form.student_status}}<br>
+          <label>Transfer Date :</label>{{form.tc_date}}<br>
+    <input type="submit" class="btn btn-success" value="submit">
+
+</form>
+</div>
+{% endblock %}

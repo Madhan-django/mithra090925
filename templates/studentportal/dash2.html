@@ -1,0 +1,238 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+<div class="container">
+
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Exams
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'add_exams' %}" class="btn btn-sm btn-outline-light">New Exam</a>
+     </span>
+
+</div>
+    </div>
+<br>
+<div class="post-content">
+
+<h1 class="has-text-align-center"><strong><em>Student’s/Parent’s Portal</em></strong></h1>
+
+
+
+<p class="has-text-align-center">	</p><div class="wlsm-logged-in-info">
+		<span class="wlsm-logged-in-text">You are logged in.</span>
+		<a class="wlsm-logout-link" href="https://jacob.mithran.co.in/disconnect?_wpnonce=5e1a81c3d3">
+			Logout		</a>
+		<br>
+		<br>
+		</div>
+	<div class="wlsm-container wlsm-container-student">
+<input class="wlsm-menu-btn" type="checkbox" id="wlsm-menu-btn">
+<label class="wlsm-menu-label" for="wlsm-menu-btn"><span class="wlsm-menu-icon"></span></label>
+<ul class="wlsm-navigation-links">
+	<li>
+		<a class="wlsm-navigation-link active" href="https://jacob.mithran.co.in">Dashboard</a>
+	</li>
+		<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=fee-invoices">Fee Invoices</a>
+	</li>
+
+		<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=fee-structure">Fee Structure</a>
+	</li>
+
+			<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=payment-history">Payment History</a>
+	</li>
+
+			<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=study-materials">Study Materials</a>
+	</li>
+
+			<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=homework">Home Work</a>
+	</li>
+				<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=noticeboard">Noticeboard</a>
+	</li>
+
+		<li>
+			<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=events">Events</a>
+		</li>
+		<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=class-time-table">Class Time Table</a>
+	</li>
+
+			<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=live-classes">Live Classes</a>
+	</li>
+
+	<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=books-issued">Books Issued</a>
+	</li>
+<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=exams-time-table">Exam Time Table</a>
+	</li>
+	<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=exam-admit-card">Admit Card</a>
+	</li>
+
+		<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=exam-results">Exam Results</a>
+	</li>
+
+		<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=certificates">Certificates</a>
+	</li>
+
+	<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=attendance">Attendance</a>
+	</li>
+
+		<li>
+		<a class="wlsm-navigation-link" href="https://jacob.mithran.co.in?action=leave-request">Leave Request</a>
+	</li>
+
+</ul>
+	<div class="wlsm-content-area wlsm-section-dashboard wlsm-student-dashboard">
+
+		<span class="wlsm-pl-2">
+			Student Name: <span class="wlsm-font-bold">AKASHA A</span>		</span>
+		<div class="wlsm-fex">
+
+					<span class=" wlsm-pl-2">
+				School Name:				<strong> Jacob Nursery &amp; Primary School</strong>
+			</span>
+			<br>
+			<span class="wlsm-pl-2">
+				School Email:				<strong> jnps@jacobindia.edu.in</strong>
+			</span>
+			<span class=" wlsm-pl-2">
+				School Phone:				<strong> 044-27641323</strong>
+			</span>
+			<br>
+			<span class="wlsm-pl-2">
+				School Address:				<strong> No:150, P H Road, Ondikuppam, Thiruvallur- 602002</strong>
+			</span>
+
+
+		<a style="float: right;" class="" href="https://jacob.mithran.co.in?action=settings">Account Settings</a>
+		<br>
+
+		<div class="wlsm-flex-between">
+			<div class="wlsm-flex-item wlsm-l-w-50 wlsm-mt-3">
+				<div class="wlsm-st-details-heading wlsm-mt-3">
+					<span>Noticeboard</span>
+				</div>
+				<div class="wlsm-st-recent-notices-section">
+											<div>
+							<span class="wlsm-font-medium wlsm-font-bold">
+								There is no notice.							</span>
+						</div>
+									</div>
+			</div>
+			<div class="wlsm-flex-item wlsm-l-w-48 wlsm-mt-2">
+
+
+				<div class="wlsm-st-details">
+					<div class="wlsm-st-details-heading">
+						<span>Your Details</span>
+					</div>
+
+
+						<img src="https://jacob.mithran.co.in/storage/2022/11/9830.jpg" alt="student picture" class="wlsm-img-thumbnail">
+										<ul class="wlsm-st-details-list">
+						<li>
+							<span class="wlsm-st-details-list-key">Name:</span>
+							<span class="wlsm-st-details-list-value">AKASHA A</span>
+						</li>
+													<li>
+								<span class="wlsm-st-details-list-key">Enrollment Number:</span>
+								<span class="wlsm-st-details-list-value">0834</span>
+							</li>
+
+													<li>
+								<span class="wlsm-st-details-list-key">Admission Number:</span>
+								<span class="wlsm-st-details-list-value">1747</span>
+							</li>
+
+						<li>
+							<span class="wlsm-st-details-list-key">Session:</span>
+							<span class="wlsm-st-details-list-value">2022-2023</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Class:</span>
+							<span class="wlsm-st-details-list-value">S.K.G</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Section:</span>
+							<span class="wlsm-st-details-list-value">A</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Roll Number:</span>
+							<span class="wlsm-st-details-list-value">S020</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Father's Name:</span>
+							<span class="wlsm-st-details-list-value">AGASTIN RAJ</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">ID Card:</span>
+							<span class="wlsm-st-details-list-value">
+								<a class="wlsm-st-print-id-card" data-id-card="1726" data-nonce="657fea821c" href="#" data-message-title="Print ID Card">
+									Print								</a>
+							</span>
+						</li>
+					</ul>
+
+					<div class="wlsm-st-details-heading">
+						<span>Your Attendance</span>
+					</div>
+					<span class="wlsm-st-details-list wlsm-st-attendance-section">
+						<ul class="wlsm-st-attendance-stats">
+							<li>-</li>
+						</ul>
+					</span>
+
+					<br>
+
+					<br>
+
+										<div class="wlsm-st-details-heading">
+						<span>Class Fee Type Total</span><br>
+					</div>
+					<span><strong> Payable :  </strong></span>
+					-					<br>
+
+										<span><strong>Total Paid :   </strong> ₹9,460.00</span>
+					<hr>
+					<p> <strong>Note:</strong> Total paid shows the all payments made by student. Payable will only show current session fee type amount estimate.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<p></p>
+
+					<div class="cleaner">&nbsp;</div>
+
+
+				</div>
+
+
+
+				<div class="cleaner">&nbsp;</div>
+			</div>
+  </div>
+{% endblock %}

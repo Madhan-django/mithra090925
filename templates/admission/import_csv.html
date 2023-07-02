@@ -1,0 +1,67 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<style>
+	.wlsm-form-section{
+	padding: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-collapse: collapse;
+    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.22);
+	}
+	.wlsm-main-header card col{
+	border-radius: 15px;
+    background-color: #f2210a;
+    border: 0;
+    box-sizing:border-box;
+	}
+	.school_header{
+	background-color: #343a40;
+	color:white;
+	padding:10px;
+	}
+	.wlsm-section-heading-block{
+	background-color: #e53238;
+    color: #fff;
+    padding: 0.3rem 0.5rem;
+    margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+	}
+</style>
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					New Enquiry
+				</span>
+			</span>
+
+
+</div>
+    </div>
+  <div class="col-11">
+      <br><br>
+      <form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+          <!-- download_csv_template.html -->
+  <div class="form-group">
+    <label for="csv_file">Select CSV file:</label>
+    <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Import</button>
+  <a href="{% url 'download_csv_template' %}" class="btn btn-success">Download Template</a>
+</form>
+
+
+  </div>
+{% endblock %}

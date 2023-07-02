@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+
+    <title>Reciept</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      </head>
+<style>
+table {
+  border-spacing: 5px;
+}
+span{
+font-size:3mm;
+
+
+}
+
+ td {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:5px;
+}
+th {
+
+  border-spacing: 5px;
+  text-align:center;
+
+}
+table, th, td {
+  border: 1px solid black;
+  padding:5px
+}
+p {
+  margin: 0em;
+}
+b{
+font-size:15px;
+}
+tr{
+padding:15px;
+}
+.inv{
+font-size:13px;
+}
+.school{
+
+}
+.wlsm-heading{
+font-size:1.5em
+}
+.wlsm-school{
+font-size:3em;
+font-weight: bold;
+}
+.wlsm-address{
+font-size:1.5em;
+text-align:center;
+}
+</style>
+<div>
+
+
+<!-- School header -->
+    <div class="jumbotron jumbotron-fluid">
+  <div class="container">
+	  <div align="center">
+						<img src="https://jacob.mithran.co.in/wp-content/uploads/2021/04/Jacob-logo-3-copy-copy-1.jpg" width="100" height = "100">
+      </div>
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="wlsm-school" align="center">{{skool}}</div>
+	  <div  class="wlsm-address">{{skool.address}}</div>
+
+
+<div class="container-fluid">
+	<div class="row wlsm-school-header justify-content-center">
+
+		<div class="col-9">
+
+
+
+		<div class="wlsm-heading">
+			<h3 align="center">Academic Report</h3>
+		</div><br>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="wlsm-student-side-lists">
+					<table align="center"><tbody>
+					<ul>
+						<tr><td>
+						<li>
+							<span class="wlsm-font-bold">Student Name:</span>
+							<span>{{adm_data.exam_stu.first_name}}{{adm_data.exam_stu.last_name}}</span>
+						</li></td>
+                        <td>
+						<li>
+							<span class="wlsm-font-bold">Admission Number:</span>
+							<span>{{adm_data.exam_stu.admn_no}}</span>
+						</li></td>
+                        <td>
+						<li>
+							<span class="wlsm-font-bold">Session:</span>
+							<span>{{adm_data.exam_stu.ac_year}}</span>
+						</li></td>
+						<td><li>
+							<span class="pr-3">
+								<span class="wlsm-font-bold">Class:</span>
+								<span>{{adm_data.exam_stu.class_name}}</span>
+							</span>
+							<span class="pl-3">
+								<span class="wlsm-font-bold">Section:</span>
+								<span>{{adm_data.exam_stu.secs}}</span>
+							</span>
+						</li></td></tr>
+					<tr><td>
+						<li>
+							<span class="wlsm-font-bold">Roll Number:</span>
+							<span>{{adm_data.exam_stu.roll_no}}</span>
+						</li></td>
+						<td><li>
+							<span class="wlsm-font-bold">Phone:</span>
+							<span>{{adm_data.exam_stu.phone}}</span>
+						</li></td>
+						<td><li>
+							<span class="wlsm-font-bold">Father's Name:</span>
+							<span>{{adm_data.exam_stu.father_name}}</span>
+						</li></td>
+						<td><li>
+							<span class="wlsm-font-bold">Attendance:</span>
+							<span>-</span>
+						</li></td></tr>
+						</ul>
+				</tbody>
+                 </table>
+					<div class="wlsm-print-photo-box wlsm-to-right">
+											<img src="#" class="wlsm-print-photo">
+										</div>
+				</div>
+			</div>
+		</div><br><br>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="table-responsive w-100">
+					<table class="table table-bordered wlsm-results-subject-wise-table wlsm-results-subject-wise-table">
+						<thead>
+		<tr>
+			<th>Subject</th>
+			{% for exam_title in data %}
+             <th>{{exam_title.exam_sub}}</th>
+			{% endfor %}
+             <th>Total</th>
+	</tr>
+</thead>
+<tbody>
+			<tr>
+
+				<td>{{adm_data.exam_label}}</td>
+				{% for exam_title in data %}
+
+			<td><span class="wlsm-font-bold">{{exam_title.obtained_marks}}</span></td>
+                {% endfor %}
+
+				<td><span class="wlsm-font-bold">{{tot}}</span></td>
+
+		     </tr>
+
+</tbody>
+					</table><br><br>
+					<table class="table table-bordered wlsm-results-subject-wise-table wlsm-results-subject-wise-table">
+	<tbody><tr>
+		<th><br><br><br><br><center>Parents Signature</center></th>
+		<th><br><br><br><br><center>Teachers Signature</center></th>
+		<th><br><br><br><br><center>Students Signature</center></th>
+		</tr>
+					</tbody></table>
+
+
+
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+</div>
+
+</body>
+</html>

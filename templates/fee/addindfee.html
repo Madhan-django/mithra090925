@@ -1,0 +1,133 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<style>
+ input[type='radio'] {
+     transform: scale(2);
+ }
+#secelt{
+font-size:20px;
+font-weight:bold;
+}
+
+.myDiv{
+	display:none;
+}
+#showOne{
+	color:red;
+    border:1px solid red;
+    padding:10px;
+}
+#showTwo{
+	color:green;
+    border:1px solid green;
+    padding:10px;
+}
+#showThree{
+	color:blue;
+    border:1px solid blue;
+    padding:10px;
+}
+</style>
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+                     Fee
+				</span>
+			</span>
+</div>
+    </div>
+<div class="text-center" id="secelt">
+<h4>Select</h4>
+<input type="radio" name="demo" value="One"/> Bulk Fee &nbsp;&nbsp;
+<input type="radio" name="demo" value="Two"/> Individual Fee
+</div>
+<br>
+<div id="showTwo" class="myDiv">
+  	<strong>Add Individual Fee</strong>
+
+	<form id="addindfeeform" data-class-url="{% url 'ajax_load_class' %}" method ="POST">
+                      {% csrf_token %}
+
+                      <label> Fee Type </label>
+                      <select id="id_fee_cat" name="fee_cat" class="form-control">
+                          <option value="" selected="">---------</option>
+                          {% for sel in data %}
+                          <option value="{{sel.id}}">{{sel.invoice_title}}</option>
+                          {% endfor %}
+                      </select>
+                      <br>
+                      <label> Class </label>
+                      <select id="id_class_name" name="class_name" class="form-control">
+                          <option value="" selected="">---------</option>
+                          {% for sel in cdata %}
+                          <option value="{{sel.id}}">{{sel.name}}</option>
+                          {% endfor %}
+                      </select><br>
+
+                      <label> Student </label>{{form.stud_name}}<br>
+                     {{form.due_amt}}<br>
+                      <label> Concession</label>{{form.concession}}<br>
+                     {{form.invoice_no}}<br>
+                      {{form.status}}<br>
+                      <button type="submit" class="btn btn-success">Submit</button>
+                      <button  type="reset"class="btn btn-warning">Reset</button>
+
+                  </form>
+</div>
+<div id="showOne" class="myDiv">
+	<strong>Add Bulk Fee</strong>
+	<form action ="{% url 'addbulkfee' %}" method ="POST">
+                      {% csrf_token %}
+                    <label>Fee Category :</label>{{form.fee_cat}}<br>
+                    <label>Class :</label>
+                    <select name="class_name" required="" id="id_class_name" class="form-control">
+                         <option value="" selected="">---------</option>
+                         {% for cls in cdata %}
+                        <option value="{{cls.id}}">{{cls}}</option>
+                         {% endfor %}
+                    </select><br><br>
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-success">Generate</button>
+                      <button  type="reset"class="btn btn-warning">Reset</button>
+                        </div>
+                  </form>
+</div>
+
+  <script>
+    $("#id_class_name").change(function () {
+       var url = $("#addindfeeform").attr("data-class-url");
+       var classid = $(this).val();
+       console.log('Test Working');
+
+      $.ajax({
+        url: url,
+        data: {
+          'selclassid': classid
+        },
+        success: function (data) {
+          $("#id_stud_name").html(data);
+          console.log('stud',data);
+        }
+      });
+
+});
+ $('input[type="radio"]').click(function(){
+    	var demovalue = $(this).val();
+        $("div.myDiv").hide();
+        $("#show"+demovalue).show();
+    });
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+{% load static %}
+<div class="col-11">
+<form action ="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>First Name :</label>{{form.first_name }}<br>
+          <label>Last Name :</label>{{form.last_name }}<br>
+          <label>Admission Number :</label>{{form.admn_no}}<br>
+          <label>Gender :</label>{{form.gender}}<br>
+          <label>Date of Birth :</label>{{form.dob_date }}<br>
+          <label>Phone/Mobile :</label>{{form.phone }}<br>
+          <label>Email  :</label>{{form.email}}<br>
+          <label>Address :</label>{{form.address}}<br>
+          <label>Date of Admission : </label>{{form.admn_date}}<br>
+          <label>Religion :</label>{{form.religion}}<br>
+          <label>Caste :</label>{{form.caste}}<br>
+          <label>Blood Group :</label>{{form.blood_group}}<br>
+          <label>Father's Name :</label>{{form.father_name}}<br>
+          <label>Mother's Name :</label>{{form.mother_name}}<br>
+          <label>Father's Occupation :</label>{{form.father_occupation}}<br>
+          <label>Mother's Occupation :</label>{{form.mother_occupation}}<br>
+          <label>Photo :&nbsp; </label>
+          {% if form.instance.student_photo %}
+                   <img src="{{ form.instance.student_photo.url }}" alt="photo" width="150px" height="150px">
+          {% endif %}
+         {{form.student_photo}}
+
+          <br>
+          <label>Roll Number :</label>{{form.roll_no}}<br>
+          <label>Class :</label>{{form.class_name}}<br>
+          <label>Section :</label>{{form.secs}}
+          <label>Academic Year :</label>{{form.ac_year}}
+
+          {% if form.usernm.value is None %}
+              <label>Username</label>
+                  {{ form.usernm }}
+          {% else %}
+                  <input type="hidden" name="usernm" value="{{ form.usernm.value }}" class="form-control" maxlength="25" id="id_usernm">
+          {% endif %}
+        <br>
+         {{form.school_student}}<br>
+          <label>Student Status :</label>{{form.student_status}}<br>
+    <input type="submit" class="btn btn-success" value="Update">
+    <script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script type='text/javascript'>
+    $(document).ready(function(){
+    $("#id_class_name").change(function(){
+    var url = $("#addstudform").attr("data-section-url");
+     var classId = $(this).val();
+       $.ajax({
+        url: url,
+        data: {
+          'Class_Id': classId
+        },
+        success: function (data) {
+          $("#id_secs").html(data);
+        }
+      });
+         });
+$("#id_class_name").change(function(){
+
+});
+});
+
+</script>
+</form>
+</div>
+{% endblock %}

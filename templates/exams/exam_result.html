@@ -1,0 +1,57 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Exam Results
+				</span>
+			</span>
+</div>
+    </div>
+
+
+            <div class="col-md  text-right">
+                <form action="bulk_print_result" method="POST">
+                    {% csrf_token %}
+                    <select name="selectcls">
+                        <option value="">--------------------</option>
+                        {% for cls in clsdata %}
+                        <option value="{{cls.id}}">{{cls.name}}</option>
+                        {% endfor %}
+                    </select>
+
+                <button type="submit" class="btn btn-success" >Bulk Print</button>
+
+                    </form>
+            </div>
+
+<br>
+
+{% if data %}
+
+ <table>
+     <tr>
+         <th>Student Name</th>
+         <th>Print</th>
+     </tr>
+     {% for result in data %}
+     <tr>
+         <td>{{result.exam_stu}}</td>
+         <td><a href="{% url 'exam_result_print' result.id %}">Print</a></td>
+     </tr>
+     {% endfor %}
+ </table>
+
+{% endif %}
+
+{% endblock %}
+

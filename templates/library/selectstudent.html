@@ -1,0 +1,4 @@
+<option value="">--------</option>
+{% for professioncategory in stud %}
+<option value="{{ professioncategory.pk }}">{{ professioncategory.first_name }}</option>
+{% endfor %}

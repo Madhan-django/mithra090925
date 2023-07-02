@@ -1,0 +1,51 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					New Notice
+				</span>
+			</span>
+
+</div>
+    </div>
+<br>
+<div class="container">
+  <div class="col-11 mx-auto">
+    <br><br><br>
+    <form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+  </div>
+</div>
+
+<!-- Include the necessary JavaScript files for datepicker -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    // Initialize the date pickers
+    $('#id_start_date').datetimepicker({
+      format: 'YYYY-MM-DD',
+    });
+
+    $('#id_end_date').datetimepicker({
+      format: 'YYYY-MM-DD',
+    });
+  });
+</script>
+{% endblock %}

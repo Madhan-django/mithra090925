@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+
+    <title>Reciept</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      </head>
+<style>
+
+table {
+  border-spacing: 30px;
+}
+ td {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:15px;
+}
+th {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:5px;
+}
+table, th, td {
+  border: 1px solid black;
+}
+p {
+  margin: 0em;
+}
+b{
+font-size:15px;
+}
+.inv{
+font-size:13px;
+}
+.school{
+
+}
+</style>
+<body>
+
+
+<div class="container">
+  <p  class="school" align="center" style="font-size:25px;font-family:Times New Roman;">{{sch_name}}</p>
+  <p align="center" style="font-size:15px;font-family:courier;">{{sch_addr}}</p>
+  <p style="font-size:15px;font-family:courier;">Reciept No:- {{rec_no}}</p>
+  <p style="font-size:15px;font-family:courier;">Reciept Date :- {{rec_date}}</p>
+   <table>
+  <tr>
+    <th>Student Name:- {{rec_stud}}</th>
+    <th>Admission No:- {{rec_admn}}</th>
+
+  </tr>
+  <tr>
+    <th>Father Name:-{{rec_father}} </th>
+    <th>Mobile No:- {{rec_mob}}</th>
+
+  </tr>
+
+</table>
+  <table class="table">
+    <thead>
+      <tr bgcolor="#BFE0FF">
+        <th   style="padding:3px">Fee</th>
+        <th  bgcolor="#BFE0FF">Fee Amount</th>
+        <th bgcolor="#BFE0FF">Amount Paid</th>
+      </tr>
+    </thead>
+    <br>
+    <tbody>
+      <tr>
+        <td class="inv" >{{rec_inv}}</td>
+        <td class="inv">{{rec_total}}</td>
+        <td class="inv" >{{rec_paid_amt}}</td>
+      </tr>
+      <tr class="success">
+        <td colspan="2"><b>Total</b></td>
+        <td><b> Rs-{{rec_paid_amt}}/-</b></td>
+
+      </tr>
+
+    </tbody>
+  </table><br>
+  <p style="font-size:20px;font-family:courier;">Payment Type:- {{rec_ptype}}</p>
+  <p style="font-size:15px;font-family:courier;"> Thanks Recieved a sum of Rupees:- {{rec_paid_amt}}</p>
+</div>
+</body>
+</html>

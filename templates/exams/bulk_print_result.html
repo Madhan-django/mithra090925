@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+  <title>Receipt</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <style>
+    table {
+      -pdf-keep-with-next: true;
+    }
+
+    p {
+      margin: 0;
+      -pdf-keep-with-next: true;
+    }
+
+    p.separator {
+      -pdf-keep-with-next: false;
+      font-size: 6pt;
+    }
+
+    .wlsm-school {
+      font-size: 2em;
+      font-family: "Gill Sans", sans-serif;
+    }
+
+    .wlsm-address {
+      font-size: 1.5em;
+    }
+
+    .table {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  {% if data %}
+    {% for stu in stud %}
+     
+        <center>
+          <p class="h3 text-dark">Exam Results</p>
+        </center>
+
+        <div class="jumbotron jumbotron-fluid">
+          <div class="container">
+            <div align="center">
+              <img src="https://jacob.mithran.co.in/wp-content/uploads/2021/04/Jacob-logo-3-copy-copy-1.jpg" width="100" height="100">
+            </div>
+
+            <div class="wlsm-school" align="center">{{skool}}</div>
+            <div class="wlsm-address" align="center">{{skool.address}}</div>
+
+            <div class="container-fluid">
+              <div class="row wlsm-school-header justify-content-center">
+                <div class="col-9">
+                  <div class="wlsm-heading">
+                    <h3 align="center">Academic Report</h3>
+                  </div><br>
+
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="wlsm-student-side-lists">
+                        <table class="table">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <span class="wlsm-font-bold">Student Name:</span>
+                                <span>{{stu.first_name}}{{stu.last_name}}</span>
+                              </td>
+                              <td>
+                                <span class="wlsm-font-bold">Admission Number:</span>
+                                <span>{{stu.admn_no}}</span>
+                              </td>
+                              <td>
+                                <span class="wlsm-font-bold">Session:</span>
+                                <span>{{stu.ac_year}}</span>
+                              </td>
+                              <td>
+                                <span class="pr-3">
+                                  <span class="wlsm-font-bold">Class:</span>
+                                  <span>{{stu.class_name}}</span>
+                                </span>
+                                <span class="pl-3">
+                                  <span class="wlsm-font-bold">Section:</span>
+                                  <span>{{stu.secs}}</span>
+                                </span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <span class="wlsm-font-bold">Roll Number:</span>
+                                <span>{{stu.roll_no}}</span>
+                              </td>
+                              <td>
+                                <span class="wlsm-font-bold">Phone:</span>
+                                <span>{{stu.phone}}</span>
+                              </td>
+                              <td>
+                                <span class="wlsm-font-bold">Father's Name:</span>
+                                <span>{{stu.father_name}}</span>
+                              </td>
+                              <td>
+                                <span class="wlsm-font-bold">Attendance:</span>
+                                <span>-</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <div class="wlsm-print-photo-box wlsm-to-right">
+                          <img src="#" class="wlsm-print-photo">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div><br><br>
+
+                <table class="table">
+                  <tr>
+                    <td>Subjects</td>
+                    {% for ex in exm %}
+                      <td>{{ ex.exam_name }}</td>
+                    {% endfor %}
+                  </tr>
+                  {% for sub in subj %}
+                    <tr>
+                      <td>{{ sub.subject_name }}</td>
+                      {% for dt in data %}
+                        {% if stu == dt.adm_card.exam_stu and sub == dt.exam_sub.exam_subjects %}
+                          <td>{{ dt.obtained_marks }}</td>
+                        {% endif %}
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </table>
+
+                <br><br>
+
+                <table class="table table-bordered wlsm-results-subject-wise-table wlsm-results-subject-wise-table">
+                  <tbody>
+                    <tr>
+                      <th><br><br><br><br><center>Parents Signature</center></th>
+                      <th><br><br><br><br><center>Teachers Signature</center></th>
+                      <th><br><br><br><br><center>Students Signature</center></th>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </pdf:nextpage>
+    {% endfor %}
+  {% endif %}
+</body>
+
+</html>

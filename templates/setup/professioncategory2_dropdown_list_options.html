@@ -1,0 +1,4 @@
+<option id="id_secs" value="">--------</option>
+{% for professioncategory in ssection %}
+<option value="{{ professioncategory.pk }}">{{ professioncategory.section_name }}</option>
+{% endfor %}

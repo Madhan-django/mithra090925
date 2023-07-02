@@ -1,0 +1,96 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="wlsm-main-header card col">
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Enterprises
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'addschool' %}" class="btn btn-sm btn-outline-light">
+                        New Institution</a>
+     </span>
+
+</div>
+    </div>
+
+<br>
+{% if sch %}
+
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Enterprise Name</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Status</th>
+        <th>Action</th>
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+    <tr align="center">
+
+      <td>{{sch.name}}</td>
+      <td>{{sch.phone}}</td>
+      <td>{{sch.email}}</td>
+      <td>{{sch.isactive}}</td>
+      <td>
+          <form action="{% url 'updateschool' sch.id %}"  method="" class="d-inline">
+              {% csrf_token %}
+<!--           <a href="#"> <i  class="fa-regular fa-pen-to-square" style="color:green" aria-hidden="true"></i></a>-->
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+          {% if request.user.groups.all.0.name == "superadmin" %}
+<!--          <a href ="{% url 'updateschool' sch.id %}">Update</a>-->
+          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
+  Delete
+</button>
+{% endif %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">School Delete</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       <h5 style="color:red;"> Are you sure want to Delete - {{sch.name}} &nbsp; ? </h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+         <form action="{% url 'delschool' sch.id %}" method="" class="d-inline">
+              {% csrf_token %}
+<!--             <a href="{% url 'delschool' sch.id %}"> <i  class="fa fa-trash "style="color:red" aria-hidden="true"></i></a>-->
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+     </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+{% else %}
+  <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+
+{% endblock content %}

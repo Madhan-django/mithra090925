@@ -1,0 +1,89 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Products Category
+				</span>
+			</span>
+     <span class="float-md-right">
+					<button type="button" action="{% url 'category_create' %}}" class="btn btn-sm btn-outline-light" data-toggle="modal" data-target="#exampleModal">
+                       New Product Category</a></button>
+     </span>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 align="center" class="modal-title text-danger text-center" id="exampleModalLabels">Product Category</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       <form method="post" >
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Create</button>
+  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+   </form>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+    </div>
+
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Category Name</th>
+      <th>School</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for cat in data %}
+
+    <tr align="center">
+      <td>{{cat.name}}</td>
+      <td>{{cat.Cat_school}}</td>
+
+        <td>
+          <form action="{% url 'category_update' cat.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-info" value="Update">
+          </form>
+ {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+            <form action="{% url 'category_delete' cat.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-delete" value="Delete">
+  {% endif %}
+          </form>
+        </td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+{% endblock %}
+

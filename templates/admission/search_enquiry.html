@@ -1,0 +1,79 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+
+<div class="text-danger bg-primary bg-light"><h2 align="center" style="color:red"><i class="fa fa-graduation-cap" aria-hidden="true"></i>&nbsp;&nbsp;{{skool}}-({{year}})</h2></div><br>
+<center><p class="h3 text-dark" >Enquiry Search</p></center><br><br><br>
+            <div class="col-md  text-left">
+                <form action="{% url 'search_enquiry' %}" method="POST">
+                    {% csrf_token %}
+                <select name="searchby" id="searchby">
+                     <option value="enq_date" >Date YYYY-MM-DD</option>
+                     <option value="enq_student">Student Name</option>
+                     <option value="enq_name">Enquirer Name</option>
+                </select>
+                <input type="search" placeholder="search" name="searched">
+                <button type="submit" class="btn btn-success btn-sm" >Search</button>
+                </form>
+            </div>
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Name </th>
+      <th>Enquiry Date</th>
+      <th>Follow Up Date</th>
+      <th>Class</th>
+      <th>Mobile Number</th>
+      <th>Enquiry Status</th>
+      <th>Actions </th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for enq in data %}
+
+    <tr align="center">
+
+      <td>{{enq.enq_student}}</td>
+      <td>{{enq.enq_date}}</td>
+      <td>{{enq.enq_followup}}</td>
+      <td>{{enq.enq_class}}</td>
+      <td>{{enq.enq_mob}}</td>
+      <td>{{enq.enq_status}}</td>
+        <td>
+          <form action="{% url 'update_enquiry' enq.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+
+
+          <form action="{% url 'del_enquiry' enq.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+      </td>
+    </tr>
+
+   {% endfor %}
+
+
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+
+
+{% endblock %}
+

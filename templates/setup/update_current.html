@@ -1,0 +1,25 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+
+<div class="text-warning bg-dark"><h3 align="center">New Session</h3></div><br><br>
+  <div class="col-11">
+      <br><br><br>
+
+      <form action="" method="POST">
+          {% csrf_token %}
+          {{form.school_name}}<br>
+          <label>Current Year:</label>
+          <select name="current_year" required="" id="id_current_year">
+              <option value="">---------</option>
+              {% for yr in year %}
+              <option value="{{yr.id}}" selected="">{{yr}}</option>
+              {% endfor %}
+          </select>
+
+          <button type="submit" class="btn btn-success">Submit</button>
+      </form>
+
+
+  </div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+
+{% if adata %}
+
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Update Session
+				</span>
+			</span>
+
+</div>
+    </div>
+  <div class="col-12">
+      <br>
+      <table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>School Name </th>
+      <th>Academic Year</th>
+      <th>Actions </th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+  <tr align="center">
+
+      <td>{{adata.school_name}}</td>
+      <td>{{adata.current_year}}</td>
+              <td>
+          <form action="{% url 'update_acad_yr' adata.id %}" method="" >
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-success" value="Update">
+          </form>
+              </td>
+    </tr>
+    </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+
+<div class="text-warning bg-dark"><h3 align="center">New Session</h3></div><br><br>
+  <div class="col-11">
+
+      <br><br><br>
+      <form action="{% url 'set_current_yr' %}" method="POST">
+          {% csrf_token %}
+          <Label> Academic Year :</Label>
+          <select name="current_year" required="" id="id_current_year">
+
+                 <option value="" selected="">---------</option>
+               {% for acad in ydata %}
+               <option value="{{acad.id}}">{{acad.acad_year}}</option>
+               {% endfor %}
+          </select>
+          <select name="school_name" required="" id="id_school_name">
+            <option value="{{sdata.id}}" selected>{{sdata}}</option>
+          </select>
+
+
+          <button type="submit" class="btn btn-success">Submit</button>
+      </form>
+
+
+  </div>
+      </div></div>
+
+{% endif %}
+
+{% endblock %}

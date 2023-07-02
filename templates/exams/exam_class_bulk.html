@@ -1,0 +1,41 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="text-warning bg-dark"><h3 align="center">New Exam</h3></div><br><br>
+  <div class="col-11">
+      <br><br><br>
+      <form action="{% url 'exam_class_bulk' %}" method="POST">
+          {% csrf_token %}
+          <label> Exam Name : </label>
+
+ <select name="exam_name" required="" id="id_exam_name">
+  <option value="" selected="">---------</option>
+  {% for exam in examnm %}
+  <option value="{{exam.id}}">{{exam.exam_title}}</option>
+  {% endfor %}
+</select>
+          <br>
+          <label> Class Name : </label>
+         <select name="exam_class" required="" id="id_exam_class">
+          <option id="" value="">--------</option>
+          {% for examclass in examcs %}
+             <option value="{{ examclass.id }}">{{ examclass.name }}</option>
+          {% endfor %}
+          </select><br>
+
+          <label> Exam Number Start : </label>{{form.exam_number}}<br>
+
+
+          <label> School:</label>
+          <select name="exam_school" required="" id="id_exam_school">
+          <option id="" value="{{sdata.id}}" selected>{{sdata.name}}</option>
+          </select><br>
+
+
+
+          <button type="submit" class="btn btn-success">Generate</button>
+      </form>
+
+
+  </div>
+{% endblock %}

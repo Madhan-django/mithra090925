@@ -1,0 +1,40 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+{% if data %}
+	<br>
+	<div class="table-responsive">
+  <table class="table table-bordered">
+  <thead class="table-dark" align ="center">
+			<tr>
+				<th>Title</th>
+				<th>Start Date</th>
+				<th>End Date</th>
+				<th>Attachment</th>
+				<th>Description</th>
+				<th>Venue</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for eve in data %}
+
+            <tr align="center">
+                <td>{{ eve.event_title }}</td>
+                <td>{{ eve.start_date }}</td>
+				<td>{{ eve.end_date }}</td>
+                 {% if eve.event_image %}
+                <td><a href="\{{ MEDIA_URL }}media\{{eve.event_image}}">Attachment</a></td>
+				{% else %}
+				<td>-</td>
+                {% endif %}
+				<td>{{ eve.event_desc }}</td>
+                <td>{{ eve.event_location }}</td>
+
+            </tr>
+
+    {% endfor %}
+		</tbody>
+	</table>
+{% else %}
+<h3> No data</h3>
+{% endif %}
+{% endblock %}

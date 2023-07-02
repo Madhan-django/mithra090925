@@ -1,0 +1,51 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+{% if data %}
+<div class="table-responsive">
+  <table class="table table-bordered">
+      <thead class="table-dark" align="center">
+    <tr>
+      <th>Invoice Title </th>
+      <th>Invoice Number </th>
+      <th>Student Name</th>
+      <th>Class</th>
+      <th>Invoice Date </th>
+      <th>Amount</th>
+      <th>Due Amount</th>
+      <th>Status</th>
+       <th>Action</th>
+    </tr>
+      </thead>
+    <tbody>
+  <br>
+   {% for frm in data %}
+    <tr align="center">
+      <td>{{frm.fee_cat.invoice_title}}</td>
+      <td>{{frm.id}}</td>
+      <td>{{frm.stud_name.first_name}}</td>
+      <td>{{frm.class_name.name}}</td>
+      <td>{{frm.fee_cat.issued_date}}</td>
+      <td>{{frm.fee_cat.fee_amount}}</td>
+      <td>{{frm.due_amt}}</td>
+       <td>{{frm.status}}</td>
+        <td>
+
+          <form action="{% url 'addfeereciept' frm.id %}"  class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-success" value="Pay">
+          </form>
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+      </div>
+
+{% endif %}
+
+{% endblock %}

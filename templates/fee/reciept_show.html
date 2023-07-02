@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+
+    <title>Reciept</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      </head>
+<style>
+a{
+align:center;
+}
+table {
+  border-spacing: 30px;
+}
+ td {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:15px;
+}
+th {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:5px;
+}
+table, th, td {
+  border: 1px solid black;
+}
+p {
+  margin: 0em;
+}
+@media print {
+    /* Print-specific styles */
+    body {
+        font-size: 14px;
+    }
+    .hide-on-print {
+        display: none !important;
+    }
+    /* Add more print styles as needed */
+}
+
+</style>
+<body>
+
+<div class="container">
+  <p align="center" style="font-size:25px;font-family:courier;"><b>{{sch_name}}</b></p>
+  <p align="center" style="font-size:15px;font-family:courier;">{{sch_name.address}}</p>
+  <p style="font-size:15px;font-family:courier;">Reciept No:- {{data.reciept_no}}</p>
+  <p style="font-size:15px;font-family:courier;">Reciept Date :- {{data.reciept_date}}</p>
+  <table>
+  <tr>
+    <th>Student Name:- {{data.reciept_inv.stud_name.first_name}}{{data.reciept_inv.stud_name.last_name}}</th>
+    <th>Admission No:- {{data.reciept_inv.stud_name.admn_no}}</th>
+
+  </tr>
+  <tr>
+    <th>Father Name:- {{data.reciept_inv.stud_name.father_name}} </th>
+    <th>Mobile No:- {{data.reciept_inv.stud_name.phone}}</th>
+
+  </tr>
+
+</table>
+  <table class="table">
+    <thead>
+      <tr bgcolor="#BFE0FF">
+        <th   style="padding:3px">Fee</th>
+        <th  bgcolor="#BFE0FF">Fee Amount</th>
+        <th bgcolor="#BFE0FF">Amount Paid</th>
+      </tr>
+    </thead>
+    <br>
+    <tbody>
+      <tr>
+        <td >{{data.reciept_inv.fee_cat}}</td>
+        <td>{{data.total}}</td>
+        <td>{{data.paid_amt}}</td>
+      </tr>
+      <tr class="success">
+        <td colspan="2">Total</td>
+        <td> Rs-{{data.paid_amt}}/-</td>
+
+      </tr>
+
+    </tbody>
+  </table><br>
+  <p style="font-size:20px;font-family:courier;">Payment Type:- {{data.payment_type}}</p>
+  <p style="font-size:15px;font-family:courier;"> Thanks Recieved a sum of Rupees:- {{data.paid_amt}}</p>
+  <button class="hide-on-print btn btn-success" onclick="printPage()">Print</button>
+  <a  href="{% url 'html_to_pdf_directly' data.id %}" type="button" class="btn btn-primary hide-on-print" target="_blank" rel="noopener">Print Reciept</a>
+  <a  href="{% url 'fee_reciepts' %}" type="button" class="btn btn-warning hide-on-print">Back</a>
+</div>
+<script>
+function printPage() {
+    window.print();
+}
+</script>
+
+</body>
+</html>

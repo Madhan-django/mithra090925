@@ -1,0 +1,30 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+{% if examdata %}
+	<br>
+	<div class="table-responsive">
+  <table class="table table-bordered">
+  <thead class="table-dark" align ="center">
+			<tr>
+				<th>Exam Name</th>
+				<th>View</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for exam in examdata %}
+
+            <tr align="center">
+                <td>{{ exam.exam_title }}</td>
+
+                <td>
+                    <a href="{% url 'student_exam_timetable_exam' exam.id %}"><i class="fa fa-eye fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
+                   </td>
+            </tr>
+
+              {% endfor %}
+		</tbody>
+	</table>
+{% else %}
+<h3> No Exam Time table Available</h3>
+{% endif %}
+{% endblock %}

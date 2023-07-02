@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+
+    <title>Reciept</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      </head>
+<style>
+
+table {
+  border-spacing: 30px;
+}
+ td {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:2px;
+}
+th {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:5px;
+}
+table, th, td {
+  border: 1px solid black;
+}
+p {
+  margin: 0em;
+}
+b{
+font-size:15px;
+}
+.inv{
+font-size:13px;
+}
+.school{
+
+}
+</style>
+<body>
+<p  class="school" align="center" style="font-size:25px;font-family:Times New Roman;">{{sch_name}}</p>
+{% if rec_data %}
+
+<br><br>
+<table class="table">
+    <thead class="table-dark" align ="center">
+    <tr>
+      <th>Name </th>
+      <th>Admission No</th>
+      <th>Roll No</th>
+      <th>Class</th>
+      <th>Section</th>
+      <th>Phone </th>
+      <th>Father Name</th>
+
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for stud in rec_data %}
+
+    <tr align="center">
+
+      <td>{{stud.first_name}}{{stud.last_name}}</td>
+      <td>{{stud.admn_no}}</td>
+      <td>{{stud.roll_no}}</td>
+      <td>{{stud.class_name}}</td>
+      <td>{{stud.secs}}</td>
+      <td>{{stud.phone}}</td>
+      <td>{{stud.father_name}}</td>
+
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+No Students Record  are available to Show
+</div>
+
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+					</h1>
+			</div>
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					New Staff
+				</span>
+			</span>
+     </div>
+<div class="row">
+	<div class="col-lg-6 mx-auto">
+		<form method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			{{ form.as_p }}
+
+			<div class="form-group">
+				<label for="id_staff_photo">Staff Photo:</label>
+				{{ form.staff_photo }}
+				<img id="staff_photo_preview" src="#" alt="Staff photo preview">
+			</div>
+
+			<div class="d-flex justify-content-end mt-3">
+                               <div class="mr-2">
+                                      <button type="submit" class="btn btn-warning btn-lg">Submit</button>
+                                </div>
+                                 <div>
+                                     <button type="reset" class="btn btn-success btn-lg">Clear</button>
+
+                                 </div>
+                         </div>
+
+
+		</form>
+	</div>
+</div>
+
+<style>
+.form-group {
+	margin-bottom: 15px;
+}
+
+label {
+	font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+select {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	appearance: none;
+}
+
+img#staff_photo_preview {
+	max-width: 200px;
+	margin-top: 10px;
+}
+
+input[type="submit"] {
+	background-color: #4CAF50;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+input[type="submit"]:hover {
+	background-color: #45a049;
+}
+
+.card {
+	background-color: #f2f2f2;
+	padding: 20px;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.mt-3 {
+	margin-top: 15px;
+}
+
+.wlsm-section-heading {
+	display: inline-block;
+	padding: 5px 10px;
+	border-radius: 4px;
+
+	font-weight: bold;
+}
+
+.wlsm-section-heading-box {
+
+	padding: 5px;
+}
+
+.wlsm-main-header {
+	margin-bottom: 15px;
+}
+
+.wlsm_text_secondary {
+	color: #888;
+	font-size: 14px;
+}
+
+.h3 {
+	margin-top: 0;
+}
+
+.row {
+	margin-right: -15px;
+	margin-left: -15px;
+}
+
+.col {
+	float: left;
+	position: relative;
+	min-height: 1px;
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
+.col-lg-6 {
+	width: 50%;
+}
+
+.mx-auto {
+	margin-right: auto;
+	margin-left: auto;
+}
+
+</style>
+
+<script>
+function previewStaffPhoto() {
+	const staffPhotoInput = document.querySelector('#id_staff_photo');
+	const staffPhotoPreview = document.querySelector('#staff_photo_preview');
+
+	staffPhotoInput.addEventListener('change', function() {
+		const file = this.files[0];
+
+		if (file) {
+			const reader = new FileReader();
+
+			reader.addEventListener('load', function() {
+				staffPhotoPreview.setAttribute('src', this.result);
+			});
+
+			reader.readAsDataURL(file);
+		} else {
+			staffPhotoPreview.setAttribute('src', '#');
+		}
+	});
+}
+
+previewStaffPhoto();
+</script>
+{% endblock %}

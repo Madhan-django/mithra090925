@@ -1,0 +1,31 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+{% if adm_card %}
+	<br>
+	<div class="table-responsive">
+  <table class="table table-bordered">
+  <thead class="table-dark" align ="center">
+			<tr>
+				<th>Exam Name</th>
+				<th>View</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for ex in adm_card %}
+
+            <tr align="center">
+
+                <td>{{ ex.exam_label }}</td>
+
+                <td>
+                    <a href="{% url 'student_print_admitcard' ex.exam_label ex.examno %}" target="_blank"><i class="fa fa-eye fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
+                   </td>
+            </tr>
+
+              {% endfor %}
+		</tbody>
+	</table>
+{% else %}
+<h3> No Exam Time table Available</h3>
+{% endif %}
+{% endblock %}

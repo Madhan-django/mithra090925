@@ -1,0 +1,68 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="text-warning bg-dark"><h2 align="center">Enterprises</h2></div><br>
+
+
+
+            <div class="col-md  text-right">
+                <form action="{% url 'addschool' %}" method="POST">
+                    {% csrf_token %}
+                <button type="submit" class="btn btn-success" >New Institution</button>
+
+                    </form>
+            </div>
+
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Enterprise Name</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Status</th>
+        <th>Action</th>
+
+    </tr>
+  </thead>
+
+  <tbody>
+   {% for sch in data %}
+
+    <tr align="center">
+
+      <td>{{sch.name}}</td>
+      <td>{{sch.phone}}</td>
+      <td>{{sch.email}}</td>
+      <td>{{sch.isactive}}</td>
+
+      <td>
+          <form action="{% url 'updateschool' sch.id %}"  method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+<!--          <a href ="{% url 'updateschool' sch.id %}">Update</a>-->
+
+{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+          <form action="{% url 'delschool' sch.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+ {% endif %}
+      </td>
+    </tr>
+     {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+  <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+
+{% endblock content %}

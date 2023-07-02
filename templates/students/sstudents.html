@@ -1,0 +1,133 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Students
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'addstudents' %}" class="btn btn-sm btn-outline-light">New Admission</a>
+                    <a href="{% url 'print_students' %}" class="btn btn-sm btn-outline-light">Export PDF</a>
+                    <a href="{% url 'student_csv' %}" class="btn btn-sm btn-outline-light">Export CSV</a>
+
+     </span>
+
+</div>
+    </div>
+  <div class="col-11">
+      <div class="col-md  text-left">
+                <form action="{% url 'students_search' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table">
+                        <tr>
+                         <td><select name="searchby" id="searchby" class="form-control">
+                     <option value="studname" >Student Name</option>
+                     <option value="fathername">Father Name</option>
+                     <option value="studmob">Mobile No</option>
+                     <option value="studclass">Class</option>
+                     <option value="studstatus">Status</option>
+
+                </select></td>
+                            <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
+                            <td><button type="submit" class="btn btn-success" >Search</button></td>
+
+                        </tr>
+                    </table>
+
+
+                    </form>
+            </div>
+           </div>
+{% if data %}
+<br><br>
+<table class="table">
+    <thead class="table-dark" align ="center">
+    <tr>
+      <th>Name </th>
+      <th>Admission No</th>
+      <th>Class</th>
+      <th>Section</th>
+       <th>Gender</th>
+      <th>Phone </th>
+      <th>Father Name</th>
+      <th>User Name</th>
+      <th>Actions</th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for stud in data %}
+
+    <tr align="center">
+
+      <td>{{stud.first_name}}{{stud.last_name}}</td>
+      <td>{{stud.admn_no}}</td>
+      <td>{{stud.class_name}}</td>
+      <td>{{stud.secs}}</td>
+      <td>{{stud.gender}}</td>
+      <td>{{stud.phone}}</td>
+      <td>{{stud.father_name}}</td>
+      <td>{{stud.usernm}}</td>
+        <td>
+         <a href ="{% url 'updatestud' stud.id %}"><i class="fas fa-pencil-alt fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
+             {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+         <a href ="{% url 'delstud' stud.id %}"><i class="fa fa-trash-can fa-xl" style="color: #ff0000;"></i></a> &nbsp;
+         <a href ="{% url 'reset_password' stud.usernm %}"><i class="fa-solid fa-key fa-xl" style="color:grey;"></i></a>
+            {% endif%}
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+ <nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if data.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for num in data.paginator.page_range %}
+      {% if data.number == num %}
+        <li class="page-item active">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if data.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+No Students Record  are available to Show
+</div>
+
+{% endif %}
+</div>
+{% endblock %}
+

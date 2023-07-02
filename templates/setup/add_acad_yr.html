@@ -1,0 +1,17 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="text-warning bg-dark"><h3 align="center">New Session</h3></div><br><br>
+  <div class="col-11">
+      <br><br><br>
+
+      <form action="{% url 'add_acad_yr' %}" method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+
+          <button type="submit" class="btn btn-success">Submit</button>
+      </form>
+
+
+  </div>
+{% endblock %}

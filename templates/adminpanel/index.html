@@ -1,0 +1,483 @@
+{% load static %}
+  {% load custom_tags %}
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Favicon icon -->
+    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+    <link rel="icon" type="image/png" sizes="16x16" href="dashboard/images/favicon.png">
+        <title>Mithran ERP</title>
+        <!-- Custom CSS -->
+    <link href="dashboard/css/float-chart.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'dashboard/css/style.min.css' %}" rel="stylesheet" type="text/css" >
+    <link href="{% static 'dashboard/css/custom.css' %}" rel="stylesheet" type="text/css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+   <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <![endif]-->
+</head>
+
+<body>
+<script>
+setTimeout(function() {
+    $('#mydiv').fadeOut('fast');
+}, 3000); // <-- time in milliseconds
+</script>
+<style>
+    .btn{
+
+	border-radius: 24px;
+    }
+
+	.wlsm-form-section{
+	padding: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-collapse: collapse;
+    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.22);
+	}
+	.wlsm-main-header card col{
+	border-radius: 15px;
+    background-color: #f2210a;
+    border: 0;
+    box-sizing:border-box;
+	}
+	.school_header{
+	background-color: #343a40;
+	color:white;
+	padding:0px;
+	}
+	.wlsm-section-heading-block{
+	background-color: #e53238;
+    color: #fff;
+    padding: 0.5rem 0.5rem;
+    font-size:1.3em;
+    font-weight:bold;
+    margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+	}
+</style>
+    <!-- ============================================================== -->
+    <!-- Preloader - style you can find in spinners.css -->
+    <!-- ============================================================== -->
+    <div class="preloader">
+        <div class="lds-ripple">
+            <div class="lds-pos"></div>
+            <div class="lds-pos"></div>
+        </div>
+    </div>
+    <!-- ============================================================== -->
+    <!-- Main wrapper - style you can find in pages.scss -->
+    <!-- ============================================================== -->
+    <div id="main-wrapper">
+        <!-- ============================================================== -->
+        <!-- Topbar header - style you can find in pages.scss -->
+        <!-- ============================================================== -->
+        <header class="topbar" data-navbarbg="skin5">
+            <nav class="navbar fixed-top top-navbar navbar-expand-md navbar-dark">
+                <div class="navbar-header" data-logobg="skin5">
+                    <!-- This is for the sidebar toggle which is visible on mobile only -->
+                    <a class="nav-toggler waves-effect waves-light d-block d-md-none" href="javascript:void(0)"><i class="ti-menu ti-close"></i></a>
+                    <!-- ============================================================== -->
+                    <!-- Logo -->
+                    <!-- ============================================================== -->
+                    <a class="navbar-brand" href="index.html">
+                        <!-- Logo icon -->
+                        <b class="logo-icon p-l-10">
+                            <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+                            <!-- Dark Logo icon -->
+                            <img src="{% static 'dashboard/images/logo2.png' %}" alt="homepage" class="light-logo" />
+                           
+                        </b>
+                        <!--End Logo icon -->
+                         <!-- Logo text -->
+                        <span class="logo-text">
+                             <!-- dark Logo text -->
+
+                            
+                        </span>
+                        <!-- Logo icon -->
+                        <!-- <b class="logo-icon"> -->
+                            <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+                            <!-- Dark Logo icon -->
+                            <!-- <img src="dashboard/images/logo-text.png" alt="homepage" class="light-logo" /> -->
+                            
+                        <!-- </b> -->
+                        <!--End Logo icon -->
+                    </a>
+                    <!-- ============================================================== -->
+                    <!-- End Logo -->
+                    <!-- ============================================================== -->
+                    <!-- ============================================================== -->
+                    <!-- Toggle which is visible on mobile only -->
+                    <!-- ============================================================== -->
+                    <a class="topbartoggler d-block d-md-none waves-effect waves-light" href="javascript:void(0)" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><i class="ti-more"></i></a>
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Logo -->
+                <!-- ============================================================== -->
+                <div class="navbar-collapse collapse" id="navbarSupportedContent" data-navbarbg="skin5">
+                    <!-- ============================================================== -->
+                    <!-- toggle and nav items -->
+                    <!-- ============================================================== -->
+                    <ul class="navbar-nav float-left mr-auto">
+                        <li class="nav-item d-none d-md-block"><a class="nav-link sidebartoggler waves-effect waves-light" href="javascript:void(0)" data-sidebartype="mini-sidebar"><i class="mdi mdi-menu font-24"></i></a></li>
+                        <!-- ============================================================== -->
+                        <!-- create new -->
+                        <!-- ============================================================== -->
+<!--                        <li class="nav-item dropdown">-->
+<!--                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+<!--                             <span class="d-none d-md-block">Create New <i class="fa fa-angle-down"></i></span>-->
+<!--                             <span class="d-block d-md-none"><i class="fa fa-plus"></i></span>   -->
+<!--                            </a>-->
+<!--                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">-->
+<!--                                <a class="dropdown-item" href="#">Action</a>-->
+<!--                                <a class="dropdown-item" href="#">Another action</a>-->
+<!--                                <div class="dropdown-divider"></div>-->
+<!--                                <a class="dropdown-item" href="#">Something else here</a>-->
+<!--                            </div>-->
+<!--                        </li>-->
+
+<!--                        &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--                        &lt;!&ndash; Search &ndash;&gt;-->
+<!--                        &lt;!&ndash; ============================================================== &ndash;&gt;-->
+<!--                        <li class="nav-item search-box"> <a class="nav-link waves-effect waves-dark" href="javascript:void(0)"><i class="ti-search"></i></a>-->
+<!--                            <form class="app-search position-absolute">-->
+<!--                                <input type="text" class="form-control" placeholder="Search &amp; enter"> <a class="srh-btn"><i class="ti-close"></i></a>-->
+<!--                            </form>-->
+<!--                        </li>-->
+                    </ul>
+                    <!-- ============================================================== -->
+                    <!-- Right side toggle and nav items -->
+                    <!-- ============================================================== -->
+                    <ul class="navbar-nav float-right">
+                        <!-- ============================================================== -->
+                        <!-- Comment -->
+                        <!-- ============================================================== -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-bell font-24"></i>
+                            </a>
+                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+<!--                                <a class="dropdown-item" href="#">Action</a>-->
+<!--                                <a class="dropdown-item" href="#">Another action</a>-->
+<!--                                <div class="dropdown-divider"></div>-->
+<!--                                <a class="dropdown-item" href="#">Something else here</a>-->
+                            </div>
+                        </li>
+                        <!-- ============================================================== -->
+                        <!-- End Comment -->
+                        <!-- ============================================================== -->
+                        <!-- ============================================================== -->
+                        <!-- Messages -->
+                        <!-- ============================================================== -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" id="2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="font-24 mdi mdi-comment-processing"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right mailbox animated bounceInDown" aria-labelledby="2">
+                                <ul class="list-style-none">
+                                    <li>
+                                        <div class="">
+                                             <!-- Message -->
+                                            <a href="javascript:void(0)" class="link border-top">
+                                                <div class="d-flex no-block align-items-center p-10">
+                                                    <span class="btn btn-success btn-circle"><i class="ti-calendar"></i></span>
+                                                    <div class="m-l-10">
+                                                        <h5 class="m-b-0">Event today</h5> 
+                                                        <span class="mail-desc">Nil</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <!-- Message -->
+<!--                                            <a href="javascript:void(0)" class="link border-top">-->
+<!--                                                <div class="d-flex no-block align-items-center p-10">-->
+<!--                                                    <span class="btn btn-info btn-circle"><i class="ti-settings"></i></span>-->
+<!--                                                    <div class="m-l-10">-->
+<!--                                                        <h5 class="m-b-0">Settings</h5> -->
+<!--                                                        <span class="mail-desc">You can customize this template</span> -->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </a>-->
+<!--                                            &lt;!&ndash; Message &ndash;&gt;-->
+<!--                                            <a href="javascript:void(0)" class="link border-top">-->
+<!--                                                <div class="d-flex no-block align-items-center p-10">-->
+<!--                                                    <span class="btn btn-primary btn-circle"><i class="ti-user"></i></span>-->
+<!--                                                    <div class="m-l-10">-->
+<!--                                                        <h5 class="m-b-0">Pavan kumar</h5> -->
+<!--                                                        <span class="mail-desc">Just see the my admin!</span> -->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </a>-->
+<!--                                            &lt;!&ndash; Message &ndash;&gt;-->
+<!--                                            <a href="javascript:void(0)" class="link border-top">-->
+<!--                                                <div class="d-flex no-block align-items-center p-10">-->
+<!--                                                    <span class="btn btn-danger btn-circle"><i class="fa fa-link"></i></span>-->
+<!--                                                    <div class="m-l-10">-->
+<!--                                                        <h5 class="m-b-0">Luanch Admin</h5> -->
+<!--                                                        <span class="mail-desc">Just see the my new admin!</span> -->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </a>-->
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <!-- ============================================================== -->
+                        <!-- End Messages -->
+                        <!-- ============================================================== -->
+
+                        <!-- ============================================================== -->
+                        <!-- User profile and search -->
+                        <!-- ============================================================== -->
+                        <li class="nav-item dropdown">
+
+                            <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark pro-pic" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src= "{% static 'dashboard/images/users/1.jpg' %}" alt="user" class="rounded-circle" width="31"></a>
+                            <div class="dropdown-menu dropdown-menu-right user-dd animated">
+                                <div class="dropdown-divider"></div>
+                                <h5 align="center">Welcome {{request.user}}, Howdy ...</h5>
+                                <a class="dropdown-item" href="javascript:void(0)"><i class="ti-user m-r-5 m-l-5"></i> My Profile</a>
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'staff_password_reset' %}" ><i class="fa-solid fa-arrows-spin"></i> Reset Password</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout_user' %}" ><i class="fa fa-power-off m-r-5 m-l-5"></i> Logout</a>
+                                <div class="dropdown-divider"></div>
+                                <div class="p-l-30 p-10"><a href="javascript:void(0)" class="btn btn-sm btn-success btn-rounded">View Profile</a></div>
+                            </div>
+                        </li>
+                        <!-- ============================================================== -->
+                        <!-- User profile and search -->
+                        <!-- ============================================================== -->
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <!-- ============================================================== -->
+        <!-- End Topbar header -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- Left Sidebar - style you can find in sidebar.scss  -->
+        <!-- ============================================================== -->
+        <aside class="left-sidebar" data-sidebarbg="skin5">
+            <!-- Sidebar scroll-->
+            <div class="scroll-sidebar">
+                <!-- Sidebar navigation-->
+                <nav class="sidebar-nav">
+                    <ul id="sidebarnav" class="p-t-30">
+                            {% if request.user.groups.all.0.name == "superadmin" %}
+                             <li class="sidebar-item">
+                                 <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{% url 'select' %}" aria-expanded="false"><i class="mdi mdi-view-dashboard"></i>
+                                 <span class="hide-menu">Dashboard</span></a>
+                             </li>
+                              {% endif %}
+                            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cog fa-spin fa-3x fa-fw"></i><span class="hide-menu">Configuration </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'conf_school' %}" class="sidebar-link"><i class="fa fa-university" aria-hidden="true"></i><span class="hide-menu"> Institution </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'academicyr' %}" class="sidebar-link"><i class="fa fa-calendar" aria-hidden="true"></i><span class="hide-menu">Session </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'set_current_yr' %}" class="sidebar-link"><i class="fa fa-clock" aria-hidden="true"></i><span class="hide-menu"> Current Session</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'listclass' %}" class="sidebar-link"><i class="fa fa-c"></i><span class="hide-menu"> Classes </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'listsec' %}" class="sidebar-link"><i class="fa fa-s"></i><span class="hide-menu"> Sections </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'listsubjects' %}" class="sidebar-link"><i class="fa-solid fa-book"></i><span class="hide-menu"> Subjects </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'add_admin' %}" class="sidebar-link"><i class="fa-solid fa-user-ninja"></i><span class="hide-menu"> Admins </span></a></li>
+
+                            </ul>
+                        </li>
+                         {% endif %}
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat  fa-id-badge" aria-hidden="true"></i><span class="hide-menu">Admission </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'enquiry_list' %}" class="sidebar-link"><i class="fa fa-info-circle" aria-hidden="true"></i><span class="hide-menu"> Enquiry </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'add_enquiry' %}" class="sidebar-link"><i class="fa fa-plus" aria-hidden="true"></i><span class="hide-menu"> New Enquiry </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'followup_enquiry' %}" class="sidebar-link"><i class="fa fa-info-circle" aria-hidden="true"></i><span class="hide-menu"> Follow up </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'addstudents' %}" class="sidebar-link"><i class="fa fa-user" aria-hidden="true"></i><span class="hide-menu"> Admit </span></a></li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-child" aria-hidden="true"></i><span class="hide-menu">Students </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'students_list' %}" class="sidebar-link"><i class="fa-solid fa-list"></i><span class="hide-menu"> Student List </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'addattendance' %}" class="sidebar-link"><i class="fa-solid fa-clipboard-user"></i><span class="hide-menu"> Mark Attendance </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'viewattendance' %}" class="sidebar-link"><i class="fa fa-eye"></i><span class="hide-menu"> Show Attendance </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'students_promote' %}" class="sidebar-link"><i class="fa-solid fa-person-arrow-up-from-line"></i><span class="hide-menu"> Promotion </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'student_transfer' %}" class="sidebar-link"><i class="fa-solid fa-right-left"></i><span class="hide-menu"> Student Transfer </span></a></li>
+
+                            </ul>
+                        </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-users"></i><span class="hide-menu">Staffs </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'stafflist' %}" class="sidebar-link"><i class="fa-solid fa-list"></i><span class="hide-menu"> Staff List </span></a></li>
+                                      <li class="sidebar-item"><a href="{% url 'add_staff' %}" class="sidebar-link"><i class="fa-solid fa-light fa-user"></i><span class="hide-menu"> Add Staff</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'add_staff_attendance' %}" class="sidebar-link"><i class="fa-solid fa-clipboard-user"></i><span class="hide-menu"> Mark Attendance </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'staff_viewattendance' %}" class="sidebar-link"><i class="fa fa-eye"></i><span class="hide-menu"> Show Attendance </span></a></li>
+
+
+                            </ul>
+                        </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-users"></i><span class="hide-menu">Academic </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="#" class="sidebar-link"><i class="fa fa-info-circle" aria-hidden="true"></i><span class="hide-menu"> Dashboard</span></a></li>
+                                      <li class="sidebar-item"><a href="{% url 'homework' %}" class="sidebar-link"><i class="fa-solid fa-pen"></i><span class="hide-menu"> Homework </span></a></li>
+                                      <li class="sidebar-item"><a href="{% url 'academic_noticeboard' %}" class="sidebar-link"><i class="fa-solid fa-chalkboard-user"></i><span class="hide-menu">Notice Board</span></a></li>
+                                      <li class="sidebar-item"><a href="{% url 'academic_events' %}" class="sidebar-link"><i class="fa-regular fa-calendar-days"></i><span class="hide-menu"> Events </span></a></li>
+                                                           </ul>
+                        </li>
+                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-university" aria-hidden="true"></i><span class="hide-menu">Finance </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'fee_details' %}" class="sidebar-link"><i class="fa-solid fa-diagram-next"></i><span class="hide-menu"> Fees Category </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'addindfee' %}" class="sidebar-link"><i class="fa-solid fa-file-invoice-dollar"></i><span class="hide-menu"> Add Fees</span></a></li>
+
+                                <li class="sidebar-item"><a href="{% url 'invoices' %}" class="sidebar-link"><i class="fa-solid fa-check-double"></i><span class="hide-menu"> Invoices</span></a></li>
+                                 <li class="sidebar-item"><a href="{% url 'fee_reciepts' %}" class="sidebar-link"><i class="fa-solid fa-indian-rupee-sign"></i><span class="hide-menu"> Reciepts</span></a></li>
+
+                                </ul>
+                        </li>
+                        {% endif %}
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-square-pen"></i><span class="hide-menu">Examination </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'examlist' %}" class="sidebar-link"><i class="fa-solid fa-diagram-next"></i><span class="hide-menu"> Exam </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'exams_subject' %}" class="sidebar-link"><i class="fa-solid fa-book"></i><span class="hide-menu"> Exam Subjects</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'admit_card_list' %}" class="sidebar-link"><i class="fa-regular fa-id-badge"></i><span class="hide-menu"> Admit Card</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'exam_result' %}" class="sidebar-link"><i class="fa-solid fa-chart-simple"></i><span class="hide-menu"> Exam Result</span></a></li>
+
+
+                                </ul>
+                        </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-book"></i><span class="hide-menu">Library </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'books_list' %}" class="sidebar-link"><i class="fa-solid fa-diagram-next"></i><span class="hide-menu"> All Books </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'issued_booklist' %}" class="sidebar-link"><i class="fa-solid fa-book-open-reader"></i><span class="hide-menu"> Issued Books</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'library_cards' %}" class="sidebar-link"><i class="fa-regular fa-address-card"></i><span class="hide-menu"> Library Cards</span></a></li>
+                                </ul>
+                        </li>
+                         {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-beat fa-id-card"></i><span class="hide-menu">Visitors</span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'visitors_list' %}" class="sidebar-link"><i class="fa-solid fa-diagram-next"></i><span class="hide-menu"> Dashboard </span></a></li>
+
+                                  </ul>
+                         </li>
+                        {% endif %}
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa-solid fa-beat fa-gears"></i></i><span class="hide-menu">Inventory Setup</span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{% url 'supplier_list' %}" class="sidebar-link"><i class="fa-brands fa-supple"></i><span class="hide-menu"> Supplier</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'category_list' %}" class="sidebar-link"><i class="fa-solid fa-layer-group"></i><span class="hide-menu"> Product Category </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'products_list' %}" class="sidebar-link"><i class="fa-brands fa-product-hunt"></i><span class="hide-menu"> Products  </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'product_set_list' %}" class="sidebar-link"><i class="fa-solid fa-diagram-next"></i><span class="hide-menu"> Group Product </span></a></li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa-solid fa-beat fa-cart-flatbed"></i><span class="hide-menu">Inventory </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+
+                                <li class="sidebar-item"><a href="{% url 'purchase_list' %}" class="sidebar-link"><i class="fa-solid fa-cart-shopping"></i><span class="hide-menu"> Purchase </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'stock_list' %}" class="sidebar-link"><i class="fa-solid fa-boxes-stacked"></i><span class="hide-menu"> Stocks </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'reciept_book_set' %}" class="sidebar-link"><i class="fa-solid fa-cart-arrow-down"></i><span class="hide-menu"> Bulk Sale </span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'reciept_ind_book' %}" class="sidebar-link"><i class="fa-solid fa-comment-dollar"></i><span class="hide-menu"> Individual Sale </span></a></li>
+
+                            </ul>
+                        </li>
+
+                    </ul>
+                </nav>
+                <!-- End Sidebar navigation -->
+            </div>
+            <!-- End Sidebar scroll-->
+        </aside>
+        <!-- ============================================================== -->
+        <!-- End Left Sidebar - style you can find in sidebar.scss  -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- Page wrapper  -->
+        <div class="page-wrapper">
+            <!-- ============================================================== -->
+            <!-- Bread crumb and right sidebar toggle -->
+            <!-- ============================================================== -->
+            <div class="page-breadcrumb">
+                <div class="row">
+
+                </div>
+            </div>
+            <!-- ============================================================== -->
+            <!-- End Bread crumb and right sidebar toggle -->
+            <!-- ============================================================== -->
+            <!-- ============================================================== -->
+            <!-- Container fluid  -->
+            <!-- ============================================================== -->
+            <div class="container-fluid">
+
+        {% if messages %}
+        {% for message in messages %}
+
+
+        <div class="alert alert-warning" role="alert" id="mydiv">
+              <center><h3> {{message}}</h3></center>
+         </div>
+        {% endfor %}
+        {% endif %}
+
+          {% block content %}
+            {% endblock %}
+            <!-- footer -->
+            <!-- ============================================================== -->
+            <footer class="footer text-center">
+                All Rights Reserved by Mithran Soft Solutions. Designed and Developed by <a href="#">Mithran Soft Solutions</a>.
+            </footer>
+            <!-- ============================================================== -->
+            <!-- End footer -->
+            <!-- ============================================================== -->
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Page wrapper  -->
+        <!-- ============================================================== -->
+        </div></div>
+    <!-- ============================================================== -->
+    <!-- End Wrapper -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- All Jquery -->
+    <!-- ============================================================== -->
+    <script src="{% static 'dashboard/js/jquery.min.js' %}"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="{% static 'dashboard/js/popper.min.js' %}"></script>
+    <script src="{% static 'dashboard/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'dashboard/js/perfect-scrollbar.jquery.min.js' %}"></script>
+    <script src="{% static 'dashboard/js/sparkline.js' %}"></script>
+    <!--Wave Effects -->
+    <script src="{% static 'dashboard/js/waves.js' %}"></script>
+    <!--Menu sidebar -->
+    <script src="{% static 'dashboard/js/sidebarmenu.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <!--Custom JavaScript -->
+    <script src="{% static 'dashboard/js/custom.min.js' %}"></script>
+    <!--This page JavaScript -->
+    <!-- <script src="dist/js/pages/dashboards/dashboard1.js"></script> -->
+    <!-- Charts js Files -->
+    <script src="{% static 'dashboard/js/excanvas.js' %}"></script>
+    <script src="{% static 'dashboard/js/jquery.flot.js' %}"></script>
+    <script src="{% static 'dashboard/js/jquery.flot.pie.js' %}"></script>
+    <script src="{% static 'dashboard/js/jquery.flot.time.js' %}"></script>
+    <script src="{% static 'dashboard/js/jquery.flot.stack.js' %}"></script>
+    <script src="{% static 'dashboard/js/jquery.flot.crosshair.js' %}"></script>
+    <script src="{% static 'dashboard/js/jquery.flot.tooltip.min.js' %}"></script>
+    <script src="{% static 'dashboard/js/chart-page-init.js' %}"></script>
+
+</body>
+
+</html>

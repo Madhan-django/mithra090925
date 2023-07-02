@@ -1,0 +1,88 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+
+<div class="text-warning bg-dark">
+  <h3 class="text-center">New Exam</h3>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header wlsm-form-sub-heading wlsm-font-bold">Student Details</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">Student Name:</span>
+              <span>{{ data.exam_stu }}</span>
+            </li>
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">Father Name:</span>
+              <span>{{ data.exam_stu.father_name }}</span>
+            </li>
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">Class:</span>
+              <span>{{ data.exam_label.exam_class }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header wlsm-form-sub-heading wlsm-font-bold">Exam Details</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">Exam Title:</span>
+              <span>{{ data.exam_label }}</span>
+            </li>
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">Exam Center:</span>
+              <span>{{ data.exam_label.exam_centre }}</span>
+            </li>
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">Start Date:</span>
+              <span>{{ data.exam_label.exam_start_date }}</span>
+            </li>
+            <li class="list-group-item">
+              <span class="wlsm-font-bold">End Date:</span>
+              <span>{{ data.exam_label.exam_end_date }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form method="post" class="mt-5">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <h4 class="mb-4">Formset Label</h4>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            {% for field in formset.empty_form %}
+            <th>{{ field.label_tag }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for form in formset %}
+          <tr>
+            {% for field in form %}
+            <td>{{ field }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+{% load static %}
+<style>
+.wlsm-st-details-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-size: 1.05em;
+  text-align: left;
+}
+.wlsm-st-details-list li {
+  padding: .35em 0;
+  border-bottom: 1px solid #ddd;
+}
+.wlsm-st-details-list-key {
+  font-weight: 600;
+}
+.wlsm-st-details-list {
+  list-style: none;
+    list-style-position: outside;
+    list-style-type: none;
+  font-size: 1.05em;
+  text-align: left;
+}
+.post-content {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.wlsm-font-bold{
+  font-weight: 600;
+}
+</style>
+	<div class="wlsm-content-area wlsm-section-dashboard wlsm-student-dashboard">
+    <span class="wlsm-pl-2">
+        Student Name: <span class= "wlsm-font-bold">{{ student.first_name }} {{ student.last_name }}</span>
+    </span>
+    <div class="wlsm-fex">
+        <span class="wlsm-pl-2">
+            School Name: <strong>{{ skool }}</strong>
+        </span>
+        <br>
+        <span class="wlsm-pl-2">
+            School Email: <strong>{{ skool.email }}</strong>
+        </span>
+        <span class="wlsm-pl-2">
+            School Phone: <strong>{{ skool.phone }}</strong>
+        </span>
+        <br>
+        <span class="wlsm-pl-2">
+            School Address: <strong>{{ skool.address }}</strong>
+        </span>
+    </div>
+
+    <a class="float-right" href="#">Account Settings</a>
+    <br>
+</div><hr>
+
+
+
+		<div class="wlsm-flex-between">
+			<div class="wlsm-flex-item wlsm-l-w-50 wlsm-mt-3">
+				<div class="wlsm-st-details-heading wlsm-mt-3">
+					<span>Noticeboard</span>
+				</div>
+				<div class="wlsm-st-recent-notices-section">
+											<div>
+							<span class="wlsm-font-medium wlsm-font-bold">
+								There is no notice.							</span>
+						</div>
+									</div>
+			</div>
+			<div class="row">
+				<div class="col-8">
+					</div>
+				<div class="col-4">
+			<div class="wlsm-flex-item wlsm-l-w-48 wlsm-mt-2">
+				<div class="wlsm-st-details">
+					<div class="wlsm-st-details-heading">
+						<span>Your Details</span>
+					</div>
+					<li>
+							<img src="\{{ MEDIA_URL }}media\{{student.student_photo}} "style="width: 120px; height: 150px; align : center;" >
+
+						</li>
+                    	<ul class="wlsm-st-details-list">
+						<li>
+							<span class="wlsm-st-details-list-key">Name:</span>
+							<span class="wlsm-st-details-list-value">{{student.first_name}}{{student.last_name}}</span>
+						</li>
+						<li>
+								<span class="wlsm-st-details-list-key">Roll Number:</span>
+								<span class="wlsm-st-details-list-value">{{student.roll_no}}</span>
+						</li>
+						<li>
+								<span class="wlsm-st-details-list-key">Admission Number:</span>
+								<span class="wlsm-st-details-list-value">{{student.admn_no}}</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Session:</span>
+							<span class="wlsm-st-details-list-value">{{year}}</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Class:</span>
+							<span class="wlsm-st-details-list-value">{{student.class_name}}</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Section:</span>
+							<span class="wlsm-st-details-list-value">{{student.secs}}</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">Father's Name:</span>
+							<span class="wlsm-st-details-list-value">{{student.father_name}}</span>
+						</li>
+						<li>
+							<span class="wlsm-st-details-list-key">ID Card:</span>
+							<span class="wlsm-st-details-list-value">
+								<a class="wlsm-st-print-id-card" data-id-card="1726" data-nonce="657fea821c" href="#" data-message-title="Print ID Card">
+									Print								</a>
+							</span>
+						</li>
+
+					</ul>
+				</div></div>
+					<div class="wlsm-st-details-heading">
+						<span>Your Attendance</span>
+					</div>
+					<span class="wlsm-st-details-list wlsm-st-attendance-section">
+						<ul class="wlsm-st-attendance-stats">
+							<li>-</li>
+						</ul>
+					</span>
+
+					<br>
+
+					<br>
+
+
+									</div>
+			</div>
+		</div>
+{% endblock %}

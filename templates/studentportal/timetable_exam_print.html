@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Time Table</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<h3 align="center">Exam Time Table</h3>
+{% if exam_det %}
+	<br>
+	<table >
+		<thead>
+			<tr>
+				<th>Exam Name</th>
+				<th>Subject</th>
+				<th>Paper Code</th>
+				<th>Exam Date</th>
+				<th>Exam Time</th>
+			</tr>
+		</thead>
+		<thead>
+			{% for exam in exam_det %}
+
+            <tr>
+                <th>{{ exam.exname }}</th>
+				<th>{{ exam.exam_subjects }}</th>
+				<th>{{ exam.paper_code }}</th>
+				<th>{{ exam.paper_date}}</th>
+				<th>{{ exam.start_time }} - {{ exam.start_time }} </th>
+             </tr>
+              {% endfor %}
+		</thead>
+	</table>
+{% else %}
+<h3> No Exam Time table Available</h3>
+{% endif %}
+
+</body>
+</html>

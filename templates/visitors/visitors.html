@@ -1,0 +1,106 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+		</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Visitors
+				</span>
+				 <span class="float-md-right">
+					<a href="{% url 'add_visitor' %}" class="btn btn-sm btn-outline-light">New Visitor</a>
+
+     </span>
+
+			</span>
+
+
+</div>
+    </div>
+ <div class="col-12">
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Id</th>
+      <th>Name </th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Company</th>
+      <th>Check_In_Time </th>
+      <th>Check_Out_Time </th>
+      <th>Meeting Person</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+   {% for visitor in data %}
+
+    <tr align="center">
+      <td>{{visitor.id}}</td>
+      <td>{{visitor.name}}</td>
+      <td>{{visitor.phone}}</td>
+      <td>{{visitor.email}}</td>
+      <td>{{visitor.company}}</td>
+      <td>{{visitor.check_in_time}}</td>
+      <td>{{visitor.check_out_time}}</td>
+      <td>{{visitor.meeting_person}}</td>
+        <td>
+
+          <a href="{% url 'view_visitor' visitor.id %}"><i class="fa fa-eye fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
+          <form action="{% url 'update_visitor' visitor.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
+  Delete
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Visitor</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       <h5 style="color:red;"> Are you sure want to Delete - {{visitor.name}} &nbsp; ? </h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+         <form action="{% url 'delete_visitor' visitor.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+        </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+      </div></div>
+
+{% endif %}
+{% endblock %}
+

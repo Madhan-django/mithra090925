@@ -1,0 +1,181 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+{% load static %}
+<style>
+
+#myForm {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+#myForm label {
+  margin-right: 5px;
+}
+
+#myForm input {
+  margin-right: 10px;
+}
+
+#secelt{
+font-size:20px;
+font-weight:bold;
+}
+
+.myDiv{
+	display:none;
+}
+#formOne{
+    display:none;
+	color:red;
+    padding:10px;
+}
+#showTwo{
+	color:green;
+
+    padding:10px;
+}
+#showThree{
+	color:blue;
+    border:1px solid blue;
+    padding:10px;
+}
+</style>
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+    </div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Individual Book Sale
+				</span>
+			</span>
+</div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <form id="myForm" method="POST" action="" class="form-inline">
+        {% csrf_token %}
+        <div class="form-group mx-2">
+          <label for="start_date">Start Date:</label>
+          <input type="date" id="start_date" name="start_date" required class="form-control">
+        </div>
+        <div class="form-group mx-2">
+          <label for="end_date">End Date:</label>
+          <input type="date" id="end_date" name="end_date" required class="form-control">
+        </div>
+        <button type="button" id="changeUrlsearch" class="btn btn-success mx-2">Search</button>
+        <button type="button" id="changeUrldownload" class="btn btn-success mx-2">Download</button>
+      </form>
+    </div>
+    <div class="col-auto">
+      <button type="button"  id="formoneshow" class="btn btn-primary">New Bill</button>
+    </div>
+  </div></div>
+
+
+           <br>
+
+<div class="container">
+ <form id ="formOne" method="post" data-section-url = "{% url 'ajax_load_student' %}" >
+  {% csrf_token %}
+  {{form.as_p}}
+  <button type="submit" class="btn btn-primary">Create</button>
+  <button type="reset" class="btn btn-danger">Clear</button>
+  <button  class="btn btn-secondary float-center" id ="hideme">Hide Me</button>
+</form>
+    </div>
+<br><hr>
+{% if ind_bk %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+	  <th>Date</th>
+      <th>Product</th>
+      <th>Student Name</th>
+      <th>Class</th>
+      <th>Section</th>
+      <th>Quantity</th>
+	  <th>status</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for set in ind_bk %}
+
+    <tr align="center">
+      <td>{{set.issue_date}}</td>
+      <td>{{set.inv_prod}}</td>
+      <td>{{set.stud}}</td>
+      <td>{{set.stud.class_name}}</td>
+      <td>{{set.stud.secs}}</td>
+      <td>{{set.qty}}</td>
+      <td>{{set.status}}</td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+</div>
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+        $(document).ready(function() {
+            // jQuery code to handle button click
+            $("#changeUrlsearch").click(function() {
+                // Modify the form's action attribute
+
+                $("#myForm").attr("action", "{% url 'set_search' %}");  // Change the URL as needed
+                $("#myForm").submit();
+            });
+              $("#changeUrldownload").click(function() {
+                // Modify the form's action attribute
+
+                $("#myForm").attr("action", "{% url 'ind_book_pdf' %}");  // Change the URL as needed
+                $("#myForm").submit();
+            });
+             $("#formoneshow").click(function() {
+                // Modify the form's action attribute
+
+
+                $("#formOne").show();
+            });
+             $("#hideme").click(function() {
+                // Modify the form's action attribute
+
+
+                $("#formOne").hide();
+            });
+             $("#id_bclass").change(function(){
+                    var url = $("#formOne").attr("data-section-url");
+                    var classId = $(this).val()
+                    console.log(classId)
+                  $.ajax({
+                         url: url,
+                          data: {
+                                'Class_Id': classId
+                              },
+                        success: function (data) {
+                            $("#id_stud").html(data);
+                                     }
+             });
+         });
+
+
+        });
+    </script>
+
+{% endblock %}
+

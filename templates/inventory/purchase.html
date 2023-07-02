@@ -1,0 +1,75 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+    <div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Purchase
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'purchase_entry' %}" class="btn btn-sm btn-outline-light">
+                       New Purchase</a>
+     </span>
+
+</div>
+</div>
+
+
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Invoice No</th>
+      <th>Date</th>
+      <th>Product Name</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for prod in data %}
+
+    <tr align="center">
+      <td>{{prod.invoice_no}}</td>
+      <td>{{prod.rec_dt}}</td>
+      <td>{{prod.name}}</td>
+      <td>{{prod.price}}</td>
+      <td>{{prod.quantity}}</td>
+      <td>{{prod.total_cost}}</td>
+              <td>
+          <form action="{% url 'purchase_update' prod.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-info" value="Update">
+          </form>
+ {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+            <form action="{% url 'purchase_delete' prod.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-warning" value="Delete">
+          </form>
+  {% endif %}
+        </td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+{% endblock %}
+

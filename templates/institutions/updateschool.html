@@ -1,0 +1,38 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					 Institutions - Update
+				</span>
+			</span>
+</div>
+    </div>
+<div class = "container">
+    <br><br>
+<div class="col-11">
+<form action ="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+{{form.as_p}}
+{% if form.instance.logo %}
+    <img src="{{ form.instance.logo.url }}" alt="Logo" width="100px" height="100px">
+  {% endif %}
+    <br>
+
+
+    <div class="d-flex justify-content-end mt-3">
+                               <div class="mr-2">
+                                     <input type="submit" class="btn btn-primary btn-lg float-right" value="submit">
+                                </div>
+                                 <div>
+                                     <a href="{% url 'conf_school' %}" type="button" class="btn btn-danger btn-lg float-right">Close</a>
+
+                                 </div>
+                         </div>
+
+</form>
+</div>
+    </div>
+<br><br>
+{% endblock %}

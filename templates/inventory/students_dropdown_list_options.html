@@ -1,0 +1,4 @@
+<option id="id_stud_name" value="">--------</option>
+{% for student in data %}
+<option value="{{ student.pk }}">{{ student.first_name }}</option>
+{% endfor %}

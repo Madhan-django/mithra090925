@@ -1,0 +1,89 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Books
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'add_book' %}" class="btn btn-sm btn-outline-light">New Book</a>
+                    <a href="#" class="btn btn-sm btn-outline-light">Export PDF</a>
+                    <a href="#" class="btn btn-sm btn-outline-light">Export CSV</a>
+
+     </span>
+
+</div>
+    </div>
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Title</th>
+      <th>Author </th>
+      <th>subject</th>
+      <th>Rack Number</th>
+       <th>Book Number</th>
+       <th>ISBN Number</th>
+      <th>Price</th>
+      <th>Quantity/Issued </th>
+      <th>Issue Book </th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for libbook in data %}
+
+    <tr align="center">
+      <td>{{libbook.title}}</td>
+      <td>{{libbook.author}}</td>
+      <td>{{libbook.subject}}</td>
+       <td>{{libbook.rack}}</td>
+       <td>{{libbook.book_no}}</td>
+       <td>{{libbook.isbn}}</td>
+      <td>{{libbook.price}}</td>
+      <td>Quantity :-{{libbook.quantity}}- issued :-{{libbook.issued}}</td>
+
+
+
+
+        <td>
+            {% if libbook.quantity > libbook.issued %}
+          <form action="{% url 'add_book_issued' libbook.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-info" value="Issue Book">
+          </form>
+            {% endif %}
+                </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+
+
+{% endblock %}
+

@@ -1,0 +1,68 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Product Sets
+				</span>
+			</span>
+</div>
+    </div>
+            <div class="col-md  text-right">
+                <form action="{% url 'product_set_create' %}" method="">
+                    {% csrf_token %}
+                <button type="submit" class="btn btn-success" >New Product Set</button>
+                    </form>
+            </div>
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Class Name</th>
+      <th>Product Category</th>
+      <th>Product Name</th>
+      <th>Quantity</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+   {% for set in data %}
+    <tr align="center">
+      <td>{{set.pclass.name}}</td>
+      <td>{{set.prod_set.category}}</td>
+      <td>{{set.prod_set}}</td>
+      <td>{{set.qty}}</td>
+             <td>
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-info" value="Update">
+          </form>
+{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+            <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-warning" value="Delete">
+          </form>
+{% endif %}
+        </td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+{% endblock %}
+

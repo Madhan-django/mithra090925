@@ -1,0 +1,44 @@
+{% extends 'studentportal/main.html' %}
+{% block content %}
+{% load static %}
+{% if data %}
+	<br>
+	<div class="table-responsive">
+  <table class="table table-bordered">
+  <thead class="table-dark" align ="center">
+			<tr>
+				<th>Title</th>
+				<th>Date</th>
+				<th>Attachment</th>
+				<th>URL</th>
+				<th>Status</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for nt in data %}
+
+            <tr align="center">
+                <td>{{ nt.title }}</td>
+                <td>{{ nt.notice_date}}</td>
+                {% if nt.file %}
+                <td><a href="\{{ MEDIA_URL }}media\{{nt.file}}">Attachment</a></td>
+				{% else %}
+				<td>-</td>
+                {% endif %}
+                <td>{{ nt.url}}</td>
+                <td>{{ nt.status }}</td>
+                <td>
+                    <a href="{% url 'update_noticeboard' nt.id %}"><i class="fa fa-eye fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
+                </td>
+            </tr>
+
+    {% endfor %}
+		</tbody>
+	</table>
+{% else %}
+	<div class="alert alert-danger" role="alert">
+		No Notice are available to show.
+	</div>
+{% endif %}
+{% endblock %}

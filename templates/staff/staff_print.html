@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+
+    <title>Reciept</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      </head>
+<style>
+
+table {
+  border-spacing: 30px;
+}
+ td {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:2px;
+}
+th {
+
+  border-spacing: 5px;
+  text-align:center;
+  padding:5px;
+}
+table, th, td {
+  border: 1px solid black;
+}
+p {
+  margin: 0em;
+}
+b{
+font-size:15px;
+}
+.inv{
+font-size:13px;
+}
+.school{
+
+}
+</style>
+<body>
+<p  class="school" align="center" style="font-size:25px;font-family:Times New Roman;">{{sch_name}}</p>
+{% if rec_data %}
+
+<br><br>
+<table class="table">
+    <thead class="table-dark" align ="center">
+    <tr>
+      <th>Name </th>
+      <th>Gender</th>
+      <th>DOB</th>
+      <th>Mobile</th>
+      <th>Email</th>
+      <th>Date of Joining </th>
+      <th>Designation</th>
+      <th>Status</th>
+      <th>Staff ID</th>
+
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for staff in rec_data %}
+
+    <tr align="center">
+
+      <td>{{staff.first_name}}{{staff.last_name}}</td>
+      <td>{{staff.gender}}</td>
+      <td>{{staff.dob}}</td>
+      <td>{{staff.mobile}}</td>
+      <td>{{staff.email}}</td>
+      <td>{{staff.join}}</td>
+      <td>{{staff.desg}}</td>
+      <td>{{staff.status}}</td>
+      <td>{{staff.staff_user}}</td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+No Students Record  are available to Show
+</div>
+
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Sections
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'addsec' %}" class="btn btn-sm btn-outline-light">
+                        New Section</a>
+     </span>
+
+</div>
+</div>
+<br>
+{% if data %}
+<table class="table">
+   <thead class="table-dark" align ="center">
+    <tr>
+      <th>Section Name</th>
+      <th>Class </th>
+
+       <th>Action</th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+   {% for seclst in data %}
+
+    <tr align="center">
+
+      <td>{{seclst.section_name}}</td>
+      <td>{{seclst.class_sec_name}}</td>
+
+        <td>
+          <form action="{% url 'updatesec' seclst.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <button type="submit" class="btn btn-lg"><i class="fas fa-edit" style="color: #106c02;"></i></button>
+          </form>
+
+         </form>
+<button type="button" class="btn btn-lg" data-toggle="modal" data-target="#{{seclst}}">
+<i class="fas fa-trash" style="color: #fd0013;"></i>
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="{{seclst}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Session</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+     <h5 style="color:red;"> Are you sure want to Delete -{{seclst.class_sec_name}} - {{seclst}} ? </h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+           <form action="{% url 'delsec' seclst.id %}" method="POST" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+ {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+      </td>
+    </tr>
+   {% endfor %}
+
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+{% endblock %}
+

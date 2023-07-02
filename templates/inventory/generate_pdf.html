@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 3px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr{
+        font-size:12px;
+        font-weight: Normal;
+        text-align:center;
+        }
+
+        .wlsm-main-header card col{
+             text-align: center;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="wlsm-main-header card col" xmlns="http://www.w3.org/1999/html">
+	<div class="school_header">
+		<h1>
+			<i class="fa fa-graduation-cap text-light"></i><center>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small></center>
+		</h1>
+			</div>
+
+    <h1 align="center">Books Sets</h1>
+{% if filtered_data %}
+    <table>
+        <thead>
+            <tr>
+                <th>Book Set</th>
+                <th>Issue Date</th>
+                <th>Student Class</th>
+                <th>Book Student</th>
+                <th>Status</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in filtered_data %}
+            <tr>
+                <td>{{ item.book_set }}</td>
+                <td>{{ item.issue_date }}</td>
+                <td>{{ item.stud_class }}</td>
+                <td>{{ item.book_student }}</td>
+                <td>{{ item.status }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+        <p>No records are available to show.</p>
+    {% endif %}
+
+</body>
+</html>

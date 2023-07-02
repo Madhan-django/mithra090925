@@ -1,0 +1,153 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+                    Invoices
+				</span>
+			</span>
+     <span class="float-md-right">
+					<a href="{% url 'addindfee' %}" class="btn btn-sm btn-outline-light">New Fee</a>
+
+
+     </span>
+
+</div>
+    </div>
+ <div class="col-11">
+            <div class="col-md  text-left">
+                 <form id="myForm" method="POST" action="" class="form-inline">
+                    {% csrf_token %}
+                <select name="searchby" id="searchby">
+                     <option value="studname" >Student Name</option>
+                    <option value="admn_no" >Admission No</option>
+                    <option value="CClass">Class</option>
+                    <option value="status">Status</option>
+
+
+                </select>
+                <input type="search" placeholder="search" name="searched" required>
+                 <button type="button" id="changeUrlsearch" class="btn btn-primary mx-2">Search</button>
+                 <button type="button" id="changeUrldownload" class="btn btn-success mx-2">Download</button>
+
+                    </form>
+            </div></div>
+<br>
+
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Invoice Title </th>
+      <th>Invoice Number </th>
+      <th>Student Name</th>
+      <th>Class</th>
+      <th>Invoice Date </th>
+      <th>Amount</th>
+      <th>Due Amount</th>
+      <th>Status</th>
+       <th>Action</th>
+
+
+    </tr>
+  </thead>
+  <tbody>
+   {% for frm in data %}
+    <tr align="center">
+
+      <td>{{frm.fee_cat.invoice_title}}</td>
+      <td>{{frm.id}}</td>
+      <td>{{frm.stud_name.first_name}}</td>
+      <td>{{frm.class_name.name}}</td>
+      <td>{{frm.fee_cat.issued_date}}</td>
+      <td>{{frm.fee_cat.fee_amount}}</td>
+      <td>{{frm.due_amt}}</td>
+       <td>{{frm.status}}</td>
+        <td>
+          <form action="{% url 'updateindfee' frm.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+          <form action="{% url 'delindfee' frm.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+            {% endif %}
+          <form action="{% url 'addfeereciept' frm.id %}"  class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-success" value="Pay">
+          </form>
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if data.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for num in data.paginator.page_range %}
+      {% if data.number == num %}
+        <li class="page-item active">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if data.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+        $(document).ready(function() {
+            // jQuery code to handle button click
+            $("#changeUrlsearch").click(function() {
+                // Modify the form's action attribute
+
+                $("#myForm").attr("action", "{% url 'invoice_search' %}");  // Change the URL as needed
+                $("#myForm").submit();
+            });
+              $("#changeUrldownload").click(function() {
+                // Modify the form's action attribute
+
+                $("#myForm").attr("action", "{% url 'invoices_download' %}");  // Change the URL as needed
+                $("#myForm").submit();
+            });
+            });
+</script>
+
+
+
+{% endblock %}
+

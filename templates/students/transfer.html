@@ -1,0 +1,99 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					Students Transfer
+				</span>
+			</span>
+
+
+</div>
+    </div>
+
+  <div class="col-11">
+      <br><br><br>
+       <div class="col-md  text-left">
+                <form action="{% url 'students_search' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table">
+                        <tr>
+
+                    <td><select name="searchby" id="searchby" class="form-control">
+                     <option value="studname" >Student Name</option>
+                     <option value="fathername">Father Name</option>
+                     <option value="studmob">Mobile No</option>
+                     <option value="studclass">Class</option>
+                     <option value="studstatus">Status</option>
+                </select></td>
+                <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
+                            <td><button type="submit" class="btn btn-success " >Search</button></td>
+
+
+                        </tr>
+                    </table>
+
+                    </form>
+
+       </div>
+{% if data %}
+
+<br><br>
+<table class="table">
+    <thead class="table-dark" align ="center">
+    <tr>
+      <th>First Name </th>
+      <th>Class</th>
+      <th>Section</th>
+      <th>Phone </th>
+      <th>Father Name</th>
+      <th>Actions</th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for stud in data %}
+
+    <tr align="center">
+
+      <td>{{stud.first_name}}{{stud.last_name}}</td>
+      <td>{{stud.class_name}}</td>
+      <td>{{stud.secs}}</td>
+      <td>{{stud.phone}}</td>
+      <td>{{stud.father_name}}</td>
+        <td>
+          <form action="{% url 'transfer_update' stud.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Transfer">
+          </form>
+
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+No Students Record  are available to Show
+</div>
+
+{% endif %}
+</div>
+{% endblock %}
+

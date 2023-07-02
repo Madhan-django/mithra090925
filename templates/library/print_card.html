@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Card</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card {
+            max-width: 350px;
+            margin: 0 auto;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card h5 {
+            text-align: center;
+            margin-top: 10px;
+            color: #333;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .card h6 {
+            text-align: center;
+            margin-top: 5px;
+            color: #777;
+        }
+
+        .card p {
+            margin-bottom: 0;
+            color: #555;
+        }
+
+        .card hr {
+            margin-top: 10px;
+            border-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+<table>
+    <tr>
+        <td>
+       <h5>Library Card</h5>
+        <hr>
+
+        <p>School: {{ skool.name }}</p>
+        <p>Address: {{ skool.address }}</p>
+        <p>Year: {{ year.acad_year }}</p>
+        <p>Card No: {{ rec_data.card_no }}</p>
+        <p>Name: {{ rec_data.issued_to }}</p>
+        <p>Class: {{ rec_data.issued_to.class_name }}</p>
+        <p>Section: {{ rec_data.issued_to.secs }}</p>
+        <p>Phone: {{ rec_data.issued_to.phone }}</p>
+        <p>Issued on: {{ rec_data.card_issued_date }}</p>
+    </td>
+    <td>
+         <img src="{{ photo.image.url }}" alt="Photo">
+    </td>
+    </tr>
+   </table>
+ </div>
+</body>
+</html>

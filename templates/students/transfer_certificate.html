@@ -1,0 +1,84 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+{% load static %}
+{% load humanize %}
+<div class="col-11">
+<form action ="{% url 'print_tc_view' %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+       <table class="table table-bordered">
+  <thead>
+    <tr>
+        <th colspan="3"><center><h2>{{form.school_student}}</h2><br><h5>{{addr.address}}</h5></center></th>
+
+
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="50%"><h5>Name :</label></h5></td>
+      <td width = "35%">{{form.first_name }}{{form.last_name }}</td>
+      <td rowspan="3">{{form.student_photo}}</td>
+    </tr>
+    <tr>
+      <td><h5>Admission Number :</label></h5></td>
+      <td>{{form.admn_no}}</td>
+    </tr>
+    <tr>
+      <td><h5>Date of Birth : :</label></h5></td>
+      <td>{{form.dob_date }}</td>
+    </tr>
+  <tr>
+      <td><h5>Father's Name :</label></h5></td>
+      <td colspan="2">{{form.father_name}}</td>
+    </tr>
+    <tr>
+      <td><h5>Mother's Name :</label></h5></td>
+      <td colspan="2">{{form.mother_name}}</td>
+    </tr>
+    <tr>
+      <td><h5>Religion :</label></h5></td>
+      <td colspan="2">{{form.religion}}</td>
+    </tr>
+    <tr>
+      <td><h5>Date of Admission :</label></h5></td>
+      <td colspan="2">{{form.admn_date}}</td>
+    </tr>
+     <tr>
+      <td><h5>Caste :</label></h5></td>
+      <td colspan="2">{{form.caste}}</td>
+    </tr>
+    <tr>
+      <td><h5>Blood Group :</label></h5></td>
+      <td colspan="2">{{form.blood_group}}</td>
+    </tr>
+     <tr>
+      <td><h5>Roll Number :</label></h5></td>
+      <td colspan="2">{{form.roll_no}}</td>
+    </tr>
+    <tr>
+      <td><h5>Class :</label></h5></td>
+      <td colspan="2">{{form.class_name}}</td>
+    </tr>
+    <tr>
+      <td><h5>Section :</label></h5></td>
+      <td colspan="2">{{form.secs}}</td>
+    </tr>
+    <tr>
+      <td><h5>TC Issued Date :</label></h5></td>
+      <td colspan="2">{{form.tc_date}}</td>
+    </tr>
+
+  </tbody>
+</table>
+
+
+
+
+
+<center>
+</form>
+
+</div>
+{% endblock %}

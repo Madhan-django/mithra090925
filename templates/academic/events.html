@@ -1,0 +1,81 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{ skool }}<small class="wlsm_text_secondary">{{ year }}</small>
+		</h1>
+	</div>
+
+	<div class="mt-3 text-center wlsm-section-heading-block">
+		<span class="wlsm-section-heading-box">
+			<span class="wlsm-section-heading">
+				Events
+			</span>
+		</span>
+		<span class="float-md-right">
+			<a href="{% url 'add_event' %}" class="btn btn-sm btn-outline-light">New Event</a>
+		</span>
+	</div></div>
+<div class="col-md  text-left">
+                <form action="{% url 'event_search' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table">
+                        <tr>
+                         <td><select name="searchby" id="searchby" class="form-control">
+                     <option value="event_title" >Event Title</option>
+					 <option value="start_date">Event Date('yyyy-mm-dd')</option>
+                     <option value="event_location">Location</option>
+
+                </select></td>
+                            <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
+                            <td><button type="submit" class="btn btn-success" >Search</button></td>
+
+                        </tr>
+                    </table>
+
+
+                    </form>
+            </div>
+{% if data %}
+	<br>
+	<table class="table">
+		<thead class="table-dark" align="center">
+			<tr>
+				<th>Title</th>
+				<th>Date</th>
+				<th>Attachment</th>
+				<th>URL</th>
+				<th>Location</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for eve in data %}
+
+            <tr align="center">
+                <td>{{ eve.event_title }}</td>
+                <td>{{ eve.event_desc}}</td>
+                <td>{{ eve.start_date }}</td>
+                <td>{{ eve.end_date }}</td>
+                <td>{{ eve.event_location }}</td>
+                <td>
+                    <a href="{% url 'update_event' eve.id %}"><i class="fas fa-pencil-alt fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
+                    {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                        <a href="#"><i class="fa fa-trash-can fa-xl" style="color: #ff0000;"></i></a>&nbsp;&nbsp;&nbsp;
+                    {% endif %}
+
+                </td>
+            </tr>
+
+    {% endfor %}
+		</tbody>
+	</table>
+{% else %}
+	<div class="alert alert-danger" role="alert">
+		No Notice are available to show.
+	</div>
+{% endif %}
+{% endblock %}
