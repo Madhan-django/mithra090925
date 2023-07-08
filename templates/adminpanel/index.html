@@ -375,6 +375,7 @@ setTimeout(function() {
                                   </ul>
                          </li>
                         {% endif %}
+                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa-solid fa-beat fa-gears"></i></i><span class="hide-menu">Inventory Setup</span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item"><a href="{% url 'supplier_list' %}" class="sidebar-link"><i class="fa-brands fa-supple"></i><span class="hide-menu"> Supplier</span></a></li>
@@ -383,6 +384,7 @@ setTimeout(function() {
                                 <li class="sidebar-item"><a href="{% url 'product_set_list' %}" class="sidebar-link"><i class="fa-solid fa-diagram-next"></i><span class="hide-menu"> Group Product </span></a></li>
                             </ul>
                         </li>
+
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa-solid fa-beat fa-cart-flatbed"></i><span class="hide-menu">Inventory </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
 
@@ -393,6 +395,7 @@ setTimeout(function() {
 
                             </ul>
                         </li>
+                         {% endif %}
 
                     </ul>
                 </nav>
