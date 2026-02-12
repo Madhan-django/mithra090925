@@ -15,7 +15,8 @@ class Skill(models.Model):
         return self.name
 
 class staff(models.Model):
-
+    EmpCode = models.CharField(max_length=20, blank=True, null=True)
+    BioCode = models.CharField(max_length=10, blank=True, null=True)
     first_name = models.CharField(max_length=35)
     last_name = models.CharField(max_length=35)
     gender = models.CharField(max_length=12)
