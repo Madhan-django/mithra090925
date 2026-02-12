@@ -1,88 +1,281 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 
 {% block content %}
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, th, td, label, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-<div class="text-warning bg-dark">
-  <h3 class="text-center">New Exam</h3>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ===== TITLE BAR ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px 0 !important;          /* reduced height */
+    border-radius: 10px 20px 0 0;
+    margin-bottom: 0px;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.card-title h5 span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 6px;
+}
+
+/* ===== TABLE ===== */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding: 6px 10px !important;      /* compact header height */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+td {
+    font-size: 14px !important;
+    padding: 10px 8px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* ===== DROPDOWN BUTTON ===== */
+.dropdown-toggle {
+    border: none;
+}
+
+/* ===== ALERT ===== */
+.alert {
+    margin-top: 10px;
+}
+.text-end{
+    padding:20px;
+    }
+ /* Base title styling (optional — keeps h5 consistent) */
+.profession-title {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+/* Base profession label */
+.profession-label {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 14px;               /* pill shape */
+  border: 1px solid rgba(0,0,0,0.06);
+  background-color: #f5f6f8;         /* subtle light background */
+  color: #212529;                    /* dark text */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  vertical-align: middle;
+  letter-spacing: 0.2px;
+}
+
+/* Small modifier */
+.profession-label.small {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Outline variant */
+.profession-label.outline {
+  background: transparent;
+  border: 1px solid #ced4da;
+  color: #343a40;
+  box-shadow: none;
+}
+
+/* Blue gradient variant — use when you want the header-style gradient */
+.profession-label.gradient {
+  background: linear-gradient(90deg, #0477ff 0%, #2b9bff 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(43,155,255,0.18);
+}
+
+/* Icon support: place an icon inside the span before text */
+.profession-label .icon {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+  font-size: 0.95em;
+}
+
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+
+            <div class="card-title text-center">
+               <h5><span>{{data.exam_label}}</span></h5>
+            </div>
+        </div>
+        <br><br><br>
+        <div class="text-end">
+            <a href="{{request.META.HTTP_REFERER}}" class="btn btn-md btn-primary">Back</a>
+        </div>
+		<div class="card-body">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+
+
+                <div class="card mb-3">
+                    <div class="card-header wlsm-form-sub-heading wlsm-font-bold text-center">
+                         <h5 class="profession-title">
+                            <span class="profession-label gradient">
+                                <i class="ri-graduation-cap-line"></i>
+                                Student Details
+                            </span>
+                         </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                             <div class="col-md-8">
+                        <ul class="list-group list-group-timeline">
+                            <li class="list-group-item list-group-timeline-primary"><span class="wlsm-font-bold">Student Name:</span>
+                                <span >{{ data.exam_stu }}</span></li>
+
+                            <li class="list-group-item list-group-timeline-warning">
+                                <span class="wlsm-font-bold">Father Name:</span>
+                                <span >{{ data.exam_stu.father_name }}</span>
+                            </li>
+                            <li class="list-group-item list-group-timeline-secondary">
+                                <span class="wlsm-font-bold">Class:</span>
+                                <span >{{ data.exam_label.exam_class }}</span>
+                            </li>
+                             <li class="list-group-item">
+                                <br>
+                            </li>
+                        </ul>
+                        </div>
+                            <div class="col-md-4">
+
+                                 <img  src="https://mithran.co.in/media/{{data.exam_stu.student_photo}}" alt="image" width="130" height="150"  />
+                             </div>
+                        </div>
+                    </div>
+                </div>
+               </div>
+
+
+
+
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header wlsm-form-sub-heading wlsm-font-bold text-center">
+                         <h5 class="profession-title">
+                            <span class="profession-label gradient">
+                                <i class="ri-file-list-3-line"></i>
+                                Exam Details
+                            </span>
+                         </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-timeline">
+                            <li class="list-group-item list-group-timeline-danger">
+                                <span class="wlsm-font-bold">Exam Title:</span>
+                                <span>{{ data.exam_label }}</span>
+                            </li>
+                            <li class="list-group-item list-group-timeline-primary">
+                                <span class="wlsm-font-bold">Exam Center:</span>
+                                <span>{{ data.exam_label.exam_centre }}</span>
+                            </li>
+                            <li class="list-group-item list-group-timeline-secondary">
+                                <span class="wlsm-font-bold">Start Date:</span>
+                                <span>{{ data.exam_label.exam_start_date }}</span>
+                            </li>
+                            <li class="list-group-item list-group-timeline-warning">
+                                <span class="wlsm-font-bold">End Date:</span>
+                                <span>{{ data.exam_label.exam_end_date }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ <div class="container mt-5">
+        <div class="card">
+            <div class="card-header text-center">
+                <button type="button" class="btn btn-dark waves-effect waves-light" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-info" data-bs-original-title="Update Marks">
+                      Marks Updation
+                    </button>
+
+            </div>
+            <div class="card-body">
+                <form method="post" onsubmit="return enableFieldsBeforeSubmit();">
+                    {% csrf_token %}
+                    {{ formset.management_form }}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped table-bordered">
+                            <thead class="table-dark ">
+                                <tr>
+                                    <th><center>Subject</center></th>
+                                    <th><center>Mark</center></th>
+                                    <th><center>Remark</center></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in formset %}
+                                <tr>
+
+
+                                  <td>{{ form.subb }}</td>
+                                  <td>{{ form.obtained_marks }}</td>
+
+                                  <td>{{ form.remark }}</td>
+
+                                </tr>
+                                 {{ form.exam_sub }}
+                                  {{ form.adm_card }}
+                                  {{ form.id }}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Submit</button>&nbsp;&nbsp;&nbsp;
+
+                    <a href="{{request.META.HTTP_REFERER}}"type="button" class="btn btn-warning">&nbsp;Back&nbsp;</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script>
+    function enableFieldsBeforeSubmit() {
+
+    }
+</script>
 </div>
-
-<div class="container mt-5">
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card mb-3">
-        <div class="card-header wlsm-form-sub-heading wlsm-font-bold">Student Details</div>
-        <div class="card-body">
-          <ul class="list-group">
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">Student Name:</span>
-              <span>{{ data.exam_stu }}</span>
-            </li>
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">Father Name:</span>
-              <span>{{ data.exam_stu.father_name }}</span>
-            </li>
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">Class:</span>
-              <span>{{ data.exam_label.exam_class }}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
-
-    <div class="col-md-6">
-      <div class="card mb-3">
-        <div class="card-header wlsm-form-sub-heading wlsm-font-bold">Exam Details</div>
-        <div class="card-body">
-          <ul class="list-group">
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">Exam Title:</span>
-              <span>{{ data.exam_label }}</span>
-            </li>
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">Exam Center:</span>
-              <span>{{ data.exam_label.exam_centre }}</span>
-            </li>
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">Start Date:</span>
-              <span>{{ data.exam_label.exam_start_date }}</span>
-            </li>
-            <li class="list-group-item">
-              <span class="wlsm-font-bold">End Date:</span>
-              <span>{{ data.exam_label.exam_end_date }}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <form method="post" class="mt-5">
-    {% csrf_token %}
-    {{ formset.management_form }}
-    <h4 class="mb-4">Formset Label</h4>
-    <div class="table-responsive">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            {% for field in formset.empty_form %}
-            <th>{{ field.label_tag }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for form in formset %}
-          <tr>
-            {% for field in form %}
-            <td>{{ field }}</td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
 </div>
 
 {% endblock %}

@@ -1,28 +1,105 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="col-11">
-   <div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
 
-					</h1>
-			</div>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, input, select, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (STYLE A) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 6px;
+    text-align: center;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title .badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;
+    padding: 6px 24px;
+    border-radius: 6px;
+}
+
+/* ===== FORM ===== */
+.card-body {
+    padding: 25px 30px;
+}
+
+form p {
+    margin-bottom: 14px;
+}
+
+form label {
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    height: 42px;
+    font-size: 14px;
+    border-radius: 10px;
+}
+
+/* ===== BUTTON ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    padding: 8px 22px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+/* ===== ALIGNMENT ===== */
+.text-end {
+    text-align: right;
+}
+.btn{
+	margin-top:10px;
+	}
+</style>
+
+<div class="col-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===== TITLE ===== -->
+        <div class="card-title">
+            <h5>
+                <span class="badge bg-light text-dark">
+                    Update Class
+                </span>
+            </h5>
+        </div>
+
+        <!-- ===== BODY ===== -->
+        <div class="card-body">
+            <form action="" method="POST">
+                {% csrf_token %}
+                <div class="row">
+					<div class="col-md-6">
+						  {{ form.as_p }}
+					</div>
+					<div class="col-md-6">
+						<br>
+						<button type="submit" class="btn btn-primary">Update</button>
+						<a href ="{% url 'listclass' %}" class="btn btn-danger">Clear</a>
+					</div>
+
+				</div>
+			</form>
+        </div>
+
+    </div>
 </div>
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Class - Update
-				</span>
-			</span>
-
-</div>
-<form action ="" method="POST">
-    {% csrf_token %}
-{{form.as_p}}
-    <input type="submit" class ="btn btn-success" value="submit">
-</form>
-</div>
 {% endblock %}

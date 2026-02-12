@@ -1,63 +1,196 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
 <style>
-	.wlsm-form-section{
-	padding: 1rem;
-    border: 1px solid rgba(0, 0, 0, 0.125);
-    border-collapse: collapse;
-    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.22);
-	}
-	.wlsm-main-header card col{
-	border-radius: 15px;
-    background-color: #f2210a;
-    border: 0;
-    box-sizing:border-box;
-	}
-	.school_header{
-	background-color: #343a40;
-	color:white;
-	padding:10px;
-	}
-	.wlsm-section-heading-block{
-	background-color: #e53238;
+/* === General Typography === */
+body, h1, h3, h5, th, td, label, input, button, select {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* === Card Layout === */
+  /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .card {
+        border: none;
+
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+h6 {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.form-floating > label {
+    color: #555;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #0069d9, #00aaff);
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
     color: #fff;
-    padding: 0.3rem 0.5rem;
-    margin-top: 1.4rem;
-    margin-bottom: 1.4rem;
+}
+
+img {
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
-	}
+    border: 2px solid #e3e3e3;
+}
+
+/* === Spacing Enhancements === */
+.card-body {
+    padding: 1.5rem 2rem;
+}
+
+hr {
+    border-top: 2px solid #007bff33;
+}
 </style>
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<div class="card">
+    <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Enquiry</span></h5>
+        </div>
 
-					</h1>
+    <form class="card-body" action="{% url 'add_enquiry' %}" method="POST">
+            {% csrf_token %}
+       <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_student}}
+                    <label for="id_enq_student">Enquirer Name</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.enq_name}}
+                    <label for="id_enq_name">Student Name</label>
+                </div>
+            </div>
+       </div><br>
+          <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_gender}}
+                    <label for="id_enq_gender">Gender</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.enq_date}}
+                    <label for="id_enq_date">Date of Enquiry</label>
+                </div>
+            </div>
+       </div><br>
+        <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_followup}}
+                    <label for="id_enq_followup">Next Follow Up</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.enq_class}}
+                    <label for="id_enq_class">Standard</label>
+                </div>
+            </div>
+       </div><br>
+        <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_mob}}
+                    <label for="id_enq_mob">Contact No</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.enq_altmob}}
+                    <label for="id_enq_altmob">Alternate Contact No</label>
+                </div>
+            </div>
+       </div><br>
+        <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_email}}
+                    <label for="id_enq_email">Email</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.enq_ref}}
+                    <label for="id_enq_ref">Reference Name</label>
+                </div>
+            </div>
+       </div><br>
+        <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_communication}}
+                    <label for="id_enq_communication">How do you come to know about our school</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.enq_det}}
+                    <label for="id_enq_det">Details</label>
+                </div>
+            </div>
+       </div><br>
+        <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                     {{form.enq_status}}
+                    <label for="id_enq_status">Status</label>
+                </div>
+            </div>
 
-			</div>
-
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					New Enquiry
-				</span>
-			</span>
-
-
+       </div><br>
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="reset" class="btn btn-danger">Clear</button>
+         </div>
+    </form>
 </div>
-    </div>
-  <div class="col-11">
-      <br><br><br>
-      <form action="{% url 'add_enquiry' %}" method="POST">
-          {% csrf_token %}
-          {{ form.as_p }}
 
-          <button type="submit" class="btn btn-success">Submit</button>
-      </form>
+	
 
-
-  </div>
 {% endblock %}

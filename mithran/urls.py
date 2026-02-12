@@ -26,7 +26,7 @@ urlpatterns = [
     path('admission/',include('admission.urls')),
     path('students/',include('students.urls')),
     path('fees/',include('fees.urls')),
-    path('examination/', include('examination.urls')),
+    path('examination/',include('examination.urls')),
     path('library/',include('library.urls')),
     path('staff/',include('staff.urls')),
     path('',include('authenticate.urls')),
@@ -34,9 +34,24 @@ urlpatterns = [
     path('visitors/',include('visitors.urls')),
     path('studentportal/',include('studentportal.urls')),
     path('academic/',include('academic.urls')),
+    path('dashboard/',include('dashboards.urls')),
+    path('reports/',include('reports.urls')),
+    path('studentsapi/',include('studentsapi.urls')),
+    path('mobi/',include('mobi.urls')),
+    path('push_messages/',include('pushnotify.urls')),
+    path('mobiplayer/',include('mobiplayer.urls')),
+    path('uploads/',include('uploads.urls')),
+    path('digiattend/',include('digiattend.urls')),
+    path('sera/',include('sera.urls')),
+    path('pettycash/',include('pettycash.urls')),
+    path('payroll/',include('payroll.urls')),
+    path('timetable/',include('timetable.urls')),
+    path('automate/',include('automate.urls')),
+    path('tally/',include('tally.urls')),
+    path('assets/',include('assets.urls')),
+    path('grievance/',include('grievance.urls')),
 
-
-
+    
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

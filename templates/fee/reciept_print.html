@@ -46,13 +46,20 @@ font-size:13px;
 
 
 <div class="container">
-  <p  class="school" align="center" style="font-size:25px;font-family:Times New Roman;">{{sch_name}}</p>
-  <p align="center" style="font-size:15px;font-family:courier;">{{sch_addr}}</p>
+  <div align="center">
+    <img src="{{skoollogo}}" alt="school Logo" width="75" height="75">
+  </div>
+
+    <p  class="school" align="center" style="font-size:25px;font-family:Times New Roman;">{{sch_name}}</p>
+    <p align="center" style="font-size:15px;font-family:courier;">{{sch_addr}}</p>
+
+  </span>
+
   <p style="font-size:15px;font-family:courier;">Reciept No:- {{rec_no}}</p>
   <p style="font-size:15px;font-family:courier;">Reciept Date :- {{rec_date}}</p>
    <table>
   <tr>
-    <th>Student Name:- {{rec_stud}}</th>
+    <th>Student Name:- {{rec_stud.first_name}}&nbsp;&nbsp;{{rec_stud.last_name}}</th>
     <th>Admission No:- {{rec_admn}}</th>
 
   </tr>

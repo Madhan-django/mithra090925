@@ -1,0 +1,218 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+
+<style>
+/* ================= GLOBAL ================= */
+h1, h3, h5, th, td, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ================= CARD ================= */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    overflow: hidden;
+    border: none;
+}
+
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+/* ================= TABLE ================= */
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table tbody td {
+    background: white;
+    padding: 12px 10px !important;
+    font-size: 15px;
+    vertical-align: middle;
+    border: none;
+}
+
+tr:hover td {
+    background: #f6f8ff;
+    transition: 0.2s ease-in-out;
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
+}
+
+/* Primary Gradient */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0085db, #1c1c5e);
+}
+
+/* Danger Gradient */
+.btn-danger {
+    background: linear-gradient(135deg, #ff4b4b, #c70000);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #e60000, #a30000);
+}
+
+/* Outline Primary (for add spare) */
+.btn-outline-primary {
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+
+
+/* Status badges */
+.badge-success {
+    background: #28a745 !important;
+}
+
+.badge-warning {
+    background: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #ff4b4b, #c70000) !important;
+    color: #fff !important;
+}
+
+.badge-info {
+    background: #17a2b8 !important;
+    color: #fff !important;
+}
+
+/* No records message */
+.alert {
+    width: 85%;
+    margin: 25px auto;
+    font-size: 16px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE BAR -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Sub Assets / Spares</span></h5>
+        </div>
+
+        <!-- ADD SPARE BUTTON -->
+        <div class="text-end my-3 me-3">
+            <a href="{% url 'add_spare_subasset' %}" class="btn btn-outline-primary btn-sm">➕ Add Spare</a>
+        </div>
+
+        {% if data %}
+       <table class="table table-bordered table-striped align-middle text-center">
+                <thead class="table-dark">
+                <tr>
+                    <th>S.No</th>
+                    <th>Asset Name</th>
+                    <th>Parent Asset</th>
+                    <th>Parent Asset Tag</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for asset in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ asset.name }}</td>
+
+                    <td>
+                        {% if asset.parent_asset %}
+                            {{ asset.parent_asset.asset_name }}
+                        {% else %}
+                            <span class="badge badge-info text-dark">Spare</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if asset.parent_asset %}
+                            {{ asset.parent_asset.asset_tag }}
+                        {% else %}
+                            <span class="badge badge-info text-dark">Spare</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if asset.condition == "Good" %}
+                            <span class="badge badge-success">Good</span>
+                        {% elif asset.condition == "Repair" %}
+                            <span class="badge badge-warning">Repair</span>
+                        {% elif asset.condition == "Discarded" %}
+                            <span class="badge badge-danger">Discarded</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ asset.condition }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'update_spare' asset.id %}" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="{% url 'delete_subasset' asset.id %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <div class="alert alert-danger text-center" role="alert">
+            No records are available to show.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

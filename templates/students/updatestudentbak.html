@@ -1,0 +1,253 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+
+</style>
+
+ <!-- Multi Column with Form Separator -->
+              <div class="card mb-6">
+                <h5 class="card-header">Update Student</h5>
+                <form class="card-body" id="addstudform" data-section-url="{% url 'ajax_load_section' %}" data-uclass-url="{% url 'ajax_load_uclass' %}" method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+				  <h6>1. Personal Information </h6>
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.first_name }}
+                        <label for="id_first_name">First Name</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.last_name }}
+                        <label for="id_last_name">Last Name</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.gender }}
+                        <label for="id_gender">Gender</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.dob_date }}
+                        <label for="id_dob_date">Date of Birth</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.religion }}
+                        <label for="id_religion">Religion</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.caste }}
+                        <label for="id_caste">Caste</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                   <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.blood_group }}
+                        <label for="id_blood_group">Blood Group</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.address }}
+                        <label for="id_address">Address</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                    <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.phone }}
+                        <label for="id_phone">Phone</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.email }}
+                        <label for="id_email">Email</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                   <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.father_name }}
+                        <label for="id_father_name">Father Name</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.mother_name }}
+                        <label for="id_mother_name">Mother Name</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                     <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.father_occupation }}
+                        <label for="id_father_occupation">Father Occupation</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.mother_occupation }}
+                        <label for="id_mother_occupation">Mother Occupation</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                   <hr class="my-6 mx-n4" />
+                  <h6>2. School Info</h6>
+                   <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{ form.admn_no }}
+                        <label for="id_admn_no">Admission No</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                           {{ form.admn_date }}
+                        <label for="id_admn_date">Admission Date</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                           {{ form.roll_no }}
+                        <label for="id_roll_no">Roll No</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                           {{ form.stud_type }}
+                        <label for="id_stud_type">Student Type</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                    <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                        <select name="class_name" class="form-control" required id="id_class_name">
+                            {% for ccls in cls %}
+                                <option value="{{ ccls.id }}" {% if ccls == selcls %} selected {% endif %}>{{ ccls }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="id_class_name">Class Name</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         <select name="secs" class="form-control" id="id_secs">
+                            {% for sc in sec %}
+                                <option value="{{ sc.id }}" {% if sel == sc %} selected {% endif %}>{{ sc }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="id_secs">Section</label>
+                      </div>
+                    </div>
+                    </div>
+                    <br>
+                   <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                           {{ form.student_status }}
+                        <label for="id_student_status">Status</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                           {{ form.usernm }}
+                        <label for="id_usernm">Username</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                     <div class="row g-6">
+                   <div class="col-md-6">
+  <div class="form-floating form-floating-outline mb-6">
+    <input
+      type="file"
+      class="form-control"
+      id="id_student_photo"
+      name="student_photo"
+      accept="image/*"
+      onchange="checkFileSize(this)" />
+    <label for="id_student_photo">Profile pic</label>
+  </div>
+</div>
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                          {% if form.instance.student_photo %}
+                            <img src="{{ form.instance.student_photo.url }}" alt="photo" width="150px" height="150px">
+                          {% endif %}
+                        </div>
+                    </div>
+                     </div>
+                    {{ form.ac_year }}
+                    {{ form.school_student }}
+               <div class="pt-6">
+                    <button type="submit" class="btn btn-primary me-4">Submit</button>
+                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                  </div>
+                </form>
+              </div>
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+  $(document).ready(function () {
+
+    // When class changes, load sections dynamically
+    $("#id_class_name").change(function () {
+      var url = $("#addstudform").attr("data-section-url");
+      var classId = $(this).val();
+      $.ajax({
+        url: url,
+        data: { 'Class_Id': classId },
+        success: function (data) {
+          $("#id_secs").html(data);
+        }
+      });
+    });
+
+    // ✅ File size validation when user selects a photo
+    $("#id_student_photo").on("change", function () {
+      const file = this.files[0];
+      if (file) {
+        const maxSize = 120 * 1024; // 120 KB in bytes
+        if (file.size > maxSize) {
+          alert("File size must be less than 120 KB!");
+          $(this).val(""); // Clear the file input
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,38 +1,256 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					 Institutions - Update
-				</span>
-			</span>
-</div>
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, h6, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px; /* Reduced font size globally */
+}
+
+/* ===== CARD ===== */
+  .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+    font-weight: 600;
+    color: #444;
+    border-left: 4px solid #009ffd;
+    padding-left: 10px;
+    font-size: 14px;
+}
+
+/* ===== FORM ===== */
+.form-floating > label {
+    color: #666;
+    font-size: 14px;
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+    font-size: 14px; /* reduced font */
+    padding: 6px 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    font-size: 14px;
+    padding: 6px 16px;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #ff5f6d, #c31432);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    padding: 6px 16px;
+}
+
+/* ===== IMAGE PREVIEW ===== */
+.preview-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    background: #fff;
+    padding: 4px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===== TITLE ===== -->
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge bg-light text-dark">
+                    Update Institution
+                </span>
+            </h5>
+        </div>
+
+        <!-- ===== FORM ===== -->
+        <form class="card-body p-3" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- ===== SECTION 1 ===== -->
+            <h6 class="section-title mb-3">1. Institution Details</h6>
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.name }}
+                        <label>Institution Name</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.phone }}
+                        <label>Phone Number</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.email }}
+                        <label>Email</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.address }}
+                        <label>Address</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.regno }}
+                        <label>Registration Number</label>
+                    </div>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check mt-2">
+                        {{ form.isactive }}
+                        <label class="form-check-label ms-2">
+                            Active Status
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ===== LOGO ===== -->
+                <div class="col-md-6">
+                    <label class="fw-semibold mb-1">Institution Logo</label>
+                    {{ form.logo }}
+                    {% if form.instance.logo %}
+                    <div class="mt-2">
+                        <img src="{{ form.instance.logo.url }}" class="preview-img border" alt="Logo">
+                    </div>
+                    {% endif %}
+                    <small class="text-muted d-block mt-1">
+                        Recommended: <strong>500×500 px</strong> (PNG / JPG)
+                    </small>
+                </div>
+
+                <!-- ===== NOTIFICATION ICON ===== -->
+                <div class="col-md-6">
+                    <label class="fw-semibold mb-1">
+                        Notification Icon <span class="text-muted">(Android App)</span>
+                    </label>
+                    {{ form.notification_logo }}
+                    {% if form.instance.notification_logo %}
+                    <div class="mt-2">
+                        <img src="{{ form.instance.notification_logo.url }}" class="preview-img border" alt="Notification Icon">
+                    </div>
+                    {% endif %}
+                    <small class="text-muted d-block mt-1">
+                        Recommended: <strong>512×512 px</strong> (Transparent PNG)
+                    </small>
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+
+            <!-- ===== SECTION 2 ===== -->
+            <h6 class="section-title mb-3">2. Web & Mobile App Details</h6>
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.website }}
+                        <label>Website</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_aboutus }}
+                        <label>About Us</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_contactus }}
+                        <label>Contact Us</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_gallery }}
+                        <label>Gallery</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_admission }}
+                        <label>Admission</label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== ACTION BUTTONS ===== -->
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary px-3 me-2">
+                    <i class="ri-check-line me-1"></i> Update
+                </button>
+                <button type="reset" class="btn btn-cancel px-3">
+                    <i class="ri-close-line me-1"></i> Cancel
+                </button>
+            </div>
+
+        </form>
     </div>
-<div class = "container">
-    <br><br>
-<div class="col-11">
-<form action ="" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-{{form.as_p}}
-{% if form.instance.logo %}
-    <img src="{{ form.instance.logo.url }}" alt="Logo" width="100px" height="100px">
-  {% endif %}
-    <br>
-
-
-    <div class="d-flex justify-content-end mt-3">
-                               <div class="mr-2">
-                                     <input type="submit" class="btn btn-primary btn-lg float-right" value="submit">
-                                </div>
-                                 <div>
-                                     <a href="{% url 'conf_school' %}" type="button" class="btn btn-danger btn-lg float-right">Close</a>
-
-                                 </div>
-                         </div>
-
-</form>
 </div>
-    </div>
-<br><br>
+
+<!-- ===== FIX FOR FLOATING LABEL EMPTY ISSUE ===== -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".form-floating input, .form-floating textarea").forEach(function (el) {
+        if (!el.hasAttribute("placeholder")) {
+            el.setAttribute("placeholder", " ");
+        }
+    });
+});
+</script>
+
 {% endblock %}

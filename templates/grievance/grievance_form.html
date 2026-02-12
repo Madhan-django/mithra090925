@@ -1,0 +1,361 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ================= GLOBAL STYLES ================= */
+body, h1, h3, h4, h5, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+    padding-bottom: 15px;
+}
+
+/* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 2px 0 !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 10px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+/* ================= MATRIX (2×2) ================= */
+.row-matrix {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.col-matrix {
+    flex: 1;
+    min-width: 48%;
+}
+
+/* ================= FLOATING LABEL (UNIVERSAL) ================= */
+.form-floating-custom {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.form-floating-custom input,
+.form-floating-custom select,
+.form-floating-custom textarea {
+    width: 100%;
+    padding: 14px 12px 6px 12px;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    font-size: 15px;
+    background-color: white;
+}
+
+/* DOUBLE HEIGHT FOR TEXTAREAS */
+.form-floating-custom textarea {
+    min-height: 120px !important;
+}
+
+/* LABEL FLOAT */
+.form-floating-custom label {
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: white;
+    padding: 0 6px;
+    font-size: 13px;
+    color: #444;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* SELECT2 FIX: ENSURE HEIGHT MATCHES */
+.select2-container .select2-selection--single {
+    height: 50px !important;
+    padding-top: 10px;
+    border: 1px solid #bbb !important;
+    border-radius: 10px !important;
+}
+.select2-selection__rendered {
+    padding-top: 5px !important;
+}
+
+/* ================= BUTTONS ================= */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    padding: 10px 30px;
+    font-size: 15px;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4e50, #c31432);
+    border: none;
+    padding: 10px 30px;
+    font-size: 15px;
+    border-radius: 10px;
+}
+
+/* ================= ALIGN ================= */
+.align-right {
+    text-align: right;
+    padding: 15px;
+}
+    <style>
+#id_aoc_other:disabled {
+    background: #eee;
+}
+h6{
+        font-weight: 600;
+        color: #007bff;
+        line-height3.75
+    }
+</style>
+
+
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5><span class="badge">{{ title }}</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post" enctype="multipart/form-data" id="addform"
+                  data-section-url="{% url 'ajax_load_section' %}"
+                  data-student-url="{% url 'ajax_load_students' %}">
+                {% csrf_token %}
+
+                {{ form.gschool }}
+                {{ form.ac_year }}
+                <!-- hidden fields safe -->
+
+                <!-- ================= MATRIX BLOCK 1 ================= -->
+                <h6>1. Register Grievance</h6><br>
+                <div class="row-matrix">
+
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.gclass }}
+                        <label>Class</label>
+                    </div>
+
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.gsec }}
+                        <label>Section</label>
+                    </div>
+
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.stud_name }}
+                        <label>Student Name</label>
+                    </div>
+                    <div class="col-matrix form-floating-custom">
+                    {{ form.concern_person_name }}
+                    <label>Concern Person Name</label>
+                    </div>
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.mobile }}
+                        <label>Mobile Number</label>
+                    </div>
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.complaint_date }}
+                        <label>Complaint Date</label>
+                    </div>
+
+
+                </div>
+
+                <!-- ================= MATRIX BLOCK 2 ================= -->
+                <div class="row-matrix">
+
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.area_of_complaint }}
+                        <label>Area of Complaint</label>
+                    </div>
+
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.aoc_other }}
+                        <label>If Other, specify</label>
+                    </div>
+
+                     <div class="col-matrix form-floating-custom">
+                        {{ form.complaint_received }}
+                        <label>Complaint Received Mode</label>
+                    </div>
+
+                    <div class="col-matrix form-floating-custom">
+                        {{ form.complaint_status }}
+                        <label>Status</label>
+                    </div>
+                </div>
+
+                <!-- ================= FULL WIDTH FLOATING FIELDS ================= -->
+                <h6>2. Response</h6><br>
+                <div class="form-floating-custom">
+                    {{ form.detail }}
+                    <label>Complaint Details</label>
+                </div>
+
+                <div class="form-floating-custom">
+                    {{ form.principal_remark }}
+                    <label>Principal Remark</label>
+                </div>
+
+                <div class="form-floating-custom">
+                    {{ form.concern_person_remark }}
+                    <label>Concern Person Remark</label>
+                </div>
+
+                <div class="form-floating-custom">
+                    {{ form.act_details }}
+                    <label>Action Details</label>
+                </div>
+
+
+
+                <!-- ================= MATRIX BLOCK 3 ================= -->
+                <div class="row-matrix">
+
+
+
+                     <div class="col-matrix form-floating-custom">
+                        {{ form.action_date }}
+                        <label>Action Date</label>
+                    </div>
+                     <div class="col-matrix form-floating-custom">
+                    {{ form.act_intimation_to_person }}
+                    <label>Act Intimation to Person</label>
+                   </div>
+
+
+
+
+                </div>
+
+
+                <div class="align-right">
+                    <button type="submit" class="btn-primary">Submit</button>
+                    <button type="reset" class="btn-danger">Clear</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- jQuery + Select2 -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function () {
+
+    // ==========================
+    // Load sections
+    // ==========================
+    $("#id_gclass").change(function () {
+        $.get($("#addform").data("section-url"), { "Class_Id": $(this).val() }, function (data) {
+            $("#id_gsec").html(data);
+            $("#id_stud_name").html("<option value=''>Select Student</option>").trigger("change");
+        });
+    });
+
+    // ==========================
+    // Load students
+    // ==========================
+    $("#id_gsec").change(function () {
+        $.get($("#addform").data("student-url"), {
+            "class_id": $("#id_gclass").val(),
+            "sec_id": $(this).val()
+        }, function (data) {
+            $("#id_stud_name").html(data);
+            $("#id_stud_name").select2({ width: "100%", allowClear: true });
+        });
+    });
+
+    // ==========================
+    // Initialize Select2
+    // ==========================
+    $("#id_stud_name").select2({ width: "100%", allowClear: true });
+
+
+
+    // ==========================================================
+    //   AOC - Other: Enable / Disable Textbox Based on Selection
+    // ==========================================================
+
+    function toggleAOCOther() {
+        let selected = $("#id_area_of_complaint").val();
+
+        if (selected === "Other" || selected === "other" || selected === "Others") {
+            $("#id_aoc_other").prop("disabled", false);
+        } else {
+            $("#id_aoc_other").val("");
+            $("#id_aoc_other").prop("disabled", true);
+        }
+    }
+
+    // Run on page load (edit mode support)
+    toggleAOCOther();
+
+    // Run on change
+    $("#id_area_of_complaint").change(function () {
+        toggleAOCOther();
+    });
+
+
+
+    // ==========================================================
+    //   STATUS COLOR SYSTEM
+    //   Open → Blue | Pending → Red | Inprogress → Yellow | Close → Green
+    // ==========================================================
+
+function colorStatus() {
+    let status = $("#id_complaint_status option:selected").text().trim();
+
+    let color = "#0066ff";  // Open → blue
+
+    if (status === "Pending") color = "#d00000";       // red
+    if (status === "In-progress") color = "#d4a100";    // yellow
+    if (status === "Resolved") color = "#0f9d58";         // green
+
+    $("#id_complaint_status").css({
+        "color": color,
+        "font-weight": "bold",
+        "background-color": "",   // remove background
+    });
+}
+
+// Run on page load
+colorStatus();
+
+// Run when status changes
+$("#id_complaint_status").change(function(){
+    colorStatus();
+});
+
+});
+</script>
+
+
+{% endblock %}

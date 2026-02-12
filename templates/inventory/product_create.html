@@ -1,28 +1,126 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* === General Typography === */
+body, h1, h3, h5, th, td, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
+/* === Card Styling === */
+.col-lg-12.grid-margin.stretch-card {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin: 0;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					 Create Product
-				</span>
-			</span>
-</div>
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: none;
+}
+
+/* === Card Header (Gradient) === */
+.card-title {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    color: white;
+    height: 50px;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+}
+
+.card-title span {
+    display: inline-block;
+}
+
+/* === Card Body === */
+.card-body {
+    background-color: #f8f9fa;
+    padding: 25px;
+}
+
+/* === Form Elements === */
+form {
+    font-size: 15px;
+}
+
+form label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: block;
+}
+
+form input, form select, form textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+/* === Buttons === */
+.text-end {
+    padding-top: 15px;
+    text-align: right;
+}
+
+.btn {
+    border-radius: 8px;
+    min-width: 100px;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    border: none;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #0056d2, #0096ff);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5 class="mb-0"><span class="badge bg-light text-dark">New Product</span></h5>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                    <a href="{% url 'products_list' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-           <br>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Create</button>
-</form>
-
+</div>
 {% endblock %}
-

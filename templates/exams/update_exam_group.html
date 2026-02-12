@@ -1,0 +1,102 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+
+/* ===== GLOBAL FONT ===== */
+body, label, button, input, select, textarea, h1, h3, h5 {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD STYLE ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ===== TITLE BAR ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 8px 0 !important;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.card-title h5 {
+    margin: 0;
+}
+
+.card-title .badge {
+    background: #ffffff;
+    color: #000;
+    padding: 6px 18px;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+/* ===== FORM FIELDS ===== */
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    border-radius: 8px !important;
+    border: 1.5px solid #005C97 !important;
+    font-size: 16px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #e52d27, #b31217);
+    border: none;
+    border-radius: 8px;
+}
+
+.align-right {
+    text-align: right;
+    padding-top: 15px;
+}
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5 class="mb-0">
+                <span class="badge bg-light text-dark">Exams</span>
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form action="" method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Exam Group:</label>
+                    {{ form.exm_group }}
+                </div>
+
+                {{ form.exam_group_school }}
+
+                <div class="align-right">
+                    <button type="submit" class="btn btn-primary btn-sm">SUBMIT</button>
+
+                    <a href="{% url 'exam_groups' %}" class="btn btn-warning btn-sm">BACK</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

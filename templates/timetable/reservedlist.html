@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Periods</title>
+</head>
+<body>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Class</th>
+    <th>Section</th>
+    <th>Staff</th>
+    <th>Subject</th>
+    <th>Day</th>
+    <th>Reserved Period</th>
+
+  </tr>
+  {% if data %}
+  {% for dt in data %}
+    
+  <tr>
+      
+      <td>{{dt.id}}</td>
+      <td>{{dt.section.class_sec_name}}</td>
+      <td>{{dt.section}}</td>
+
+      <td>{{dt.subject}}</td>
+      <td>{{dt.timeslot.day}}</td>
+      <td>{{dt.timeslot.period_number}}</td>
+
+
+
+
+
+  </tr>
+  {% endfor %}
+  {% else %}
+    <tr>
+        <td colspan="4">No data found</td>
+    </tr>
+    {% endif %}
+</table>
+</body>
+</html>

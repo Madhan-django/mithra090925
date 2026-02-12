@@ -1,0 +1,248 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+    /* === General Typography === */
+    body, h1, h3, h4, h5, th, td, label {
+        font-family: 'Roboto', sans-serif;
+    }
+
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+     /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+    /* === Buttons === */
+    .btn-primary {
+        background: linear-gradient(90deg, #0d6efd, #3b8bff);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 10px;
+        font-weight: 500;
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #ff4b4b, #cc0000);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 10px;
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+    }
+
+    .btn-info {
+        background: linear-gradient(90deg, #17a2b8, #1fc8d4);
+        border: none;
+        border-radius: 10px;
+    }
+
+    /* Modal Title */
+    .modal-header {
+        background: linear-gradient(90deg, #0d6efd, #3b8bff);
+        color: white;
+    }
+
+</style>
+
+
+<!-- ================== FORM CARD ================== -->
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Time Slot</span></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="container">
+
+                {% if existing_slots %}
+                <!-- Delete All Modal -->
+                <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+
+                      <div class="modal-header">
+                        <h4 class="modal-title">Delete All Time Slots</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+
+                      <div class="modal-body">
+                        <p>Are you sure you want to delete all time slots?</p>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <a href="{% url 'delete_timeslot' %}" class="btn btn-danger">Delete</a>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- Form -->
+                <form method="post">
+                  {% csrf_token %}
+
+                  <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                <select class="form-select" id="working_days" name="working_days" required>
+                                   <option value="">Select...</option>
+                                   <option value="mon-fri">Monday to Friday (5 Days)</option>
+                                   <option value="mon-sat">Monday to Saturday (6 Days)</option>
+                                </select>
+                                <label for="working_days">Working Days Per Week</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="periods_per_day" name="periods_per_day" min="1" max="10" required>
+                                <label for="periods_per_day">Periods Per Day</label>
+                            </div>
+                        </div>
+                  </div>
+
+                  <br>
+
+                  <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                  </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- ================== TABLE CARD ================== -->
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Time Slots</span></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="container">
+
+                {% if existing_slots %}
+
+                <!-- Delete All Button -->
+                <div class="text-end mb-3">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#basicModal">
+                        <i class="fa fa-trash"></i> Delete All Time Slots
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Day</th>
+                                <th>Period Number</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for hw in existing_slots %}
+                                <tr align="center">
+                                    <td>{{ hw.id }}</td>
+                                    <td>{{ hw.day }}</td>
+                                    <td>{{ hw.period_number }}</td>
+                                    <td>
+                                        <a class="btn btn-danger" href="{% url 'delete_singleslot' hw.id %}">
+                                            <i class="fa fa-trash-can"></i> Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+                {% else %}
+                    <p class="text-center text-danger">No TimeSlot available</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

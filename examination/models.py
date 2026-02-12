@@ -6,6 +6,15 @@ from admission.models import students
 
 # Create your models here.
 
+class exam_group(models.Model):
+    exm_group = models.CharField(max_length=15)
+    exam_group_school = models.ForeignKey(school,on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.exm_group
+
+
+
 
 class exams(models.Model):
     exam_title = models.CharField(max_length=50)
@@ -13,11 +22,14 @@ class exams(models.Model):
     exam_centre = models.CharField(max_length=50)
     exam_class = models.ForeignKey(sclass,on_delete=models.CASCADE)
     exam_Sub_count= models.IntegerField()
-    exam_groupby = models.CharField(max_length=25)
+    exam_groupby = models.CharField(max_length=25,blank=True,null=True)
+    exm_grp = models.ForeignKey(exam_group, default=None, blank=True, null=True, on_delete=models.SET_NULL)
     exam_start_date = models.DateField()
     exam_end_date = models.DateField()
     exam_year = models.ForeignKey(academicyr,on_delete=models.CASCADE)
     exam_school = models.ForeignKey(school,on_delete=models.CASCADE)
+    published = models.CharField(max_length=6,blank=True,null=True)
+    remark = models.CharField(max_length=6)
 
     def __str__(self):
        return self.exam_title

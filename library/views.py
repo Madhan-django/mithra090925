@@ -68,7 +68,8 @@ def gen_lib_card(request):
       cls_name = sclass.objects.get(pk=cls)
       secs = request.POST.get('secs')
       sec_name = section.objects.get(pk=secs)
-      stud= students.objects.filter(ac_year=yr, class_name=cls_name, secs=sec_name)
+      stud= students.objects.filter(ac_year=year, class_name=cls_name, secs=sec_name)
+      
       for stu in stud:
          starting=str(starting)
          cardno = prefix+starting

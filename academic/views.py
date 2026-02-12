@@ -137,9 +137,9 @@ def noticeboard_search(request):
     Searchby = request.POST['searchby']
     Searched = request.POST['searched']
     if Searchby == 'title':
-        data = noticeboard.objects.filter(title__startswith=Searched)
+        data = noticeboard.objects.filter(title__startswith=Searched,notice_school=sdata)
     else:
-        data = noticeboard.objects.filter(notice_date=Searched)
+        data = noticeboard.objects.filter(notice_date=Searched,notice_school=sdata)
     return render(request, 'academic/noticeboard.html', context={'data': data, 'skool': sdata, 'year': year})
 
 
@@ -152,9 +152,9 @@ def event_search(request):
     Searchby = request.POST['searchby']
     Searched = request.POST['searched']
     if Searchby == 'event_title':
-        data = events.objects.filter(event_title__startswith=Searched)
+        data = events.objects.filter(event_title__startswith=Searched,event_school=sdata)
     elif Searchby == 'start_date':
-        data = events.objects.filter(start_date=Searched)
+        data = events.objects.filter(start_date=Searched,event_school=sdata)
     else:
         data = events.objects.filter(event_location__startswith=Searched)
     return render(request, 'academic/events.html', context={'data': data, 'skool': sdata, 'year': year})

@@ -1,16 +1,196 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 
 {% block content %}
-<div class="text-warning bg-dark"><h3 align="center">Update Exam</h3></div><br><br>
-  <div class="col-11">
-      <br><br><br>
-      <form action="" method="POST">
-          {% csrf_token %}
-          {{ form.as_p }}
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
+    font-family: 'Roboto', sans-serif;
+}
 
-          <button type="submit" class="btn btn-success">Submit</button>
-      </form>
+/* ===== CARD TITLE (REDUCED HEIGHT) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px 0 !important;            /* reduced height */
+    border-radius: 20px 20px 0 0;
+    margin-bottom: 0;
+}
+
+.card-title h5 {
+    margin: 0;
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 14px;                  /* reduced badge font */
+    padding: 4px 10px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+}
+
+/* ===== FORM SPACING (SPACE BETWEEN EVERY ROW) ===== */
+.row {
+    margin-bottom: 18px !important;
+}
+
+/* ===== INPUT, SELECT, TEXTAREA ===== */
+.form-control {
+    border-radius: 10px !important;
+    padding: 8px 10px !important;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    border-radius: 10px !important;
+}
+
+/* Cancel button red gradient */
+.btn-danger {
+    background: linear-gradient(90deg, #ff4d4d, #b30000);
+    border: none;
+}
+
+/* ===== ALIGN SUBMIT BUTTON ===== */
+.text-end {
+    padding-right: 20px;
+}
+</style>
 
 
-  </div>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge">Update Exam</span>
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form action="" id="updateexamform" data-uclass-url="{% url 'ajax_load_uclass' %}" method="POST">
+                {% csrf_token %}
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_title }}
+                            <label for="id_exam_title">Exam</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_code }}
+                            <label for="id_exam_code">Exam Code</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_centre }}
+                            <label for="id_exam_centre">Exam Centre</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select name="exam_class" class="form-control" required id="id_exam_class">
+                                <option value="{{ ex_cls.id }}">{{ ex_cls }}</option>
+                                {% for cl in cls %}
+                                    {% if cl.id != ex_cls.id %}
+                                        <option value="{{ cl.id }}">{{ cl.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <label for="id_exam_class">Class</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_Sub_count }}
+                            <label for="id_exam_Sub_count">Subject Count</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select name="exm_grp" class="form-control" id="id_exm_grp">
+                                <option value="{{ ex_grp.id }}">{{ ex_grp }}</option>
+                                {% for exg in exgrp %}
+                                    {% if exg.id != ex_grp.id %}
+                                        <option value="{{ exg.id }}">{{ exg }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <label for="id_exm_grp">Exam Group</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_start_date }}
+                            <label for="id_exam_start_date">Exam Start Date</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_end_date }}
+                            <label for="id_exam_end_date">Exam End Date</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.exam_year }}
+                            <label for="id_exam_year">Academic Year</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.remark }}
+                            <label for="id_remark">Remark</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            {{ form.published }}
+                            <label for="id_published">Published</label>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form.exam_school }}
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 {% endblock %}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Timetable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h2 {
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-left: 5px solid #4CAF50;
+        }
+        h3 {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+        }
+        th {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+<h2>All Sections' Timetables</h2>
+
+{% for group in section_timetables %}
+  <h3>{{ group.section.class_sec_name.name }} - {{ group.section.section_name }}</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Day / Period</th>
+        {% for p in group.periods %}
+          <th>Period {{ p }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in group.grid %}
+        <tr>
+          <td>{{ row.day }}</td>
+          {% for cell in row.cells %}
+            <td>{{ cell }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br><br>
+{% endfor %}
+
+</body>
+</html>

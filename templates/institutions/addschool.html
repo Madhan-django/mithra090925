@@ -1,36 +1,221 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					 New Institutions
-				</span>
-			</span>
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+  .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+/* ===== SECTION HEADING ===== */
+.section-title {
+    font-weight: 600;
+    color: #555;
+    border-left: 4px solid #009ffd;
+    padding-left: 10px;
+}
+
+/* ===== FORM ===== */
+.form-floating > label {
+    color: #666;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+}
+
+.btn-outline-secondary {
+    border-radius: 10px;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #ff5f6d, #c31432);
+    border: none;
+    color: #fff;
+}
+
+/* ===== CHECKBOX ===== */
+.form-check-input {
+    cursor: pointer;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===== TITLE ===== -->
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge bg-light text-dark">
+                    New Institution
+                </span>
+            </h5>
+        </div>
+
+        <!-- ===== FORM ===== -->
+        <form class="card-body p-4" action="{% url 'addschool' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- ===== SECTION 1 ===== -->
+            <h6 class="section-title mb-4">1. Institution Details</h6>
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.name }}
+                        <label for="id_name">Institution Name</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.phone }}
+                        <label for="id_phone">Phone Number</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.email }}
+                        <label for="id_email">Email</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.address }}
+                        <label for="id_address">Address</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.regno }}
+                        <label for="id_regno">Registration Number</label>
+                    </div>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check mt-3">
+                        {{ form.isactive }}
+                        <label class="form-check-label ms-2" for="id_isactive">
+                            Active Status
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="fw-semibold mb-1">Institution Logo</label>
+                    {{ form.logo }}
+                    <small class="text-muted d-block mt-1">
+                        Recommended: <strong>500×500 px</strong> (PNG/JPG)
+                    </small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="fw-semibold mb-1">
+                        Notification Icon <span class="text-muted">(Android App)</span>
+                    </label>
+                    {{ form.notification_logo }}
+                    <small class="text-muted d-block mt-1">
+                        Recommended: <strong>512×512 px</strong> (Transparent PNG)
+                    </small>
+                </div>
+
+            </div>
+            <br>
+            <hr class="my-5">
+
+            <!-- ===== SECTION 2 ===== -->
+            <h6 class="section-title mb-4">2. Web & Mobile App Details</h6>
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.website }}
+                        <label for="id_website">Website</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_aboutus }}
+                        <label for="id_web_aboutus">About Us</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_contactus }}
+                        <label for="id_web_contactus">Contact Us</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_gallery }}
+                        <label for="id_web_gallery">Gallery</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form.web_admission }}
+                        <label for="id_web_admission">Admission</label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== ACTIONS ===== -->
+            <div class="d-flex justify-content-end mt-5">
+                <button type="submit" class="btn btn-primary px-4 me-3">
+                    <i class="ri-check-line me-1"></i> Submit
+                </button>
+                <button type="reset" class="btn btn-cancel px-4">
+                    <i class="ri-close-line me-1"></i> Cancel
+                </button>
+            </div>
+
+        </form>
+    </div>
 </div>
-         <div class="container">
-            <div class="row">
-                <div class="col-sm">
-                    <form action="{% url 'addschool' %}" method ="POST" enctype="multipart/form-data">
-                         {% csrf_token %}
-
-                          {{form.as_p}}
-                         <div class="d-flex justify-content-end mt-3">
-                               <div class="mr-2">
-                                      <button type="submit" class="btn btn-warning btn-lg">Submit</button>
-                                </div>
-                                 <div>
-                                     <button type="reset" class="btn btn-success btn-lg">Clear</button>
-
-                                 </div>
-                         </div>
-
-
-
-                    </form>
-                </div></div></div>
-
-
-
 
 {% endblock %}

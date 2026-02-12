@@ -1,0 +1,154 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<div class="col-lg-12 grid-margin stretch-card">
+  <div class="card">
+    <div class="card-title text-center mt-3">
+      {% if parent_asset %}
+
+        <h5 class="card-header">New Asset</h5>
+      <div class="divider divider-primary">
+        <div class="divider-text">{{ parent_asset.asset_name }}-Sub Asset</div>
+      </div>
+      {% else %}
+        <h3>New Spare SubAsset</h3>
+        <p class="text-muted">Leave "Parent Asset" empty if this item is not yet assigned to any main asset.</p>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <div class="container mt-4">
+        <form method="post">
+          {% csrf_token %}
+
+          {% if not parent_asset %}
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.parent_asset.label_tag }}
+              {{ form.parent_asset }}
+              {% if form.parent_asset.errors %}
+                <div class="text-danger">{{ form.parent_asset.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% else %}
+          <input type="hidden" name="parent_asset" value="{{ parent_asset.id }}">
+          {% endif %}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.name.label_tag }}
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {{ form.capacity_or_spec.label_tag }}
+              {{ form.capacity_or_spec }}
+              {% if form.capacity_or_spec.errors %}
+                <div class="text-danger">{{ form.capacity_or_spec.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.serial_number.label_tag }}
+              {{ form.serial_number }}
+              {% if form.serial_number.errors %}
+                <div class="text-danger">{{ form.serial_number.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {{ form.sub_asset_tag.label_tag }}
+              {{ form.sub_asset_tag }}
+              {% if form.sub_asset_tag.errors %}
+                <div class="text-danger">{{ form.sub_asset_tag.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.assigned_to.label_tag }}
+              {{ form.assigned_to }}
+              {% if form.assigned_to.errors %}
+                <div class="text-danger">{{ form.assigned_to.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {{ form.vendor.label_tag }}
+              {{ form.vendor }}
+              {% if form.vendor.errors %}
+                <div class="text-danger">{{ form.vendor.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.purchase_date.label_tag }}
+              {{ form.purchase_date }}
+              {% if form.purchase_date.errors %}
+                <div class="text-danger">{{ form.purchase_date.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {{ form.warranty_end_date.label_tag }}
+              {{ form.warranty_end_date }}
+              {% if form.warranty_end_date.errors %}
+                <div class="text-danger">{{ form.warranty_end_date.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.subasset_school.label_tag }}
+              {{ form.subasset_school }}
+              {% if form.subasset_school.errors %}
+                <div class="text-danger">{{ form.subasset_school.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {{ form.condition.label_tag }}
+              {{ form.condition }}
+              {% if form.condition.errors %}
+                <div class="text-danger">{{ form.condition.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.remark.label_tag }}
+              {{ form.remark }}
+
+            </div>
+            <div class="col-md-6">
+              {{ form.is_discarded.label_tag }}
+              {{ form.is_discarded }}
+              {% if form.is_discarded.errors %}
+                <div class="text-danger">{{ form.is_discarded.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">
+              {% if parent_asset %}
+                Add SubAsset
+              {% else %}
+                Add Spare
+              {% endif %}
+            </button>
+            <a href="{% url 'sub_assets' %}" class="btn btn-secondary ms-2">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

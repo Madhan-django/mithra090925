@@ -1,0 +1,111 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    overflow: hidden;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+/* ===== TITLE BAR (STYLE A BADGE) ===== */
+.card-title {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    padding: 6px 0;
+    text-align: center;
+}
+.card-title h5 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+.card-title h5 span.badge {
+    background: #fff;
+    color: #000;
+    padding: 5px 12px;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+/* ===== INLINE ROW ===== */
+.form-inline-row {
+    display: flex;
+    align-items: center;       /* Keeps button & field aligned */
+    gap: 15px;
+}
+
+/* WIDTH FOR THE SELECT FIELD */
+.input-container select {
+    width: 900px !important;   /* 4× width */
+    height: 38px !important;
+    padding: 5px 10px !important;
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    font-size: 14px;
+}
+
+/* BUTTON SMALL */
+.button-container button {
+    height: 36px !important;
+    padding: 0 20px !important;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+/* ===== SUBMIT BUTTON STYLE ===== */
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+}
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838, #28a745);
+}
+</style>
+
+
+<!-- CARD -->
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5><span class="badge">Update Fee Category</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <form action="" method="POST">
+                {% csrf_token %}
+
+                <div class="form-inline-row">
+
+                    <!-- Select Field -->
+                    <div class="input-container">
+                        {{ form.fee_cat }}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-success btn-sm">Submit</button>
+                        <a href="{% url 'invoices' %}" class="btn btn-danger">Clear</a>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    /* ===== GLOBAL FONT ===== */
+    body, h1, h3, th, td, button {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        overflow: hidden;
+    }
+
+    /* ===== TITLE BAR ===== */
+    .card-title {
+        background: linear-gradient(90deg, #005C97, #363795);
+        padding: 12px;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .card-title h3 {
+        margin: 0;
+        display: inline-block;
+        background: #f8f9fa;
+        padding: 6px 22px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #000;
+    }
+
+    /* ===== ACTION BAR ===== */
+    .align-right {
+        padding: 20px 30px;
+        text-align: right;
+    }
+
+    /* ===== TABLE WRAPPER ===== */
+    .col-lg-12.grid-margin.stretch-card {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    /* ===== TABLE ===== */
+    .table {
+        margin: 0;
+        padding: 15px;
+        white-space: nowrap;
+    }
+
+    thead.table-dark th {
+        background-color: #212529 !important;
+        color: #fff !important;
+        font-size: 16px !important;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    tbody td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 15px;
+    }
+
+    tbody tr:hover {
+        background-color: #f6f9ff;
+        transition: 0.2s ease-in-out;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+        border-radius: 8px;
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #0053d6, #2a92ff);
+        border: none;
+    }
+
+    .btn-warning {
+        background: linear-gradient(90deg, #f0ad4e, #ffcc70);
+        border: none;
+        color: #000;
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #d9534f, #ff6b60);
+        border: none;
+    }
+
+    /* ===== ALERT ===== */
+    .alert-danger {
+        margin: 20px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 12px;
+    }
+</style>
+
+
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>Employees</h3>
+        </div>
+
+     <div class="align-right">
+         <a href="{% url 'add_Employee' %}" class="btn btn-sm btn-primary">New Employee</a>
+         <a href="{% url 'import_employees' %}" class="btn btn-sm btn-danger">Import</a>
+         <a href="{% url 'export_employee_sample' %}" class="btn-sm btn-success">Export</a>
+     </div>
+
+<br>
+
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align="center">
+    <tr>
+      <th>Employee Code</th>
+      <th>Name</th>
+      <th>Department</th>
+      <th>Designation</th>
+      <th>Date of Joining</th>
+
+      <th>Status</th>
+
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in data %}
+    <tr align="center">
+      <td>{{ item.emp_code }}</td>
+      <td>{{ item.name }}</td>
+      <td>{{ item.department.name }}</td>
+      <td>{{ item.designation.title }}</td>
+      <td>{{ item.date_of_joining }}</td>
+
+      <td>{{ item.status}}</td>
+
+      <td>
+
+          <form action="{% url 'update_Employee' item.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+          <form action="{% url 'Salary_Record' item.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Salary Record">
+          </form>
+
+
+           {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+          <form action="{% url 'del_Employee' item.id %}" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+            {% endif %}
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+</div>
+    </div>
+
+
+{% endblock %}
+

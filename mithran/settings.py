@@ -10,12 +10,27 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 from django.conf import settings
+import firebase_admin
+from firebase_admin import credentials
+from datetime import timedelta
 from pathlib import Path
 import os
+import environ
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+FIREBASE_ACCOUNT = os.path.join(BASE_DIR,'firebase-adminsdk.json')
+
+cred = credentials.Certificate(FIREBASE_ACCOUNT)
+firebase_admin.initialize_app(cred)
+
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, 'env/.env'))   # adjust path if needed
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -26,11 +41,14 @@ SECRET_KEY = 'django-insecure-ffuldpa792vnjjac10g7s2ufwy)@_$kx(!xkff$yt96tl3k0*f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['13.232.42.251','mithran.co.in','www.mithran.co.in','*']
 
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
-STATIC_DIR = os.path.join(BASE_DIR,'static')
+#STATIC_DIR = os.path.join(BASE_DIR,'static')
 # Application definition
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "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")
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'rest_framework',
     'phonenumber_field',
     'multiforloop',
     'institutions',
@@ -55,11 +74,51 @@ INSTALLED_APPS = [
     'visitors',
     'studentportal',
     'academic',
-
-
-
-
+    'dashboards',
+    'reports',
+    'mobi',
+    'pushnotify',
+    'payroll',
+    'mobiplayer',
+    'uploads',
+    'digiattend',
+    'sera',
+    'pettycash',
+    'django_q',
+    'timetable',
+    'automate',
+    'tally',
+    'assets',
+    'grievance'
+    
+     
 ]
+
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 300,
+    'retry': 0 ,
+    'ack_failures': False,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default',
+    'scheduler': True,  # Important
+}
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'EXCEPTION_HANDLER': 'mobi.exceptions.custom_exception_handler',
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),   # increase from 5 min
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # keep or extend
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,7 +128,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'global_login_required.GlobalLoginRequiredMiddleware',
+   
 
 ]
 
@@ -93,6 +152,19 @@ TEMPLATES = [
 
 LOGIN_URL = '/'
 
+# Set the session engine to use database-backed sessions
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# Set the session timeout (in seconds) to the desired idle time before logout
+# For example, to set a timeout of 30 minutes (1800 seconds)
+
+SESSION_COOKIE_AGE = 1200
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
+WSGI_APPLICATION = 'mithran.wsgi.application'
+
+
 
 WSGI_APPLICATION = 'mithran.wsgi.application'
 
@@ -102,10 +174,17 @@ WSGI_APPLICATION = 'mithran.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mithra100226',
+        'USER': 'root',
+        'PASSWORD':'MithranMithra123',
+        'HOST': 'localhost',  # or your MySQL host IP address
+        'PORT': '3306',      # or your MySQL port
     }
 }
+
+
+
 
 
 
@@ -117,7 +196,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+       'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -133,7 +212,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -143,8 +222,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = STATIC_DIR,
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+#STATIC_URL = 'static'
+
+#STATIC_ROOT = '/home/ubuntu/mithra'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -154,5 +241,45 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
+MAX_UPLOAD_SIZE = 100 * 1024 * 1024
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'madhan.dorai@gmail.com'
+# EMAIL_HOST_PASSWORD = 'mpep dect phqw hduy '
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#
+# EMAIL_HOST = 'email-smtp.ap-south-1.amazonaws.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+#
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+#
+# DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'email-smtp.ap-south-1.amazonaws.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER ='AKIAQK5TKPH6YNWWO3OK'
+EMAIL_HOST_PASSWORD = 'BJJ9AIPeCGzYvgzG+5JqyQS7ozy+V3A9NlCkt8d8DE0i'
+DEFAULT_FROM_EMAIL = 'noreply@mithran.co.in'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}

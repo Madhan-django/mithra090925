@@ -1,0 +1,279 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+    /* === General Typography === */
+    body, h1, h3, h4, h5, th, td, label {
+        font-family: 'Roboto', sans-serif;
+    }
+
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+     /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+    /* === Buttons === */
+    .btn-primary {
+        background: linear-gradient(90deg, #0d6efd, #3b8bff);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 10px;
+
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #ff4b4b, #cc0000);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 10px;
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+    }
+
+    .btn-info {
+        background: linear-gradient(90deg, #17a2b8, #1fc8d4);
+        border: none;
+        border-radius: 10px;
+    }
+
+    /* Modal Title */
+    .modal-header {
+        background: linear-gradient(90deg, #0d6efd, #3b8bff);
+        color: white;
+    }
+    .col-md-6{
+    padding:15px;
+    }
+</style>
+
+<!-- ======================= FORM CARD ======================= -->
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Title -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Reservation</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post" data-section-url="{% url 'ajax_load_secsub' %}" id="addresform">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <!-- CLASS -->
+                    <div class="col-md-6 form-block">
+                        <label class="form-label" for="id_sch_class">Class</label>
+                        <select name="sch_class" class="form-control" required id="id_sch_class">
+                            <option value="" selected>---------</option>
+                            {% for cl in cls %}
+                                <option value="{{ cl.id }}">{{ cl }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- SECTION -->
+                    <div class="col-md-6 form-block">
+                        <label class="form-label" for="id_section">Section</label>
+                        <select name="section" class="form-control" required id="id_section">
+                            <option value="" selected>---------</option>
+                            {% for sc in sec %}
+                                <option value="{{ sc.id }}" {% if sel == sc %}selected{% endif %}>{{ sc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- SUBJECT -->
+                    <div class="col-md-6 form-block">
+                        <label class="form-label" for="id_subject">Subject</label>
+                        <select name="subject" class="form-control" required id="id_subject">
+                            <option value="" selected>---------</option>
+                        </select>
+                    </div>
+
+                    <!-- TIMESLOT -->
+                    <div class="col-md-6 form-block">
+                        <label class="form-label" for="id_timeslot">Reservation Slot</label>
+                        {{ form.timeslot }}
+                    </div>
+
+                    <!-- ADAPTIVE DAY -->
+                    <div class="col-md-6 form-block">
+                      <label class="form-label" for="id_adaptive_day" ><span class="h6 mb-0">Adaptive Day</span></label>
+                        {{ form.adaptive_day }}
+                    </div>
+
+                    <!-- ADAPTIVE PERIOD -->
+                    <div class="col-md-6 form-block">
+                        <label class="form-label" for="id_adaptive_period"><span class="h6 mb-0">Adaptive Period</span></label>
+                        {{ form.adaptive_period }}
+                    </div>
+
+                    {{ form.school }}
+
+                </div>
+
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-primary me-2">Submit</button>
+                    <button type="reset" class="btn btn-danger me-2">Clear</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ======================= TABLE CARD ======================= -->
+<div class="col-lg-12 grid-margin stretch-card mt-3">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Reservations</span></h5>
+        </div>
+
+        <div class="card-body">
+
+           <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Subject</th>
+                            <th>Time Slot</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if data %}
+                            {% for hw in data %}
+                                <tr align="center">
+                                    <td>{{ hw.id }}</td>
+                                    <td>{{ hw.section.class_sec_name }}</td>
+                                    <td>{{ hw.section }}</td>
+                                    <td>{{ hw.subject }}</td>
+                                    <td>{{ hw.timeslot }}</td>
+
+                                    <td>
+                                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                                            <a class="btn btn-primary btn-sm" href="{% url 'edit_reservation' hw.id %}">
+                                                <i class="fa fa-pencil-can"></i> Edit
+                                            </a>
+                                            <a class="btn btn-danger btn-sm" href="{% url 'delete_reservation' hw.id %}">
+                                                <i class="fa fa-trash-can"></i> Delete
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" align="center" class="text-danger">No Reserved Slots Available.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- AJAX Script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+    $('#id_sch_class').change(function () {
+        var classId = $(this).val();
+        if (classId) {
+            $.ajax({
+                url: "{% url 'ajax_load_secsub' %}",
+                data: { 'Class_Id': classId },
+                success: function (data) {
+                    $('#id_section').html(data.sections_html);
+                    $('#id_subject').html(data.subjects_html);
+                }
+            });
+        } else {
+            $('#id_section').html('<option value="">Select Section</option>');
+            $('#id_subject').html('<option value="">Select Subject</option>');
+        }
+    });
+});
+</script>
+
+{% endblock %}

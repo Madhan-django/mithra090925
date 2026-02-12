@@ -1,0 +1,43 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+    h1, h4{
+        font-family: Roboto;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+  <div class="card">
+    <div class="card-title text-center">
+      <br>
+      <h4>Edit Block</h4>
+    </div>
+
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            {{form.name}}
+          </div>
+          <div class="col-md-6 mb-3">
+
+              {{form.block}}
+             <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </div>
+        <div class="text-end">
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Include the necessary JavaScript files for datepicker -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
+
+
+{% endblock %}

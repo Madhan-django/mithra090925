@@ -1,74 +1,134 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h5, th, td, label, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Admit Cards
-				</span>
-			</span>
+/* ===== TITLE BAR ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px 0 !important;      /* reduced height */
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;
+    padding: 4px 12px;
+    border-radius: 6px;
+}
+
+/* ===== TABLE ===== */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+td {
+    font-size: 14px !important;
+    padding: 10px 8px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Align dropdown icon properly */
+.dropdown-toggle {
+    border: none;
+}
+
+/* Table empty message */
+.alert-danger {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title">
+            <h5><span class="badge bg-light text-dark">Admit Cards</span></h5>
+        </div>
+
+        <div class="card-body">
+            {% if data %}
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Exam Name</th>
+                        <th>Class</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for examdet in data %}
+                    <tr>
+                        <td>{{ examdet.exam_title }}</td>
+                        <td>{{ examdet.exam_class }}</td>
+                        <td>{{ examdet.exam_start_date }}</td>
+                        <td>{{ examdet.exam_end_date }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="ri-more-2-line"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{% url 'generate_admit_card' examdet.id %}">
+                                        <i class="ri-pencil-line me-1"></i> Admit Card / Exam Results
+                                    </a>
+                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                    <a class="dropdown-item" href="{% url 'delete_admit_card' examdet.id %}">
+                                        <i class="ri-delete-bin-7-line me-1"></i> Delete
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-danger" role="alert">
+                No Records are available to Show
+            </div>
+            {% endif %}
+        </div>
+
     </div>
-    </div>
-<br>
-
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Exam Name</th>
-      <th>Class </th>
-      <th>Start Date</th>
-      <th>End Date/th>
-      <th>Action</th>
-    </tr>
-  </thead>
-
-  <tbody>
-
-
-   {% for examdet in data %}
-
-    <tr align="center">
-      <td>{{examdet.exam_title}}</td>
-      <td>{{examdet.exam_class}}</td>
-      <td>{{examdet.exam_start_date}}</td>
-      <td>{{examdet.exam_end_date}}</td>
-
-      <td>
-            <form action="{% url 'generate_admit_card' examdet.id %}" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-primary" value=" Admit Card / Exam Results">
-          </form>
-         {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-           <form action="{% url 'delete_admit_card' examdet.id %}" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-warning" value=" Delete">
-          </form>
-          {% endif %}
-      </td>
-    </tr>
-
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
 </div>
-
-{% endif %}
-
-
-
 {% endblock %}
-

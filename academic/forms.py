@@ -1,5 +1,8 @@
 from django import forms
 from .models import noticeboard
+from .models import events
+
+
 sts = (
     ('Active','Active'),
     ('In-Active', 'In-Active'),
@@ -20,16 +23,16 @@ class NoticeBoardForm(forms.ModelForm):
         }
 
 
-from django import forms
-from .models import events
+
 
 class add_event_form(forms.ModelForm):
     class Meta:
         model = events
-        fields = ('event_title', 'event_desc', 'start_date', 'end_date', 'event_location', 'event_image', 'event_school')
+        fields = ('event_title', 'event_desc', 'start_date', 'end_date', 'event_location','post_date','event_image', 'event_school')
         widgets = {
             'event_title': forms.TextInput(attrs={'class': 'form-control'}),
             'event_desc': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'post_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
             'start_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
             'end_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
             'event_location': forms.TextInput(attrs={'class': 'form-control'}),

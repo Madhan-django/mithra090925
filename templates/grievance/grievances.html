@@ -1,0 +1,267 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+<style>
+
+/* ===== GLOBAL FONT ===== */
+   /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== NEW EXAM BUTTON AREA ===== */
+.text-end {
+    padding-right: 20px;
+}
+
+/* ===== TABLE ===== */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+/* ===== TABLE HEADER (Compact & Clean) ===== */
+.table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* ===== TABLE DATA ===== */
+td {
+    font-size: 14px !important;    /* reduced to match timetable style */
+    padding: 10px 8px !important;  /* compact row height */
+    vertical-align: middle;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Align dropdown icon properly */
+.dropdown-toggle {
+    border: none;
+}
+
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge">Grievance</span></h5>
+        </div>
+
+        <!-- NEW EXAM BUTTON -->
+        <div class="text-end">
+            <a href="{% url 'new_grievance' %}" class="btn btn-primary btn-sm">New Grievance</a>
+        </div>
+
+
+        <div class="card-body">
+            <!-- === Search Form === -->
+             <!-- === Search Form === -->
+            <form method="GET" action="{% url 'grievance_search' %}" data-section-url="{% url 'ajax_load_section' %}" id="studentSearchForm" class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label for="searchby" class="form-label">Search By</label>
+                    <select name="searchby" id="searchby" class="form-select" required>
+                        <option value="">--Select--</option>
+                        <option value="studname" {% if searchby == 'studname' %}selected{% endif %}>Student Name</option>
+                        <option value="cdate" {% if searchby == 'cdate' %}selected{% endif %}>Complaint Date</option>
+                        <option value="mobno" {% if searchby == 'mobno' %}selected{% endif %}>Mobile No</option>
+                        <option value="studclass" {% if searchby == 'studclass' %}selected{% endif %}>Class</option>
+                        <option value="studsec" {% if searchby == 'studsec' %}selected{% endif %}>Class + Section</option>
+                        <option value="comptype" {% if searchby == 'comptype' %}selected{% endif %}>Complaint Type</option>
+                        <option value="compstatus" {% if searchby == 'compstatus' %}selected{% endif %}>Status</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 search-field" id="text-search-field">
+                    <label for="searched" class="form-label">Search Value</label>
+                    <input type="text" name="searched" id="searched" value="{{ searched }}" class="form-control" placeholder="Enter value...">
+                </div>
+
+                <div class="col-md-3 class-field d-none">
+                    <label for="class_name" class="form-label">Class</label>
+                    <select name="class_name" id="class_name" class="form-select">
+                        <option value="">--Select Class--</option>
+                        {% for c in cls %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3 section-field d-none">
+                    <label for="section_name" class="form-label">Section</label>
+                    <select name="section_name" id="section_name" class="form-select">
+                        <option value="">--Select Section--</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>&nbsp;&nbsp;
+                    <a href="{% url 'grievance_list' %}" class="btn btn-danger w-100">Clear</a>
+
+                </div>
+            </form>
+            {% if grievances %}
+            <table class="table">
+                <thead class="table-dark" align="center">
+                    <tr>
+                        <th>S.No</th>
+                        <th>Complaint Date</th>
+                        <th>Complaint Type</th>
+                        <th>Student Name</th>
+                        <th>Complainant</th>
+                        <th>complaint_status</th>
+                        <th>Completion Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for data in grievances %}
+                    <tr align="center">
+                        <td>{{forloop.counter}}</td>
+                        <td>{{data.complaint_date}}</td>
+                        <td>{{data.area_of_complaint}}</td>
+                        <td>{{data.stud_name}}</td>
+                        <td>{{data.concern_person_name}}</td>
+                        <td>{{data.complaint_status}}</td>
+                        <td>
+                               {% if data.complaint_status == 'Open' %}
+                                  <span class="badge" style="background:#007bff;">Open</span>
+                               {% elif data.complaint_status == 'Pending' %}
+                                  <span class="badge" style="background:#d00000;">Pending</span>
+                               {% elif data.complaint_status == 'In-progress' %}
+                                  <span class="badge" style="background:#d4a100; color:black;">In-progress</span>
+                               {% elif data.complaint_status == 'Resolved' %}
+                                  <span class="badge" style="background:#0f9d58;">Resolved</span>
+                               {% else %}
+                                  <span class="badge bg-secondary">{{ data.complaint_status }}</span>
+                            {% endif %}
+                         </td>
+
+                        <td>{{data.action_date}}</td>
+
+                    <td>
+    <div class="d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <!-- Icon as Dropdown Toggle -->
+            <button class="btn p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ri-more-2-line" style="font-size: 20px;"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item" href="{% url 'grievance_update' data.id %}">
+                        <i class="ri-pencil-line me-1"></i> Update
+                    </a>
+                </li>
+                {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                <li>
+                    <a class="dropdown-item" href="{% url 'grievance_delete' data.id %}">
+                        <i class="ri-delete-bin-7-line me-1"></i> Delete
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</td>
+
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            {% else %}
+            <div class="alert alert-danger" role="alert">
+                No Records are available to Show
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // === Toggle search input type ===
+    $('#searchby').change(function() {
+        var selected = $(this).val();
+        if (selected === 'studclass' || selected === 'studsec') {
+            $('#text-search-field').addClass('d-none');
+            $('.class-field').removeClass('d-none');
+            if (selected === 'studsec') {
+                $('.section-field').removeClass('d-none');
+            } else {
+                $('.section-field').addClass('d-none');
+            }
+        } else {
+            $('#text-search-field').removeClass('d-none');
+            $('.class-field, .section-field').addClass('d-none');
+        }
+    });
+
+    // === AJAX Load Sections ===
+    $('#class_name').change(function() {
+        var url = $('#studentSearchForm').attr('data-section-url');
+        var classId = $(this).val();
+        $.ajax({
+            url: url,
+            data: { 'Class_Id': classId },
+            success: function(data) {
+                $('#section_name').html(data);
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

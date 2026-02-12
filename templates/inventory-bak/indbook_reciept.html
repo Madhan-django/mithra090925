@@ -1,0 +1,71 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0">Individual Sale </h5>
+        </div>
+		<div class="card-body">
+    {% if bkset %}
+<div class="table-responsive">
+    <table class="table table-hover table-striped table-bordered">
+        <tr>
+            <thead class="table-dark">
+      <th>S.No</th>
+	  <th>Date</th>
+      <th>Book Set </th>
+      <th>Student Name</th>
+      <th>Class</th>
+      <th>Section</th>
+      <th>Quantity</th>
+      <th>Group</th>
+	  <th>status</th>
+      <th>Action</th>
+             </thead>
+    </tr>
+
+
+  <tbody>
+   {% for set in bkset %}
+    <tr align="center">
+      <td><span class="serial-number"></span></td>
+      <td>{{set.issue_date}}</td>
+      <td>{{set.inv_prod}}</td>
+      <td>{{set.stud}}</td>
+      <td>{{set.stud.class_name}}</td>
+      <td>{{set.stud.secs}}</td>
+      <td>{{set.qty}}</td>
+      <td>{{set.isbook_set}}</td>
+      <td>{{set.status}}</td>
+      <td>
+          <a href ="{% url 'bookset_delete' set.id %}" class="btn btn-danger" >Delete</a>
+      </td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+        </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    const serialNumberElements = $(".serial-number");
+
+    serialNumberElements.each(function(index) {
+        $(this).text(index + 1); // Just display the index for now
+    });
+});
+</script>
+{% endblock %}
+

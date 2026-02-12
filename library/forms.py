@@ -11,6 +11,20 @@ class add_book_form(forms.ModelForm):
         model = books
         fields='__all__'
 
+        labels = {
+            'title': 'Title',
+            'author': 'Author',
+            'subject': 'Subject',
+            'price': 'Price',
+            'quantity': 'Quantity',
+            'issued': 'Issued',
+            'desc': 'Description',
+            'rack': 'Rack No',
+            'book_no': 'Book No',
+            'isbn': 'ISBN No',
+
+        }
+
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'author': forms.TextInput(attrs={'class': 'form-control'}),
@@ -22,7 +36,13 @@ class add_book_form(forms.ModelForm):
             'rack': forms.TextInput(attrs={'class': 'form-control'}),
             'book_no': forms.TextInput(attrs={'class': 'form-control'}),
             'isbn': forms.TextInput(attrs={'class': 'form-control'}),
+            'book_school':forms.HiddenInput()
         }
+
+        def __init__(self, *args, **kwargs):
+            super(AddBookForm, self).__init__(*args, **kwargs)
+            for field_name, field in self.fields.items():
+                field.label_tag(attrs={'class': 'form-label'})
 
 class add_bookissue_form(forms.ModelForm):
     class Meta:

@@ -1,107 +1,224 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
 
-					</h1>
-			</div>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h5, th, td, label, button, input, select, textarea {
+    font-family: 'Roboto', sans-serif;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					 New Exam
-				</span>
-			</span>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-</div>
-    </div>
-<br>
-<div class="container">
-  <div class="col-11 mx-auto">
-    <br><br><br>
+/* ===== TITLE BAR (GRADIENT + BADGE STYLE A) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 2px 0 !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+}
+
+.card-title .badge {
+    background: #ffffff;
+    color: #000;
+    padding: 6px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* ===== FORM LABELS ===== */
+.form-floating > label {
+    font-weight: 500;
+}
+
+/* ===== FORM FIELD BORDER ===== */
+.form-control,
+.form-select {
+    border-radius: 10px !important;
+    border: 1.5px solid #005C97 !important;
+    box-shadow: none !important;
+}
+
+/* Fix floating labels visibility */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: 0.85;
+    transform: scale(.85) translateY(-1.2rem) translateX(0.15rem);
+}
+
+/* ===== BUTTONS ===== */
+.btn-info {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #e52d27, #b31217);
+    border: none;
+    border-radius: 8px;
+}
+
+/* ===== BOTTOM BUTTON AREA ===== */
+.text-end {
+    padding-top: 15px;
+}
+
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge">Update Exams</span></h5>
+        </div>
+
+        <div class="card-body">
+
     <form action="{% url 'add_exams' %}" method="POST">
       {% csrf_token %}
-      <div class="form-group">
-        <label>Exam Title:</label>
-        {{ form.exam_title }}
-      </div>
-      <div class="form-group">
-        <label>Exam Code:</label>
-        {{ form.exam_code }}
-      </div>
-      <div class="form-group">
-        <label>Exam Centre:</label>
-        {{ form.exam_centre }}
-      </div>
-      <div class="form-group">
-        <label>Class:</label>
-        <select name="exam_class" required class="form-control" id="id_exam_class">
-          <option value="" selected>---------</option>
-          {% for schcls in cls %}
-          <option value="{{ schcls.id }}">{{ schcls.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Total Subjects:</label>
-        {{ form.exam_Sub_count }}
-      </div>
-      <div class="form-group">
-        <label>Exam Group:</label>
-        {{ form.exam_groupby }}
-      </div>
-      <div class="form-group">
-        <label>Exam Start Date:</label>
-        <div class="input-group date" id="exam_start_date_picker" data-target-input="nearest">
-          {{ form.exam_start_date }}
-<!--          <div class="input-group-append" data-target="#exam_start_date_picker" data-toggle="datetimepicker">-->
-<!--            <div class="input-group-text"><i class="fa fa-calendar"></i></div>-->
-<!--          </div>-->
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Exam End Date:</label>
-        <div class="input-group date" id="exam_end_date_picker" data-target-input="nearest">
-          {{ form.exam_end_date }}
-<!--          <div class="input-group-append" data-target="#exam_end_date_picker" data-toggle="datetimepicker">-->
-<!--            <div class="input-group-text"><i class="fa fa-calendar"></i></div>-->
-<!--          </div>-->
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Academic Year:</label>
-             <select name="exam_year" class="form-control" required="" id="id_exam_year">
-               <option value="{{year.id}}" selected="">{{year}}</option>
-             </select>
-      </div>
-      <div class="form-group">
 
-        {{ form.exam_school }}
+      <!-- ROW 1 -->
+      <div class="row g-6">
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.exam_title }}
+                  <label for="id_exam_title">Exam Title</label>
+              </div>
+          </div>
+
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.exam_code }}
+                  <label for="id_exam_code">Exam Code</label>
+              </div>
+          </div>
       </div>
-      <button type="submit" class="btn btn-success">Submit</button>
+
+      <br>
+
+      <!-- ROW 2 -->
+      <div class="row g-6">
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.exam_centre }}
+                  <label for="id_exam_centre">Exam Centre</label>
+              </div>
+          </div>
+
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                   <select name="exam_class" required class="form-control" id="id_exam_class">
+                       <option value="" selected>---------</option>
+                       {% for schcls in cls %}
+                       <option value="{{ schcls.id }}">{{ schcls.name }}</option>
+                       {% endfor %}
+                   </select>
+                   <label for="id_exam_class">Class</label>
+              </div>
+          </div>
+      </div>
+
+      <br>
+
+      <!-- ROW 3 -->
+      <div class="row g-6">
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.exam_Sub_count }}
+                  <label for="id_exam_Sub_count">Total Subjects</label>
+              </div>
+          </div>
+
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  <select name="exm_grp" class="form-control" id="id_exm_grp">
+                      <option value="" selected="">---------</option>
+                      {% for grp in exgrp %}
+                      <option value="{{ grp.id }}">{{ grp }}</option>
+                      {% endfor %}
+                  </select>
+                  <label for="id_exm_grp">Exam Group</label>
+              </div>
+          </div>
+      </div>
+
+      <br>
+
+      <!-- ROW 4 -->
+      <div class="row g-6">
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.exam_start_date }}
+                  <label for="id_exam_start_date">Exam Start Date</label>
+              </div>
+          </div>
+
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.exam_end_date }}
+                  <label for="id_exam_end_date">Exam End Date</label>
+              </div>
+          </div>
+      </div>
+
+      <br>
+
+      <!-- ROW 5 -->
+      <div class="row g-6">
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  <select name="exam_year" class="form-control" required="" id="id_exam_year">
+                      <option value="{{ year.id }}" selected>{{ year }}</option>
+                  </select>
+                  <label for="id_exam_year">Academic Year</label>
+              </div>
+          </div>
+
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.published }}
+                  <label for="id_published">Result Publish</label>
+              </div>
+          </div>
+      </div>
+
+      <br>
+
+      <!-- ROW 6 -->
+      <div class="row g-6">
+          <div class="col-md-6">
+              <div class="form-floating form-floating-outline">
+                  {{ form.remark }}
+                  <label for="id_remark">Remarks</label>
+              </div>
+          </div>
+      </div>
+
+      <br>
+
+      {{ form.exam_school }}
+
+      <!-- ACTION BUTTONS -->
+      <div class="text-end">
+          <button type="submit" class="btn btn-info">Submit</button>
+          <button type="reset" class="btn btn-danger">Clear</button>
+      </div>
+
     </form>
+
   </div>
 </div>
+</div>
 
-<!-- Include the necessary JavaScript files for datepicker -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
-
-<script>
-  $(document).ready(function () {
-    // Initialize the date pickers
-    $('#exam_start_date_picker').datetimepicker({
-      format: 'YYYY-MM-DD',
-    });
-
-    $('#exam_end_date_picker').datetimepicker({
-      format: 'YYYY-MM-DD',
-    });
-  });
-</script>
 {% endblock %}

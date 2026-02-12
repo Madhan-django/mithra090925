@@ -1,0 +1,127 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, th, td, label, button {
+    font-family: 'Roboto', sans-serif;
+    font-size:14px;
+}
+
+/* ===== CARD STYLE ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: none;
+}
+
+/* ===== SUPER SLIM TITLE BAR (AS PER YOUR LAST TEMPLATE) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 4px 0;
+    margin-bottom: 10px;
+}
+
+.card-title h5 {
+    margin: 0;
+    padding: 0;
+}
+
+.card-title h5 span {
+    font-size: 15px;
+    background: #ffffff;
+    color: #000;
+    padding: 3px 14px;
+    border-radius: 6px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 18px;
+    font-size: 14px;
+}
+
+/* ===== TOP RIGHT BUTTON SPACING ===== */
+.top-btn-area {
+    padding: 15px;
+    text-align: right;
+}
+
+/* ===== TABLE ===== */
+.table-dark th {
+    color: #fff !important;
+    background-color: #212529 !important;
+}
+
+/* Center table content */
+.table td, .table th {
+    vertical-align: middle;
+}
+ /* ===== REDUCED TABLE HEADER HEIGHT ===== */
+.table thead th {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-size: 14px !important;
+    line-height: 14px;
+}
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Balance Summary</span></h5>
+        </div>
+
+        <!-- BUTTON -->
+        <div class="top-btn-area">
+            <a href="{% url 'balancesheet_pdf' %}" class="btn btn-sm btn-primary">Last 30-days</a>
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>S.No</th>
+                        <th>Date</th>
+                        <th>Opening Balance</th>
+                        <th>Closing Balance</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% if data %}
+                    {% for bal in data %}
+                        <tr class="text-center">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ bal.date }}</td>
+                            <td>{{ bal.opening_balance }}</td>
+                            <td>{{ bal.closing_balance }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="alert alert-danger m-0" role="alert">
+                                No Record are available to Show
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

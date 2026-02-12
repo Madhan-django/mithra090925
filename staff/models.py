@@ -1,5 +1,5 @@
 import datetime
-
+import os
 from django.db import models
 from institutions.models import school
 from admission.models import students
@@ -15,6 +15,7 @@ class Skill(models.Model):
         return self.name
 
 class staff(models.Model):
+
     first_name = models.CharField(max_length=35)
     last_name = models.CharField(max_length=35)
     gender = models.CharField(max_length=12)
@@ -24,10 +25,10 @@ class staff(models.Model):
     email = models.EmailField()
     join = models.DateField()
     staff_photo = models.ImageField(upload_to='images/', null=True, blank=True)
-    role = models.CharField(max_length=15)
+    role = models.CharField(max_length=150)
     salary = models.FloatField()
-    desg = models.CharField(max_length=15)
-    qualification = models.CharField(max_length=35)
+    desg = models.CharField(max_length=150)
+    qualification = models.CharField(max_length=150)
     status = models.CharField(max_length=10,default='Active')
     desc = models.CharField(max_length=150,blank=True,null=True)
     staff_school=models.ForeignKey(school,on_delete=models.CASCADE)
@@ -35,7 +36,7 @@ class staff(models.Model):
     experience = models.TextField(blank=True)
     subjects_taught = models.ManyToManyField(subjects, blank=True)
     permission_group = models.CharField(max_length=15)
-    staff_user = models.OneToOneField(User,on_delete=models.CASCADE,default=0)
+    staff_user = models.OneToOneField(User,on_delete=models.CASCADE)
 
 
     def __str__(self):
@@ -62,9 +63,10 @@ class homework(models.Model):
     hclass = models.ForeignKey(sclass,on_delete=models.CASCADE)
     secs = models.ForeignKey(section,on_delete=models.CASCADE)
     subj = models.ForeignKey(subjects,on_delete=models.CASCADE)
-    homework_date = models.DateField(default=datetime.datetime.now())
-    description = models.CharField(max_length=250)
-    submission_date = models.DateField(default=datetime.datetime.now())
+    homework_date = models.DateField(default=datetime.datetime.today)
+    attachment = models.FileField(upload_to='homework/', blank=True, null=True)
+    description = models.CharField(max_length=155)
+    submission_date = models.DateField(default=datetime.datetime.today)
     created_by = models.ForeignKey(staff, on_delete=models.CASCADE)
     acad_yr = models.ForeignKey(currentacademicyr, on_delete=models.CASCADE)
     school_homework = models.ForeignKey(school,on_delete=models.CASCADE,blank=True,null=True)
@@ -72,8 +74,29 @@ class homework(models.Model):
     def __str__(self):
         return self.title
 
+def homework_upload_path(instance, filename):
+    # Store file in media/homework/<year>/<filename>
+    return os.path.join(
+        "homework",
+        str(instance.homework_date.year),
+        filename
+    )
 
+class temp_homework(models.Model):
+    title = models.CharField(max_length=100)
+    hclass = models.ForeignKey(sclass,on_delete=models.CASCADE)
+    secs = models.ForeignKey(section,on_delete=models.CASCADE)
+    subj = models.ForeignKey(subjects,on_delete=models.CASCADE)
+    homework_date = models.DateField(default=datetime.datetime.today)
+    description = models.CharField(max_length=180)
+    attachment = models.FileField(upload_to=homework_upload_path, blank=True, null=True)
+    submission_date = models.DateField(default=datetime.datetime.today)
+    created_by = models.ForeignKey(staff, on_delete=models.CASCADE)
+    acad_yr = models.ForeignKey(currentacademicyr, on_delete=models.CASCADE)
+    school_homework = models.ForeignKey(school,on_delete=models.CASCADE,blank=True,null=True)
 
+    def __str__(self):
+        return self.title
 
 
 

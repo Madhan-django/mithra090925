@@ -1,44 +1,193 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-    <div class="school_header">
-        <h1 class="h3 text-center">
-            <i class="fa fa-graduation-cap text-light"></i>
-            {{ skool }}<small class="wlsm_text_secondary">{{ year }}</small>
-        </h1>
+
+<style>
+    /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b52a36;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 20px auto;
+        font-size: 15px;
+    }
+    .search-row .form-control {
+    height: 45px !important;
+    font-size: 12px;
+    border-radius: 8px;
+    width:300px
+}
+
+.search-row .btn {
+    min-width: 110px;
+    height: 35px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+    .text-center{
+    text-align:center;
+    }
+    .text-end{
+    padding-right:15px;
+    }
+    td{
+     text-align:center;
+    }
+</style>
+
+<div class="card">
+    <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">Subjects</span></h5>
     </div>
+        <div class="text-end">
+             <a href="{% url 'addsubject' %}" type="button" class="btn btn-primary mt-2 mt-sm-0 btn-icon-text" align="right">
+                  <i class="mdi mdi-plus-circle"></i> New Subject </a>
 
-    <div class="mt-3 text-center wlsm-section-heading-block">
-        <span class="wlsm-section-heading-box">
-            <span class="wlsm-section-heading">
-                Subjects
-            </span>
-        </span>
-        <span class="float-md-right">
-            <a href="{% url 'addsubject' %}" class="btn btn-sm btn-outline-light">
-                New Subject
-            </a>
-        </span>
-    </div>
-</div>
+             <!-- Copy Button triggers modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#copyModal">
+                <i class="mdi mdi-content-copy"></i> Copy
+            </button>
+        </div>
 
-<br>
-
-{% if data %}
-    <table class="table">
-        <thead class="table-dark" align="center">
-            <tr>
-                <th>Id</th>
-                <th>Subjects</th>
-                <th>Class</th>
-                <th>School</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for sublst in data %}
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-dark">
+                <tr class="text-center">
+                    <th>Id</th>
+                    <th>Subjects</th>
+                    <th>Class</th>
+                    <th>School</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if data %}
+                {% for sublst in data %}
                 <tr align="center">
                     <td>{{ sublst.id }}</td>
                     <td>{{ sublst.subject_name }}</td>
@@ -46,50 +195,52 @@
                     <td>{{ sublst.subject_school }}</td>
                     <td>
                         <form action="{% url 'updatesubject' sublst.id %}" method="POST" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-lg">
-                                <i class="fas fa-edit" style="color: #106c02;"></i>
-                            </button>
+                          {% csrf_token %}
+                            <button type="submit" class="btn btn-info"><i class="fas fa-edit"></i>Update</button>
                         </form>
-
-
-                        <button type="button" class="btn btn-lg" data-toggle="modal" data-target="#{{ sublst }}">
-                            <i class="fas fa-trash" style="color: #fd0013;"></i>
-                        </button>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="{{ sublst }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{ sublst.id }}" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel{{ sublst.id }}">Delete Session</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <h5 style="color: red;">Are you sure you want to delete - {{sublst.subject_class}} - {{ sublst }} </h5>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                                        <form action="{% url 'delsub' sublst.id %}" method="POST" class="d-inline">
-                                            {% csrf_token %}
-                                            <input type="submit" class="btn btn-danger" value="Delete">
-                                        </form>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                     {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                        <form action="{% url 'delsub' sublst.id %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i>Delete</button>
+                        </form>
+                     {% endif %}
                     </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <div class="alert alert-danger" role="alert">
-        No records are available to show.
+                {% endfor %}
+                {% else %}
+                   <div class="alert alert-danger" role="alert">
+                    <p>No records are available to show.</p>
+                   </div>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
-{% endif %}
+</div>
+<!-- Copy Modal -->
+<div class="modal fade" id="copyModal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'copysubjects' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="copyModalLabel">Copy Subjects</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="cpyyear" class="form-label">Select Academic Year</label>
+                    <select name="cpyyear" id="cpyyear" class="form-select" required>
+                        {% for yr in cpyears %}
+                            <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Copy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

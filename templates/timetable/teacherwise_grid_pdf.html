@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        h2, h4 {
+            margin: 5px 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    {% for data in teacher_timetables %}
+        <div class="page">
+            <div class="header">
+                <h2>{{ skool.name }}</h2>
+                <p><strong>Academic Year:</strong> {{ year.acad_year }}</p>
+                <h4>Teacher: {{ data.teacher.first_name }} {{ data.teacher.last_name }}</h4>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        {% for p in data.periods %}
+                            <th>Period {{ p }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data.grid %}
+                        <tr>
+                            <td><strong>{{ row.day }}</strong></td>
+                            {% for cell in row.cells %}
+                                <td>{{ cell|safe }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if not forloop.last %}
+        <div class="page-break"></div>
+        {% endif %}
+    {% endfor %}
+</body>
+</html>

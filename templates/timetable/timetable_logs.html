@@ -1,0 +1,131 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+
+<style>
+    /* === General Typography === */
+    body, h1, h3, h4, h5, th, td, label, input, button, select {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* === Card Styling === */
+    .card {
+        border-radius: 20px;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        border: none;
+        overflow: hidden;
+    }
+
+    /* === Title Bar (Reduced Height) === */
+    .card-header {
+        background: linear-gradient(to right, #1e5799, #207cca, #2989d8);
+        color: white;
+        font-weight: bold;
+        font-size: 17px;
+        padding: 10px 0;            /* Reduced */
+        border-radius: 20px 20px 0 0;
+        text-align: center;
+        letter-spacing: 0.3px;
+    }
+
+    /* === Table Header (Reduced Height) === */
+    table thead th {
+        background-color: #212529 !important;
+        color: white !important;
+        font-size: 15px;
+        text-align: center;
+        padding: 6px !important;      /* Reduced height */
+    }
+
+    /* === Table Body === */
+    table tbody td {
+        font-size: 15px;
+        padding: 6px 10px !important; /* Reduced */
+        vertical-align: middle;
+    }
+
+    .table-bordered td, .table-bordered th {
+        border: 1px solid #ccc !important;
+    }
+
+    /* === Button Styling === */
+    .btn-primary {
+        background: linear-gradient(to right, #1e5799, #207cca);
+        border: none;
+        padding: 8px 16px;            /* Slightly reduced */
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(to right, #0f3f73, #1a5b99);
+    }
+
+    .text-end {
+        padding: 15px;
+        padding-bottom: 5px;
+    }
+</style>
+
+
+<div class="card">
+
+    <!-- Export Button -->
+    <form method="POST" action="{% url 'timetable_check_pdf' %}" target="_blank">
+        {% csrf_token %}
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-sm">Export Logs</button>
+        </div>
+    </form>
+
+    <!-- Title Bar -->
+    <h5 class="card-header">Timetable Check Logs</h5>
+
+    <div class="card-body" style="padding:18px;">
+
+        <div class="table-responsive text-nowrap">
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Total Periods</th>
+                        <th>Allocated Periods</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% if sections_issue %}
+                        {% for dt in sections_issue %}
+                        <tr>
+                            <td>
+                                {% if dt.status == "No issue found" %}
+                                    <i class="ri-checkbox-circle-fill ri-22px text-success me-2"></i>
+                                {% else %}
+                                    <i class="ri-close-circle-fill ri-22px text-danger me-2"></i>
+                                {% endif %}
+                                <span class="fw-medium">{{ dt.cls }}</span>
+                            </td>
+
+                            <td>{{ dt.sect }}</td>
+                            <td>{{ dt.tot }}</td>
+                            <td>{{ dt.cnt }}</td>
+                            <td>{{ dt.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">No data found</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

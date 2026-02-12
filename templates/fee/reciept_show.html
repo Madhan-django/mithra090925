@@ -49,13 +49,17 @@ p {
 <body>
 
 <div class="container">
+  <div align="center">
+    <img src="{{skoollogo}}" alt="school Logo" width="75" height="75">
+  </div>
+
   <p align="center" style="font-size:25px;font-family:courier;"><b>{{sch_name}}</b></p>
   <p align="center" style="font-size:15px;font-family:courier;">{{sch_name.address}}</p>
   <p style="font-size:15px;font-family:courier;">Reciept No:- {{data.reciept_no}}</p>
   <p style="font-size:15px;font-family:courier;">Reciept Date :- {{data.reciept_date}}</p>
   <table>
   <tr>
-    <th>Student Name:- {{data.reciept_inv.stud_name.first_name}}{{data.reciept_inv.stud_name.last_name}}</th>
+    <th>Student Name:- {{data.reciept_inv.stud_name.first_name}}&nbsp;&nbsp;{{data.reciept_inv.stud_name.last_name}}</th>
     <th>Admission No:- {{data.reciept_inv.stud_name.admn_no}}</th>
 
   </tr>
@@ -94,6 +98,7 @@ p {
   <button class="hide-on-print btn btn-success" onclick="printPage()">Print</button>
   <a  href="{% url 'html_to_pdf_directly' data.id %}" type="button" class="btn btn-primary hide-on-print" target="_blank" rel="noopener">Print Reciept</a>
   <a  href="{% url 'fee_reciepts' %}" type="button" class="btn btn-warning hide-on-print">Back</a>
+  <a  href="{% url 'invoices' %}" type="button" class="btn btn-primary hide-on-print">Back-Invoices</a>
 </div>
 <script>
 function printPage() {

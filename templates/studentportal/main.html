@@ -21,10 +21,9 @@
     border-radius: 5px;
     padding: 10px;
     margin-bottom: 5px;
+    background-color: #96ffe1;
   }
-  .tble {
-      border: 1px solid grey;
-  }
+ 
 </style>
 
 
@@ -64,7 +63,7 @@
           <div class="nav flex-column nav-pills">
             <a class="nav-link{% if request.path == '/' %} active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
 
-            <a class="nav-link{% if request.path == '/student_exam_result/' %} active{% endif %}" href="{% url 'student_exam_result' %}">Exam Results</a>
+           <a class="nav-link{% if request.path == '/student_exam_result/' %} active{% endif %}" href="{% url 'student_exam_result' %}">Exam Results</a>
             <a class="nav-link{% if request.path == '/student_fee_invoice/' %} active{% endif %}" href="{% url 'student_fee_invoice' %}">Fee Invoices</a>
             <a class="nav-link{% if request.path == '/student_fee_structure/' %} active{% endif %}" href="{% url 'student_fee_structure' %}">Fee Structure</a>
             <a class="nav-link{% if request.path == '/student_fee_reciept/' %} active{% endif %}" href="{% url 'student_fee_reciept' %}">Payment History</a>

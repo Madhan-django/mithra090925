@@ -1,178 +1,280 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
-					</h1>
-			</div>
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					New Staff
-				</span>
-			</span>
-     </div>
-<div class="row">
-	<div class="col-lg-6 mx-auto">
-		<form method="POST" enctype="multipart/form-data">
-			{% csrf_token %}
-			{{ form.as_p }}
-
-			<div class="form-group">
-				<label for="id_staff_photo">Staff Photo:</label>
-				{{ form.staff_photo }}
-				<img id="staff_photo_preview" src="#" alt="Staff photo preview">
-			</div>
-
-			<div class="d-flex justify-content-end mt-3">
-                               <div class="mr-2">
-                                      <button type="submit" class="btn btn-warning btn-lg">Submit</button>
-                                </div>
-                                 <div>
-                                     <button type="reset" class="btn btn-success btn-lg">Clear</button>
-
-                                 </div>
-                         </div>
-
-
-		</form>
-	</div>
-</div>
 
 <style>
-.form-group {
-	margin-bottom: 15px;
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
 }
-
-label {
-	font-weight: bold;
+h6 {
+    font-weight: 600;
+    color: #007bff;
 }
-
-input[type="text"],
-input[type="email"],
-textarea {
-	width: 100%;
-	padding: 8px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-sizing: border-box;
-}
-
-select {
-	width: 100%;
-	padding: 8px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-sizing: border-box;
-	appearance: none;
-}
-
-img#staff_photo_preview {
-	max-width: 200px;
-	margin-top: 10px;
-}
-
-input[type="submit"] {
-	background-color: #4CAF50;
-	color: white;
-	border: none;
-	padding: 10px 20px;
-	border-radius: 4px;
-	cursor: pointer;
-}
-
-input[type="submit"]:hover {
-	background-color: #45a049;
-}
-
+/* ===== CARD ===== */
 .card {
-	background-color: #f2f2f2;
-	padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
 }
 
-.text-center {
-	text-align: center;
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
 }
 
-.mt-3 {
-	margin-top: 15px;
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
 }
 
-.wlsm-section-heading {
-	display: inline-block;
-	padding: 5px 10px;
-	border-radius: 4px;
-
-	font-weight: bold;
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
 }
 
-.wlsm-section-heading-box {
 
-	padding: 5px;
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
 }
 
-.wlsm-main-header {
-	margin-bottom: 15px;
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
 }
 
-.wlsm_text_secondary {
-	color: #888;
-	font-size: 14px;
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
 }
 
-.h3 {
-	margin-top: 0;
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
 }
 
-.row {
-	margin-right: -15px;
-	margin-left: -15px;
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
 }
 
-.col {
-	float: left;
-	position: relative;
-	min-height: 1px;
-	padding-right: 15px;
-	padding-left: 15px;
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
 }
-
-.col-lg-6 {
-	width: 50%;
-}
-
-.mx-auto {
-	margin-right: auto;
-	margin-left: auto;
-}
-
 </style>
 
-<script>
-function previewStaffPhoto() {
-	const staffPhotoInput = document.querySelector('#id_staff_photo');
-	const staffPhotoPreview = document.querySelector('#staff_photo_preview');
+<div class="card">
 
-	staffPhotoInput.addEventListener('change', function() {
-		const file = this.files[0];
+    <!-- Title Bar -->
+    <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">New Faculty</span></h5>
+    </div>
 
-		if (file) {
-			const reader = new FileReader();
+    <div class="card-body">
 
-			reader.addEventListener('load', function() {
-				staffPhotoPreview.setAttribute('src', this.result);
-			});
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-			reader.readAsDataURL(file);
-		} else {
-			staffPhotoPreview.setAttribute('src', '#');
-		}
-	});
-}
+            <!-- Personal Info -->
+            <h6>1. Personal Information</h6><br>
 
-previewStaffPhoto();
-</script>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.first_name }}
+                        <label>First Name</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.last_name }}
+                        <label>Last Name</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.gender }}
+                        <label>Gender</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.dob }}
+                        <label>Date of Birth</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.staff_photo }}
+                        <label>Staff Pic</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.email }}
+                        <label>Email</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.mobile }}
+                        <label>Mobile</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.address }}
+                        <label>Address</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.join }}
+                        <label>Date of Joining</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.role }}
+                        <label>Role</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.desg }}
+                        <label>Designation</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.salary }}
+                        <label>Salary</label>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Academic Info -->
+            <h6>2. Academic Information</h6><br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.qualification }}
+                        <label>Qualification</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.desc }}
+                        <label>Other (If any)</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.certifications }}
+                        <label>Certifications</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.experience }}
+                        <label>Experience</label>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        <select name="permission_group" id="id_permission_group" class="form-select">
+                            <option value="Teacher">Teacher</option>
+                        </select>
+                        <label>Permission Group</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.status }}
+                        <label>Status</label>
+                    </div>
+                </div>
+            </div>
+
+            {{ form.staff_school }}
+            {{ form.staff_user }}
+            {{ form.subjects_taught }}
+
+            <br>
+
+            <!-- Buttons -->
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="#" class="btn btn-danger">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
 {% endblock %}

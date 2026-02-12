@@ -1,0 +1,173 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    h1, h3 {
+        font-family: Roboto;
+    }
+    th {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+    .editable {
+        cursor: pointer;
+        background-color: #f8f9fa;
+    }
+    .editable:focus {
+        outline: none;
+        background-color: #e9ecef;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-center">Employee Salary Record</h2>
+
+    <div class="card p-3 mt-3">
+        <h4>School: {{ skool.name }}</h4>
+        <h5>Academic Year: {{ year.acad_year }}</h5><br><br><hr>
+
+            <table>
+               <tr>
+                 <th>Employee Details</th>
+                 <th>Bank Details</th>
+
+               </tr>
+
+               <tr>
+               <td><h6>Employee Code : &nbsp;{{emp.emp_code}}</h6></td>
+               <td><h6>Account No : &nbsp;{{bank_detail.AccNo}}</h6></td>
+               </tr>
+                <tr>
+               <td><h6>Employee Name : &nbsp;{{emp.name}} </h6></td>
+               <td><h6>CIF No : &nbsp;{{bank_detail.CIFNo}}</h6></td>
+                </tr>
+                <tr>
+               <td><h6>Department : &nbsp;{{emp.department}} </h6></td>
+               <td><h6>IFSC Code : &nbsp;{{bank_detail.IFSC}}</h6></td>
+                </tr>
+                <tr>
+               <td><h6>Designation : &nbsp;{{emp.designation}} </h6></td>
+               <td><h6>Bank Name : &nbsp;{{bank_detail.BankName}}</h6></td>
+                </tr>
+                <tr>
+               <td><h6><h6>Date of Joining : &nbsp;{{emp.date_of_joining}} </h6></td>
+               <td><h6>Branch Name : &nbsp;{{bank_detail.Branch}}</h6></td>
+               </tr>
+
+            </table>
+
+
+
+
+
+
+
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Allowances</h4>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Salary</th>
+                        <th>Amount</th>
+                    </tr>
+                    <tr>
+                        <td>Basic</td>
+                        <td>{{emp.basic_salary}}</td>
+                    </tr>
+                    <tr>
+                        <th>Allowance Type</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for allowance in allowances %}
+                    <tr>
+                        <td>{{ allowance.allowance_name.name }}</td>
+                        <td contenteditable="true" class="editable" data-id="{{ allowance.id }}" data-type="allowance">{{ allowance.amount }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center">No allowances available</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6">
+            <h4>Deductions</h4>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Deduction Type</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deduction in deductions %}
+                    <tr>
+                        <td>{{ deduction.deduction_name }}</td>
+                        <td contenteditable="true" class="editable" data-id="{{ deduction.id }}" data-type="deduction">{{ deduction.amount }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center">No deductions available</td></tr>
+                    {% endfor %}
+                </tbody>
+                <thead>
+                    <th>Loans</th>
+                </thead>
+                <tbody>
+                  <tr>   </tr>
+                  {% for loan in emp_loan %}
+                  <tr>
+                      <td>Loan</td>
+                      <td>{{loan.loan_amount}}</td>
+                  </tr><tr>
+                      <td>EMI/</td>
+                      <td>{{loan.monthly_installment}}</td>
+                  </tr>
+                  <tr>
+                      <td>Balance</td>
+                       <td>{{loan.remaining_amount}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.editable').on('blur', function() {
+            var newValue = $(this).text();
+            var id = $(this).data('id');
+            var type = $(this).data('type');
+
+            $.ajax({
+                url: "{% url 'update_salary' %}",
+                type: "POST",
+                data: {
+                    'id': id,
+                    'type': type,
+                    'value': newValue,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $(this).css('background-color', '#d4edda'); // Green highlight
+                    } else {
+                        alert('Error updating data!');
+                    }
+                },
+                error: function() {
+                    alert('Something went wrong. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

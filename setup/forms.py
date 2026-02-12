@@ -1,7 +1,10 @@
 from django import forms
-from .models import academicyr,currentacademicyr,sclass,section,subjects
+from .models import academicyr,currentacademicyr,sclass,section,subjects,receipt_template,homework_time
 
-
+receipt =[
+    ('fee/reciept_show.html','Receipt1'),
+    ('fee/reciept_show3.html','Receipt2')
+]
 
 class add_Acad_Form(forms.ModelForm):
     class Meta:
@@ -11,7 +14,14 @@ class add_Acad_Form(forms.ModelForm):
             'acad_year':'Academic Year',
         }
         widgets={
-            'school_name':forms.HiddenInput(attrs={'class':'form-control'})
+            'school_name':forms.HiddenInput(attrs={'class':'form-control'}),
+
+            'acad_year': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'font-family: Roboto, sans-serif; font-size: 16px; width: 100%;'
+            }
+        ),
+
         }
 
 
@@ -33,7 +43,10 @@ class add_class(forms.ModelForm):
         }
 
         widgets = {
-            'name':forms.TextInput(attrs={'class':'form-control'}),
+            'name':forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'font-family: Roboto, sans-serif; font-size: 16px; width: 80%;'}),
+
             'acad_year': forms.HiddenInput(attrs={'class':'form-control'}),
             'school_name': forms.HiddenInput(attrs={'class':'form-control'}),
         }
@@ -48,7 +61,7 @@ class add_section(forms.ModelForm):
 
         widgets = {
                     'section_name':forms.TextInput(attrs={'class':'form-control'}),
-                    'class_sec_name':forms.Select(attrs={'class':'form-control'}),
+                    'class_sec_name':forms.HiddenInput(attrs={'class':'form-control'}),
                     'school_name':forms.HiddenInput(attrs={'class':'form-control'}),
                     'acad_year': forms.HiddenInput(attrs={'class': 'form-control'}),
                 }
@@ -63,9 +76,29 @@ class add_subjects(forms.ModelForm):
          'subject_name': forms.TextInput(attrs={'class':'form-control'}),
          'subject_code': forms.TextInput(attrs={'class':'form-control'}),
          'subject_year' : forms.HiddenInput(),
-         'subject_class' : forms.Select(attrs={'class':'form-control'}),
+         'subject_class' : forms.HiddenInput(attrs={'class':'form-control'}),
          'subject_school' : forms.HiddenInput(),
         }
 
 
+
+class receipt_template_form(forms.ModelForm):
+    class Meta:
+        model= receipt_template
+        fields='__all__'
+        widgets = {
+            'template':forms.Select(choices=receipt,attrs={'class':'form-control'}),
+            'school_name': forms.HiddenInput(),
+        }
+        
+        
+class add_homeworktime_form(forms.ModelForm):
+    class Meta:
+        model = homework_time
+        fields = '__all__'
+
+        widgets = {
+            'time':forms.TimeInput(attrs={'class':'form-control','type': 'time'}),
+            'homework_school': forms.HiddenInput()
+        }
 

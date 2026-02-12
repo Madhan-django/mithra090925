@@ -1,0 +1,209 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+  /* Hide bulk form initially */
+  #showOne {
+    display: none;
+  }
+
+  /* Card Title Background */
+  .card-title {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    padding: 10px 0;
+  }
+
+  /* Badge styling in title */
+  .card-title h5 span.badge {
+    background-color: #fff;
+    color: #000;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+</style>
+
+<div class="card">
+  <div class="card-title text-center">
+      <h5 class="mb-0">
+        <span class="badge">Fee</span>
+      </h5>
+  </div>
+
+  <div class="card-body">
+      <!-- Fee Type Radios -->
+      <div class="col-md-6">
+          <div class="form-group row">
+              <label class="col-sm-3 col-form-label"></label>
+              <div class="col-sm-4">
+                  <div class="form-check">
+                      <label class="form-check-label">
+                          <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios1" value="Two" checked> Individual Fee
+                      </label>
+                  </div>
+              </div>
+              <div class="col-sm-4">
+                  <div class="form-check">
+                      <label class="form-check-label">
+                          <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios2" value="One"> Bulk Fee
+                      </label>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- INDIVIDUAL FEE FORM -->
+      <div id="showTwo" class="myDiv">
+          <center><strong>Individual Fee</strong></center><br>
+          <form id="addindfeeform" data-class-url="{% url 'ajax_load_class' %}" method="POST">
+              {% csrf_token %}
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          <select id="id_fee_cat" name="fee_cat" class="form-control">
+                              <option value="" selected="">---------</option>
+                              {% for sel in data %}
+                              <option value="{{sel.id}}">{{sel.invoice_title}}</option>
+                              {% endfor %}
+                          </select>
+                          <label for="id_fee_cat">Fee Category</label>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          <select id="id_class_name" name="class_name" class="form-control">
+                              <option value="" selected="">---------</option>
+                              {% for sel in cdata %}
+                              <option value="{{sel.id}}">{{sel.name}}</option>
+                              {% endfor %}
+                          </select>
+                          <label for="id_class_name">Class</label>
+                      </div>
+                  </div>
+              </div>
+
+              <br>
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          <div class="select2-primary">
+                              <select name="stud_name" id="id_stud_name" class="form-control select2 select2-primary" multiple>
+                                  <!-- Options will load dynamically -->
+                              </select>
+                          </div>
+                          <label for="id_stud_name">Students</label>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {{form.concession}}
+                          <label for="id_concession">Concession</label>
+                      </div>
+                  </div>
+              </div>
+
+              <br>
+              {{form.due_amt}}
+              {{form.invoice_no}}
+              {{form.status}}
+
+              <div class="text-end">
+                  <button type="submit" class="btn btn-info">Submit</button>
+                  <button type="reset" class="btn btn-danger">Clear</button>
+              </div>
+          </form>
+      </div>
+
+      <!-- BULK FEE FORM -->
+      <div id="showOne" class="myDiv">
+          <center><strong>Bulk Fee</strong></center><br>
+          <form action="{% url 'addbulkfee' %}" method="POST">
+              {% csrf_token %}
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          <select name="fee_cat" class="form-control" required="" id="id_fee_cat">
+                              <option value="" selected="">---------</option>
+                              {% for sel in data %}
+                              <option value="{{sel.id}}">{{sel.invoice_title}}</option>
+                              {% endfor %}
+                          </select>
+                          <label for="id_fee_cat">Fee Category</label>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          <select name="class_name" required="" id="id_class_name" class="form-control">
+                              <option value="" selected="">---------</option>
+                              {% for cls in cdata %}
+                              <option value="{{cls.id}}">{{cls}}</option>
+                              {% endfor %}
+                          </select>
+                          <label for="id_class_name">Class</label>
+                      </div>
+                  </div>
+              </div>
+
+              <br>
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          <select name="years" id="id_years" class="form-control">
+                              <option value="" selected="">---------</option>
+                              {% for yrs in years %}
+                              <option value="{{yrs.id}}">{{yrs}}</option>
+                              {% endfor %}
+                          </select>
+                          <label for="id_years">Academic Year</label>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                      </div>
+                  </div>
+              </div>
+
+              <br>
+              <div class="text-center">
+                  <button type="submit" class="btn btn-info">Generate</button>
+                  <button type="reset" class="btn btn-danger">Clear</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  // Show correct form on radio click
+  $('input[type="radio"]').click(function () {
+      var demovalue = $(this).val();
+      $("div.myDiv").hide();
+      $("#show" + demovalue).show();
+  });
+
+  // Select2
+  $('#id_stud_name').select2({
+      placeholder: "Select students",
+      allowClear: true,
+      width: '100%'
+  });
+
+  // AJAX load students
+  $("#id_class_name").change(function () {
+      var url = $("#addindfeeform").attr("data-class-url");
+      var classid = $(this).val();
+
+      $.ajax({
+          url: url,
+          data: { 'selclassid': classid },
+          success: function (data) {
+              $("#id_stud_name").html(data).trigger('change');
+          }
+      });
+  });
+</script>
+{% endblock %}

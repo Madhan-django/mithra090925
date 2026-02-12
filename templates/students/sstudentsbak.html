@@ -1,0 +1,238 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+img{
+    height:30px;
+}
+</style>
+
+
+
+
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>Students </h3>
+             <div class="text-end">
+                  {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts"  %}
+					<a href="{% url 'addstudents' %}" class="btn btn-sm btn-primary">New Admission</a>
+                  {% endif %}
+                   {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                    <a href="{% url 'print_students' %}" class="btn btn-sm btn-info">Export PDF</a>
+                    <a href="{% url 'student_csv' %}" class="btn btn-sm btn-warning">Export CSV</a>
+                    {% endif %}
+             </div>
+             <div class="col-md  text-left">
+                <form action="{% url 'students_search' %}" method="GET">
+    <table class="table">
+        <tr>
+            <td>
+                <select name="searchby" id="searchby" class="form-control">
+                    <option value="studname">Student Name</option>
+                    <option value="fathername">Father Name</option>
+                    <option value="studmob">Mobile No</option>
+                    <option value="studclass">Class</option>
+                    <option value="studstatus">Status</option>
+                </select>
+            </td>
+            <td>
+                <input type="search" placeholder="search" name="searched" required class="form-control">
+            </td>
+            <td>
+                <button type="submit" class="btn btn-success">Search</button>
+                <a href="{% url 'students_list' %}" class="btn btn-danger btn-md">Clear</a>
+            </td>
+        </tr>
+    </table>
+</form>
+            </div>
+                  <div class="card-body">
+                      {% if data %}
+                    <div class="table-responsive">
+                      <table class="table table-hover  table-bordered">
+                        <thead>
+                          <tr>
+                            <th>Image</th>
+                            <th>Name </th>
+                            <th>Admission No</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>User Name</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {% for stud in data %}
+                          <tr>
+                            <td class="py-1">
+                              <img class="rounded-circle" src="https://mithran.co.in/media/{{stud.student_photo}}" alt="image"  />
+                            </td>
+                            <td> {{stud.first_name}}&nbsp;{{stud.last_name}} </td>
+                            <td>{{stud.admn_no}}</td>
+                            <td>{{stud.class_name}}</td>
+                            <td>{{stud.secs}}</td>
+                            <td>{{stud.usernm}}</td>
+                              <td>
+                             <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                              <i class="ri-more-2-line"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'updatestud' stud.id %}?next={{ request.get_full_path|urlencode }}">
+                                <i class="ri-pencil-line me-1"></i> Edit</a>
+                          {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                              <a class="dropdown-item" href="{% url 'delsstud' stud.id %}">
+                                <i class="ri-delete-bin-7-line me-1"></i> Delete</a>
+                          {% endif %}
+                            </div>
+                          </div>
+<!--                            <td>-->
+<!--                              {% if stud.account == 'Locked' %}-->
+<!--                              <i class="fa-solid fa-lock  fa-xl d-inline" style="color:Red;"></i>-->
+<!--                              {% else %}-->
+<!--                              <i class="fa-solid fa-lock-open  fa-xl d-inline" style="color:Green;"></i>-->
+<!--                              {% endif %}-->
+<!--                            </td>-->
+
+<!--         <a href ="{% url 'updatestud' stud.id %}" class="btn btn-primary">Update</a>&nbsp;&nbsp;&nbsp;-->
+<!--             {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}-->
+<!--         <a href ="{% url 'delsstud' stud.id %}"><i class="fa fa-trash-can fa-xl d-inline" style="color: #ff0000;"></i></a> &nbsp;-->
+
+<!--            {% endif%}-->
+      </td>
+
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% else %}
+    <div class="alert alert-danger" role="alert">
+No Students Record  are available to Show
+</div>
+
+{% endif %}
+                  </div>
+                </div>
+              </div>
+</div>
+
+
+
+
+<b>{{cnt}} - Records Available</b>
+<nav aria-label="Page navigation" class="pagination-container">
+  <ul class="pagination">
+    {% if data.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% if data.paginator.num_pages <= 10 %}
+      {% for num in data.paginator.page_range %}
+        {% if data.number == num %}
+          <li class="page-item active">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% if data.number > 3 %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1">1</a>
+        </li>
+        {% if data.number != 4 %}
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+        {% endif %}
+      {% endif %}
+
+      {% for num in data.paginator.page_range %}
+        {% if num > data.number|add:'-3' and num < data.number|add:'3' %}
+          {% if data.number == num %}
+            <li class="page-item active">
+              <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {% if data.number < data.paginator.num_pages|add:'-3' %}
+        {% if data.number != data.paginator.num_pages|add:'-3' %}
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+        {% endif %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ data.paginator.num_pages }}">{{ data.paginator.num_pages }}</a>
+        </li>
+      {% endif %}
+    {% endif %}
+
+    {% if data.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+
+
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script type='text/javascript'>
+ $(document).ready(function(){
+    $("#id_class_name").change(function(){
+    var url = $("#class_sec").attr("data-section-url");
+     var classId = $(this).val();
+       $.ajax({
+        url: url,
+        data: {
+          'Class_Id': classId
+        },
+        success: function (data) {
+          $("#id_secs").html(data);
+        }
+      });
+         });
+
+});
+ var searchBySelect = document.getElementById('searchby');
+  var classSecForm = document.getElementById('class_sec');
+
+  // Add an event listener to the first form's select element
+  searchBySelect.addEventListener('change', function() {
+    // Check the selected option value
+    if (searchBySelect.value === 'studclass') {
+      // If the selected value is 'studclass', show the second form
+      classSecForm.style.display = 'block';
+
+    } else {
+      // Otherwise, hide the second form
+      classSecForm.style.display = 'none';
+    }
+  });
+
+// JavaScript code to generate serial numbers
+document.addEventListener("DOMContentLoaded", function() {
+    const serialNumberElements = document.getElementsByClassName("serial-number");
+    let startSerial = ({{ data.number }} - 1) * {{ data.paginator.per_page }};
+
+    for (let i = 0; i < serialNumberElements.length; i++) {
+        serialNumberElements[i].textContent = startSerial + i + 1;
+    }
+});
+</script>
+
+
+{% endblock %}
+

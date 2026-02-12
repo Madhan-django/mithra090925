@@ -6,6 +6,7 @@ from setup.models import sclass
 from admission.models import students
 from datetime import datetime
 
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     Cat_school = models.ForeignKey(school,on_delete=models.CASCADE)
@@ -64,7 +65,12 @@ class stock(models.Model):
         return self.name.name
 
 class Order(models.Model):
-    product = models.ForeignKey(stock, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        products,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     quantity = models.PositiveIntegerField()
     order_date = models.DateField(auto_now_add=True)
 
@@ -72,20 +78,17 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.quantity}"
 
-class product_set(models.Model):
-    pclass = models.ForeignKey(sclass,on_delete=models.CASCADE)
-    prod_set = models.ForeignKey(stock, on_delete=models.CASCADE)
-    qty = models.IntegerField()
-    ac_year = models.ForeignKey(academicyr,on_delete=models.CASCADE)
-
-
+class group_set(models.Model):
+    name = models.CharField(max_length=35)
+    acad_year = models.ForeignKey(academicyr,on_delete=models.CASCADE)
+    group_school = models.ForeignKey(school,on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.pclass.name
+        return self.name
 
 class book_set_issue(models.Model):
-    book_set = models.ForeignKey(product_set,on_delete=models.CASCADE)
-    issue_date = models.DateField(default=datetime.today())
+    book_set = models.ForeignKey(group_set,on_delete=models.CASCADE)
+    issue_date = models.DateField(default=datetime.today)
     stud_class = models.ForeignKey(sclass,on_delete=models.CASCADE)
     book_student = models.ForeignKey(students,on_delete=models.CASCADE)
     status = models.CharField(max_length=10)
@@ -94,9 +97,22 @@ class book_set_issue(models.Model):
     def __str__(self):
         return self.book_student.first_name
 
+class product_set(models.Model):
+    name = models.ForeignKey(group_set,on_delete=models.CASCADE)
+    pclass = models.ForeignKey(sclass,on_delete=models.CASCADE)
+    prod_set = models.ForeignKey(products, on_delete=models.CASCADE)
+    qty = models.IntegerField()
+    ac_year = models.ForeignKey(academicyr,on_delete=models.CASCADE)
+
+
+
+    def __str__(self):
+        return self.pclass.name
+
+
 class ind_book(models.Model):
     inv_prod = models.ForeignKey(products,on_delete=models.CASCADE)
-    issue_date = models.DateField(default=datetime.today())
+    issue_date = models.DateField(default=datetime.today)
     bclass = models.ForeignKey(sclass, on_delete=models.CASCADE)
     stud = models.ForeignKey(students,on_delete=models.CASCADE)
     isbook_set = models.CharField(max_length=5)

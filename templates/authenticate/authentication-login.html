@@ -4,22 +4,14 @@
   <head>
      <link href="{% static 'font-awesome/css/all.min.css' %}" rel="stylesheet" />
 
-<link
-  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-  rel="stylesheet"
-/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
 <!-- MDB -->
-<link
-  href="{% static 'css/mdb.min.css' %}"
-  rel="stylesheet"
-/>
-    <script
-  type="text/javascript"
-  src="{% static 'js/mdb.min.js' %}"
-</script>
-
-    <script>
-
+<link href="{% static 'css/mdb.min.css' %}" rel="stylesheet"/>
+<script type="text/javascript" src="{% static 'js/mdb.min.js' %}"></script>
+<style>
+p{
+ font-family: Roboto;
+}
   .gradient-custom-2 {
 /* fallback for old browsers */
 background: #fccb90;
@@ -28,11 +20,12 @@ background: #fccb90;
 background: -webkit-linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593);
 
 /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593);
+/*background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593); */
+background: linear-gradient(to right, #0f3057, #136a8a, #147693, #1a94bc);
 }
 
 @media (min-width: 768px) {
-.gradient-form {
+.mac{
 height: 100vh !important;
 }
 }
@@ -42,11 +35,21 @@ border-top-right-radius: .3rem;
 border-bottom-right-radius: .3rem;
 }
 }
-</script>
+.gradient-form {
+  height: 100vh;
+}
+ h4{
+    font-family : Sedan SC
+      }
+  p{
+  font-family: Dosis;
+  font-size:14px;
+  color:#0f3057;
+  }
+</style>
   </head>
-
   <body>
-  <section class="h-100 gradient-form" style="background-image: url({% static 'images/bgground1.jpg' %}); background-size: cover; background-position: center; background-repeat: no-repeat;">
+  <section class="gradient-form height:100vh" style="background-image: url({% static 'images/bgground1.jpg' %}); background-size: cover; background-position: center; background-repeat: repeat;">
   <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-xl-10">
@@ -56,7 +59,7 @@ border-bottom-right-radius: .3rem;
               <div class="card-body p-md-5 mx-md-4">
 
                 <div class="text-center">
-                  <img src="{% static 'images/logo.PNG' %}"
+                  <img src="{% static 'images/logo.png' %}"
                     style="width:200px;" alt="logo"><br><br>
 
 
@@ -91,9 +94,18 @@ border-bottom-right-radius: .3rem;
               </div>
             </div>
             <div class="col-lg-6 d-flex align-items-center gradient-custom-2" style="background-color: #2B65EC">
+
               <div class="text-white px-3 py-4 p-md-5 mx-md-4">
+                <h5 class="mb-4" align="center">Scan to Download Mobile APP</h5>
+                 <center>
+                <img src="{% static 'images/mobi.png' %}" width="200" height="200" alt="Mobile Image"><br><br>
+
+
+                  </center><hr>
+
+
                 <h4 class="mb-4" align="center">Welcome to Mithran Software Solutions</h4>
-                <p class="small mb-0" align="center">"Get Digitalised with MithranERP: Empowering Education, Unleashing Possibilities!"</p>
+                <h6 class="small mb-0" align="center">"Get Digitalised with MithranERP: Empowering Education, Unleashing Possibilities!"</h6>
               </div>
             </div>
           </div>

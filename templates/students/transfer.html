@@ -1,99 +1,164 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
 
-					</h1>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-			</div>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Students Transfer
-				</span>
-			</span>
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
 
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
 
-</div>
-    </div>
+}
 
-  <div class="col-11">
-      <br><br><br>
-       <div class="col-md  text-left">
-                <form action="{% url 'students_search' %}" method="POST">
-                    {% csrf_token %}
-                    <table class="table">
-                        <tr>
-
-                    <td><select name="searchby" id="searchby" class="form-control">
-                     <option value="studname" >Student Name</option>
-                     <option value="fathername">Father Name</option>
-                     <option value="studmob">Mobile No</option>
-                     <option value="studclass">Class</option>
-                     <option value="studstatus">Status</option>
-                </select></td>
-                <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
-                            <td><button type="submit" class="btn btn-success " >Search</button></td>
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
 
 
-                        </tr>
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+}
+
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Title -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Search Students</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Search Form -->
+            <form action="{% url 'students_search' %}" method="POST">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <td width="30%">
+                                    <select name="searchby" id="searchby" class="form-control" style="height:50px;">
+                                        <option value="studname">Student Name</option>
+                                        <option value="fathername">Father Name</option>
+                                        <option value="studmob">Mobile No</option>
+                                        <option value="studclass">Class</option>
+                                        <option value="studstatus">Status</option>
+                                    </select>
+                                </td>
+
+                                <td width="50%">
+                                    <input type="search" placeholder="Search" name="searched" required class="form-control">
+                                </td>
+
+                                <td width="20%">
+                                    <button type="submit" class="btn btn-success w-100">Search</button>
+                                </td>
+                            </tr>
+                        </thead>
                     </table>
+                </div>
+            </form>
 
-                    </form>
+            {% if data %}
+            <!-- Results Table -->
+            <div class="table-responsive mt-4">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Phone</th>
+                            <th>Father Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stud in data %}
+                        <tr align="center">
+                            <td>{{stud.first_name}} {{stud.last_name}}</td>
+                            <td>{{stud.class_name}}</td>
+                            <td>{{stud.secs}}</td>
+                            <td>{{stud.phone}}</td>
+                            <td>{{stud.father_name}}</td>
+                            <td>
+                                <form action="{% url 'transfer_update' stud.id %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="submit" class="btn btn-warning" value="Transfer">
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-       </div>
-{% if data %}
+            {% else %}
+            <div class="alert alert-danger mt-4" role="alert">
+                No Student Records are available to show.
+            </div>
+            {% endif %}
 
-<br><br>
-<table class="table">
-    <thead class="table-dark" align ="center">
-    <tr>
-      <th>First Name </th>
-      <th>Class</th>
-      <th>Section</th>
-      <th>Phone </th>
-      <th>Father Name</th>
-      <th>Actions</th>
-
-
-    </tr>
-  </thead>
-
-  <tbody>
-
-
-   {% for stud in data %}
-
-    <tr align="center">
-
-      <td>{{stud.first_name}}{{stud.last_name}}</td>
-      <td>{{stud.class_name}}</td>
-      <td>{{stud.secs}}</td>
-      <td>{{stud.phone}}</td>
-      <td>{{stud.father_name}}</td>
-        <td>
-          <form action="{% url 'transfer_update' stud.id %}" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-warning" value="Transfer">
-          </form>
-
-      </td>
-    </tr>
-
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-    <div class="alert alert-danger" role="alert">
-No Students Record  are available to Show
+        </div>
+    </div>
 </div>
 
-{% endif %}
-</div>
 {% endblock %}
-

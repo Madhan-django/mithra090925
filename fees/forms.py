@@ -20,18 +20,24 @@ class fee_addform(forms.ModelForm):
     class Meta:
         model = fees
         fields = '__all__'
+        labels = {
+            'iclass':'Class',
+
+        }
         widgets = {
             'invoice_title':forms.TextInput(attrs={'class':'form-control','placeholder':'Invoice Title','id':'InvoiceTitle' }),
             'desc': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Invoice Description'}),
-            'issued_date': forms.DateInput(format=('%m/%d/%Y'), attrs={'class':'form-control', 'placeholder':'Select a date', 'type':'date'}),
-            'due_date': forms.DateInput(format=('%m/%d/%Y'), attrs={'class':'form-control', 'placeholder':'Select a date', 'type':'date'}),
+            'issued_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
+            'due_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
             'fees_school':forms.HiddenInput(),
             'ac_year': forms.HiddenInput(),
             'invoice_no': forms.HiddenInput(),
             'fee_amount':forms.NumberInput(attrs={'class':'form-control','placeholder':'Fee Amount'}),
             'latefee': forms.NumberInput(attrs={'class':'form-control','placeholder':'late Fee'}),
-            'isactive': forms.Select(choices=isact,attrs={'class':'form-control'})
+            'isactive': forms.Select(choices=isact,attrs={'class':'form-control'}),
+            'iclass':forms.Select(attrs={'class':'form-control'})
         }
+
 
 class addindfeeform(forms.ModelForm):
     class Meta:
@@ -48,6 +54,8 @@ class addindfeeform(forms.ModelForm):
             'concession':forms.TextInput(attrs={'class': 'form-control'})
 
         }
+        
+
 
 
 class addbulkfeeform(forms.ModelForm):
@@ -75,5 +83,41 @@ class addfeerecieptform(forms.ModelForm):
             'payment_id':forms.TextInput(attrs={'class':'form-control'}),
             'reciept_inv':forms.HiddenInput()
 
+
+        }
+
+class updateindfeeform(forms.ModelForm):
+    class Meta:
+        model = addindfee
+        fields = ('fee_cat','class_name','stud_name','concession','status','invoice_no','due_amt',)
+
+        widgets = {
+
+            'fee_cat': forms.HiddenInput(),
+            'class_name': forms.HiddenInput,
+            'status': forms.HiddenInput(),
+            'due_amt':forms.HiddenInput(),
+            'invoice_no' : forms.HiddenInput(),
+            'stud_name':forms.HiddenInput(),
+            'concession':forms.TextInput(attrs={'class': 'form-control'})
+
+        }
+
+class updateindfee_catform(forms.ModelForm):
+    class Meta:
+        model = addindfee
+        fields = ('fee_cat','class_name','stud_name','concession','status','invoice_no','due_amt',)
+        labels = {
+            'fee_cat': 'Fee Category'
+        }
+        widgets = {
+
+            'fee_cat': forms.Select(attrs={'class': 'form-control'}),
+            'class_name': forms.HiddenInput,
+            'status': forms.HiddenInput(),
+            'due_amt':forms.HiddenInput(),
+            'invoice_no' : forms.HiddenInput(),
+            'stud_name':forms.HiddenInput(),
+            'concession':forms.HiddenInput(),
 
         }

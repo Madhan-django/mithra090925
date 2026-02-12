@@ -1,133 +1,316 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+{% load static %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+    /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
 
-					</h1>
+    /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 
-			</div>
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Students
-				</span>
-			</span>
-     <span class="float-md-right">
-					<a href="{% url 'addstudents' %}" class="btn btn-sm btn-outline-light">New Admission</a>
-                    <a href="{% url 'print_students' %}" class="btn btn-sm btn-outline-light">Export PDF</a>
-                    <a href="{% url 'student_csv' %}" class="btn btn-sm btn-outline-light">Export CSV</a>
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
 
-     </span>
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
 
-</div>
-    </div>
-  <div class="col-11">
-      <div class="col-md  text-left">
-                <form action="{% url 'students_search' %}" method="POST">
-                    {% csrf_token %}
-                    <table class="table">
-                        <tr>
-                         <td><select name="searchby" id="searchby" class="form-control">
-                     <option value="studname" >Student Name</option>
-                     <option value="fathername">Father Name</option>
-                     <option value="studmob">Mobile No</option>
-                     <option value="studclass">Class</option>
-                     <option value="studstatus">Status</option>
+}
 
-                </select></td>
-                            <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
-                            <td><button type="submit" class="btn btn-success" >Search</button></td>
-
-                        </tr>
-                    </table>
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
 
 
-                    </form>
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b52a36;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 20px auto;
+        font-size: 15px;
+    }
+    .search-row .form-control {
+    height: 45px !important;
+    font-size: 12px;
+    border-radius: 8px;
+    width:300px
+}
+
+.search-row .btn {
+    min-width: 110px;
+    height: 35px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Student List / Search</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- === Top Action Buttons === -->
+            <div class="text-end mb-3">
+                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                    <a href="{% url 'addstudents' %}" class="btn btn-sm btn-primary">New Admission</a>
+                {% endif %}
+                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                    <a href="{% url 'print_students' %}" class="btn btn-sm btn-info">Export PDF</a>
+                    <a href="{% url 'student_csv' %}" class="btn btn-sm btn-warning">Export CSV</a>
+                {% endif %}
             </div>
-           </div>
-{% if data %}
-<br><br>
-<table class="table">
-    <thead class="table-dark" align ="center">
-    <tr>
-      <th>Name </th>
-      <th>Admission No</th>
-      <th>Class</th>
-      <th>Section</th>
-       <th>Gender</th>
-      <th>Phone </th>
-      <th>Father Name</th>
-      <th>User Name</th>
-      <th>Actions</th>
 
+            <!-- === Search Form === -->
+            <form method="GET" action="{% url 'students_search' %}" data-section-url="{% url 'ajax_load_section' %}" id="studentSearchForm" class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label for="searchby" class="form-label">Search By</label>
+                    <select name="searchby" id="searchby" class="form-select" required>
+                        <option value="">--Select--</option>
+                        <option value="studname" {% if searchby == 'studname' %}selected{% endif %}>Student Name</option>
+                        <option value="fathername" {% if searchby == 'fathername' %}selected{% endif %}>Father Name</option>
+                        <option value="studmob" {% if searchby == 'studmob' %}selected{% endif %}>Mobile No</option>
+                        <option value="studclass" {% if searchby == 'studclass' %}selected{% endif %}>Class</option>
+                        <option value="studsec" {% if searchby == 'studsec' %}selected{% endif %}>Class + Section</option>
+                        <option value="userid" {% if searchby == 'userid' %}selected{% endif %}>User ID</option>
+                        <option value="studstatus" {% if searchby == 'studstatus' %}selected{% endif %}>Status</option>
+                    </select>
+                </div>
 
-    </tr>
-  </thead>
+                <div class="col-md-3 search-field" id="text-search-field">
+                    <label for="searched" class="form-label">Search Value</label>
+                    <input type="text" name="searched" id="searched" value="{{ searched }}" class="form-control" placeholder="Enter value...">
+                </div>
 
-  <tbody>
+                <div class="col-md-3 class-field d-none">
+                    <label for="class_name" class="form-label">Class</label>
+                    <select name="class_name" id="class_name" class="form-select">
+                        <option value="">--Select Class--</option>
+                        {% for c in cls %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
+                <div class="col-md-3 section-field d-none">
+                    <label for="section_name" class="form-label">Section</label>
+                    <select name="section_name" id="section_name" class="form-select">
+                        <option value="">--Select Section--</option>
+                    </select>
+                </div>
 
-   {% for stud in data %}
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
 
-    <tr align="center">
+            <!-- === Student Table === -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead>
+                        <tr class="text-center">
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Father Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data %}
+                            {% for st in data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ st.first_name }} {{ st.middle_name }} {{ st.last_name }}</td>
+                                <td>{{ st.father_name }}</td>
+                                <td>{{ st.class_name.name }}</td>
+                                <td>{{ st.secs.section_name }}</td>
+                                <td>{{ st.phone }}</td>
+                                <td>{{ st.student_status }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'updatestud' st.id %}?next={{ request.get_full_path|urlencode }}"
+                                      class="btn btn-sm btn-outline-primary me-1">
+                                          <i class="mdi mdi-pencil"></i> Update</a>
+                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                    <a href="{% url 'delsstud' st.id %}" class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Are you sure you want to delete this student?');">
+                                        <i class="mdi mdi-delete"></i> Delete
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center">No records found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
 
-      <td>{{stud.first_name}}{{stud.last_name}}</td>
-      <td>{{stud.admn_no}}</td>
-      <td>{{stud.class_name}}</td>
-      <td>{{stud.secs}}</td>
-      <td>{{stud.gender}}</td>
-      <td>{{stud.phone}}</td>
-      <td>{{stud.father_name}}</td>
-      <td>{{stud.usernm}}</td>
-        <td>
-         <a href ="{% url 'updatestud' stud.id %}"><i class="fas fa-pencil-alt fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
-             {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-         <a href ="{% url 'delstud' stud.id %}"><i class="fa fa-trash-can fa-xl" style="color: #ff0000;"></i></a> &nbsp;
-         <a href ="{% url 'reset_password' stud.usernm %}"><i class="fa-solid fa-key fa-xl" style="color:grey;"></i></a>
-            {% endif%}
-      </td>
-    </tr>
+            <!-- === Pagination === -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>Total Records: <strong>{{ cnt }}</strong></div>
+                <div>
+                    {% if data.has_previous %}
+                        <a href="?page={{ data.previous_page_number }}" class="btn btn-sm btn-outline-primary">Previous</a>
+                    {% endif %}
+                    <span class="mx-2">Page {{ data.number }} of {{ data.paginator.num_pages }}</span>
+                    {% if data.has_next %}
+                        <a href="?page={{ data.next_page_number }}" class="btn btn-sm btn-outline-primary">Next</a>
+                    {% endif %}
+                </div>
+            </div>
 
-   {% endfor %}
-  </tbody>
-</table>
- <nav aria-label="Page navigation">
-  <ul class="pagination">
-    {% if data.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
-      </li>
-    {% endif %}
-
-    {% for num in data.paginator.page_range %}
-      {% if data.number == num %}
-        <li class="page-item active">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% else %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% endif %}
-    {% endfor %}
-
-    {% if data.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
-      </li>
-    {% endif %}
-  </ul>
-</nav>
-{% else %}
-    <div class="alert alert-danger" role="alert">
-No Students Record  are available to Show
+        </div>
+    </div>
 </div>
 
-{% endif %}
-</div>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // === Toggle search input type ===
+    $('#searchby').change(function() {
+        var selected = $(this).val();
+        if (selected === 'studclass' || selected === 'studsec') {
+            $('#text-search-field').addClass('d-none');
+            $('.class-field').removeClass('d-none');
+            if (selected === 'studsec') {
+                $('.section-field').removeClass('d-none');
+            } else {
+                $('.section-field').addClass('d-none');
+            }
+        } else {
+            $('#text-search-field').removeClass('d-none');
+            $('.class-field, .section-field').addClass('d-none');
+        }
+    });
+
+    // === AJAX Load Sections ===
+    $('#class_name').change(function() {
+        var url = $('#studentSearchForm').attr('data-section-url');
+        var classId = $(this).val();
+        $.ajax({
+            url: url,
+            data: { 'Class_Id': classId },
+            success: function(data) {
+                $('#section_name').html(data);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
-

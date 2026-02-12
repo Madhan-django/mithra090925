@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Sections Timetable</title>
+</head>
+<body>
+    <h2>All Sections' Timetables</h2>
+
+    {% for group in section_timetables %}
+        <h3>{{ group.section.class_sec_name.class_name }} - {{ group.section.section_name }}</h3>
+        <ul>
+            {% for entry in group.entries %}
+                <li>
+                    <strong>{{ entry.timeslot.get_day_display }} - Period {{ entry.timeslot.period_number }}</strong>:
+                    {{ entry.subject.subject_name }} by {{ entry.teacher.name.first_name }} {{ entry.teacher.name.last_name }}
+                </li>
+            {% endfor %}
+        </ul>
+        <hr>
+    {% empty %}
+        <p>No timetables available.</p>
+    {% endfor %}
+</body>
+</html>

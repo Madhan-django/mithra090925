@@ -1,51 +1,184 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
 
-					</h1>
-			</div>
+<style>
+    /* === Typography === */
+    body, h4, label, input, textarea, select {
+        font-family: 'Roboto', sans-serif;
+    }
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					New Notice
-				</span>
-			</span>
+    /* === Card Layout === */
+    .card {
+        border-radius: 20px;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.12);
+        border: none;
+        padding-bottom: 20px;
+    }
 
-</div>
+    /* === Header (Saved Style) === */
+    .card-title {
+        background: linear-gradient(45deg, #2364d2, #1e88e5);
+        padding: 2px 0;
+        border-radius: 20px 20px 0 0;
+        margin-bottom: 25px;
+    }
+
+    .card-title h4 {
+        margin: 0;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    /* === Form Controls === */
+    .form-control, .form-control-file {
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    /* Space between rows */
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    label {
+        font-weight: 500;
+    }
+
+    /* Material File Upload Box */
+    .custom-file-box {
+        margin-top: 6px;
+    }
+    .custom-file-box .form-control {
+        border: 2px dashed #90caf9 !important;
+        background: #e3f2fd !important;
+        border-radius: 12px !important;
+        padding: 14px !important;
+        cursor: pointer;
+        transition: 0.3s ease;
+        color: #1e88e5 !important;
+        font-weight: 500;
+    }
+    .custom-file-box .form-control:hover {
+        background: #bbdefb !important;
+        border-color: #64b5f6 !important;
+    }
+    .custom-file-box .form-control::-webkit-file-upload-button {
+        visibility: hidden;
+    }
+    .custom-file-box .form-control::before {
+        content: "📁 Click to upload file";
+        color: #1e88e5;
+        display: inline-block;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    /* === Buttons === */
+    .btn-submit {
+        background: linear-gradient(45deg, #2364d2, #1e88e5);
+        color: white;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(45deg, #c62828, #e53935);
+        color: white;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-left: 10px;
+    }
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Title -->
+         <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">Update Event</span></h5>
     </div>
-<br>
-<div class="container">
-  <div class="col-11 mx-auto">
-    <br><br><br>
-    <form method="POST" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
 
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-  </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="container">
+
+                <!-- Row 1 -->
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Event Title</label>
+                        {{ form.event_title }}
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Event Location</label>
+                        {{ form.event_location }}
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Start Date</label>
+                        {{ form.start_date }}
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>End Date</label>
+                        {{ form.end_date }}
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Post Date</label>
+                        {{ form.post_date }}
+                    </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label>Event Description</label>
+                        {{ form.event_desc }}
+                    </div>
+                </div>
+
+                {{ form.event_school }}
+
+                <!-- Row 5 (EVENT IMAGE MOVED TO LAST) -->
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label>Event Image</label>
+
+                        {% if data.event_image %}
+                            <img src="{{ data.event_image.url }}"
+                                 alt="Event Image"
+                                 style="max-width: 140px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                        {% endif %}
+
+                        <div class="custom-file-box">
+                            <input type="file" class="form-control" id="inputGroupFile02" name="event_image">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-submit">Update</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
 </div>
 
-<!-- Include the necessary JavaScript files for datepicker -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
-
-<script>
-  $(document).ready(function () {
-    // Initialize the date pickers
-    $('#id_start_date').datetimepicker({
-      format: 'YYYY-MM-DD',
-    });
-
-    $('#id_end_date').datetimepicker({
-      format: 'YYYY-MM-DD',
-    });
-  });
-</script>
 {% endblock %}

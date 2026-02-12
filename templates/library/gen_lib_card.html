@@ -1,57 +1,164 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 
 {% block content %}
- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+/* ===== CARD STYLE ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+}
+
+/* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
 
 
-  <div class="col-11">
-      <div class="text-danger bg-primary bg-light"><h2 align="center" style="color:red"><i class="fa fa-graduation-cap" aria-hidden="true"></i>&nbsp;&nbsp;{{skool}}-({{year}})</h2></div><br>
-<center><p class="h3 text-dark" >Add Fee</p></center>
-            <div class="container>
-            <div class="row">
-                <div class="col-sm">
-                    <form id="libgen_form"  data-section-url="{% url 'ajax_load_section' %}" method ="POST" enctype="multipart/form-data" >
-                         {% csrf_token %}
-                    <label>Prefix</label><input type="text" name="prefix">&nbsp;
-                    <label>Starting No</label><input type="text" name="start_no">&nbsp;
-                    <label>Class</label>
-                        <select id="id_class_name" name="class_name">
-                            <option value="">...........</option>
-                            {% for cls in lib_class %}
-                            <option value="{{cls.id}}">{{cls.name}}</option>
-                            {% endfor %}
-                        </select>
-                    <label> Section</label>
-                        <select name="secs"  id="id_secs">
-                           <option value="">--------</option>
-                        </select>
+/* ===== FLOATING OUTLINE FIX ===== */
+.form-floating > label {
+    padding-left: 10px !important;
+    font-size: 15px;
+}
 
-          <label>Academic Year :</label>{{year}}
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                         <script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script type='text/javascript'>
-    $(document).ready(function(){
-    $("#id_class_name").change(function(){
-    var url = $("#libgen_form").attr("data-section-url");
-     var classId = $(this).val();
-       $.ajax({
-        url: url,
-        data: {
-          'Class_Id': classId
-        },
-        success: function (data) {
-          $("#id_secs").html(data);
-        }
-      });
-         });
+.form-floating-outline .form-control {
+    height: 55px !important;
+    padding-top: 15px !important;
+}
 
-});
-</script>
-                    </form>
-            </div>
+.form-floating-outline {
+    margin-bottom: 20px;
+}
 
-  </div>
+/* ===== BUTTONS ===== */
+.btn-info {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    color: #fff;
+    font-weight: bold;
+    padding: 10px 25px;
+    border-radius: 10px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4e4e, #b30000);
+    color: white;
+    padding: 10px 25px;
+    border-radius: 10px;
+}
+
+/* ===== ROW GAP ===== */
+.row {
+    margin-bottom: 10px;
+}
+
+</style>
+
+<br><br>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===== TITLE BAR WITH BADGE STYLE A ===== -->
+        <div class="card-title text-center">
+            <h5 class="mb-0">
+                <span class="badge bg-light text-dark">Generate Library Card</span>
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <form id="libgen_form" data-section-url="{% url 'ajax_load_section' %}"
+                  method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <input class="form-control" type="text" name="prefix" id="id_prefix">
+                            <label for="id_prefix">Prefix</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <input class="form-control" type="text" name="start_no" id="startno">
+                            <label for="startno">Starting No</label>
+                        </div>
+                    </div>
                 </div>
 
+                <div class="row g-6">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select class="form-control" id="id_class_name" name="class_name">
+                                <option value="">Select Class</option>
+                                {% for cls in lib_class %}
+                                <option value="{{cls.id}}">{{cls.name}}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="id_class_name">Class</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select class="form-control" name="secs" id="id_secs">
+                                <option value="">Select Section</option>
+                            </select>
+                            <label for="id_secs">Section</label>
+
+                            <input type="hidden" name="year" value="{{ year }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-info">Submit</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_class_name").change(function(){
+        var url = $("#libgen_form").attr("data-section-url");
+        var classId = $(this).val();
+
+        $.ajax({
+            url: url,
+            data: {'Class_Id': classId},
+            success: function (data) {
+                $("#id_secs").html(data);
+            }
+        });
+    });
+});
+</script>
 
 {% endblock %}

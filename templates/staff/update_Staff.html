@@ -1,0 +1,661 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+}
+
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+h6 {
+    font-weight: 600;
+    color: #007bff;
+}
+</style>
+
+<div class="card">
+
+    <div class="card-body">
+        <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">Update Staff</span></h5>
+    </div>
+
+         <!-- Multi Column with Form Separator -->
+              <div class="card mb-6">
+                  <form class="card-body"  method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                  <h6>1. Personal Information</h6>
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                       <div class="form-floating form-floating-outline">
+                        {{form.first_name}}
+                        <label for="id_first_name">First Name</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{form.last_name}}
+                        <label for="id_last_name">Last Name</label>
+                      </div>
+                    </div>
+                  </div>
+                    <br>
+                 <div class="row g-6">
+                   <div class="col-md-6">
+                     <div class="form-floating form-floating-outline">
+                        {{form.gender}}
+                         <label for="id_gender">Gender</label>
+                     </div>
+                   </div>
+                   <div class="col-md-6">
+                     <div class="form-floating form-floating-outline">
+                        {{form.dob}}
+                         <label for="id_dob">Date of Birth</label>
+                     </div>
+                   </div>
+                 </div>
+                    <br>
+                 <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+
+                         {{ form.staff_photo }}
+                          <label for="id_staff_photo">Staff Pic</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.email }}
+                           <label for="id_email">Email</label>
+                     </div>
+                   </div>
+                 </div>
+                    <br>
+                    <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+
+                         {{ form.mobile }}
+                          <label for="id_mobile">Mobile</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.address }}
+                           <label for="id_address">Address</label>
+                     </div>
+                   </div>
+                 </div>
+
+    <br>
+                    <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+
+                         {{ form.join }}
+                          <label for="id_join">Date of Joining</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.role }}
+                           <label for="id_role">Role</label>
+                     </div>
+                   </div>
+                 </div>
+                     <br>
+                    <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+
+                         {{ form.desg }}
+                          <label for="id_desg">Designation</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.salary }}
+                           <label for="id_salary">Salary</label>
+                     </div>
+                   </div>
+                 </div>
+                 <hr class="my-6 mx-n4" />
+                  <h6>2. Acaademic Info</h6>
+                    <br>
+                    <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+
+                         {{ form.qualification }}
+                          <label for="id_qualification">Qualification</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.desc }}
+                           <label for="id_desc">Other if Any</label>
+                     </div>
+                   </div>
+                 </div>
+                   <br>
+                    <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+
+                         {{ form.certifications }}
+                          <label for="id_certifications">Certifications if Any</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.experience}}
+                           <label for="id_experience">Years of Experience</label>
+                     </div>
+                   </div>
+                 </div>
+                 <br>
+                    <div class="row g-6">
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         <select name="permission_group" maxlength="15" id="id_permission_group"  class="select2 form-select" data-allow-clear="true">
+
+                              <option value="Teacher">Teacher</option>
+
+                         </select>
+
+                          <label for="id_permission_group">Permission Group</label>
+                      </div>
+                   </div>
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{ form.status}}
+                           <label for="id_status">Status</label>
+                     </div>
+                   </div>
+                 </div>
+                    <br>
+                     <div class="row g-6">
+
+                   <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                          {% if form.staff_photo.value %}
+					<img id="staff_photo_preview" src="{{ form.staff_photo.value.url }}" alt="Staff photo preview" height="150" width="150">
+				{% else %}
+					<img id="staff_photo_preview" src="#" alt="No photo selected">
+				{% endif %}
+                     </div>
+                   </div>
+                 </div>
+
+                          {{form.staff_school}}
+                          {{ form.staff_user }}
+                          {{ form.subjects_taught }}
+                    <br>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button class="btn btn-danger">Cancel</button>
+                    </div>
+                </form>
+
+<script>
+function previewStaffPhoto() {
+    const staffPhotoInput = document.querySelector('#id_staff_photo');
+    const staffPhotoPreview = document.querySelector('#staff_photo_preview');
+
+    staffPhotoInput.addEventListener('change', function() {
+        const file = this.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.addEventListener('load', function() {
+                staffPhotoPreview.setAttribute('src', this.result);
+            });
+
+            reader.readAsDataURL(file);
+        } else {
+            staffPhotoPreview.setAttribute('src', '#');
+        }
+    });
+}
+
+previewStaffPhoto();
+</script>
+
+<!--
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-password-toggle">
+                        <div class="input-group input-group-merge">
+                          <div class="form-floating form-floating-outline">
+                            <input
+                              type="password"
+                              id="multicol-password"
+                              class="form-control"
+                              placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                              aria-describedby="multicol-password2" />
+                            <label for="multicol-password">Password</label>
+                          </div>
+                          <span class="input-group-text cursor-pointer" id="multicol-password2"
+                            ><i class="ri-eye-off-line"></i
+                          ></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-password-toggle">
+                        <div class="input-group input-group-merge">
+                          <div class="form-floating form-floating-outline">
+                            <input
+                              type="password"
+                              id="multicol-confirm-password"
+                              class="form-control"
+                              placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                              aria-describedby="multicol-confirm-password2" />
+                            <label for="multicol-confirm-password">Confirm Password</label>
+                          </div>
+                          <span class="input-group-text cursor-pointer" id="multicol-confirm-password2"
+                            ><i class="ri-eye-off-line"></i
+                          ></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <hr class="my-6 mx-n4" />
+                  <h6>2. Personal Info</h6>
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                        <input type="text" id="multicol-first-name" class="form-control" placeholder="John" />
+                        <label for="multicol-first-name">First Name</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                        <input type="text" id="multicol-last-name" class="form-control" placeholder="Doe" />
+                        <label for="multicol-last-name">Last Name</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                        <select id="multicol-country" class="select2 form-select" data-allow-clear="true">
+                          <option value="">Select</option>
+                          <option value="Australia">Australia</option>
+                          <option value="Bangladesh">Bangladesh</option>
+                          <option value="Belarus">Belarus</option>
+                          <option value="Brazil">Brazil</option>
+                          <option value="Canada">Canada</option>
+                          <option value="China">China</option>
+                          <option value="France">France</option>
+                          <option value="Germany">Germany</option>
+                          <option value="India">India</option>
+                          <option value="Indonesia">Indonesia</option>
+                          <option value="Israel">Israel</option>
+                          <option value="Italy">Italy</option>
+                          <option value="Japan">Japan</option>
+                          <option value="Korea">Korea, Republic of</option>
+                          <option value="Mexico">Mexico</option>
+                          <option value="Philippines">Philippines</option>
+                          <option value="Russia">Russian Federation</option>
+                          <option value="South Africa">South Africa</option>
+                          <option value="Thailand">Thailand</option>
+                          <option value="Turkey">Turkey</option>
+                          <option value="Ukraine">Ukraine</option>
+                          <option value="United Arab Emirates">United Arab Emirates</option>
+                          <option value="United Kingdom">United Kingdom</option>
+                          <option value="United States">United States</option>
+                        </select>
+                        <label for="multicol-country">Country</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 select2-primary">
+                      <div class="form-floating form-floating-outline">
+                        <select id="multicol-language" class="select2 form-select" multiple>
+                          <option value="en" selected>English</option>
+                          <option value="fr" selected>French</option>
+                          <option value="de">German</option>
+                          <option value="pt">Portuguese</option>
+                        </select>
+                        <label for="multicol-language">Language</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                        <input
+                          type="text"
+                          id="multicol-birthdate"
+                          class="form-control dob-picker"
+                          placeholder="YYYY-MM-DD" />
+                        <label for="multicol-birthdate">Birth Date</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                        <input
+                          type="text"
+                          id="multicol-phone"
+                          class="form-control phone-mask"
+                          placeholder="658 799 8941"
+                          aria-label="658 799 8941" />
+                        <label for="multicol-phone">Phone No</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pt-6">
+                    <button type="submit" class="btn btn-primary me-4">Submit</button>
+                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                  </div>
+                </form>
+              </div>
+
+
+<!--        Multiple coloum end -->
+
+
+<!--        <form class="form-sample" method="POST" enctype="multipart/form-data">-->
+<!--                    {% csrf_token %}-->
+<!--                    <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">First name<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.first_name }}-->
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Last name<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.last_name }}-->
+<!--                        </div>-->
+
+<!--                    </div>-->
+<!--                     <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Gender<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.gender }}-->
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Date of Birth<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.dob }}-->
+<!--                        </div>-->
+
+<!--                    </div>-->
+<!--                      <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Profile Pic<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.staff_photo }}-->
+<!--                            <img id="staff_photo_preview" src="#" alt="Staff photo preview">-->
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Email<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.email }}-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                      <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Mobile<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.mobile }}-->
+
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Address<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.address }}-->
+<!--                        </div>-->
+
+<!--                      </div>-->
+<!--                     <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Date of Joining<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.join }}-->
+
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Role<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.role }}-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                    <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Designation<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.desg }}-->
+
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Salary<span class="text-danger"> *</span></label>-->
+<!--                             {{ form.salary }}-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                    <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Qualification<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.qualification }}-->
+
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Other if Any<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.desc }}-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                    <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Certifications<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.certifications }}-->
+
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Experience<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.experience }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="row justify-content-between text-left">-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
+<!--                            <label class="form-control-label px-3">Permission Group<span class="text-danger"> *</span></label>-->
+<!--                             <select name="permission_group" maxlength="15" id="id_permission_group">-->
+<!--                                    {% for group in ggrp %}-->
+<!--                                    <option value="{{ group.id }}">{{ group }}</option>-->
+<!--                                    {% endfor %}-->
+<!--                                </select>-->
+
+<!--                        </div>-->
+<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Status<span class="text-danger"> *</span></label>-->
+<!--                            {{ form.status }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                          {{form.staff_school}}-->
+<!--                          {{ form.staff_user }}-->
+<!--                          {{ form.subjects_taught }}-->
+<!--                    <div class="align-center">-->
+<!--                        <button type="submit" class="btn btn-primary me-2">Submit</button>-->
+<!--                        <button class="btn btn-light">Cancel</button>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--            </div>-->
+
+<!--    </div>-->
+<!--</div>-->
+<!--        <div class="main-panel">-->
+<!--            <div class="content-wrapper">-->
+<!--                <form class="form-sample" method="POST" enctype="multipart/form-data">-->
+<!--                    {% csrf_token %}-->
+<!--                    <div class="row">-->
+<!--                        <div class="col-lg-6">-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_first_name">First Name</label>-->
+<!--                                {{ form.first_name }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_last_name">Last Name</label>-->
+<!--                                {{ form.last_name }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_gender">Gender</label>-->
+<!--                                {{ form.gender }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_dob">Date of Birth</label>-->
+<!--                                {{ form.dob }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_staff_photo">Staff Photo:</label>-->
+<!--                                {{ form.staff_photo }}-->
+<!--                                <img id="staff_photo_preview" src="#" alt="Staff photo preview">-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_email">Email address</label>-->
+<!--                                {{ form.email }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_address">Address</label>-->
+<!--                                {{ form.address }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_doj">Date of Joining</label>-->
+<!--                                {{ form.join }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_role">Role</label>-->
+<!--                                {{ form.role }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_desg">Designation</label>-->
+<!--                                {{ form.desg }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_salary">Salary</label>-->
+<!--                                {{ form.salary }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_qualification">Qualification</label>-->
+<!--                                {{ form.qualification }}-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="col-lg-6">-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_mobile">Mobile No</label>-->
+<!--                                {{form.mobile}}-->
+<!--                            </div>-->
+
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_desc">Description</label>-->
+<!--                                {{ form.desc }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_certification">Any Certification</label>-->
+<!--                                {{ form.certifications }}-->
+<!--                            </div>-->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_experience">Experience</label>-->
+<!--                                {{ form.experience }}-->
+<!--                            </div>-->
+
+<!--                                {{ form.subjects_taught }}-->
+
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_permission_group">Permission Group</label>-->
+<!--                               <select name="permission_group" maxlength="15" id="id_permission_group">-->
+<!--								   <option value="Teacher">Teacher</option>-->
+<!--							   </select>-->
+<!--                            </div>-->
+<!--                   -->
+<!--                             -->
+<!--                                {{ form.staff_user }}-->
+<!--                            -->
+<!--                            <div class="form-group">-->
+<!--                                <label for="id_status">Status</label>-->
+<!--                                {{ form.status }}-->
+<!--                            </div>-->
+<!--                            {{form.staff_school}}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="align-center">-->
+<!--                        <button type="submit" class="btn btn-primary me-2">Submit</button>-->
+<!--                        <button class="btn btn-light">Cancel</button>-->
+<!--                    </div>-->
+<!--                </form>-->
+
+<!--    </div>-->
+<!--</div>-->
+<script>
+function previewStaffPhoto() {
+    const staffPhotoInput = document.querySelector('#id_staff_photo');
+    const staffPhotoPreview = document.querySelector('#staff_photo_preview');
+
+    staffPhotoInput.addEventListener('change', function() {
+        const file = this.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.addEventListener('load', function() {
+                staffPhotoPreview.setAttribute('src', this.result);
+            });
+
+            reader.readAsDataURL(file);
+        } else {
+            staffPhotoPreview.setAttribute('src', '#');
+        }
+    });
+}
+
+previewStaffPhoto();
+</script>
+{% endblock %}
+
+

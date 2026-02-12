@@ -1,0 +1,233 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    h1, h3, h5, th, td, label {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .card-title {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+        padding: 15px 0;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
+    }
+
+    .form-check-label {
+        margin-left: 5px;
+        font-weight: 500;
+    }
+
+    .btn {
+        padding: 8px 18px;
+        font-size: 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        letter-spacing: 0.4px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        background-color: #565e64;
+        transform: translateY(-1px);
+    }
+
+    .text-danger {
+        font-size: 13px;
+    }
+
+    .form-section {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #dee2e6;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+         <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark px-3 py-2">Update Asset</span></h5>
+        </div>
+
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Row 1: Asset Name & Room -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.asset_name.label_tag }}
+                        {{ form.asset_name }}
+                        {% for error in form.asset_name.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.room.label_tag }}
+                        {{ form.room }}
+                        {% for error in form.room.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Row 2: Type & Brand -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.asset_type.label_tag }}
+                        {{ form.asset_type }}
+                        {% for error in form.asset_type.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.brand.label_tag }}
+                        {{ form.brand }}
+                        {% for error in form.brand.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Row 3: Serial Number & Asset Tag -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.serial_number.label_tag }}
+                        {{ form.serial_number }}
+                        {% for error in form.serial_number.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.asset_tag.label_tag }}
+                        {{ form.asset_tag }}
+                        {% for error in form.asset_tag.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Row 4: Purchase Date & Warranty -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.purchase_date.label_tag }}
+                        {{ form.purchase_date }}
+                        {% for error in form.purchase_date.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.warranty_end_date.label_tag }}
+                        {{ form.warranty_end_date }}
+                        {% for error in form.warranty_end_date.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Row 5: Vendor & School -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.vendor.label_tag }}
+                        {{ form.vendor }}
+                        {% for error in form.vendor.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.asset_school.label_tag }}
+                        {{ form.asset_school }}
+                        {% for error in form.asset_school.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Row 6: Condition & Discard -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.condition.label_tag }}
+                        {{ form.condition }}
+                        {% for error in form.condition.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6 mb-3 d-flex align-items-center mt-4">
+                        <div class="form-check">
+                            {{ form.is_discarded }}
+                            <label class="form-check-label" for="id_is_discarded">
+                                {{ form.is_discarded.label }}
+                            </label>
+                        </div>
+                        {% for error in form.is_discarded.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Row 7: Remark -->
+                <div class="row form-section">
+                    <div class="col-md-6 mb-3">
+                        {{ form.remark.label_tag }}
+                        {{ form.remark }}
+
+                    </div>
+
+
+                </div>
+
+                <!-- Buttons -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary me-2">💾 Update Asset</button>
+                    <a href="{% url 'asset' %}" class="btn btn-secondary">⬅ Back</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

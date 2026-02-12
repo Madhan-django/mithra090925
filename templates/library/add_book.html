@@ -1,42 +1,126 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 
 {% block content %}
- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h5, label, button, input, select, textarea {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
+/* ===== CARD ===== */
+/* ===== TITLE BAR (REDUCED SIZE) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px 20px 0 0;
+    padding: 0 !important;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					New Books
-				</span>
-			</span>
+.card-title h5 {
+    margin: 0;
+}
 
-</div>
-    </div>
-
-  <div class="col-11">
-
-            <div class="container>
-            <div class="row">
-                <div class="col-sm">
-                    <form id="add_book"  action = "" method ="POST" >
-                         {% csrf_token %}
-
-                        {{form.as_p}}
+.card-title h5 span {
+    background: #f8f9fa;
+    color: #000;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+}
 
 
-                         <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-            </div>
+/* ===== FORM GRID ===== */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+}
 
-  </div>
+/* ===== FLOATING LABEL FIX ===== */
+.form-floating label {
+    font-weight: 600;
+}
+
+/* Card padding */
+.card-body {
+    padding: 25px 35px;
+}
+</style>
+
+<br><br>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Book</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <form id="add_book" method="POST">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.title }}
+                        <label for="{{ form.title.id_for_label }}">Title</label>
+                    </div>
+
+                    <div class="form-floating form-floating-outline">
+                        {{ form.author }}
+                        <label for="{{ form.author.id_for_label }}">Author</label>
+                    </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.subject }}
+                        <label for="{{ form.subject.id_for_label }}">Subject</label>
+                    </div>
+
+                    <div class="form-floating form-floating-outline">
+                        {{ form.rack }}
+                        <label for="{{ form.rack.id_for_label }}">Rack</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.book_no }}
+                        <label for="{{ form.book_no.id_for_label }}">Book No</label>
+                    </div>
+
+                    <div class="form-floating form-floating-outline">
+                        {{ form.isbn }}
+                        <label for="{{ form.isbn.id_for_label }}">ISBN</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.price }}
+                        <label for="{{ form.price.id_for_label }}">Price</label>
+                    </div>
+
+                    <div class="form-floating form-floating-outline">
+                        {{ form.quantity }}
+                        <label for="{{ form.quantity.id_for_label }}">Quantity</label>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                    <button type="reset" class="btn btn-danger mt-3">Clear</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 
 {% endblock %}

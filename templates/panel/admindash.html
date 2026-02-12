@@ -1,0 +1,36 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+ <!-- partial -->
+
+             <div class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-end mx-5 flex-md-row flex-column gap-6">
+              <a href="{% url 'addschool' %}" class="btn btn-primary waves-effect waves-light">
+                <i class="ri-add-box-line ri-16px me-2"></i>Institution
+              </a>
+            </div>
+
+
+
+               <div class="container-xxl flex-grow-1 container-p-y">
+              <!-- Card Border Shadow -->
+              <div class="row g-6">
+                   {% for school in data %}
+                  <div class="col-sm-6 col-lg-4">
+                  <div class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                        <a href="{% url 'sels' school.id %}">
+                      <div class="d-flex align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded-3 bg-label-primary">
+                          <i class="ri-graduation-cap-line"></i>
+                          </span>
+                        </div>
+                        <h4 class="mb-0">{{ school.name }}</h4>
+                      </div></a>
+                     </div>
+                  </div>
+                </div>
+                  </a>
+                  {% endfor %}
+              </div>
+            </div>
+            {% endblock %}

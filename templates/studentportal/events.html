@@ -1,5 +1,20 @@
-{% extends 'studentportal/main.html' %}
+{% extends 'studentportal/index.html' %}
 {% block content %}
+<div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white me-2">
+                  <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
+                </span> Events
+              </h3>
+              <nav aria-label="breadcrumb">
+                <ul class="breadcrumb">
+                  <li class="breadcrumb-item active" aria-current="page">
+                    <span></span>Overview <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
+                  </li>
+                </ul>
+              </nav>
+            </div>
 {% if data %}
 	<br>
 	<div class="table-responsive">

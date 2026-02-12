@@ -1,0 +1,185 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+/* === General Typography === */
+h1, h3, h5, th, td, label {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* === Card Layout === */
+.col-lg-12.grid-margin.stretch-card {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 0;
+}
+
+/* === Gradient Header === */
+.card-title {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    color: white;
+    height: 50px;
+    padding: 12px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+/* === Table Styling === */
+.table {
+    margin: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+}
+
+.table thead {
+    background-color: #212529 !important;
+    color: #fff !important;
+}
+
+.table thead th {
+    font-weight: 600;
+    font-size: 14px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 6px 10px !important;
+    vertical-align: middle !important;
+}
+
+.table tbody td {
+    background-color: #ffffff;
+    vertical-align: middle;
+    font-size: 15px !important;
+    padding: 10px 10px !important;
+    border: none;
+}
+
+tr {
+    transition: all 0.2s ease;
+}
+
+tr:hover td {
+    background-color: #f6f8ff;
+}
+
+/* === Buttons === */
+.btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border: none;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056d2;
+}
+
+/* === Text Alignment === */
+.text-end {
+    text-align: right;
+    padding-right: 20px;
+}
+
+/* === Alerts === */
+.alert {
+    width: 95%;
+    margin: 20px auto;
+    font-size: 15px;
+    border-radius: 8px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card mt-4">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Groups</span></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="text-end mb-3">
+                <form action="{% url 'group_set_create' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">New Group</button>
+                </form>
+            </div>
+
+            {% if data %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Group Name</th>
+                            <th>Academic Year</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for set in data %}
+                        <tr>
+                            <td>{{ set.name }}</td>
+                            <td>{{ set.acad_year }}</td>
+                            <td>
+                                <form action="{% url 'group_set_update' set.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-info btn-sm">Edit</button>
+                                </form>
+                                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                                <form action="{% url 'group_set_delete' set.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-danger text-center" role="alert">
+                No Record are available to Show
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

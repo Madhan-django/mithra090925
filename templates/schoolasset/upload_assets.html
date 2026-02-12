@@ -1,0 +1,158 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* === Global Typography === */
+body, label, th, td, button, input {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* === Card Styling (Your Saved Style) === */
+.card {
+    border-radius: 20px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+    padding: 20px;
+}
+
+/* Blue gradient header */
+.card-title {
+    background: linear-gradient(135deg, #2193b0, #0a5fa8);
+    padding: 18px 0;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+}
+
+/* Dark table headers */
+thead th {
+    background-color: #212529 !important;
+    color: white !important;
+}
+
+/* Upload btn (blue gradient) */
+.btn-upload {
+    background: linear-gradient(135deg, #2193b0, #0a5fa8);
+    border: none;
+    color: #fff;
+    padding: 10px 25px;
+    border-radius: 10px;
+}
+
+/* Cancel btn (your red gradient) */
+.btn-cancel {
+    background: linear-gradient(135deg, #ff6b6b, #b30000);
+    border: none;
+    color: #fff;
+    padding: 10px 25px;
+    border-radius: 10px;
+}
+
+/* Messages */
+.alert {
+    border-radius: 12px;
+    font-size: 16px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Gradient Title -->
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge bg-light text-dark">Asset Upload</span>
+            </h5>
+        </div>
+
+        <br>
+        <div class="text-end">
+            <a href ="{% url 'download_asset_template' %}" type="button" class="btn btn-primary">Sample Template</a>
+        </div>
+
+        <!-- Status Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} text-center" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row mb-4">
+                <div class="col-md-6 offset-md-3 text-center">
+                    <label class="form-label"><b>Select CSV File</b></label>
+                    <input type="file" name="file" class="form-control" required>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="text-center">
+                <button type="submit" class="btn-upload">Upload File</button>
+                <a href="{% url 'dashboard' %}" class="btn-cancel ms-2">Cancel</a>
+            </div>
+
+            <br>
+
+            <!-- Sample Format Table -->
+            <h5 class="text-center mt-4 mb-2">Upload Format</h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>asset_name</td>
+                            <td>Name of asset</td>
+                            <td>Projector</td>
+                        </tr>
+                        <tr>
+                            <td>room_id</td>
+                            <td>ID of Room</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>asset_type_id</td>
+                            <td>ID of AssetType</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>brand_id</td>
+                            <td>ID of Brand (optional)</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>serial_number</td>
+                            <td>Serial No (optional)</td>
+                            <td>SN884920</td>
+                        </tr>
+                        <tr>
+                            <td>condition</td>
+                            <td>Good / Average / Poor / Not Working / Transferred</td>
+                            <td>Good</td>
+                        </tr>
+                        <tr>
+                            <td>is_discarded</td>
+                            <td>True / False</td>
+                            <td>False</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

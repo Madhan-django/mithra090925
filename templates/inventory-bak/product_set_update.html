@@ -1,0 +1,71 @@
+{% extends 'adminpanel/index.html' %}
+{% block content %}
+<div class="wlsm-main-header card col">
+	<div class="school_header">
+		<h1 class="h3 text-center">
+			<i class="fa fa-graduation-cap text-light"></i>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+
+					</h1>
+			</div>
+
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					 Create Product
+				</span>
+			</span>
+</div>
+    </div>
+           <br>
+<div class="container">
+<form method="post" style="background-color: transparent;">
+  {% csrf_token %}
+ <form method="post" style="background-color: transparent;">
+  {% csrf_token %}
+   <label for="id_name">Name:</label>
+     {{form.name}}
+  <p>
+    <label for="id_pclass">Class:</label>
+    <select name="pclass" class="form-control" required="" id="id_pclass">
+  <option value="">---------</option>
+  {% for cl in cls %}
+
+  <option value="{{cl.id}}">{{cl.name}}</option>
+  {% endfor %}
+</select>
+
+
+  </p>
+
+
+  <p>
+    <label for="id_prod_set">Product:</label>
+   {{form.prod_set}}
+
+
+  </p>
+
+
+  <p>
+    <label for="id_qty">Quantity:</label>
+      {{form.qty}}
+
+
+      {{form.ac_year}}
+
+  </p>
+
+  <div style="display: flex; justify-content: flex-end; gap: 10px;">
+	  <button type="submit" class="btn btn-primary btn-lg">Create</button>
+    <input type="reset" value="Close" class="btn btn-secondary btn-lg">
+
+  </div>
+</form>
+
+
+	</div>
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+{% endblock %}
+

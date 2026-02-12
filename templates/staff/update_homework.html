@@ -1,61 +1,148 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="container-fluid">
-  <form method="POST" >
-    {% csrf_token %}
-    <div class="form-group">
-      <label for="id_title">Title:</label>
-      {{ form.title }}
-    </div>
- <div class="form-group">
-  <label for="id_hclass">Class:</label>
-      {{ form.hclass }}
-</div>
-    <div class="form-group">
-      <label for="id_secs">Secs:</label>
-      {{ form.secs }}
-    </div>
+<style>
+   #id_description{
+     height:100px;
+    }
+</style>
 
-    <div class="form-group">
-      <label for="id_subject">Subject:</label>
-      {{ form.subj }}
-    </div>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0">New Homework</h5>
+        </div>
+   <div class="card-body">
+    <form id="addhomework" method="POST" data-section-url = "{% url 'ajax_load_section' %}" data-subject-url = "{% url 'ajax_load_subject' %}"method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
 
-    <div class="form-group">
-      <label for="id_homework_date">Homework Date:</label>
-      {{ form.homework_date }}
-    </div>
+        <div class="row g-6">
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                    {{form.title}}
+                    <label for="id_title">Homework Title</label>
+                </div><br>
+                 <div class="form-floating form-floating-outline">
+                  {{form.homework_date}}
+                  <label for="id_homework_date">Homework Date</label>
+                </div>
+            </div>
+            <div class="col-md-6">
 
-    <div class="form-group">
-      <label for="id_description">Description:</label>
-      {{ form.description }}
-    </div>
+                     <div class="form-floating form-floating-outline">
+                   {{form.description}}
+                   <label for="id_description">Description (Characters)<small id="charCount">0 / 135</small></label>
+                </div>
 
-    <div class="form-group">
-      <label for="id_submission_date">Submission Date:</label>
-      {{ form.submission_date }}
-    </div>
 
-    <div class="form-group">
-      <label for="id_created_by">Created By:</label>
-      {{ form.created_by }}
-    </div>
+            </div>
+        </div>
+        <br>
+        <div class="row g-6">
+           <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+                  {{form.submission_date}}
+                  <label for="id_submission_date">Submission Date</label>
+                </div>
+            </div>
 
-    <div class="form-group">
-      <label for="id_students">Students:</label>
-      {{ form.stud }}
-    </div>
-      <p>
-    <label for="id_acad_yr">Academic Yr:</label>
+            <div class="col-md-6">
+               <div class="form-floating form-floating-outline">
+                  {{form.attachment}}
+                  <label for="id_attachment">Submission Date</label>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <div class="row g-6">
+           <div class="col-md-6">
+
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating form-floating-outline">
+
+                </div>
+            </div>
+        </div>
+        <br>
+		 <div class="row g-6">
+           <div class="col-md-6">
+
+            </div>
+
+        </div>
+        <br>
+            {{form.created_by}}
+            {{form.subj}}
+            {{form.secs}}
+            {{form.hclass}}
             {{form.acad_yr}}
+            {{form.school_homework}}
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="reset" class="btn btn-danger">Clear</button>
 
-    <div class="form-group">
-      <label for="id_school_homework">School Homework:</label>
-      {{ form.school_homework }}
+            </div>
+
+        </form>
+   </div>
     </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
 </div>
+
+<script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script type='text/javascript'>
+    $(document).ready(function(){
+
+        // Dropdown change AJAX
+        $("#id_hclass").change(function(){
+            // First AJAX request to data-section-url
+            var url1 = $("#addhomework").attr("data-section-url");
+            var classId = $(this).val();
+            $.ajax({
+                url: url1,
+                data: {
+                    'Class_Id': classId
+                },
+                success: function (data) {
+                    $("#id_secs").html(data);
+                }
+            });
+
+            // Second AJAX request to data-subject-url
+            var url2 = $("#addhomework").attr("data-subject-url");
+            $.ajax({
+                url: url2,
+                data: {
+                    'Class_Id': classId
+                },
+                success: function (data) {
+                    $("#id_subj").html(data);
+                }
+            });
+        });
+
+        // Character counter for description textarea
+        var maxLength = 135;
+        $("#id_description").on("input", function(){
+            var text = $(this).val();
+
+            // Prevent typing beyond max length
+            if (text.length > maxLength) {
+                $(this).val(text.substring(0, maxLength));
+                text = $(this).val();
+            }
+
+            // Update counter
+            $("#charCount").text(text.length + " / " + maxLength);
+
+            // Optional: turn red when limit reached
+            if(text.length >= maxLength){
+                $("#charCount").css("color", "red");
+            } else {
+                $("#charCount").css("color", "");
+            }
+        });
+    });
+</script>
 {% endblock %}

@@ -1,0 +1,182 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    /* General typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Card and layout */
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card-title {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+        padding: 15px 0;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Table styling */
+    .table {
+        margin: 20px auto;
+        width: 95%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+        border-radius: 10px;
+    }
+
+    th {
+        font-weight: 600;
+        font-size: 15px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 14px 10px !important;
+    }
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 12px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+
+    /* Button styling */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b52a36;
+    }
+
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    /* Empty alert */
+    .alert {
+        width: 80%;
+        margin: 30px auto;
+        font-size: 16px;
+    }
+
+    .text-end {
+        padding-right: 50px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Sub Assets</span></h5>
+        </div>
+
+
+        {% if data %}
+        <table class="table">
+            <thead align="center">
+                <tr>
+                    <th>S.No</th>
+                    <th>Asset Name</th>
+                    <th>Parent Asset</th>
+                    <th>Parent Asset Tag</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for asset in data %}
+                <tr align="center">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ asset.name }}</td>
+                    <td>
+                        {% if asset.parent_asset %}
+                            {{ asset.parent_asset.asset_name }}
+                        {% else %}
+                            <span class="badge bg-info text-dark">Spare</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if asset.parent_asset %}
+                            {{ asset.parent_asset.asset_tag }}
+                        {% else %}
+                            <span class="badge bg-info text-dark">Spare</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if asset.condition == "Good" %}
+                            <span class="badge bg-success">Good</span>
+                        {% elif asset.condition == "Repair" %}
+                            <span class="badge bg-warning text-dark">Repair</span>
+                        {% elif asset.condition == "Discarded" %}
+                            <span class="badge bg-danger">Discarded</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ asset.condition }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'update_subasset' asset.id %}" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="{% url 'delete_subasset' asset.id %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-danger text-center" role="alert">
+            No records are available to show.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

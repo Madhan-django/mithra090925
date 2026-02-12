@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+</head>
+<style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+<body>
+    <h1>Attendance Records</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee Name</th>
+                <th>First Punch</th>
+                <th>Early IN</th>
+                <th>Late IN</th>
+                <th>Last Punch</th>
+                <th>Early Out</th>
+                <th>Late Out</th>
+                <th>Working Duration</th>
+                <th>Department</th>
+                <th>Shift</th>
+                <th>Timings</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+                <tr>
+                    <td>{{ record.employee_name }}</td>
+                    <td>
+                        {% if record.first_punch == 'MP' %}
+                            MP
+                        {% elif record.first_punch == 'ABS' %}
+                           AB
+                        {% else %}
+                            {{ record.first_punch|date:"H:i" }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.early_by is not None %}
+                            {{ record.early_by }} min
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.late_by is not None %}
+                            {{ record.late_by }} min
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.last_punch == 'MP' %}
+                            MP
+                        {% elif record.last_punch == 'ABS' %}
+                           AB
+                        {% else %}
+                            {{ record.last_punch|date:"H:i" }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.early_out is not None %}
+                            {{ record.early_out }} min
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.late_out is not None %}
+                            {{ record.late_out }} min
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ record.Duration }}</td>
+                    <td>{{ record.department }}</td>
+                    <td>{{ record.shift_name }}</td>
+                    <td>{{ record.shift_timings }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

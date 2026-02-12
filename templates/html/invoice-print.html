@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Softnio">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="images/favicon.png">
+    <title>Invoice Print | DashWind Admin Template </title>
+    <link rel="stylesheet" href="assets/css/app.css">
+</head>
+
+<body class="bg-white font-body text-sm leading-relaxed text-slate-600 font-normal min-w-[320px]" onload="printPromot()">
+    <div class="max-w-[940px] my-8 mx-auto">
+        <div class="px-5">
+            <div class="flex justify-center mb-6">
+                <div class="relative inline-block transition-opacity duration-300 h-9">
+                    <img class="h-full opacity-0 dark:opacity-100" src="images/logo.png" srcset="images/logo2x.png 2x" alt="logo">
+                    <img class="h-full opacity-100 dark:opacity-0 absolute start-0 top-0" src="images/logo-dark.png" srcset="images/logo-dark2x.png 2x" alt="logo">
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between gap-6 pb-6">
+                <div class="relative">
+                    <span class="text-slate-400 whitespace-nowrap uppercase font-bold text-xxs tracking-relaxed leading-tight">Invoice To</span>
+                    <div class="invoice-contact-info">
+                        <h4 class="text-2xl text-slate-700 dark:text-white font-heading font-bold tracking-tight mb-4">Gregory Ander son</h4>
+                        <ul class="flex flex-col gap-4">
+                            <li class="flex gap-2 text-slate-400">
+                                <em class="text-base/5 text-primary-600 ni ni-map-pin-fill"></em>
+                                <span class="text-sm">House #65, 4328 Marion Street<br>Newbury, VT 05051</span>
+                            </li>
+                            <li class="flex gap-2 text-slate-400">
+                                <em class="text-base/5 text-primary-600 ni ni-call-fill"></em>
+                                <span class="text-sm">+012 8764 556</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="w-[210px]">
+                    <h3 class="text-3xl text-primary-600 font-heading font-bold uppercase tracking-tight mb-2">Invoice</h3>
+                    <ul class="flex flex-col gap-2">
+                        <li>
+                            <span class="text-slate-400 whitespace-nowrap uppercase font-bold text-xxs tracking-relaxed leading-tight inline-block min-w-[90px]">Invoice ID</span>:<span class="font-medium text-sm text-slate-600 ms-3">66K5W3</span>
+                        </li>
+                        <li>
+                            <span class="text-slate-400 whitespace-nowrap uppercase font-bold text-xxs tracking-relaxed leading-tight inline-block min-w-[90px]">Date</span>:<span class="font-medium text-sm text-slate-600 ms-3">26 Jan, 2020</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="border-collapse w-full border-gray-300 dark:border-gray-900">
+                    <thead>
+                        <tr>
+                            <th class="py-1 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-start">
+                                <span class="text-primary-600 uppercase font-bold text-xs leading-tight">Item Id</span>
+                            </th>
+                            <th class="py-1 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-start">
+                                <span class="text-primary-600 uppercase font-bold text-xs leading-tight">Description</span>
+                            </th>
+                            <th class="py-1 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-start">
+                                <span class="text-primary-600 uppercase font-bold text-xs leading-tight">Price</span>
+                            </th>
+                            <th class="py-1 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-start">
+                                <span class="text-primary-600 uppercase font-bold text-xs leading-tight">Qty</span>
+                            </th>
+                            <th class="py-1 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-end">
+                                <span class="text-primary-600 uppercase font-bold text-xs leading-tight">Amount</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">24108054</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 whitespace-nowrap">DashWind - Conceptual App Dashboard - Regular License</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$40.00</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">5</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$200.00</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">24108054</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 whitespace-nowrap">6 months premium support</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$25.00</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">1</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$25.00</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">23604094</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 whitespace-nowrap">Invest Management Dashboard - Regular License</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$131.25</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">1</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$131.25</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">23604094</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 whitespace-nowrap">6 months premium support</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$78.75</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6 border-b border-gray-300 dark:border-gray-900">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">1</span>
+                            </td>
+                            <td class="py-2 px-2 first:ps-6 last:pe-6  border-b border-gray-300 dark:border-gray-900 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$78.75</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="pt-4">
+                        <tr>
+                            <td class="pt-6 pb-1 px-2 first:ps-6 last:pe-6" colspan="2"></td>
+                            <td class="pt-6 pb-1 px-2 first:ps-6 last:pe-6" colspan="2">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 font-medium">Subtotal</span>
+                            </td>
+                            <td class="pt-6 pb-1 px-2 first:ps-6 last:pe-6 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 font-medium">$435.00</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6" colspan="2"></td>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6" colspan="2">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">Processing fee</span>
+                            </td>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$10.00</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6" colspan="2"></td>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6" colspan="2">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">TAX</span>
+                            </td>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5">$43.50</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6" colspan="2"></td>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6 border-t border-gray-300 dark:border-gray-900" colspan="2">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 font-medium">Grand Total</span>
+                            </td>
+                            <td class="py-1 px-2 first:ps-6 last:pe-6 border-t border-gray-300 dark:border-gray-900 text-end">
+                                <span class="text-slate-600 dark:text-slate-400 text-sm/5 font-medium">$478.50</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="italic text-xs text-slate-400"> Invoice was created on a computer and is valid without the signature and seal. </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function printPromot() {
+            window.print();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,267 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+
+<style>
+/* ================= GLOBAL ================= */
+h1, h3, h5, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ================= CARD ================= */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+    border: none;
+}
+
+/* ================= TITLE BAR ================= */
+.card-header {
+    background: linear-gradient(90deg, #005C97, #363795);
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.card-header .badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 14px;
+    padding: 6px 20px;
+    border-radius: 6px;
+}
+
+/* ================= FORM FIELDS ================= */
+label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+input, select, textarea {
+    width: 100%;
+    height: 50px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+textarea {
+    height: 110px;
+    resize: vertical;
+}
+
+.form-check-label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* ================= BUTTONS ================= */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0079d0, #1c1c5e);
+}
+
+.btn-warning{
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    border: none;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #e0a800, #c69500);
+}
+
+/* ================= SPACING ================= */
+.card-body {
+    padding: 30px;
+}
+
+.row.mb-3 {
+    margin-bottom: 18px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    font-size: 13px;
+}
+
+/* ================= HIDE SCHOOL FIELD LABEL ================= */
+input[name="subasset_school"] {
+    display: none;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+  <div class="card shadow-sm border-0">
+
+    <!-- TITLE BAR -->
+    <div class="card-header">
+      {% if parent_asset %}
+      <h5><span class="badge bg-light text-dark">New Subset</span></h5>
+      {% else %}
+      <h5><span class="badge bg-light text-dark">New Spare</span></h5>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <div class="container mt-3">
+
+        {% if parent_asset %}
+        <div class="divider divider-primary my-3">
+          <div class="divider-text text-primary fw-semibold">
+            {{ parent_asset.asset_name }} — Sub Asset
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted small mt-2 text-center">
+          Leave <b>"Parent Asset"</b> empty if this sub-asset is not yet assigned to any main asset.
+        </p>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+
+          {% if not parent_asset %}
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.parent_asset.label }}</label>
+              {{ form.parent_asset }}
+              {% if form.parent_asset.errors %}
+              <div class="text-danger small">{{ form.parent_asset.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% else %}
+          <input type="hidden" name="parent_asset" value="{{ parent_asset.id }}">
+          {% endif %}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.name.label }}</label>
+              {{ form.name }}
+              {% if form.name.errors %}
+              <div class="text-danger small">{{ form.name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.capacity_or_spec.label }}</label>
+              {{ form.capacity_or_spec }}
+              {% if form.capacity_or_spec.errors %}
+              <div class="text-danger small">{{ form.capacity_or_spec.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.serial_number.label }}</label>
+              {{ form.serial_number }}
+              {% if form.serial_number.errors %}
+              <div class="text-danger small">{{ form.serial_number.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.sub_asset_tag.label }}</label>
+              {{ form.sub_asset_tag }}
+              {% if form.sub_asset_tag.errors %}
+              <div class="text-danger small">{{ form.sub_asset_tag.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.assigned_to.label }}</label>
+              {{ form.assigned_to }}
+              {% if form.assigned_to.errors %}
+              <div class="text-danger small">{{ form.assigned_to.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.vendor.label }}</label>
+              {{ form.vendor }}
+              {% if form.vendor.errors %}
+              <div class="text-danger small">{{ form.vendor.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.purchase_date.label }}</label>
+              {{ form.purchase_date }}
+              {% if form.purchase_date.errors %}
+              <div class="text-danger small">{{ form.purchase_date.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.warranty_end_date.label }}</label>
+              {{ form.warranty_end_date }}
+              {% if form.warranty_end_date.errors %}
+              <div class="text-danger small">{{ form.warranty_end_date.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Hidden School Field -->
+          {{ form.subasset_school }}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.condition.label }}</label>
+              {{ form.condition }}
+              {% if form.condition.errors %}
+              <div class="text-danger small">{{ form.condition.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 d-flex align-items-center mt-3">
+              <div class="form-check">
+                {{ form.is_discarded }}
+                <label class="form-check-label ms-2 fw-semibold">
+                  {{ form.is_discarded.label }}
+                </label>
+              </div>
+              {% if form.is_discarded.errors %}
+              <div class="text-danger small">{{ form.is_discarded.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="text-end mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+              {% if parent_asset %} Add SubAsset {% else %} Add Spare {% endif %}
+            </button>
+            <a href="{% url 'sub_assets' %}" class="btn btn-warning px-4 ms-2">Cancel</a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

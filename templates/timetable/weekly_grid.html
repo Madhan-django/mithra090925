@@ -1,0 +1,187 @@
+{% extends 'panel/index.html' %}
+{% load custom_filters %}
+{% block content %}
+
+<style>
+    /* === General Typography === */
+    body, h1, h3, h4, h5, th, td, label, button {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* === Main Title Bar (Style A) === */
+    .timetable-title {
+        background: linear-gradient(to right, #1e5799, #207cca, #2989d8);
+        padding: 8px 0; /* REDUCED HEIGHT */
+        border-radius: 18px;
+        text-align: center;
+        margin-bottom: 18px;
+        box-shadow: 0px 3px 10px rgba(0,0,0,0.15);
+    }
+    .title-badge span {
+        background: #fff;
+        color: #000;
+        padding: 4px 18px; /* REDUCED SIZE */
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.20);
+    }
+
+    /* === Buttons === */
+    .btn-primary {
+        background: linear-gradient(to right, #1e5799, #207cca);
+        border: none;
+        font-weight: 600;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(to right, #15416b, #1b5ea0);
+    }
+    .btn-danger {
+        background: linear-gradient(to right, #d9534f, #c9302c);
+        border: none;
+        font-weight: 600;
+    }
+    .btn-info {
+        background: linear-gradient(to right, #17a2b8, #138496);
+        border: none;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    /* === Table Styling === */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+    th {
+        background-color: #212529;
+        color: white;
+        font-size: 13px;   /* REDUCED SIZE */
+        padding: 6px;      /* REDUCED */
+        text-align: center;
+    }
+    td {
+        background: #fff;
+        font-size: 14px;
+        padding: 7px;
+        border: 2px solid #ccc;
+        text-align: center;
+    }
+
+    h6.section-title {
+        font-size: 17px;
+        font-weight: bold;
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+</style>
+
+
+
+<!-- Main Page Title -->
+<div class="timetable-title">
+    <div class="title-badge"><span>Timetable</span></div>
+</div>
+{% if not section_timetables %}
+    <form method="POST" action="{% url 'generate_timetable' %}">
+        {% csrf_token %}
+        <div class="text-end mb-3">
+            <button type="submit" class="btn btn-primary btn-sm">Generate Timetable</button>
+        </div>
+    </form>
+
+{% else %}
+
+    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        <div class="text-end">
+            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#basicModal">
+                Delete Timetable
+            </button>
+        </div>
+    {% endif %}
+
+    <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h6 class="modal-title text-danger"></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <h5 class="text-danger text-center">
+                        Are you sure want to Delete the previous Timetable?
+                    </h5>
+                </div>
+
+                <div class="modal-footer">
+                    <form method="POST" action="{% url 'delete_timetable' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+<!-- Buttons Row -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div>
+        <a href="{% url 'view_section_timetable' %}">
+            <button type="button" class="btn btn-info btn-sm me-2">Classwise Timetable</button>
+        </a>
+        <a href="{% url 'view_teacher_timetable' %}">
+            <button type="button" class="btn btn-info btn-sm">Teacherwise Timetable</button>
+        </a>
+    </div>
+
+    <div>
+        <a href="{% url 'school_export_pdf' %}">
+            <button type="button" class="btn btn-primary btn-sm me-2">Export to PDF</button>
+        </a>
+        <a href="{% url 'school_export_excel' %}">
+            <button type="button" class="btn btn-primary btn-sm">Export to Excel</button>
+        </a>
+    </div>
+
+</div>
+
+<!-- Section Timetables -->
+{% for group in section_timetables %}
+    <h6 class="section-title text-center">
+        {{ group.section.class_sec_name.name }} - {{ group.section.section_name }}
+    </h6>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Day / Period</th>
+                {% for p in group.grid %}
+                    <th>Period {{ p.period }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for day_index in group.days|length|make_range %}
+                <tr>
+                    <td><b>{{ group.days|index:day_index }}</b></td>
+                    {% for period_row in group.grid %}
+                        <td>{{ period_row.cells|index:day_index|safe }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% empty %}
+    <p>No timetable data available.</p>
+{% endfor %}
+
+{% endblock %}

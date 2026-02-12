@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Records</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Employee Records</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Employee Code</th>
+                <th>Gender</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Email</th>
+                <th>Contact No</th>
+                <th>Status</th>
+                <th>Date of Joining</th>
+                <th>Last Modified By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in data %}
+                <tr>
+                    <td>{{ employee.EmployeeId }}</td>
+                    <td>{{ employee.EmployeeName_id }}</td>
+                    <td>{{ employee.EmployeeCode }}</td>
+                    <td>{{ employee.Gender }}</td>
+                    <td>{{ employee.Dept.DeptName }}</td> <!-- Assuming Dept is a foreign key -->
+                    <td>{{ employee.Designation }}</td>
+                    <td>{{ employee.Email }}</td>
+                    <td>{{ employee.ContactNo }}</td>
+                    <td>{{ employee.Status }}</td>
+                    <td>{{ employee.DOJ|date:"Y-m-d" }}</td> <!-- Format date -->
+                    <td>{{ employee.LastModifiedBy }}</td>
+                     <td>
+                    <a href="{% url 'employeeUpdate' employee.EmployeeCode %}" class="btn btn-primary">Update</a> <!-- Update link -->
+                </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="11">No employee records found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

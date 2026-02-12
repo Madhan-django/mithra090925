@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category, Supplier,stock, Order,product_set,book_set_issue,Purchase,products,ind_book
+from .models import Category, Supplier,stock, Order,product_set,book_set_issue,Purchase,products,ind_book,group_set
 from django.forms import formset_factory
 
 sts = (
@@ -18,8 +18,14 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ('name','Cat_school')
+        
+        labels ={
+              'name':'Category Name'
 
+
+}
         widgets ={
+            'name':forms.TextInput(attrs={'class':'form-control'}),
             'Cat_school':forms.HiddenInput()
         }
 
@@ -60,17 +66,30 @@ class OrderForm(forms.ModelForm):
         model = Order
         fields = ('product', 'quantity')
 
+class group_set_form(forms.ModelForm):
+    class Meta:
+        model = group_set
+        fields = '__all__'
+       
+        widgets = {
+            'name':forms.TextInput(attrs={'class':'form-control'}),
+            'acad_year':forms.HiddenInput(),
+            'group_school':forms.HiddenInput()
+        }
+
 class ProductSetForm(forms.ModelForm):
     class Meta:
         model = product_set
         fields = '__all__'
         labels = {
+
              'pclass':'Class',
              'prod_set': 'Product',
              'qty':'Quantity'
          }
 
         widgets= {
+            'name':forms.Select(attrs={'class':'form-control'}),
             'ac_year': forms.HiddenInput(),
             'pclass':forms.Select(attrs={'class':'form-control'}),
             'prod_set':forms.Select(attrs={'class':'form-control'}),
@@ -89,8 +108,8 @@ class book_set_issue_form(forms.ModelForm):
             'set_school':forms.HiddenInput(),
             'book_set': forms.Select(attrs={'class':'form-control'}),
             'issue_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
-            'stud_class': forms.Select(attrs={'class':'form-control'}),
-            'book_student': forms.Select(attrs={'class':'form-control'}),
+            'stud_class': forms.HiddenInput(),
+            'book_student': forms.HiddenInput()
         }
         labels = {
             'set_school':'School',
@@ -122,16 +141,46 @@ class PurchaseForm(forms.ModelForm):
         }
 
         widgets = {
-            'name': forms.Select(attrs={'class':'form-control'}),
-            'description': forms.TextInput(attrs={'class':'form-control'}),
-            'category': forms.Select(attrs={'class':'form-control'}),
-            'supplier': forms.Select(attrs={'class':'form-control'}),
-            'price': forms.NumberInput(attrs={'class':'form-control'}),
-            'quantity':forms.NumberInput(attrs={'class':'form-control'}),
-            'invoice_no': forms.NumberInput(attrs={'class':'form-control'}),
-             'order_dt': forms.DateInput(attrs={'class':'form-control','type':'date'}),
-             'rec_dt':  forms.DateInput(attrs={'class':'form-control','type':'date'}),
-             'Prod_school':forms.HiddenInput()
+            'name': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'supplier': forms.Select(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
+            'invoice_no': forms.NumberInput(attrs={'class': 'form-control'}),
+            'order_dt': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'rec_dt': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Prod_school': forms.HiddenInput(),
+        }
+
+class UpdatePurchaseForm(forms.ModelForm):
+    class Meta:
+        model = Purchase
+        fields = '__all__'
+
+        labels = {
+            'name': 'Product',
+            'description': 'Description',
+            'category': 'Category',
+            'supplier': 'Supplier',
+            'price': 'Price',
+            'quantity': 'Quantity',
+            'invoice_no': 'Invoice No',
+            'order_dt': 'Ordered Date',
+            'rec_dt': 'Received Date',
+        }
+
+        widgets = {
+            'name': forms.HiddenInput(),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'supplier': forms.Select(attrs={'class': 'form-control'}),
+            'price': forms.HiddenInput(),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
+            'invoice_no': forms.NumberInput(attrs={'class': 'form-control'}),
+            'order_dt': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'rec_dt': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Prod_school': forms.HiddenInput(),
         }
 
 
@@ -140,7 +189,12 @@ class ProductForm(forms.ModelForm):
         model = products
         fields = '__all__'
 
+        labels ={
+            'name': 'Product Name',
+        }
+
         widgets = {
+            'name':forms.TextInput(attrs={'class':'form-control'}),
             'sch':forms.HiddenInput()
         }
 
@@ -153,8 +207,8 @@ class ind_bookForm(forms.ModelForm):
             'isbook_set':forms.Select(choices=bk_set,attrs={'class':'form-control'}),
             'inv_prod': forms.Select(attrs={'class':'form-control'}),
             'issue_date':forms.DateInput(attrs={'class':'form-control','type':'date'}),
-            'stud': forms.Select(attrs={'class':'form-control'}),
-            'bclass':forms.Select(attrs={'class':'form-control'}),
+            'stud': forms.HiddenInput(),
+            'bclass':forms.HiddenInput(),
             'qty':forms.NumberInput(attrs={'class':'form-control'}),
             'status':forms.Select(choices=sts,attrs={'class':'form-control'}),
             'ind_school':forms.HiddenInput()

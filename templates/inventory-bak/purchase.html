@@ -1,0 +1,105 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    h1, h3 {
+        font-family: Roboto;
+    }
+    th {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+    .align-right {
+        display: block;
+        padding: 30px;
+
+        text-align: right;
+    }
+    #searchby {
+        height: 50px;
+        font-family: Roboto;
+        font-size: 16px;
+    }
+    .table{
+    padding:15px;
+    }
+</style>
+
+<div class="pb-0 text-center">
+    <div class="flex-wrap d-flex justify-content-center align-items-center">
+        <span>
+            <img src="https://mithran.co.in/media/{{ skool.logo }}" alt="School Logo" width="50" height="50" style="margin-right: 10px;">
+            <h1 style="display: inline-block; vertical-align: middle; margin-bottom: 0;">{{ skool }}</h1>
+        </span>
+    </div>
+</div>
+
+<br><br>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>Purchase List</h3>
+        </div>
+     <div class="align-right">
+					<a href="{% url 'purchase_entry' %}" class="btn btn-sm btn-primary">
+                       New Purchase</a>
+     </div>
+
+<div class="card-body">
+<br>
+{% if data %}
+    <div class="table-responsive">
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Invoice No</th>
+      <th>Date</th>
+      <th>Product Name</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for prod in data %}
+
+    <tr align="center">
+      <td>{{prod.invoice_no}}</td>
+      <td>{{prod.rec_dt}}</td>
+      <td>{{prod.name}}</td>
+      <td>{{prod.price}}</td>
+      <td>{{prod.quantity}}</td>
+      <td>{{prod.total_cost}}</td>
+              <td>
+          <form action="{% url 'purchase_update' prod.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-info" value="Update">
+          </form>
+ {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+            <form action="{% url 'purchase_delete' prod.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-warning" value="Delete">
+          </form>
+  {% endif %}
+        </td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+    </div>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+</div>
+    </div>
+</div>
+{% endblock %}
+

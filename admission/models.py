@@ -45,7 +45,7 @@ class students(models.Model):
     father_occupation = models.CharField('foccup', max_length=60)
     mother_occupation = models.CharField('moccup', max_length=60)
     student_photo = models.ImageField(upload_to='images/',null=True,blank=True)
-    roll_no = models.CharField('rollno', max_length=6)
+    roll_no = models.CharField('rollno', max_length=10)
     ac_year = models.ForeignKey(academicyr,on_delete=models.CASCADE)
     class_name = models.ForeignKey(sclass, on_delete=models.CASCADE)
     secs = models.ForeignKey(section,blank=True,null=True,on_delete=models.CASCADE)
@@ -53,7 +53,8 @@ class students(models.Model):
     student_status = models.CharField(max_length=10)
     tc_date = models.DateField(null=True,blank=True)
     usernm = models.CharField(max_length=25,blank=True,null=True)
+    account = models.CharField(max_length=10,blank=True,null=True)
 
     def __str__(self):
-        return self.first_name + self.last_name
+        return self.first_name + " " +  self.last_name
 

@@ -1,99 +1,187 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
 
-					</h1>
-			</div>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Staffs
-				</span>
-			</span>
-     <span class="float-md-right">
-                  {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts"  %}
-					<a href="{% url 'add_staff' %}" class="btn btn-sm btn-outline-light">New Staff</a>
-                  {% endif %}
-                   {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                    <a href="{% url 'print_staff' %}}" class="btn btn-sm btn-outline-light">Export PDF</a>
-                    <a href="{% url 'staff_csv' %}" class="btn btn-sm btn-outline-light">Export CSV</a>
-                    {% endif %}
-     </span>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
 
-</div>
-    </div>
-<div class="col-11">
-    <div class="col-md  text-left">
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+}
+
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- === Header === -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Staff List</span></h5>
+        </div>
+            <div class="text-end">
+                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                    <a href="{% url 'add_staff' %}" class="btn btn-primary btn-sm">New Staff</a>
+                {% endif %}
+
+                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                    <a href="{% url 'print_staff' %}" class="btn btn-success btn-sm">Export PDF</a>
+                    <a href="{% url 'staff_csv' %}" class="btn btn-warning btn-sm">Export CSV</a>
+                {% endif %}
+            </div>
+
+
+        <!-- === Body === -->
+        <div class="card-body">
+
+            <div class="col-md">
                 <form action="{% url 'staff_search' %}" method="POST">
                     {% csrf_token %}
                     <table class="table">
                         <tr>
-                         <td><select name="searchby" id="searchby" class="form-control">
-                     <option value="staffname" >Staff Name</option>
-                     <option value="mobile">Mobile No</option>
-                     >
-                </select></td>
-                            <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
-                            <td><button type="submit" class="btn btn-success" >Search</button></td>
+                            <td width="20%">
+                                <select name="searchby" id="searchby" class="form-control">
+                                    <option value="staffname">Staff Name</option>
+                                    <option value="mobile">Mobile No</option>
+                                </select>
+                            </td>
 
+                            <td width="60%">
+                                <input type="search" placeholder="search" name="searched" required class="form-control">
+                            </td>
+
+                            <td width="20%">
+                                <button type="submit" class="btn btn-primary w-100">Search</button>
+                            </td>
                         </tr>
                     </table>
-
-
-                    </form>
+                </form>
             </div>
-             </div>
+
+
 {% if data %}
-<br>
-<table class="table">
-    <thead class="table-dark" align ="center">
-    <tr>
-      <th>Staff Name </th>
-      <th>Gender</th>
-      <th>DOB</th>
-      <th>Mobile</th>
-      <th>Email</th>
-      <th>Designation</th>
-      <th>Username</th>
-      <th>Actions</th>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Staff Name</th>
+                            <th>Gender</th>
+                            <th>Mobile</th>
+                            <th>Designation</th>
+                            <th>Username</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
+                    <tbody>
+                        {% for staff in data %}
+                        <tr align="center">
+                            <td>{{ staff.first_name }} {{ staff.last_name }}</td>
+                            <td>{{ staff.gender }}</td>
+                            <td>{{ staff.mobile }}</td>
+                            <td>{{ staff.desg }}</td>
+                            <td>{{ staff.staff_user }}</td>
 
-    </tr>
-  </thead>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="ri-more-2-line"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{% url 'staff_update' staff.id %}">
+                                            <i class="ri-pencil-line me-1"></i> Edit
+                                        </a>
 
-  <tbody>
+                                        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                        <a class="dropdown-item" href="{% url 'staff_delete' staff.id %}">
+                                            <i class="ri-delete-bin-7-line me-1"></i> Delete
+                                        </a>
+                                        {% endif %}
 
+                                        <a class="dropdown-item" href="{% url 'reset_password' staff.staff_user %}">
+                                            <i class="ri-key-line me-1"></i> Reset
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
 
-   {% for staff in data %}
+                </table>
+            </div>
 
-    <tr align="center">
+        </div>
+    </div>
+</div>
 
-      <td>{{staff.first_name}}{{staff.last_name}}</td>
-      <td>{{staff.gender}}</td>
-      <td>{{staff.dob}}</td>
-      <td>{{staff.mobile}}</td>
-      <td>{{staff.email}}</td>
-      <td>{{staff.desg}}</td>
-      <td>{{staff.staff_user}}</td>
-        <td>
-         <a href ="{% url 'staff_update' staff.id %}"><i class="fas fa-pencil-alt fa-xl" style="color: #136f00;"></i></a>&nbsp;&nbsp;&nbsp;
-            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-         <a href ="{% url 'staff_delete' staff.id %}"><i class="fa fa-trash-can fa-xl" style="color: #ff0000;"></i></a>&nbsp;&nbsp;&nbsp;
-            {% endif %}
-         <a href="{% url 'staff_status' staff.id %}"><i class="fas fa-sign-out-alt fa-xl" style="color: #f906ed;"></i>   </a>&nbsp;
-             {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-         <a href="{% url 'reset_password' staff.staff_user %}"><i class="fa-solid fa-key fa-xl" style="color:grey;"></i>   </a>
-            {% endif %}
-      </td>
-    </tr>
-   {% endfor %}
-  </tbody>
-</table>
+<!-- Pagination -->
 <nav aria-label="Page navigation">
   <ul class="pagination">
     {% if data.has_previous %}
@@ -121,12 +209,11 @@
     {% endif %}
   </ul>
 </nav>
+
 {% else %}
-    <div class="alert alert-danger" role="alert">
-No Students Record  are available to Show
+<div class="alert alert-danger text-center" role="alert">
+    No Staff Records are available to Show
 </div>
-
 {% endif %}
-</div>
-{% endblock %}
 
+{% endblock %}

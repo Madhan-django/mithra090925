@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fee Automate Report</title>
+</head>
+<body>
+ {% for dt in data  %}
+   {{dt.report_name}}-{{dt.reporter_name}}-{{dt.report_to}}-{{dt.status}}
+ {% endfor %}
+</body>
+</html>

@@ -1,0 +1,313 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+}
+
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+</style>
+
+<div class="card">
+    <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">New Notifications</span></h5>
+    </div>
+
+    <div class="card-body">
+        <!-- Radio Buttons -->
+        <div class="col-md-9">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label"></label>
+
+                <div class="col-sm-3">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios1" value="Two">
+                        <label class="form-check-label" for="membershipRadios1">One-to-One Alert</label>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios2" value="One">
+                        <label class="form-check-label" for="membershipRadios2">Bulk Notification</label>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios3" value="Three">
+                        <label class="form-check-label" for="membershipRadios3">Broadcast Notification</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<br>
+
+<!-- ======================= One-to-One Alert ======================= -->
+<div id="showTwo" class="myDiv">
+    <center><strong>One-to-One Alert</strong></center><br>
+
+    <form action="{% url 'new_notify' %}" method="POST">
+        {% csrf_token %}
+
+        <p>
+            <label for="id_title">Title:</label>
+            {{ form.title }}
+        </p>
+
+        <p>
+            <label for="id_message">Message: (Characters) <small id="charCount">0 / 150</small></label>
+            {{ form.message }}
+        </p>
+
+        <p>
+            <label>Date:</label>
+            <input type="datetime-local" name="create_date" class="form-control" required>
+        </p>
+
+        <p>
+            <label>Scheduled Date:</label>
+            <input type="datetime-local" name="post_date" class="form-control" required>
+        </p>
+
+        <p>
+            <label>Students:</label><br>
+            <select name="post_to" id="select2Multiple" class="select2 form-select" multiple>
+                {% for dt in data %}
+                <option value="{{ dt.id }}">{{ dt }} - {{ dt.class_name }}</option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>{{ form.created_by_id }}</p>
+
+        <p>
+            <label>Status:</label>
+            {{ form.status }}
+            {{ form.is_read }}
+            {{ form.Notification_school }}
+            {{ form.success_count }}
+            {{ form.total_count }}
+        </p>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-info">Push Notification</button>
+            <button type="reset" class="btn btn-danger">Clear</button>
+        </div>
+    </form>
+</div>
+
+<!-- ======================= Bulk Notification ======================= -->
+<div id="showOne" class="myDiv">
+    <center><strong>Bulk Notification</strong></center><br>
+
+    <form id="message_form" data-section-url="{% url 'ajax_push_load_section' %}" method="POST" action="{% url 'sectionwise_notify' %}">
+        {% csrf_token %}
+        <table class="responsive w-100">
+
+            <tr>
+                <td>
+                    <label>Class:</label>
+                    <select name="aclass" class="form-control" required id="id_aclass">
+                        <option value="">---------</option>
+                        {% for cl in cls %}
+                        <option value="{{ cl.id }}">{{ cl }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+
+                <td>
+                    <label>Section:</label>
+                    <select name="sec" id="id_sec" class="form-control" required></select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label>Date:</label>
+                    <input type="datetime-local" name="create_date" class="form-control" required>
+                </td>
+
+                <td>
+                    <label>Scheduled Date:</label>
+                    <input type="datetime-local" name="post_date" class="form-control" required>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <label>Title:</label>
+                    <input type="text" name="title" class="form-control" maxlength="50" required>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <label>Message: (Characters) <small id="charCount">0 / 150</small></label>
+                    <textarea name="message" class="form-control" maxlength="150" rows="5" required></textarea>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4" class="text-end">
+                    <br>
+                    <button type="submit" class="btn btn-info">Push Notification</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<!-- ======================= Broadcast ======================= -->
+<div id="showThree" class="myDiv">
+    <center><strong>Broadcast</strong></center><br>
+
+    <form method="POST" action="{% url 'school_notify' %}">
+        {% csrf_token %}
+        <table class="responsive w-100">
+
+            <tr>
+                <td>
+                    <label>Date:</label>
+                    <input type="datetime-local" name="create_date" class="form-control" required>
+                </td>
+
+                <td>
+                    <label>Scheduled Date:</label>
+                    <input type="datetime-local" name="post_date" class="form-control" required>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <label>Title:</label>
+                    <input type="text" name="title" class="form-control" maxlength="50" required>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <label>Message: (Characters) <small id="charCount">0 / 150</small></label>
+                    <textarea name="message" class="form-control" maxlength="150" rows="5" required></textarea>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4" class="text-end">
+                    <br>
+                    <button type="submit" class="btn btn-info">Push Notification</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </td>
+            </tr>
+
+        </table>
+    </form>
+</div>
+
+</div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    // hide sections
+    $("div.myDiv").hide();
+
+    // show selected section
+    $('input[type="radio"]').click(function(){
+        var v = $(this).val();
+        $(".myDiv").hide();
+        $("#show" + v).show();
+    });
+
+    // Load section dropdown
+    $("#id_aclass").change(function(){
+        var url = $("#message_form").attr("data-section-url");
+        $.ajax({
+            url: url,
+            data: { 'Class_Id': $(this).val() },
+            success: function(data) {
+                $("#id_sec").html(data);
+            }
+        });
+    });
+
+    // Select2
+    $('#select2Multiple').select2();
+
+});
+</script>
+
+{% endblock %}

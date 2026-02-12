@@ -1,108 +1,180 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="text-warning bg-dark">
-  <h3 class="text-center">New Enterprise</h3>
-</div><br><br>
+<style>
+body, h1, h3, h4, h5, label, input, select, button, textarea {
+    font-family: 'Roboto', sans-serif;
+}
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
 
-<div class="row">
-  <div class="col-sm-6 offset-sm-3">
-    <form action="" method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="id_name">Name:</label>
-        {{ form.name }}
-      </div>
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
 
-      <div class="form-group">
-        <label for="id_phone">Phone:</label>
-        {{ form.phone }}
-      </div>
+}
 
-      <div class="form-group">
-        <label for="id_email">Email:</label>
-        {{ form.email }}
-      </div>
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
 
-      <div class="form-group">
-        <label for="id_company">Company:</label>
-        {{ form.company }}
-      </div>
+.form-group {
+    margin-bottom: 15px;
+}
+#video-stream, #captured-photo, #existing-photo {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 12px;
+    border: 2px solid #ddd;
+    margin-bottom: 12px;
+}
+.text-end button {
+    margin-left: 10px;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+@media(max-width: 768px){
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    #video-stream, #captured-photo, #existing-photo {
+        max-width: 100%;
+    }
+}
+</style>
 
-      <div class="form-group">
-        <label for="id_address">Address:</label>
-        {{ form.address }}
-      </div>
-       <div class="form-group">
-        <label for="id_meeting_person">Meeting Person:</label>
-        {{ form.meeting_person }}
-      </div>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">{% if form.instance.pk %}Update Visitor{% else %}New Visitor{% endif %}</span></h5>
+        </div>
 
-      <div class="form-group">
-        <label for="id_purpose">Purpose:</label>
-        {{ form.purpose }}
-      </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
 
-      <div class="form-group">
-        <label for="check_in_time">Check-In-Time:</label>
-        {{ form.check_in_time }}
-      </div>
+                <div class="row">
+                    <!-- LEFT: PHOTO -->
+                    <div class="col-md-4 text-center">
+                        {% if form.instance.photo %}
+                        <img id="existing-photo" src="{{ form.instance.photo.url }}" alt="Previous Photo">
+                        {% endif %}
 
-      <div class="form-group">
-        <label for="check_out_time">Check-Out-Time:</label>
-        {{ form.check_out_time }}
-      </div>
+                        <video id="video-stream" autoplay playsinline></video>
+                        <img id="captured-photo" style="display:none;" alt="Captured Photo">
 
-      <div class="form-group">
-        <label for="id_photo">Photo:</label>
-        <input type="file" id="webcam-photo" accept="image/*" capture="user" class="form-control-file">
-        <br>
-        <img id="captured-photo" alt="Captured Photo" style="display: none;">
-        <canvas id="photo-canvas" style="display: none;"></canvas>
-        <button type="button" id="capture-btn" class="btn btn-primary">Capture Photo</button>
-      </div>
+                        <canvas id="photo-canvas" style="display:none;"></canvas>
 
-      {{ form.visitors_school }}
+                        <button type="button" id="capture-btn" class="btn btn-primary mt-2">Capture Photo</button>
 
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-  </div>
+                        <input type="hidden" name="webcam_image" id="webcam_image">
+                    </div>
+
+                    <!-- RIGHT: FORM FIELDS (2 fields per row) -->
+                    <div class="col-md-8">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Name:</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="form-group">
+                                <label>Email:</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="form-group">
+                                <label>Phone:</label>
+                                {{ form.phone }}
+                            </div>
+                            <div class="form-group">
+                                <label>Company:</label>
+                                {{ form.company }}
+                            </div>
+                            <div class="form-group">
+                                <label>Address:</label>
+                                {{ form.address }}
+                            </div>
+                            <div class="form-group">
+                                <label>Purpose:</label>
+                                {{ form.purpose }}
+                            </div>
+                            <div class="form-group">
+                                <label>Meeting Person:</label>
+                                {{ form.meeting_person }}
+                            </div>
+                            <div class="form-group">
+                                <label>Check-In Time:</label>
+                                {{ form.check_in_time }}
+                            </div>
+                            <div class="form-group">
+                                <label>Check-Out Time:</label>
+                                {{ form.check_out_time }}
+                            </div>
+                            <!-- Empty field to maintain grid if needed -->
+                            <div class="form-group"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form.visitors_school }}
+
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-info">{% if form.instance.pk %}Update{% else %}Submit{% endif %}</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
-  // JavaScript code to capture photo from webcam
-  document.addEventListener("DOMContentLoaded", function() {
-    var video = document.createElement("video");
-    var canvas = document.getElementById("photo-canvas");
-    var capturedPhoto = document.getElementById("captured-photo");
-    var captureBtn = document.getElementById("capture-btn");
-    var webcamPhotoInput = document.getElementById("webcam-photo");
+document.addEventListener("DOMContentLoaded", function () {
+    let video = document.getElementById("video-stream");
+    let canvas = document.getElementById("photo-canvas");
+    let capturedPhoto = document.getElementById("captured-photo");
+    let captureBtn = document.getElementById("capture-btn");
+    let webcamImageInput = document.getElementById("webcam_image");
 
-    // Check if getUserMedia is supported
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function(stream) {
-          video.srcObject = stream;
-          video.play();
-        })
-        .catch(function(error) {
-          console.log("Error accessing webcam:", error);
-        });
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                video.srcObject = stream;
+            })
+            .catch(function (error) {
+                console.log("Webcam error:", error);
+            });
     }
 
-    // Capture photo from webcam
-    captureBtn.addEventListener("click", function() {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+    captureBtn.addEventListener("click", function () {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-      // Convert canvas to image and display
-      var photoDataUrl = canvas.toDataURL("image/jpeg");
-      capturedPhoto.src = photoDataUrl;
-      capturedPhoto.style.display = "block";
-      webcamPhotoInput.value = photoDataUrl;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        let photoDataUrl = canvas.toDataURL("image/jpeg");
+        capturedPhoto.src = photoDataUrl;
+        capturedPhoto.style.display = "block";
+
+        let existingPhoto = document.getElementById("existing-photo");
+        if(existingPhoto) existingPhoto.style.display = "none";
+
+        webcamImageInput.value = photoDataUrl;
     });
-  });
+});
 </script>
-
 {% endblock %}

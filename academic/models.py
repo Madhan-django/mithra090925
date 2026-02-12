@@ -6,7 +6,7 @@ from datetime import datetime
 
 class noticeboard(models.Model):
     title = models.CharField(max_length=100)
-    notice_date = models.DateField(default=datetime.now())
+    notice_date = models.DateField(default=datetime.today)
     content = models.TextField()
     file = models.FileField(upload_to='notice_files/', blank=True, null=True)
     url = models.URLField(blank=True)
@@ -21,6 +21,7 @@ class events(models.Model):
     event_desc= models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
+    post_date = models.DateField(blank=True,null=True)   
     event_location = models.CharField(max_length=200)
     event_image = models.ImageField(upload_to='event_images/', blank=True, null=True)
     event_school = models.ForeignKey(school,on_delete=models.CASCADE)

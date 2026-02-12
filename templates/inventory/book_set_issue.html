@@ -1,174 +1,316 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-{% load static %}
+
 <style>
-.container {
-  display: flex;
-  align-items: center;
-}
+    /* === Default Saved Style Applied === */
 
-#myForm {
-  display: flex;
-  align-items: center;
-  margin-right: 20px;
-}
+    /* General Typography */
+    h1, h3, h5, th, td, label {
+        font-family: 'Roboto', sans-serif;
+    }
 
-#myForm label {
-  margin-right: 5px;
-}
+    /* Card Layout */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 
-#myForm input {
-  margin-right: 10px;
-}
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
 
-#secelt{
-font-size:20px;
-font-weight:bold;
-}
+    /* Card Header */
+    .card-title {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+        height: 50px;
+        padding: 12px;
+        border-radius: 12px 12px 0 0;
+    }
 
-.myDiv{
-	display:none;
-}
-#formOne{
-    display:none;
-	color:red;
-    padding:10px;
-}
-#showTwo{
-	color:green;
+    .card-title h5 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        font-size: 18px;
+    }
 
-    padding:10px;
-}
-#showThree{
-	color:blue;
-    border:1px solid blue;
-    padding:10px;
-}
-</style>
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
 
-					</h1>
-			</div>
+    .table thead {
+        background-color: #212529 !important;
+        color: #fff !important;
+    }
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					 Book Set Sale
-				</span>
-			</span>
-</div>
-    </div>
-<div class="container">
-  <div class="row">
-    <div class="col">
-      <form id="myForm" method="POST" action="" class="form-inline">
-        {% csrf_token %}
-        <div class="form-group mx-2">
-          <label for="start_date">Start Date:</label>
-          <input type="date" id="start_date" name="start_date" required class="form-control">
-        </div>
-        <div class="form-group mx-2">
-          <label for="end_date">End Date:</label>
-          <input type="date" id="end_date" name="end_date" required class="form-control">
-        </div>
-        <button type="button" id="changeUrlsearch" class="btn btn-success mx-2">Search</button>
-        <button type="button" id="changeUrldownload" class="btn btn-success mx-2">Download</button>
-      </form>
-    </div>
-    <div class="col-auto">
-      <button type="button"  id="formoneshow" class="btn btn-primary">New Bill</button>
-    </div>
-  </div>
-</div>
+    .table thead th {
+        font-weight: 600;
+        font-size: 14px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 6px 10px !important;
+        vertical-align: middle !important;
+    }
 
-<form method="post" id="formOne" data-section-url = "{% url 'ajax_load_section' %}">
-  {% csrf_token %}
-  {{ form.as_table }}
-    <br>
-  <button type="submit" class="btn btn-primary">Create</button>
-  <button type="reset" class="btn btn-danger">Clear</button>
-  <button  class="btn btn-secondary float-center" id ="hideme">Hide Me</button>
+    .table tbody td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
 
-</form>
-    <br><hr>
-    {% if bkset %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-	  <th>Date</th>
-      <th>Student Name</th>
-      <th>Class</th>
-      <th>Section</th>
-	  <th>status</th>
-    </tr>
-  </thead>
+    tr {
+        transition: all 0.2s ease;
+    }
 
-  <tbody>
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
 
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
 
-   {% for set in bkset %}
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
 
-    <tr align="center">
-      <td>{{set.issue_date}}</td>
-      <td>{{set.book_student}}</td>
-      <td>{{set.book_student.class_name}}</td>
-      <td>{{set.book_student.secs}}</td>
-      <td>{{set.status}}</td>
-    </tr>
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
-</div>
-{% endif %}
-<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script>
-        $(document).ready(function() {
-            // jQuery code to handle button click
-            $("#changeUrlsearch").click(function() {
-                // Modify the form's action attribute
+    .btn-info:hover {
+        background-color: #138496;
+    }
 
-                $("#myForm").attr("action", "{% url 'set_search' %}");  // Change the URL as needed
-                $("#myForm").submit();
-            });
-              $("#changeUrldownload").click(function() {
-                // Modify the form's action attribute
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+    }
 
-                $("#myForm").attr("action", "{% url 'book_set_pdf' %}");  // Change the URL as needed
-                $("#myForm").submit();
-            });
-             $("#formoneshow").click(function() {
-                // Modify the form's action attribute
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
 
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
 
-                $("#formOne").show();
-            });
-             $("#hideme").click(function() {
-                // Modify the form's action attribute
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
 
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
 
-                $("#formOne").hide();
-            });
-            $("#id_stud_class").change(function(){
-                    var url = $("#formOne").attr("data-section-url");
-                    var classId = $(this).val()
-       $.ajax({
-        url: url,
-        data: {
-          'Class_Id': classId
-        },
-        success: function (data) {
-          $("#id_book_student").html(data);
+    .btn-danger:hover {
+        background-color: #b02a37;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 20px auto;
+        font-size: 15px;
+    }
+
+    /* Pagination */
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .pagination .page-link {
+        color: #007bff;
+    }
+
+    /* Form & Utility */
+    select, input[type="search"], input[type="date"], .form-control {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        height: 40px;
+        font-size: 14px;
+        padding: 6px 10px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .horizontal-scroll-container {
+        overflow-x: auto;
+    }
+
+    .text-left {
+        text-align: left;
+    }
+
+    .text-end {
+        text-align: right;
+        padding-right: 20px;
+    }
+
+    .form-inline .form-group {
+        margin-bottom: 8px;
+    }
+
+    /* Responsive fix */
+    @media (max-width: 768px) {
+        .form-inline {
+            flex-direction: column;
+            align-items: stretch;
         }
-             });
-         });
-        });
-    </script>
-{% endblock %}
+    }
+</style>
 
+<div class="col-lg-12 grid-margin stretch-card mt-4">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Sales</span></h5>
+        </div>
+
+        <div class="card-body">
+            {% if data %}
+                <div class="col-11 horizontal-scroll-container">
+                    <div class="col-md text-left">
+                        <form action="{% url 'stud_search' %}" method="POST">
+                            {% csrf_token %}
+                            <table class="table">
+                                <tr>
+                                    <td>
+                                        <select name="searchby" id="searchby" class="form-control">
+                                            <option value="studname">Student Name</option>
+                                            <option value="fathername">Father Name</option>
+                                            <option value="studmob">Mobile No</option>
+                                            <option value="studclass">Class</option>
+                                            <option value="studstatus">Status</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
+                                    <td>
+                                        <button type="submit" class="btn btn-primary">Search</button>
+                                        <a href="{% url 'students_list' %}" type="button" class="btn btn-danger">Clear</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>S.No</th>
+                                <th>Name</th>
+                                <th>Admission No</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Father Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stud in data %}
+                            <tr align="center">
+                                <td><span class="serial-number"></span></td>
+                                <td align="left">{{ stud.first_name }} {{ stud.last_name }}</td>
+                                <td>{{ stud.admn_no }}</td>
+                                <td>{{ stud.class_name }}</td>
+                                <td>{{ stud.secs }}</td>
+                                <td align="left">{{ stud.father_name }}</td>
+                                <td>
+                                    <a href="{% url 'book_set_rec' stud.id %}" type="button" class="btn btn-info btn-sm">Bulk</a>
+                                    <a href="{% url 'reciept_ind_book' stud.id %}" type="button" class="btn btn-secondary btn-sm">Single</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <b>{{ cnt }} - Records Available</b>
+
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    {% if data.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Previous</span>
+      </li>
+    {% endif %}
+
+    {% with total_pages=data.paginator.num_pages current=data.number %}
+        {% if total_pages <= 7 %}
+            {% for num in data.paginator.page_range %}
+                {% if num == current %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% comment %} Show 7 pages around current page {% endcomment %}
+            {% with start=current|add:"-3" %}
+            {% with end=current|add:"3" %}
+                {% if start < 1 %}{% with end=end|add:"1-start" %}{% with start=1 %}{% endwith %}{% endwith %}{% endif %}
+                {% if end > total_pages %}{% with start=start|add:"total_pages-end" %}{% with end=total_pages %}{% endwith %}{% endwith %}{% endif %}
+
+                {% for num in data.paginator.page_range %}
+                    {% if num >= start and num <= end %}
+                        {% if num == current %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endwith %}{% endwith %}
+        {% endif %}
+    {% endwith %}
+
+    {% if data.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Next</span>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+
+
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const serialNumberElements = document.getElementsByClassName("serial-number");
+                        let startSerial = ({{ data.number }} - 1) * {{ data.paginator.per_page }};
+                        for (let i = 0; i < serialNumberElements.length; i++) {
+                            serialNumberElements[i].textContent = startSerial + i + 1;
+                        }
+                    });
+                </script>
+            {% else %}
+                <!-- Form section for new bill -->
+                {{ block.super }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

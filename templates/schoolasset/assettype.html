@@ -1,0 +1,171 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===================== GLOBAL FONT ===================== */
+h5, h3, th, td, body {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===================== CARD + LAYOUT ===================== */
+.col-lg-12.grid-margin.stretch-card {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    border: none;
+    overflow: hidden;
+}
+
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+/* ===================== TABLE ===================== */
+.table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.table-dark th {
+    background: #212529 !important;   /* User preference */
+    color: #fff !important;
+    font-weight: bold;
+    font-size: 15px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 10px !important;
+}
+
+/* Table rows */
+tbody td {
+    font-size: 15px !important;
+    padding: 11px !important;
+    vertical-align: middle;
+}
+
+tbody tr {
+    transition: 0.25s ease;
+    background: #fff;
+}
+
+tbody tr:hover {
+    background: #eef1ff !important;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* Primary button gradient */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    color: #fff;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0079d0, #1c1c5e);
+}
+
+/* Delete button with red gradient (Your preference) */
+.btn-danger {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    border: none;
+}
+.btn-danger:hover {
+    background: linear-gradient(135deg, #e33154, #e53920);
+}
+
+/* Alert style */
+.alert {
+    width: 95%;
+    margin: 20px auto;
+    font-size: 15px;
+    border-radius: 10px;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===================== TITLE BAR ===================== -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Asset Type</span></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="container-fluid mt-3">
+
+                <!-- New button -->
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="{% url 'new_assettype' %}" class="btn btn-primary px-4">
+                        + New Asset Type
+                    </a>
+                </div>
+
+                {% if data %}
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="10%">S.No</th>
+                                <th>Asset Type</th>
+                                <th width="20%">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for asset in data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ asset.name }}</td>
+                                <td>
+                                    <a href="{% url 'update_assettype' asset.id %}" class="btn btn-primary me-2 px-3">Edit</a>
+                                    <a href="{% url 'delete_assettype' asset.id %}" class="btn btn-danger px-3">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning text-center mt-4">
+                    No records available to show.
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

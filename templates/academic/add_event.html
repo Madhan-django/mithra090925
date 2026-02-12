@@ -1,50 +1,152 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					New Event
-				</span>
-			</span>
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
 
-</div>
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+}
+
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+         <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">New Event</span></h5>
     </div>
-<br>
-<div class="container">
-  <div class="col-11 mx-auto">
-    <br><br><br>
-    <form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-  </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="container">
+                 <br>
+                <!-- === Row 1 === -->
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Event Title</label>
+                        {{ form.event_title }}
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Event Location</label>
+                        {{ form.event_location }}
+                    </div>
+                </div>
+
+                <!-- === Row 2 === -->
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Start Date</label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>End Date</label>
+                        {{ form.end_date }}
+                    </div>
+                </div>
+
+                <!-- === Row 3 === -->
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Post Date</label>
+                        {{ form.post_date }}
+                    </div>
+                    <div class="col-md-6 form-group">
+
+    <input type="file" class="form-control" id="inputGroupFile02" name="event_image">
+
+                        <label>Event Image</label>
+
+                    </div>
+                </div>
+
+                <!-- === Row 4 (Full Width) === -->
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label>Event Description</label>
+                        {{ form.event_desc }}
+                    </div>
+                </div>
+
+                {{ form.event_school }}
+
+                <!-- Buttons -->
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a href="#" class="btn btn-danger">Cancel</a>
+                </div>
+                <br><br>
+            </div>
+        </form>
+    </div>
 </div>
 
-<!-- Include the necessary JavaScript files for datepicker -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
-
-<script>
-  $(document).ready(function () {
-    // Initialize the date pickers
-    $('#id_start_date').datetimepicker({
-      format: 'YYYY-MM-DD',
-    });
-
-    $('#id_end_date').datetimepicker({
-      format: 'YYYY-MM-DD',
-    });
-  });
-</script>
 {% endblock %}

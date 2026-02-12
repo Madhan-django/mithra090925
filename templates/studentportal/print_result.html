@@ -131,10 +131,14 @@
                   {% for sub in subj %}
                     <tr>
                       <td>{{ sub.subject_name }}</td>
+                      {% for ex in exm %}
                       {% for dt in data %}
                         {% if stu == dt.adm_card.exam_stu and sub == dt.exam_sub.exam_subjects %}
-                          <td>{{ dt.obtained_marks }}</td>
+                          {% if ex.exam_title == dt.adm_card.exam_label.exam_title %}
+                            <td>{{ dt.obtained_marks }}</td>
+                          {% endif %}
                         {% endif %}
+                      {% endfor %}
                       {% endfor %}
                     </tr>
                   {% endfor %}

@@ -1,0 +1,113 @@
+{% extends 'panel/index.html' %}
+{% load custom_filters %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    h2 {
+        background-color: #f2f2f2;
+        padding: 10px;
+        border-left: 5px solid #4CAF50;
+    }
+    h3 {
+        margin-top: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #e0e0e0;
+    }
+</style>
+<div class="card">
+    <br><br>
+    <div class="card-title">
+        <h5 class="mb-0 " align="center" >Classwise Timetable</h5>
+    </div>
+    <div class="card-body">
+
+        <form method="get">
+             <div class="col-md-6 mb-6">
+                          <div class="form-floating form-floating-outline">
+                            <select
+                              id="section_id"
+                              onchange="redirectToTimetable(this)"
+                              class="select2 form-select form-select-lg"
+                              data-allow-clear="true">
+                                   <option value="">...............</option>
+                              {% for sec in sections %}
+                                     <option value="{{ sec.id }}">
+                                     {{ sec.class_sec_name.name }} - {{ sec.section_name }}
+                                    </option>
+                              {% endfor %}
+
+                            </select>
+                            <label for="section_id">Select Section</label>
+                          </div>
+                        </div>
+
+    </form>
+
+
+<hr>
+{% for group in section_timetables %}
+       <div class="d-flex gap-2 mb-3 justify-content-end">
+    <form action="{% url 'export_pdf' group.section.id %}" method="get">
+        <button type="submit" class="btn btn-primary">Export to PDF</button>
+    </form>
+
+    <form action="{% url 'export_excel' group.section.id %}" method="get">
+        <button type="submit" class="btn btn-success">Export to Excel</button>
+    </form>
+</div>
+    <h5 align="center">{{ group.section.class_sec_name.name }} - {{ group.section.section_name }}</h5>
+    <table>
+        <thead>
+            <tr>
+                <th>Day / Period</th>
+                {% for p in group.grid %}
+                    <th>Period {{ p.period }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for day_index in group.days|length|make_range %}
+                <tr>
+                    <td>{{ group.days|index:day_index }}</td>
+                    {% for period_row in group.grid %}
+                        <td>{{ period_row.cells|index:day_index|safe }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br><br>
+{% empty %}
+    <p>No timetable data available.</p>
+{% endfor %}
+
+    </div>
+</div>
+
+<script>
+    function redirectToTimetable(select) {
+        const sectionId = select.value;
+        if (sectionId) {
+            const baseUrl = "{% url 'view_section_timetable' %}?section=" + sectionId;
+            window.location.href = baseUrl;
+        }
+    }
+</script>
+
+
+
+{% endblock %}

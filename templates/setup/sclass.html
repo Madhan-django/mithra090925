@@ -1,99 +1,223 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+    /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
 
-					</h1>
-			</div>
-</div>
+    /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Classes
-				</span>
-			</span>
-     <span class="float-md-right">
-					<a href="{% url 'addclass' %}" class="btn btn-sm btn-outline-light">
-                        New Class</a>
-     </span>
-</div>
- <br>
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
 
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Class Name </th>
-      <th>Academic Year</th>
-      <th>Actions </th>
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
 
 
-    </tr>
-  </thead>
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
 
-  <tbody>
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
 
 
-   {% for clslst in data %}
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
 
-    <tr align="center">
+    tr {
+        transition: all 0.2s ease;
+    }
 
-      <td>{{clslst.name}}</td>
-      <td>{{clslst.acad_year}}</td>
-      <td>
-          <form action="{% url 'updateclass' clslst.id %}" method="" class="d-inline">
-              {% csrf_token %}
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
 
-              <button type="submit" class="btn btn-lg"><i class="fas fa-edit" style="color: #106c02;"></i></button>
-          </form>
-<button type="button" class="btn btn-lg" data-toggle="modal" data-target="#{{clslst}}">
-<i class="fas fa-trash" style="color: #fd0013;"></i>
-</button>
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
 
-<!-- Modal -->
-<div class="modal fade" id="{{clslst}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Delete Session</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-     <h5 style="color:red;"> Are you sure want to Delete - {{clslst}}&nbsp; ? </h5>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-          <form action="{% url 'delcls' clslst.id %}" method="" class="d-inline">
-              {% csrf_token %}
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
 
-               <input type="submit" class="btn btn-danger" value="Delete">
-          </form>
- {% endif %}
-      </div>
+    .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b52a36;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 20px auto;
+        font-size: 15px;
+    }
+    .search-row .form-control {
+    height: 45px !important;
+    font-size: 12px;
+    border-radius: 8px;
+    width:300px
+}
+
+.search-row .btn {
+    min-width: 110px;
+    height: 35px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+    .text-center{
+    text-align:center;
+    }
+    .text-end{
+    padding-right:15px;
+    }
+    td{
+     text-align:center;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+
+            <h5><span class="badge bg-light text-dark">Class List</span></h5>
+
+        </div>
+        <div class="text-end">
+            <a href="{% url 'addclass' %}" type="button" class="btn btn-primary">
+                <i class="mdi mdi-plus-circle"></i> New Class
+            </a>
+
+
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Academic Year</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data %}
+                            {% for clslst in data %}
+                                <tr>
+                                    <td>{{ clslst.name }}</td>
+                                    <td>{{ clslst.acad_year }}</td>
+                                    <td>
+                                        <form action="{% url 'updateclass' clslst.id %}" method="get" class="d-inline">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-edit"></i> Update
+                                            </button>
+                                        </form>
+
+                                        {% if request.user.groups.first.name == "admin" or request.user.groups.first.name == "superadmin" %}
+                                            <form action="{% url 'delcls' clslst.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-danger">
+                                    No records are available to show
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-      </td>
-    </tr>
-
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
-</div>
-
-{% endif %}
 
 
 
 {% endblock %}
-

@@ -1,0 +1,235 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+           <h5 class="mb-0 text-center">Sales </h5>
+        </div>
+<div class="card-body">
+{% if data %}
+ <div class="col-11 horizontal-scroll-container">
+      <div class="col-md  text-left">
+                <form action="{% url 'students_search' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table">
+                        <tr>
+                         <td><select name="searchby" id="searchby" class="form-control">
+                     <option value="studname" >Student Name</option>
+                     <option value="fathername">Father Name</option>
+                     <option value="studmob">Mobile No</option>
+                     <option value="studclass">Class</option>
+                     <option value="studstatus">Status</option>
+
+                </select></td>
+                            <td><input type="search" placeholder="search" name="searched" required class="form-control"></td>
+                            <td><button type="submit" class="btn btn-primary" >Search</button>
+                            <a href ="{% url 'students_list' %}" type="button" class="btn btn-danger" >Clear</a></td>
+                        </tr>
+                    </table>
+                 </form>
+            </div>
+           </div>
+
+<div class="table-responsive">
+<table class="table">
+    <thead class="table-dark" align ="center">
+    <tr>
+      <th>S.No</th>
+      <th>Name </th>
+      <th>Admission No</th>
+      <th>Class</th>
+      <th>Section</th>
+      <th>Father Name</th>
+
+      <th>Actions</th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for stud in data %}
+
+    <tr align="center">
+   <td><span class="serial-number"></span></td>
+      <td align="left">{{stud.first_name}}{{stud.last_name}}</td>
+      <td>{{stud.admn_no}}</td>
+      <td>{{stud.class_name}}</td>
+      <td>{{stud.secs}}</td>
+        <td>{{stud.father_name}}</td>
+        <td>
+         <a href ="{% url 'book_set_rec' stud.id %}"  type="button" class="btn btn-info btn-sm">Bulk</a>&nbsp;&nbsp;&nbsp;
+         <a href ="{% url 'reciept_ind_book' stud.id %}" type="button" class="btn btn-secondary btn-sm">Single</a>&nbsp;&nbsp;
+
+
+     </td>
+
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+</div>
+<b>{{cnt}} - Records Available</b>
+ <nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if data.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for num in data.paginator.page_range %}
+      {% if data.number == num %}
+        <li class="page-item active">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if data.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+
+</div>
+<script>
+// JavaScript code to generate serial numbers
+document.addEventListener("DOMContentLoaded", function() {
+    const serialNumberElements = document.getElementsByClassName("serial-number");
+    let startSerial = ({{ data.number }} - 1) * {{ data.paginator.per_page }};
+
+    for (let i = 0; i < serialNumberElements.length; i++) {
+        serialNumberElements[i].textContent = startSerial + i + 1;
+    }
+});
+</script>
+{% else %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <form id="myForm" method="POST" action="" class="form-inline">
+        {% csrf_token %}
+        <div class="form-group mx-2">
+          <label for="start_date">Start Date:</label>
+          <input type="date" id="start_date" name="start_date" required class="form-control">
+        </div>
+        <div class="form-group mx-2">
+          <label for="end_date">End Date:</label>
+          <input type="date" id="end_date" name="end_date" required class="form-control">
+        </div>
+        <button type="button" id="changeUrlsearch" class="btn btn-success mx-2">Search</button>
+        <button type="button" id="changeUrldownload" class="btn btn-success mx-2">Download</button>
+      </form>
+    </div>
+    <div class="col-auto">
+      <button type="button"  id="formoneshow" class="btn btn-primary">New Bill</button>
+    </div>
+  </div>
+</div>
+
+<form method="post" id="formOne" data-section-url = "{% url 'ajax_load_section' %}">
+  {% csrf_token %}
+  {{ form.as_table }}
+    <br>
+  <button type="submit" class="btn btn-primary">Create</button>
+  <button type="reset" class="btn btn-danger">Clear</button>
+  <button  class="btn btn-secondary float-center" id ="hideme">Hide Me</button>
+
+</form>
+    <br><hr>
+    {% if bkset %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+	  <th>Date</th>
+      <th>Student Name</th>
+      <th>Class</th>
+      <th>Section</th>
+	  <th>status</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for set in bkset %}
+
+    <tr align="center">
+      <td>{{set.issue_date}}</td>
+      <td>{{set.book_student}}</td>
+      <td>{{set.book_student.class_name}}</td>
+      <td>{{set.book_student.secs}}</td>
+      <td>{{set.status}}</td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+        $(document).ready(function() {
+            // jQuery code to handle button click
+            $("#changeUrlsearch").click(function() {
+                // Modify the form's action attribute
+
+                $("#myForm").attr("action", "{% url 'set_search' %}");  // Change the URL as needed
+                $("#myForm").submit();
+            });
+              $("#changeUrldownload").click(function() {
+                // Modify the form's action attribute
+
+                $("#myForm").attr("action", "{% url 'book_set_pdf' %}");  // Change the URL as needed
+                $("#myForm").submit();
+            });
+             $("#formoneshow").click(function() {
+                // Modify the form's action attribute
+
+
+                $("#formOne").show();
+            });
+             $("#hideme").click(function() {
+                // Modify the form's action attribute
+
+
+                $("#formOne").hide();
+            });
+            $("#id_stud_class").change(function(){
+                    var url = $("#formOne").attr("data-section-url");
+                    var classId = $(this).val()
+       $.ajax({
+        url: url,
+        data: {
+          'Class_Id': classId
+        },
+        success: function (data) {
+          $("#id_book_student").html(data);
+        }
+             });
+         });
+        });
+    </script>
+{% endif %}
+    </div>
+</div>
+{% endblock %}
+
+

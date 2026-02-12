@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Periods</title>
+</head>
+<body>
+<table>
+  <tr>
+    <th>Days</th>
+    <th>Periods</th>
+    <th>School</th>
+
+  </tr>
+  {% if data %}
+  {% for dt in data %}
+    
+  <tr>
+      
+      <td>{{dt.day}}</td>
+      <td>{{dt.period_number}}</td>
+      <td>{{dt.period_school}}</td>
+
+
+
+
+
+  </tr>
+  {% endfor %}
+  {% else %}
+    <tr>
+        <td colspan="4">No data found</td>
+    </tr>
+    {% endif %}
+</table>
+</body>
+</html>

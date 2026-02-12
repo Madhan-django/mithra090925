@@ -1,0 +1,93 @@
+{% extends 'panel/index.html' %}
+{% load custom_filters %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    h2 {
+        background-color: #f2f2f2;
+        padding: 10px;
+        border-left: 5px solid #4CAF50;
+    }
+    h3 {
+        margin-top: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #e0e0e0;
+    }
+</style>
+
+
+ <div class="text-end">
+    <a href ="{% url 'all_teacher_timetable_pdf' %}" target="_blank" ><button type="submit" class="btn btn-primary btn-sm">Export to PDF</button></a>
+ </div>
+<h5 align="center">Timetable</h5>
+<form method="POST" action="{% url 'teacher_timetable_pdf' %}" target="_blank" class="row align-items-end">
+    {% csrf_token %}
+
+    <!-- Dropdown -->
+    <div class="col-md-6 mb-3">
+        <div class="form-floating form-floating-outline h-100">
+            <select
+                name="teacher_id"
+                class="select2 form-select"
+                id="teacher_id"
+                required
+                style="height: calc(3.5rem + 2px);"  <!-- Matches button height -->
+            >
+                <option value="">Select a teacher</option>
+                {% for t in teachers %}
+                    <option value="{{ t.id }}">{{ t.first_name }} {{ t.last_name }}</option>
+                {% endfor %}
+            </select>
+            <label for="teacher_id">Teacher</label>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="col-md-3 mb-3 d-flex align-items-stretch">
+        <button type="submit" class="btn btn-primary " style="height: calc(3.0rem + 1px);">
+            Export Timetable
+        </button>
+    </div>
+</form>
+
+{% for data in teacher_timetables %}
+<h4>{{ data.teacher.first_name }} {{ data.teacher.last_name }}</h4>
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Day</th>
+            {% for p in data.periods %}
+                <th>Period {{ p }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in data.grid %}
+        <tr>
+            <td><b>{{ row.day }}</b></td>
+            {% for cell in row.cells %}
+            <td>{{ cell|safe }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br><br>
+{% endfor %}
+
+
+{% endblock %}

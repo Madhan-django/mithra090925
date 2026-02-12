@@ -1,0 +1,132 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===================== GLOBAL FONT ===================== */
+body, h1, h3, h4, h5, label, input, select, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===================== CARD ===================== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+    background: #fff;
+}
+
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===================== FLOATING LABEL ===================== */
+.form-floating-outline {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.form-floating-outline > label {
+    position: absolute;
+    top: -8px;
+    left: 14px;
+    background: white;
+    padding: 0 6px;
+    font-size: 13px;
+    color: #555;
+}
+
+.form-floating-outline > input,
+.form-floating-outline > select {
+    width: 100%;
+    height: 52px;
+    border-radius: 10px;
+    padding: 14px 12px 6px 12px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+/* ===================== BUTTON ===================== */
+btn {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.text-end {
+    padding-top: 10px;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE BAR -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Room</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <!-- Room Number -->
+                    <div class="col-md-6">
+                        <div class="form-floating-outline">
+                            <input type="text" name="room_number" maxlength="50" required id="id_room_number">
+                            <label for="id_room_number">Room No</label>
+                        </div>
+                    </div>
+
+                    <!-- Floor Select -->
+                    <div class="col-md-6">
+                        <div class="form-floating-outline">
+                            <select name="floor" required id="id_floor">
+                                <option value="" selected>---------</option>
+                                {% for floor in floors %}
+                                    <option value="{{ floor.id }}">{{ floor }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="id_floor">Floor</label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary ">Submit</button>
+                    <button type="reset" class="btn btn-danger ">Clear</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

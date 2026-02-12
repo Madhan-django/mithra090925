@@ -1,0 +1,131 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style xmlns:align-items="http://www.w3.org/1999/xhtml" xmlns:align-items="http://www.w3.org/1999/xhtml"
+       xmlns:align-items="http://www.w3.org/1999/xhtml">
+    /* Global Font */
+    body, h1, h3, h5, th, td, label, input, select, button {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin: 0 !important;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    /* Title Bar - Style A (Badge Style) */
+    .card-title {
+        background: linear-gradient(90deg, #005C97, #363795);
+        padding: 6px !important;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 500;
+    }
+
+    .card-title span.badge {
+        background: #f8f9fa;
+        color: #000;
+        font-size: 13px;
+        padding: 4px 20px;
+        border-radius: 6px;
+    }
+
+    /* Form */
+    .form-label {
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        height: 45px;
+        font-size: 15px;
+        padding: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #007bff, #0056d2);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: #0054c6;
+    }
+
+    .btn-warning {
+        border-radius: 8px;
+    }
+
+    .row-align {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    @media(max-width: 768px) {
+        .row-align {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+  <div class="card">
+
+    <div class="card-title text-center mb-0">
+      <h5><span class="badge bg-light text-dark">Edit Asset Type</span></h5>
+    </div>
+
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- keep hidden field -->
+        {{ form.school }}
+
+        <div class="row-align mt-3" style="align-items: flex-end;">
+
+          <!-- Field Column -->
+          <div class="flex-grow-1">
+            <label class="form-label" for="{{ form.name.id_for_label }}">Asset Type</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+            <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Buttons Column -->
+          <div class="d-flex align-items-center">
+
+            <button type="submit" class="btn btn-primary px-4">Save</button>
+            <a href="{% url 'asset_type' %}" class="btn btn-warning ms-2">Cancel</a>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

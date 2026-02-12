@@ -1,75 +1,148 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
 
-					</h1>
-			</div>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h5, th, td, label, button, input, select {
+    font-family: 'Roboto', sans-serif;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Library Cards
-				</span>
-			</span>
-</div>
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== TOP RIGHT BUTTON ===== */
+.text-end {
+    padding: 18px 20px 10px 20px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-info {
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ===== TABLE ===== */
+.table {
+    margin-top: 10px;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.table-dark th {
+    font-size: 14px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+/* Rows */
+.table tbody td {
+    vertical-align: middle;
+    font-size: 14px;
+    padding: 10px 6px;
+}
+
+/* Print button */
+.table .btn-info {
+    padding: 6px 14px;
+    border-radius: 8px;
+}
+
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Library Cards</span></h5>
+        </div>
+
+        <!-- TOP RIGHT BUTTON -->
+        <div class="col-md text-end">
+            <form action="{% url 'gen_lib_card' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-info">Issue Library Card</button>
+            </form>
+        </div>
+
+        <div class="card-body">
+
+            <table class="table">
+                <thead class="table-dark" align="center">
+                    <tr>
+                        <th>Card Number</th>
+                        <th>Issued To</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Date Issued</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% if data %}
+                    {% for libcard in data %}
+                    <tr align="center">
+                        <td>{{ libcard.card_no }}</td>
+                        <td>{{ libcard.issued_to.first_name }}</td>
+                        <td>{{ libcard.issued_to.class_name }}</td>
+                        <td>{{ libcard.issued_to.secs }}</td>
+                        <td>{{ libcard.card_issued_date }}</td>
+
+                        <td>
+                            <form action="{% url 'print_card' libcard.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-info">Print Card</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="alert alert-danger text-center m-0" role="alert">
+                                No Records Available
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+
+        </div>
     </div>
-            <div class="col-md  text-right">
-                <form action="{% url 'gen_lib_card' %}" method="">
-                    {% csrf_token %}
-                <button type="submit" class="btn btn-success" >Issue Library Card</button>
-                    </form>
-            </div>
-<br>
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Card Number</th>
-      <th>Issued to </th>
-      <th>Class</th>
-      <th>Section</th>
-      <th>Date Issued</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-
-  <tbody>
-
-
-   {% for libcard in data %}
-
-    <tr align="center">
-      <td>{{libcard.card_no}}</td>
-      <td>{{libcard.issued_to.first_name}}</td>
-      <td>{{libcard.issued_to.class_name}}</td>
-      <td>{{libcard.issued_to.secs}}</td>
-      <td>{{libcard.card_issued_date}}</td>
-
-
-        <td>
-          <form action="{% url 'print_card' libcard.id %}" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-info" value="Print Card">
-          </form>
-                </td>
-    </tr>
-
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
 </div>
-
-{% endif %}
-
-
 
 {% endblock %}
-

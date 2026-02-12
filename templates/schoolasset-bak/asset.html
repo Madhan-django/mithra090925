@@ -1,0 +1,254 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .card-title {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+        padding: 15px 0;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    th {
+        font-weight: 600;
+        font-size: 15px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 12px 10px !important;
+    }
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b52a36;
+    }
+
+    /* Subasset Table */
+    .subassets-container table {
+        width: 95%;
+        margin: 10px auto;
+        background-color: #f9f9ff;
+        border-radius: 8px;
+    }
+
+    .subassets-container th, .subassets-container td {
+        font-size: 14px !important;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 20px auto;
+        font-size: 15px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Assets</span></h5>
+        </div>
+         <div class="container text-right">
+        <a href ="{% url 'add_asset' %}"><button class="btn btn-primary">New Asset</button></a>
+        </div>
+
+        <div class="card-body" style="padding: 10px;">
+            {% if data %}
+            <table class="table table-bordered table-striped align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>S.No</th>
+                        <th>Asset Name</th>
+                        <th>Type</th>
+                        <th>Asset Tag</th>
+                        <th>Serial No</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in data %}
+                    <tr id="asset-row-{{ asset.id }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ asset.asset_name }}</td>
+                        <td>{{ asset.asset_type }}</td>
+                        <td>{{ asset.asset_tag }}</td>
+                        <td>{{ asset.serial_number }}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm show-sub-btn"
+                                    data-asset-id="{{ asset.id }}"
+                                    type="button">
+                                Show Sub-assets
+                            </button>
+                            <a href="{% url 'add_subasset' asset.id %}" class="btn btn-success btn-sm">+ Sub</a>
+                            <a href="{% url 'update_asset' asset.id %}" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="{% url 'delete_asset' asset.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+
+                    <!-- Collapsible subasset row -->
+                    <tr id="subassets-row-{{ asset.id }}" style="display:none;">
+                        <td colspan="6">
+                            <div class="subassets-container"></div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-danger text-center" role="alert">
+                No records available to show.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Script to handle subasset loading -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.show-sub-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const assetId = button.dataset.assetId;
+      const row = document.getElementById(`subassets-row-${assetId}`);
+      const container = row.querySelector('.subassets-container');
+
+      if (row.style.display === 'none') {
+        if (!container.dataset.loaded) {
+          container.innerHTML = "<div class='text-center p-2'>Loading...</div>";
+          try {
+            const response = await fetch(`/assets/get_subassets/${assetId}/`, { method: 'GET', credentials: 'same-origin' });
+            const data = await response.json();
+
+            if (data.success && data.subassets.length > 0) {
+              let tableHTML = `
+                <table class="table table-sm table-bordered text-center">
+                  <thead class="table-secondary">
+                    <tr><th>#</th><th>Name</th><th>Tag</th><th>Serial No</th></tr>
+                  </thead>
+                  <tbody>
+              `;
+              data.subassets.forEach((s, i) => {
+                tableHTML += `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td>${s.asset_name}</td>
+                    <td>${s.asset_tag}</td>
+                    <td>${s.serial_number}</td>
+                  </tr>`;
+              });
+              tableHTML += `</tbody></table>`;
+              container.innerHTML = tableHTML;
+            } else {
+              container.innerHTML = `<div class="alert alert-secondary m-2">No sub-assets found.</div>`;
+            }
+            container.dataset.loaded = "true";
+          } catch (err) {
+            container.innerHTML = `<div class="alert alert-danger">Error loading sub-assets</div>`;
+          }
+        }
+
+        row.style.display = 'table-row';
+        button.textContent = "Hide Sub-assets";
+      } else {
+        row.style.display = 'none';
+        button.textContent = "Show Sub-assets";
+      }
+    });
+  });
+});
+</script>
+
+{% endblock %}

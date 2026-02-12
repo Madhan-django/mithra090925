@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Balance Summary</title>
+</head>
+<body>
+<h5 class="mb-0 text-center">Balance Summary</h5>
+<table>
+    <tr>
+      <th>S.No</th>
+      <th>Date</th>
+      <th>Opening Balance</th>
+      <th>Closing Balance</th>
+    </tr>
+    <tr>
+         {% if data %}
+   {% for bal in data %}
+    <tr align="center">
+        <td>{{forloop.counter}}</td>
+        <td>{{bal.date}}</td>
+        <td>{{bal.opening_balance}}</td>
+        <td>{{bal.credit}}</td>
+        <td>{{bal.closing_balance}}</td>
+
+    </tr>
+   {% endfor %}
+    {% endif %}
+
+</table>
+</body>
+</html>

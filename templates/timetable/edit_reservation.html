@@ -1,0 +1,118 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===================== GLOBAL FONT ===================== */
+body, h1, h3, h4, h5, th, td, label, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===================== CARD ===================== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===================== TITLE BAR ===================== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 6px;
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+}
+
+.card-title h4 span,
+.card-title h5 span {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 14px;
+    padding: 5px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ===================== FORM GRID (2x2) ===================== */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 30px;
+}
+
+/* Make radios aligned properly */
+.form-check-label {
+    margin-left: 5px;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-outline-secondary {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+.pt-6 {
+    text-align: right;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE BAR -->
+        <div class="card-title text-center">
+            <h4><span class="badge bg-light text-dark">Update Reservation</span></h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Hidden fields -->
+                {{ form.sch_class }}
+                {{ form.section }}
+                {{ form.subject }}
+                {{ form.school }}
+
+                <!-- 2x2 GRID -->
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Reservation Slot:</label>
+                        {{ form.timeslot }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Adaptive Day:</label><br>
+                        {{ form.adaptive_day }}
+                        <label class="form-check-label" for="id_adaptive_day"></label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Adaptive Period:</label><br>
+                        {{ form.adaptive_period }}
+                        <label class="form-check-label" for="id_adaptive_period"></label>
+                    </div>
+
+                </div>
+
+                <div class="pt-6 mt-3">
+                    <button type="submit" class="btn btn-primary me-3">Submit</button>
+                    <a href="{% url 'add_reservation' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

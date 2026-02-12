@@ -1,0 +1,30 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+   .text-end{
+     padding:20px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0 text-center">Update Product</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              {{ form.as_p }}
+    <div class="text-end">
+       <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+</form>
+		</div>
+    </div>
+</div>
+
+{% endblock %}
+
+

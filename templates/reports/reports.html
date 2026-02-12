@@ -1,0 +1,187 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ================= GLOBAL ================= */
+body, h1, h3, h4, h5, label, button, a {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ================= CARD ================= */
+.card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ================= TITLE BAR ================= */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px !important;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.card-title .badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;
+    padding: 4px 20px;
+    border-radius: 6px;
+}
+
+/* ================= CARD BODY ================= */
+.card-body {
+    padding-top: 12px;
+}
+
+/* ================= NAV PILLS ================= */
+.nav-pills {
+    gap: 8px;
+}
+
+.nav-pills .nav-link {
+    border-radius: 30px;
+    padding: 6px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2a2a72;
+    background: #f1f3f5;
+}
+
+.nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* ================= TAB CONTENT ================= */
+.tab-content {
+    padding-top: 16px;
+}
+
+/* ================= BUTTONS ================= */
+.btn-danger {
+    background: linear-gradient(135deg, #ff4e50, #c31432);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* ================= MODAL ================= */
+.modal-content {
+    border-radius: 16px;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    color: #fff;
+}
+
+.modal-title {
+    font-size: 16px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge">Reports</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- NAV -->
+            <ul class="nav nav-pills mb-3" id="ex1" role="tablist">
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#ex1-tabs-1">Students</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-2">Staff</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-3">Finance</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-4">Examination</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-5">Petty Cash</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-6">Inventory</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-7">Library</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ex1-tabs-8">Visitors</a></li>
+            </ul>
+
+            <!-- TAB CONTENT -->
+            <div class="tab-content" id="ex1-content">
+
+                <!-- STUDENTS -->
+                <div class="tab-pane fade show active" id="ex1-tabs-1">
+                    <a href="{% url 'students_summary_xl' %}" class="btn btn-danger me-2">
+                        <i class="ri-group-3-line"></i> Students Summary
+                    </a>
+                    <a href="{% url 'classwise_summary_xl' %}" class="btn btn-danger me-2">
+                        <i class="ri-building-2-line"></i> Classwise Summary
+                    </a>
+                    <button class="btn btn-danger">
+                        <i class="ri-user-star-line"></i> Attendance Summary
+                    </button>
+                </div>
+
+                <!-- STAFF -->
+                <div class="tab-pane fade" id="ex1-tabs-2">
+                    <a href="{% url 'staff_summary_xl' %}" class="btn btn-danger me-2">
+                        <i class="ri-user-6-line"></i> Staff List
+                    </a>
+                    <button class="btn btn-danger">
+                        <i class="ri-user-follow-line"></i> Attendance Summary
+                    </button>
+                </div>
+
+                <!-- FINANCE -->
+                <div class="tab-pane fade" id="ex1-tabs-3">
+                    <a href="{% url 'fee_sums_xl' %}" class="btn btn-danger me-2"><i class="ri-bill-line"></i> Fee Summary</a>
+                    <a href="{% url 'fee_paid_summary_xl' %}" class="btn btn-danger me-2"><i class="ri-money-rupee-circle-line"></i> Fee Paid Summary</a>
+                    <a href="{% url 'fee_unpaid_summary_xl' %}" class="btn btn-danger me-2"><i class="ri-money-rupee-circle-fill"></i> Fee-Unpaid Summary</a>
+                    <a href="{% url 'receipt_summary_xl' %}" class="btn btn-danger me-2"><i class="ri-receipt-line"></i> Receipt Summary</a>
+                    <a href="{% url 'fee_summary_xl' %}" class="btn btn-danger"><i class="ri-book-2-line"></i> Fee Classwise</a>
+                </div>
+
+                <!-- EXAM -->
+                <div class="tab-pane fade" id="ex1-tabs-4">
+                    <a href="{% url 'exam_result' %}" class="btn btn-danger me-2">Exam Result</a>
+                    <a href="{% url 'Exams_sums_xl' %}" class="btn btn-danger me-2">Exam</a>
+                    <a href="{% url 'studentwiseanalysis' %}" class="btn btn-danger me-2">Student Wise Analysis</a>
+                    <a href="{% url 'classwiseanalysis' %}" class="btn btn-danger">Class Wise Analysis</a>
+                </div>
+
+                <!-- PETTY -->
+                <div class="tab-pane fade" id="ex1-tabs-5">
+                    <button class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#CashSourceModal">
+                        Cash Source Summary
+                    </button>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#PettyExpenseModal">
+                        Petty Cash Summary
+                    </button>
+                </div>
+
+                <!-- INVENTORY -->
+                <div class="tab-pane fade" id="ex1-tabs-6">
+                    <a href="{% url 'stocks_summmary' %}" class="btn btn-danger">Stocks Summary</a>
+                </div>
+
+                <!-- LIBRARY -->
+                <div class="tab-pane fade" id="ex1-tabs-7">
+                    <a href="{% url 'librarybooks' %}" class="btn btn-danger">Library Books</a>
+                </div>
+
+                <!-- VISITORS -->
+                <div class="tab-pane fade" id="ex1-tabs-8"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

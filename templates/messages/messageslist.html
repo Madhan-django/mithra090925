@@ -1,0 +1,377 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+
+<!-- ========================================================= -->
+<!-- 🌈 GLOBAL STYLING (Matches your saved template styles) -->
+<!-- ========================================================= -->
+<style>
+    /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Card Layout - full width look */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+   /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table-dark th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;    /* reduced top padding */
+    padding-bottom: 6px !important; /* reduced bottom padding */
+    font-size: 14px !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+    td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #b52a36;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 20px auto;
+        font-size: 15px;
+    }
+    .search-row .form-control {
+    height: 45px !important;
+    font-size: 12px;
+    border-radius: 8px;
+    width:300px
+}
+
+.search-row .btn {
+    min-width: 110px;
+    height: 35px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+</style>
+
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+
+<!-- ========================================================= -->
+<!-- 🔔 NOTIFICATIONS TABLE -->
+<!-- ========================================================= -->
+<div class="card">
+    <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">Notifications</span></h5>
+    </div>
+
+    <div class="text-end mt-2">
+        <a href="{% url 'new_notify' %}" class="btn btn-sm btn-primary">New Notification</a>
+    </div>
+
+    <div class="card-body">
+    {% if data %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-dark" align="center">
+                    <tr>
+                        <th>S.No</th><th>Notification Title</th><th>Creation Date</th>
+                        <th>Schedule Date</th><th>Messenger</th><th>Sent</th>
+                        <th>Total</th><th>Status</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for notification in data %}
+                    <tr align="center">
+                        <td>{{ forloop.counter0|add:data.start_index }}</td>
+                        <td>{{notification.title}}</td>
+                        <td>{{notification.create_date|date:"d-m-y - h:i A"}}</td>
+                        <td>{{notification.post_date|date:"d-m-y - h:i A"}}</td>
+                        <td>{{notification.created_by_id}}</td>
+                        <td>{{notification.success_count}}</td>
+                        <td>{{notification.total_count}}</td>
+                        <td>{{notification.status}}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="ri-more-2-line"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="#"><i class="ri-pencil-line me-1"></i> Edit</a>
+                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                        <a class="dropdown-item text-danger" href="#"><i class="ri-delete-bin-7-line me-1"></i> Delete</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-3">
+            <ul class="pagination">
+                {% if data.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page1={{ data.previous_page_number }}">Previous</a></li>
+                {% endif %}
+
+                {% for num in data_page_range %}
+                    {% if data.number == num %}
+                        <li class="page-item active"><a class="page-link">{{ num }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page1={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if data.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page1={{ data.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+    {% else %}
+        <div class="alert alert-danger text-center">No Records Available</div>
+    {% endif %}
+    </div>
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- 📢 BULK NOTIFICATIONS TABLE -->
+<!-- ========================================================= -->
+<div class="card mt-4">
+    <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">Bulk Notifications</span></h5>
+    </div>
+
+    <div class="card-body">
+    {% if bulk_notifications %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-dark" align="center">
+                    <tr>
+                        <th>S.No</th><th>Notification Title</th><th>Class</th><th>Section</th>
+                        <th>Creation Date</th><th>Schedule Date</th><th>Messenger</th>
+                        <th>Sent</th><th>Total</th><th>Status</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notification in bulk_notifications %}
+                    <tr align="center">
+                        <td>{{ forloop.counter0|add:bulk_notifications.start_index }}</td>
+                        <td>{{notification.title_msg}}</td>
+                        <td>{{notification.aclass}}</td>
+                        <td>{{notification.ssec}}</td>
+                        <td>{{notification.create_date|date:"d-m-y - h:i A"}}</td>
+                        <td>{{notification.post_date|date:"d-m-y - h:i A"}}</td>
+                        <td>{{notification.created_by}}</td>
+                        <td>{{notification.success_count}}</td>
+                        <td>{{notification.total_count}}</td>
+                        <td>{{notification.status}}</td>
+                        <td> ... actions ... </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bulk Pagination -->
+        <div class="d-flex justify-content-center mt-3">
+            <ul class="pagination">
+                {% if bulk_notifications.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page2={{ bulk_notifications.previous_page_number }}">Previous</a></li>
+                {% endif %}
+
+                {% for num in bulk_page_range %}
+                    {% if bulk_notifications.number == num %}
+                        <li class="page-item active"><a class="page-link">{{ num }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page2={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if bulk_notifications.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page2={{ bulk_notifications.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+    {% else %}
+        <div class="alert alert-danger text-center">No Records Available</div>
+    {% endif %}
+    </div>
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- 📡 BROADCAST TABLE -->
+<!-- ========================================================= -->
+<div class="card mt-4">
+    <div class="card-title text-center">
+        <h5><span class="badge bg-light text-dark">Broadcasts</span></h5>
+    </div>
+
+    <div class="card-body">
+    {% if broadcast %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-dark" align="center">
+                    <tr>
+                        <th>S.No</th><th>Notification Title</th><th>Creation Date</th>
+                        <th>Schedule Date</th><th>Messenger</th><th>Sent</th>
+                        <th>Total</th><th>Status</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notification in broadcast %}
+                    <tr align="center">
+                        <td>{{ forloop.counter0|add:broadcast.start_index }}</td>
+                        <td>{{notification.title_msg}}</td>
+                        <td>{{notification.create_date|date:"d-m-y - h:i A"}}</td>
+                        <td>{{notification.post_date|date:"d-m-y - h:i A"}}</td>
+                        <td>{{notification.created_by}}</td>
+                        <td>{{notification.success_count}}</td>
+                        <td>{{notification.total_count}}</td>
+                        <td>{{notification.status}}</td>
+                        <td> ... actions ... </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Broadcast Pagination -->
+        <div class="d-flex justify-content-center mt-3">
+            <ul class="pagination">
+                {% if broadcast.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page3={{ broadcast.previous_page_number }}">Previous</a></li>
+                {% endif %}
+
+                {% for num in broadcast_page_range %}
+                    {% if broadcast.number == num %}
+                        <li class="page-item active"><a class="page-link">{{ num }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page3={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if broadcast.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page3={{ broadcast.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+    {% else %}
+        <div class="alert alert-danger text-center">No Records Available</div>
+    {% endif %}
+    </div>
+</div>
+
+
+</div>
+{% endblock %}

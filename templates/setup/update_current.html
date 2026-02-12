@@ -1,25 +1,110 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
 
-<div class="text-warning bg-dark"><h3 align="center">New Session</h3></div><br><br>
-  <div class="col-11">
-      <br><br><br>
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, select, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-      <form action="" method="POST">
-          {% csrf_token %}
-          {{form.school_name}}<br>
-          <label>Current Year:</label>
-          <select name="current_year" required="" id="id_current_year">
-              <option value="">---------</option>
-              {% for yr in year %}
-              <option value="{{yr.id}}" selected="">{{yr}}</option>
-              {% endfor %}
-          </select>
+/* ===== CARD ===== */
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    overflow: hidden;
+}
 
-          <button type="submit" class="btn btn-success">Submit</button>
-      </form>
+/* ===== TITLE BAR (STYLE A) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 6px;
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+}
 
+.card-title h5 {
+    margin: 0;
+}
 
-  </div>
+.card-title .badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;
+    padding: 6px 24px;
+    border-radius: 6px;
+}
+
+/* ===== FORM ===== */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    border-radius: 10px;
+    font-size: 14px;
+    height: 42px;
+}
+
+/* ===== BUTTON ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    padding: 8px 22px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+/* ===== ALIGNMENTS ===== */
+.text-end {
+    text-align: right;
+}
+</style>
+
+<div class="col-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===== TITLE ===== -->
+        <div class="card-title">
+            <h5>
+                <span class="badge bg-light text-dark">
+                    Update Current Session
+                </span>
+            </h5>
+        </div>
+
+        <!-- ===== BODY ===== -->
+        <div class="card-body">
+
+            <form action="" method="POST" class="row g-3">
+                {% csrf_token %}
+
+                <!-- School (Hidden/Readonly as per form) -->
+                {{ form.school_name }}
+
+                <!-- Academic Year -->
+                <div class="col-md-6">
+                    <label class="floating-label" for="id_current_year">Current Academic Year</label>
+                    <select name="current_year" required id="id_current_year" class="form-control">
+                        <option value="">---------</option>
+                        {% for yr in syear %}
+                            <option value="{{ yr.id }}" selected>{{ yr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-md-6 ">
+                    <br>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{% url 'set_current_yr' %}" class="btn btn-danger">Clear</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
 {% endblock %}

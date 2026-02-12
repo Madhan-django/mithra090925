@@ -1,87 +1,266 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* === General Typography === */
+body, h1, h3, h4, h5, label, input, select, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Products
-				</span>
-			</span>
-     <span class="float-md-right">
-					<button type="button" action="{% url 'product_create' %}" class="btn btn-sm btn-outline-light" data-toggle="modal" data-target="#exampleModal">
-                       New Product</a></button>
-     </span>
+/* === Card Styling === */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: none;
+    background-color: #f8f9fa;
+}
 
+/* === Card Header with Badge === */
+.card-title {
+    background: linear-gradient(90deg, #007bff, #6610f2);
+    color: white;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+}
 
-<!-- Modal -->
+.card-title h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.card-title h5 span {
+    display: inline-block;
+    background-color: rgba(255,255,255,0.85);
+    color: #000;
+
+}
+
+/* === Table Styling === */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+}
+
+.table thead th {
+    background-color: #212529 !important; /* Dark header */
+    color: #fff !important;               /* White text */
+    font-weight: 600;
+    font-size: 14px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    vertical-align: middle !important;
+    height: 30px; /* Reduced header height */
+    padding: 5px 8px !important; /* Less padding for thin look */
+}
+
+/* Override any Bootstrap dark table */
+.table thead th {
+    border-top: none !important;
+}
+
+.table tbody td {
+    background-color: #ffffff;
+    vertical-align: middle;
+    font-size: 15px !important;
+    text-align: center;
+    padding: 10px !important;
+    border: none;
+}
+
+.table tbody tr:hover td {
+    background-color: #f6f8ff;
+}
+
+/* === Buttons === */
+.text-end {
+    padding-right: 20px;
+    text-align: end;
+}
+
+.btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    border: none;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #0056d2, #0096ff);
+}
+
+.btn-info {
+    background: linear-gradient(90deg, #17a2b8, #20c997);
+    border: none;
+    color: #fff;
+}
+
+.btn-info:hover {
+    background: linear-gradient(90deg, #138496, #17a2b8);
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #dc3545, #ff4b5c);
+    border: none;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(90deg, #c82333, #e55353);
+}
+
+/* === Alerts === */
+.alert {
+    width: 95%;
+    margin: 20px auto;
+    font-size: 15px;
+    border-radius: 8px;
+}
+
+/* === Modal Styling === */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+.modal-header {
+    background: linear-gradient(90deg, #007bff, #6610f2);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 50px;
+}
+
+.modal-header h4 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.modal-header .close {
+    color: white;
+    font-size: 28px;
+    opacity: 0.9;
+    position: absolute;
+    right: 15px;
+    top: 5px;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+    color: #fff;
+    transform: scale(1.1);
+    transition: 0.2s ease-in-out;
+}
+
+.modal-body {
+    padding: 25px 30px;
+    background-color: #f9fafc;
+}
+
+.modal-body .btn {
+    margin-right: 10px;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card mt-4">
+    <div class="card">
+        <!-- Card Header -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Products List</span></h5>
+        </div>
+
+        <!-- New Product Button -->
+        <div class="text-end mt-2 mb-2">
+            <a href="{% url 'product_create' %}" class="btn btn-primary btn-sm">New Product</a>
+        </div>
+
+        <!-- Product Table -->
+        <div class="card-body table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>School</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data %}
+                        {% for prod in data %}
+                        <tr>
+                            <td>{{ prod.name }}</td>
+                            <td>{{ prod.sch }}</td>
+                            <td>
+                                <form action="{% url 'product_update' prod.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-info btn-sm">Edit</button>
+                                </form>
+                                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                                <form action="{% url 'product_delete' prod.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                <div class="alert alert-danger text-center mb-0">
+                                    No Records Available to Show
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for creating product -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 align="center" class="modal-title text-danger text-center" id="exampleModalLabels">Product</h4>
+        <h4 class="modal-title text-center" id="exampleModalLabel">Product</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-       <form method="post" >
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Create</button>
-  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-   </form>
+       <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-info">Create</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+       </form>
       </div>
     </div>
   </div>
 </div>
-</div>
-</div>
-<br>
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Product Name</th>
-      <th>School</th>
-      <th>Action</th>
-    </tr>
-  </thead>
 
-  <tbody>
-
-
-   {% for prod in data %}
-
-    <tr align="center">
-      <td>{{prod.name}}</td>
-      <td>{{prod.sch}}</td>
-              <td>
-          <form action="{% url 'product_update' prod.id %}" method="" class="d-inline">
-              {% csrf_token %}
-               <input type="submit" class="btn btn-info" value="Update">
-          </form>
-{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-            <form action="{% url 'product_delete' prod.id %}" method="" class="d-inline">
-              {% csrf_token %}
-               <input type="submit" class="btn btn-danger" value="Delete">
-          </form>
- {% endif %}
-        </td>
-    </tr>
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
-</div>
-{% endif %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 {% endblock %}
-

@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,HttpResponse
 from django.contrib import messages
 from .models import school
 from authenticate.decorators import allowed_users,unauthenticated_user
@@ -11,18 +11,20 @@ from .forms import add_school
 def selectschool(request):
     data = school.objects.all()
     user = request.user
-    return render(request,'institutions/index.html',context={'data':data})
+    return render(request,'panel/admindash.html',context={'data':data,'user':user})
 
-@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+
 def allschool(request):
     request.session['sch_id'] = school_id
     sch_id = request.session['sch_id']
     data = school.objects.get(pk=school_id)
     hide = 1
+
     return render(request,'institutions/schoollists.html',context={'data':data})
 
 @allowed_users(allowed_roles=['superadmin'])
 def addschool(request):
+
     if request.method =='POST':
         form= add_school(request.POST,request.FILES)
         if form.is_valid():
@@ -36,11 +38,10 @@ def schoollist(request,school_id):
     request.session['sch_id'] = school_id
     sch_id = request.session['sch_id']
     data = school.objects.get(pk=school_id)
-    return render(request,'institutions/school.html',context={'sch':data})
+    return redirect('home_dashboard')
 
 @allowed_users(allowed_roles=['superadmin'])
 def delschool(request,school_id):
-
     fm = school.objects.get(pk=school_id)
     fm.delete()
     messages.success(request,'Institution Deleted Successfully')
@@ -48,19 +49,30 @@ def delschool(request,school_id):
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def updateschool(request, sch_id):
-    data = school.objects.only('logo').get(pk=sch_id)
+    sch = school.objects.get(pk=sch_id)
+
+
+
     if request.method == "POST":
-        form = add_school(request.POST, request.FILES, instance=data)
+        form = add_school(request.POST, request.FILES, instance=sch)
         if form.is_valid():
             form.save()
             messages.success(request, 'Institution updated successfully')
             return redirect('institutions')
-    else:
-        form = add_school(instance=data)
-    return render(request, 'institutions/updateschool.html', {'form': form})
+
+    form = add_school(instance=sch)
+
+    return render(request, 'institutions/updateschool.html', {
+        'form': form,
+        'sch': sch
+    })
+
+
+
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def conf_school(request):
     sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
     data = school.objects.get(pk=sch_id)
-    return render(request,'institutions/school.html',context={'sch':data})
+    return render(request,'institutions/school.html',context={'sch':data,'skool':sdata})

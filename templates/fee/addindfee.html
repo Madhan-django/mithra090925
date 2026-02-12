@@ -1,133 +1,307 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 
 {% block content %}
-<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <style>
- input[type='radio'] {
-     transform: scale(2);
- }
-#secelt{
-font-size:20px;
-font-weight:bold;
+/* ===== Global Styling ===== */
+body, label, select, input, button {
+    font-family: 'Roboto', sans-serif !important;
 }
 
-.myDiv{
-	display:none;
+/* ===== Card Styling ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.15);
+    overflow: hidden;
 }
-#showOne{
-	color:red;
-    border:1px solid red;
-    padding:10px;
+
+/* ===== Title Bar with Badge ===== */
+.card-title {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    padding: 6px 0; /* Reduced padding */
+    border-radius: 20px 20px 0 0;
+    text-align: center;
 }
-#showTwo{
-	color:green;
-    border:1px solid green;
-    padding:10px;
+.card-title h5 {
+    margin: 0;
+    font-size: 20px; /* Smaller font */
+    color: white;
 }
-#showThree{
-	color:blue;
-    border:1px solid blue;
-    padding:10px;
+.card-title h5 span.badge {
+    background: #fff;
+    color: #000;
+    padding: 4px 10px; /* Badge padding */
+    font-size: 14px;
+    border-radius: 10px;
+}
+
+/* ===== Buttons ===== */
+.btn-info {
+    background: linear-gradient(135deg, #1a73e8, #0056d6) !important;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 15px;
+}
+.btn-danger {
+    background: linear-gradient(135deg, #ff5b5b, #cc0000) !important;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 15px;
+}
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #1c7c31) !important;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 15px;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056d2) !important;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 15px;
+}
+
+/* ===== Table Styling ===== */
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+}
+.table th, .table td {
+    vertical-align: middle !important;
+    text-align: center;
+}
+.table th {
+    font-size: 13px;      /* Smaller font */
+    padding: 4px 8px;     /* Reduced padding */
+    height: 30px;         /* Reduced header height */
+}
+.table td {
+    font-size: 13px;      /* Row font size */
+    padding: 5px 8px;
+}
+.table-dark th {
+    background-color: #212529 !important;
+    color: white;
+}
+
+/* ===== Text Alignment ===== */
+.text-end {
+    text-align: right;
+    padding-bottom: 10px;
+}
+
+/* ===== Form Controls ===== */
+select.form-control, input.form-control {
+    border-radius: 10px !important;
+}
+
+/* ===== Pagination Styling ===== */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+.pagination .page-item .page-link {
+    border-radius: 10px;
+    padding: 5px 10px;
+}
+.pagination .page-item.active .page-link {
+    background-color: #1a73e8 !important;
+    border-color: #0056d6 !important;
+    color: white;
+}
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+}
+    .myDiv {
+    display: none;
 }
 </style>
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
 
-					</h1>
-			</div>
-
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-                     Fee
-				</span>
-			</span>
+<div class="card">
+<div class="card-title text-center">
+     <h5 class="mb-0">
+        <span class="badge">Fee Generation</span>
+      </h5>
 </div>
+    <div class="card-body">
+        <div class="col-md-6">
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label"></label>
+            <div class="col-sm-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios1" value="Two" checked> Individual Fee </label>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios2" value="One"> Bulk Fee</label>
+                </div>
+            </div>
+        </div>
     </div>
-<div class="text-center" id="secelt">
-<h4>Select</h4>
-<input type="radio" name="demo" value="One"/> Bulk Fee &nbsp;&nbsp;
-<input type="radio" name="demo" value="Two"/> Individual Fee
-</div>
-<br>
-<div id="showTwo" class="myDiv">
-  	<strong>Add Individual Fee</strong>
 
-	<form id="addindfeeform" data-class-url="{% url 'ajax_load_class' %}" method ="POST">
+
+<div id="showTwo" class="myDiv"><center>
+  	<strong >Individual Fee</strong></center><br>
+    	<form id="addindfeeform" data-class-url="{% url 'ajax_load_class' %}" method ="POST">
                       {% csrf_token %}
-
-                      <label> Fee Type </label>
-                      <select id="id_fee_cat" name="fee_cat" class="form-control">
+            <div class="row">
+               <div class="col-md-6">
+                  <div class="form-floating form-floating-outline">
+                  <select id="id_fee_cat" name="fee_cat" class="form-control">
                           <option value="" selected="">---------</option>
                           {% for sel in data %}
                           <option value="{{sel.id}}">{{sel.invoice_title}}</option>
                           {% endfor %}
-                      </select>
-                      <br>
-                      <label> Class </label>
-                      <select id="id_class_name" name="class_name" class="form-control">
+                  </select>
+                  <label for="id_fee_cat">Fee Category</label>
+                  </div>
+               </div>
+                <div class="col-md-6">
+                   <div class="form-floating form-floating-outline">
+                   <select id="id_class_name" name="class_name" class="form-control">
                           <option value="" selected="">---------</option>
                           {% for sel in cdata %}
                           <option value="{{sel.id}}">{{sel.name}}</option>
                           {% endfor %}
-                      </select><br>
-
-                      <label> Student </label>{{form.stud_name}}<br>
-                     {{form.due_amt}}<br>
-                      <label> Concession</label>{{form.concession}}<br>
-                     {{form.invoice_no}}<br>
-                      {{form.status}}<br>
-                      <button type="submit" class="btn btn-success">Submit</button>
-                      <button  type="reset"class="btn btn-warning">Reset</button>
-
-                  </form>
+                    </select>
+                  <label for="id_class_name">Class</label>
+                  </div>
+               </div>
+            </div>
+            <br>
+             <div class="row">
+               <div class="col-md-6">
+                  <div class="form-floating form-floating-outline">
+                    <div class="select2-primary">
+                      <select name="stud_name" id="id_stud_name" class="form-control select2 select2-primary" multiple>
+                             <!-- Options will be loaded dynamically -->
+                      </select>
+                    </div>
+                  <label for="id_stud_name">Students</label>
+                  </div>
+               </div>
+                <div class="col-md-6">
+                   <div class="form-floating form-floating-outline">
+                     {{form.concession}}
+                  <label for="id_concession">Concession</label>
+                  </div>
+               </div>
+            </div>
+            <br>
+              {{form.due_amt}}
+              {{form.invoice_no}}
+              {{form.status}}
+            <div class="text-end">
+                      <button type="submit" class="btn btn-info">Submit</button>
+                      <button  type="reset"class="btn btn-danger">Clear</button>
+            </div>
+        </form>
 </div>
-<div id="showOne" class="myDiv">
-	<strong>Add Bulk Fee</strong>
+<div id="showOne" class="myDiv"><center>
+	<strong>Bulk Fee</strong></center><br>
 	<form action ="{% url 'addbulkfee' %}" method ="POST">
-                      {% csrf_token %}
-                    <label>Fee Category :</label>{{form.fee_cat}}<br>
-                    <label>Class :</label>
-                    <select name="class_name" required="" id="id_class_name" class="form-control">
+        {% csrf_token %}
+            <div class="row">
+               <div class="col-md-6">
+                  <div class="form-floating form-floating-outline">
+                  <select name="fee_cat" class="form-control" required="" id="id_fee_cat">
+                        <option value="" selected="">---------</option>
+                          {% for sel in data %}
+                          <option value="{{sel.id}}">{{sel.invoice_title}}</option>
+                          {% endfor %}
+                   </select>
+                  <label for="id_fee_cat">Fee Category</label>
+                  </div>
+               </div>
+                <div class="col-md-6">
+                   <div class="form-floating form-floating-outline">
+                   <select name="class_name" required="" id="id_class_name" class="form-control">
                          <option value="" selected="">---------</option>
                          {% for cls in cdata %}
                         <option value="{{cls.id}}">{{cls}}</option>
                          {% endfor %}
-                    </select><br><br>
-                    <div class="text-center">
-                      <button type="submit" class="btn btn-success">Generate</button>
-                      <button  type="reset"class="btn btn-warning">Reset</button>
-                        </div>
-                  </form>
+                    </select>
+                  <label for="id_class_name">Class</label>
+                  </div>
+               </div>
+            </div>
+            <br>
+            <div class="row">
+               <div class="col-md-6">
+                  <div class="form-floating form-floating-outline">
+                  <select name="years" id="id_years" class="form-control">
+                       <option value="" selected="">---------</option>
+                         {% for yrs in years %}
+                        <option value="{{yrs.id}}">{{yrs}}</option>
+                         {% endfor %}
+                    </select>
+                  <label for="id_years">Academic Year</label>
+                  </div>
+               </div>
+                <div class="col-md-6">
+                   <div class="form-floating form-floating-outline">
+
+                  </div>
+               </div>
+            </div>
+            <br>
+        <div class="text-center">
+            <button type="submit" class="btn btn-info">Generate</button>
+            <button  type="reset"class="btn btn-danger">Clear</button>
+        </div>
+    </form>
+</div>
+    </div>
 </div>
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <script>
+
+
+    // Initialize Select2 if the element exists
+
+
     $("#id_class_name").change(function () {
-       var url = $("#addindfeeform").attr("data-class-url");
-       var classid = $(this).val();
-       console.log('Test Working');
+        var url = $("#addindfeeform").attr("data-class-url");
+        var classid = $(this).val();
+        console.log('Test Working');
 
-      $.ajax({
-        url: url,
-        data: {
-          'selclassid': classid
-        },
-        success: function (data) {
-          $("#id_stud_name").html(data);
-          console.log('stud',data);
-        }
-      });
+        $.ajax({
+            url: url,
+            data: {
+                'selclassid': classid
+            },
+            success: function (data) {
+                $("#id_stud_name").html(data);
 
-});
- $('input[type="radio"]').click(function(){
-    	var demovalue = $(this).val();
-        $("div.myDiv").hide();
-        $("#show"+demovalue).show();
+                // Refresh Select2 to recognize new <option>s
+                $('#id_stud_name').trigger('change');
+                console.log('stud', data);
+            }
+        });
     });
-</script>
 
+    $('input[type="radio"]').click(function () {
+        var demovalue = $(this).val();
+        $("div.myDiv").hide();
+        $("#show" + demovalue).show();
+    });
+      $('#id_stud_name').select2({
+            placeholder: "Select students",
+            allowClear: true,
+            width: '100%' // Ensures proper width if inside Bootstrap
+        });
+</script>
 
 {% endblock %}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 3px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr{
+        font-size:12px;
+        font-weight: Normal;
+        text-align:center;
+        }
+
+        .wlsm-main-header card col{
+             text-align: center;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="wlsm-main-header card col" xmlns="http://www.w3.org/1999/html">
+	<div class="school_header">
+		<h1>
+			<i class="fa fa-graduation-cap text-light"></i><center>
+			{{skool}}<small class="wlsm_text_secondary">{{year}}</small></center>
+		</h1>
+			</div>
+
+    <h1 align="center">Stock List</h1>
+    {% if stk %}
+    <p align="right">{{dt_tm}}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in stk %}
+                    <tr>
+                        <td>{{ prod.name }}</td>
+                        <td>{{ prod.description }}</td>
+                        <td>{{ prod.category }}</td>
+                        <td>{{ prod.quantity }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No records are available to show.</p>
+    {% endif %}
+</body>
+</html>

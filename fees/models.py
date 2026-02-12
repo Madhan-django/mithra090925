@@ -9,6 +9,7 @@ from admission.models import students
 class fees(models.Model):
     invoice_title = models.CharField(max_length=150)
     desc = models.CharField(max_length=250)
+    fee_group = models.CharField(max_length=25,null=True,blank=True)
     iclass = models.ForeignKey(sclass,on_delete=models.CASCADE)
     issued_date = models.DateField()
     due_date = models.DateField()
@@ -24,9 +25,10 @@ class fees(models.Model):
 class addindfee(models.Model):
     fee_cat = models.ForeignKey(fees, on_delete=models.CASCADE)
     class_name = models.ForeignKey(sclass, on_delete=models.CASCADE)
-    stud_name = models.ForeignKey(students, on_delete=models.CASCADE)
+    stud_name = models.ForeignKey(students,on_delete=models.CASCADE,blank=True,null=True)
     due_amt = models.IntegerField()
     concession = models.IntegerField()
+    concession_apply = models.BooleanField(default=False)
     invoice_no = models.IntegerField()
     status = models.CharField(max_length=15)
 
@@ -38,7 +40,8 @@ class addindfee(models.Model):
 class bulkfee(models.Model):
     fee_cat = models.ForeignKey(fees, on_delete=models.CASCADE)
     class_name = models.ForeignKey(sclass, on_delete=models.CASCADE)
-
+    years = models.ForeignKey(academicyr,on_delete=models.CASCADE,blank=True,null=True)
+    
     def __str__(self):
         return self.fee_cat.invoice_title
 

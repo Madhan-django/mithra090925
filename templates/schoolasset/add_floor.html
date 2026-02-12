@@ -1,0 +1,119 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===================== GLOBAL FONT ===================== */
+body, h1, h3, h4, h5, label, input, select, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===================== CARD ===================== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===================== TITLE BAR (STYLE-A) ===================== */
+/* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+/* ===================== FORM FIELD ===================== */
+.form-control {
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn-primary {
+    background: linear-gradient(135deg, #009ffd, #2a2a72);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* Cancel (if needed in future) */
+.btn-danger {
+    background: linear-gradient(135deg, #ff4b4b, #b30000);
+    border: none;
+}
+
+.text-end {
+    padding-top: 10px;
+}
+</style>
+
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Floor</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <!-- Floor Name -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_name" class="form-label">Floor Name</label>
+                        <input type="text" name="name" class="form-control" maxlength="100" required id="id_name">
+                    </div>
+
+                    <!-- Select Block -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_block" class="form-label">Select Block</label>
+                        <select name="block" class="form-control" required id="id_block">
+                            <option value="" selected>---------</option>
+                            {% for block in blk %}
+                                <option value="{{ block.id }}">{{ block.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

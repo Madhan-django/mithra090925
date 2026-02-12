@@ -1,0 +1,69 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+{% load static %}
+<style>
+.text-end{
+    padding:20px;
+    }
+</style>
+ <!-- Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Group Sale</h4>
+           <a href="{% url 'reciept_book_set' %}" class="close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+         </a>
+
+        </div>
+        <div class="modal-body">
+          {% if form %}
+         <form method="POST">
+              {% csrf_token %}
+             <p>
+             <select name="book_set" class="form-control" required="" id="id_book_set">
+                <option value="" selected="">---------</option>
+                {% for bk in bkset %}
+                 <option value="{{bk.id}}">{{bk}}</option>
+                 {% endfor %}
+             </select>
+             </p>
+             <p>
+
+                 {{form.issue_date}}
+             </p>
+             <p>
+                 {{form.stud_class}}
+             </p>
+             <p>
+                 {{form.book_student}}
+             </p>
+              <p>
+                 {{form.status}}
+             </p>
+              <p>
+                 {{form.set_school}}
+             </p>
+             <div class="text-end">
+             <button type="submit" class="btn btn-info">Submit</button>
+             <a href = "{% url 'reciept_book_set' %}" class="btn btn-warning" >Close</a>
+             </div>
+</form>
+{% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+ <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#myModal').modal('show');
+
+  });
+</script>
+
+{% endblock %}
+

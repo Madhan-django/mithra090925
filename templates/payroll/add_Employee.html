@@ -1,0 +1,215 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+    /* ===== GLOBAL FONT ===== */
+    body, h1, h3, h4, label, input, select, textarea, button {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+        border-radius: 20px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        overflow: hidden;
+    }
+
+    /* ===== TITLE BAR ===== */
+    .card-title {
+        background: linear-gradient(90deg, #005C97, #363795);
+        padding: 12px;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .card-title h4 {
+        margin: 0;
+        display: inline-block;
+        background: #f8f9fa;
+        padding: 6px 22px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #000;
+    }
+
+    /* ===== CARD BODY ===== */
+    .card-body {
+        padding: 30px;
+    }
+
+    /* ===== FORM ELEMENTS ===== */
+    form p {
+        margin-bottom: 18px;
+    }
+
+    label {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        width: 100%;
+        height: 48px;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        padding: 10px 14px;
+        font-size: 15px;
+        transition: 0.2s ease-in-out;
+    }
+
+    textarea {
+        height: auto;
+        min-height: 90px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #2a92ff;
+        box-shadow: 0 0 0 2px rgba(42,146,255,0.2);
+        outline: none;
+    }
+
+    option {
+        font-size: 15px;
+    }
+
+    /* ===== FORMSET BLOCKS ===== */
+    fieldset {
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+        border-radius: 10px;
+        font-size: 14px;
+        padding: 8px 22px;
+        margin: 5px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #0053d6, #2a92ff);
+        border: none;
+    }
+
+    .btn-warning {
+        background: linear-gradient(90deg, #f0ad4e, #ffcc70);
+        border: none;
+        color: #000;
+    }
+
+    /* ===== ALIGNMENT ===== */
+    .text-center {
+        margin-top: 25px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 20px;
+        }
+    }
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h4>New Employee</h4>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <form action="" method="POST">
+    {% csrf_token %}
+
+<!--    <p>-->
+<!--        <label for="id_emp_code">Emp code:</label>-->
+<!--        {{ form.emp_code }}-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_name">Name:</label>-->
+<!--        {{ form.name }}-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_department">Department:</label>-->
+<!--        <select name="department" required="" id="id_department">-->
+<!--            <option value="" selected="">-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+<!--            {% for dep in dept %}-->
+<!--            <option value="{{dep.id}}">{{dep.name}}</option>-->
+<!--            {% endfor %}-->
+<!--        </select>-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_designation">Designation:</label>-->
+<!--         <select name="designation" required="" id="id_designation">-->
+<!--            <option value="" selected="">-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+<!--            {% for des in desg %}-->
+<!--            <option value="{{des.id}}">{{des.title}}</option>-->
+<!--            {% endfor %}-->
+<!--        </select>-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_date_of_joining">Date of Joining:</label>-->
+<!--        <input type="date" name="date_of_joining" required="" id="id_date_of_joining">-->
+
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_basic_salary">Basic Salary:</label>-->
+<!--        {{ form.basic_salary }}-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_contact">Contact:</label>-->
+<!--        {{ form.contact }}-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_email">Email:</label>-->
+<!--        {{ form.email }}-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        <label for="id_status">Status:</label>-->
+<!--        {{ form.status }}-->
+<!--    </p>-->
+
+
+
+<!--        {{ form.emp_sch }}-->
+
+                     {{ emp_form.as_p }}
+
+             {{formset.management_form}}
+                    {% for form in formset %}
+                    {{form.as_p}}
+                    {% endfor %}
+
+
+            </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-warning">Reset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock %}

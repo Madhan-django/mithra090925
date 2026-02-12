@@ -1,68 +1,172 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* === Typography === */
+body, h1, h3, h5, th, td, label, input, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
+/* === Card Styling === */
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					Product Sets
-				</span>
-			</span>
-</div>
-    </div>
-            <div class="col-md  text-right">
-                <form action="{% url 'product_set_create' %}" method="">
-                    {% csrf_token %}
-                <button type="submit" class="btn btn-success" >New Product Set</button>
-                    </form>
+/* === Card Header === */
+.card-title {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    color: white;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+    padding: 0 15px;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* === Table Styling === */
+/* === Table Styling === */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+}
+
+/* Table header */
+.table thead,
+.table thead th {
+    background-color: #212529 !important;  /* dark background */
+    color: #ffffff !important;             /* white text */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px !important;            /* slightly smaller font */
+    padding: 6px 8px !important;           /* reduce padding */
+    height: 35px !important;               /* set slim header height */
+    text-align: center;
+    vertical-align: middle !important;
+}
+
+/* Table body rows */
+.table tbody td {
+    background-color: #ffffff;
+    vertical-align: middle;
+    font-size: 15px;
+    padding: 10px !important;
+    text-align: center;
+    border-radius: 6px;
+}
+
+/* Hover effect */
+tr:hover td {
+    background-color: #f6f8ff;
+}
+
+/* === Buttons === */
+.text-end {
+    padding-right: 20px;
+    text-align: end;
+}
+
+.btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-info {
+    background: linear-gradient(90deg, #17a2b8, #20c997);
+    border: none;
+    color: #fff;
+}
+
+.btn-info:hover {
+    background: linear-gradient(90deg, #138496, #17a2b8);
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #dc3545, #ff4b5c);
+    border: none;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(90deg, #c82333, #e55353);
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card mt-4">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Products List</span></h5>
+        </div>
+
+        <div class="text-end mt-2 mb-2">
+            <form action="{% url 'product_set_create' %}" method="">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-info">New Product Set</button>
+            </form>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Group Name</th>
+                            <th>Class Name</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data %}
+                            {% for set in data %}
+                                <tr>
+                                    <td>{{ set.name }}</td>
+                                    <td>{{ set.pclass.name }}</td>
+                                    <td>{{ set.prod_set }}</td>
+                                    <td>{{ set.qty }}</td>
+                                    <td>
+                                        <form action="{% url 'product_set_update' set.id %}" method="" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-info btn-sm">Update</button>
+                                        </form>
+                                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                                        <form action="{% url 'product_set_delete' set.id %}" method="" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="alert alert-danger text-center mb-0" role="alert">
+                                        No Records Available to Show
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
-<br>
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Class Name</th>
-      <th>Product Category</th>
-      <th>Product Name</th>
-      <th>Quantity</th>
-      <th>Action</th>
-    </tr>
-  </thead>
+        </div>
 
-  <tbody>
-   {% for set in data %}
-    <tr align="center">
-      <td>{{set.pclass.name}}</td>
-      <td>{{set.prod_set.category}}</td>
-      <td>{{set.prod_set}}</td>
-      <td>{{set.qty}}</td>
-             <td>
-          <form action="#" method="" class="d-inline">
-              {% csrf_token %}
-               <input type="submit" class="btn btn-info" value="Update">
-          </form>
-{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-            <form action="#" method="" class="d-inline">
-              {% csrf_token %}
-               <input type="submit" class="btn btn-warning" value="Delete">
-          </form>
-{% endif %}
-        </td>
-    </tr>
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
+    </div>
 </div>
-{% endif %}
 {% endblock %}
-

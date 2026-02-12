@@ -1,55 +1,185 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<style>
+    /* ===== GLOBAL FONT ===== */
+body, label, input, select, button, h4 {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 18px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (Reduced Height) ===== */
+.card-title {
+    background: linear-gradient(90deg, #0D47A1, #1976D2);
+    padding: 6px 0;   /* Reduced height */
+    margin: 0;
+    color: white;
+}
+
+.card-title h4 {
+    margin: 0;
+    font-size: 20px;
+}
+
+/* ===== BADGE STYLE TITLE ===== */
+.card-title h4 span.badge {
+    background: #fff;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ===== FORM LAYOUT ===== */
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    font-weight: 600;
+}
+
+input, select, textarea {
+    border-radius: 8px !important;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #1565C0, #1E88E5);
+    border: none;
+    padding: 6px 18px;
+    border-radius: 8px;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #B71C1C, #D32F2F);
+    border: none;
+    padding: 6px 18px;
+    border-radius: 8px;
+}
+
+.btn-danger:hover,
+.btn-primary:hover {
+    opacity: 0.92;
+}
+
+/* ===== CENTER BUTTONS ===== */
+.text-center button {
+    margin: 0 6px;
+}
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE BAR -->
+        <div class="card-title text-center">
+            <h4 class="mb-0">
+                <span class="badge bg-light text-dark px-3 py-2" style="font-size: 16px;">
+                    Update Fee Category
+                </span>
+            </h4>
+        </div>
+        <br><br>
+        <div class="card-body">
+            <div class="container">
+
+                <form id="addfee" action="" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+
+                        <!-- LEFT SIDE -->
+                        <div class="col-md-6">
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Invoice Title:</label></div>
+                                <div class="col-md-8">{{ form.invoice_title }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Invoice Description:</label></div>
+                                <div class="col-md-8">{{ form.desc }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Invoice Date:</label></div>
+                                <div class="col-md-8">{{ form.issued_date }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Due Date:</label></div>
+                                <div class="col-md-8">{{ form.due_date }}</div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT SIDE -->
+                        <div class="col-md-6">
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Class:</label></div>
+                                <div class="col-md-8">
+                                    <select name="iclass" class="form-control" required id="id_iclass">
+                                        <option value="">---------</option>
+                                        {% for option in iclass %}
+                                            <option value="{{ option.id }}">{{ option.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Fee Amount:</label></div>
+                                <div class="col-md-4">{{ form.fee_amount }}</div>
+
+                            </div>
+                            <div class="form-row">
+
+                                <div class="col-md-4"><label>Late Fee</label></div>
+                                 <div class="col-md-4">{{ form.latefee }}</div>
+
+                            </div>
 
 
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Is-Active:</label></div>
+                                <div class="col-md-8">{{ form.isactive }}</div>
+                            </div>
 
+                            <div class="form-row">
+                                <div class="col-md-4"><label>Fee Year:</label></div>
+                                <div class="col-md-8">
+                                    <select name="ac_year" class="form-control" required id="id_ac_year">
+                                        <option value="">---------</option>
+                                        {% for yr in yr2 %}
+                                            <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {{ form.fees_school }}
+                        </div>
 
-<div class="text-danger bg-primary bg-light"><h2 align="center" style="color:red"><i class="fa-solid fa-school"></i>&nbsp;&nbsp;{{skool.name}}</h2></div><br>
-<center><p class="h3 text-dark" >New Fee</p></center>
+                    </div>
 
-            <div class="row">
-                <div class="col-sm">
-                    <form id="addfee" action = "" method ="POST">
-                         {% csrf_token %}
-                    <label>Invoice Title : </label>{{form.invoice_title}}<br>
-                    <label>Invoice Description  : </label>{{form.desc}}<br>
-                    <label>Invoice Date  : </label>{{form.issued_date}}<br>
-                    <label>Due Date  : </label>{{form.due_date}}<br>
-                    <label>Class  : </label>{{form.iclass}}<br>
+                    <br>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-danger">Reset</button>
+                    </div>
 
-                    <label>School  : </label>{{form.fees_school}}<br>
-                    <label>Fee Amount  : </label>{{form.fee_amount}}<br>
+                </form>
 
-                    <label>Late Fee  : </label>{{form.latefee}}<br>
-                    <label>Is-Active  : </label>{{form.isactive}}<br>
-
-                         <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
             </div>
-
-  </div>
-<!--<script>-->
-<!--    $("#id_iclass").change(function () {-->
-
-<!--      var url = $("#addfee").attr("data-section-url");-->
-<!--      var professionId = $(this).val();-->
-<!--      console.log(professionId);-->
-
-
-<!--      $.ajax({-->
-<!--        url: url,-->
-<!--        data: {-->
-<!--          'profession': professionId-->
-<!--        },-->
-<!--        success: function (data) {-->
-<!--          $("#id_student_name").html(data);-->
-<!--        }-->
-<!--      });-->
-
-<!--    });-->
-<!-- </script>-->
-
+        </div>
+    </div>
+</div>
 
 {% endblock %}

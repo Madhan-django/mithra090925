@@ -1,0 +1,56 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+ .text-end{
+    padding:20px;
+    }
+</style>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0">Stock List</h5>
+        </div>
+  <div class="text-end">
+      <a href ="{% url 'stock_gen_pdf' %}" type="button" class="btn btn-info">Stock</a>
+      </div>
+<br>
+        <div class="card-body">
+{% if data %}
+            <div class="table-responsive">
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Product Name</th>
+      <th> Description</th>
+      <th>Category</th>
+      <th>Quantity</th>
+      </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for prod in data %}
+
+    <tr align="center">
+      <td>{{prod.name}}</td>
+      <td>{{prod.description}}</td>
+      <td>{{prod.category}}</td>
+      <td>{{prod.quantity}}</td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+            </div>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

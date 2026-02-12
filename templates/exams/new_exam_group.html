@@ -1,0 +1,114 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+
+/* ===== GLOBAL FONT ===== */
+body, label, button, input, select, textarea, h4, h5 {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD STYLE ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ===== TITLE BAR ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 6px 0 !important;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.card-title h5 {
+    margin: 0;
+}
+
+.card-title .badge {
+    background: #ffffff;
+    color: #000;
+    padding: 6px 18px;
+    font-size: 15px;
+    border-radius: 6px;
+}
+
+/* ===== FORM FIELDS ===== */
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    border-radius: 8px;
+    box-shadow: none;
+    border: 1px solid #ced4da;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #e52d27, #b31217);
+    border: none;
+}
+
+.text-end {
+    padding-right: 60px;
+}
+.form-control {
+    border: 1.5px solid #000305;
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5 class="mb-0 text-center">
+                <span class="badge bg-light text-dark">New Exam Group</span>
+            </h5>
+        </div>
+
+        <div class="text-end">
+            <a href="{% url 'exam_groups' %}" class="btn btn-sm btn-warning">BACK</a>
+        </div>
+
+        <div class="card-body">
+
+<form action="" method="POST">
+    {% csrf_token %}
+
+    <!-- ROW: Select + Buttons -->
+    <div class="row align-items-end">
+
+        <!-- Select -->
+        <div class="col-md-8">
+            <div class="form-group">
+                <label>Exam Group:</label>
+                {{ form.exm_group }}
+            </div>
+            {{ form.exam_group_school }}
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-md-4 ">
+            <button type="submit" class="btn btn-primary btn-sm waves-effect waves-light">Submit</button>
+            <button type="reset" class="btn btn-danger btn-sm waves-effect waves-light">CLEAR</button>
+        </div>
+
+    </div>
+
+</form>
+
+<br>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    h1, h3 {
+        font-family: Roboto;
+    }
+    th {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+    .align-right {
+        display: block;
+        padding: 30px;
+
+        text-align: right;
+    }
+    #searchby {
+        height: 50px;
+        font-family: Roboto;
+        font-size: 16px;
+    }
+    .table{
+    padding:15px;
+    }
+</style>
+
+<div class="container mt-4">
+        <h2 class="text-center">Employee Salary Record</h2>
+
+        <div class="card p-3 mt-3">
+            <h4>School: {{ skool.name }}</h4>
+            <h5>Academic Year: {{ year.acad_year }}</h5>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Allowances</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Allowance Type</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for allowance in allowances %}
+                        <tr>
+                            <td>{{ allowance.allowance_name.name }}</td>
+                            <td>{{ allowance.amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center">No allowances available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <h4>Deductions</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Deduction Type</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deduction in deductions %}
+                        <tr>
+                            <td>{{ deduction.deduction_name }}</td>
+                            <td>{{ deduction.amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center">No deductions available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

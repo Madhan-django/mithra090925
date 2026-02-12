@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>Timetable for {{ section.class_sec_name.class_name }} - {{ section.section_name }}</h2>
+<ul>
+{% for entry in entries %}
+    <li>{{ entry.timeslot.get_day_display }} - Period {{ entry.timeslot.period_number }}: {{ entry.subject.subject_name }} by {{ entry.teacher.first_name }} {{ entry.teacher.last_name }}</li>
+{% endfor %}
+</ul>
+</body>
+</html>

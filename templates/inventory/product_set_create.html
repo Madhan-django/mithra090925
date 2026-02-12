@@ -1,36 +1,168 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
+<style>
+/* === General Typography === */
+body, h1, h3, h4, h5, label, input, select, button {
+    font-family: 'Roboto', sans-serif;
+}
 
-					</h1>
-			</div>
+/* === Grid & Card Layout === */
+.col-lg-12.grid-margin.stretch-card {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin: 0;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-					 Create Product
-				</span>
-			</span>
-</div>
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: none;
+    background-color: #f8f9fa;
+}
+
+/* === Gradient Card Header with Badge === */
+.card-title {
+    background: linear-gradient(90deg, #007bff, #6610f2);
+    color: white;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.card-title h5 span {
+    display: inline-block;
+    background-color: rgba(255,255,255,0.85);
+    color: #000;
+
+}
+
+/* === Form Fields === */
+.form-floating {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.form-floating input,
+.form-floating select {
+    border-radius: 8px !important;
+    border: 1px solid #ced4da !important;
+    padding: 10px !important;
+    width: 100%;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-floating label {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* === Buttons === */
+.text-end {
+    padding-top: 20px;
+    text-align: end;
+}
+
+.btn {
+    border-radius: 10px;
+    min-width: 100px;
+    font-weight: 500;
+    padding: 8px 18px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-info {
+    background: linear-gradient(90deg, #17a2b8, #20c997);
+    border: none;
+    color: #fff;
+}
+
+.btn-info:hover {
+    background: linear-gradient(90deg, #138496, #17a2b8);
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #dc3545, #ff4b5c);
+    border: none;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(90deg, #c82333, #e55353);
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card mt-4">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Product Set</span></h5>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.name }}
+                            <label for="id_name">Group Name</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select name="pclass" class="form-control" required id="id_pclass">
+                                <option value="" selected>---------</option>
+                                {% for pcls in cls %}
+                                    <option value="{{ pcls.id }}">{{ pcls }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="id_pclass">Class</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select name="prod_set" class="form-control" required id="id_prod_set">
+                                <option value="" selected>---------</option>
+                                {% for pr in prod %}
+                                    <option value="{{ pr.id }}">{{ pr }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="id_prod_set">Product</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.qty }}
+                            <label for="id_qty">Quantity</label>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form.ac_year }}
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-info">Create</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+            </form>
+        </div>
     </div>
-           <br>
-<div class="container">
-<form method="post" style="background-color: transparent;">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <div style="display: flex; justify-content: flex-end; gap: 10px;">
-	  <button type="submit" class="btn btn-primary btn-lg">Create</button>
-    <input type="reset" value="Close" class="btn btn-secondary btn-lg">
+</div>
 
-  </div>
-</form>
-
-	</div>
-<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 {% endblock %}
-

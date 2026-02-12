@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Wise Analysis</title>
+    <style>
+        h1 {
+            font-family: Roboto;
+            font-size: 22px;
+            margin: 0;
+            padding-right: 10px; /* Adjust this value if you want a small space between the text and image */
+        }
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header, .footer {
+            width: 100%;
+            text-align: center;
+            position: fixed;
+            margin: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .footer {
+            bottom: 0;
+        }
+        .pagenum:before {
+            content: counter(page);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: Roboto;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding-top: 5px;
+            text-align: center;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+    <div class="header">
+        <h1>{{ school_name }}</h1>
+        <img src="{{ skoollogo }}" alt="School Logo" height="80" width="100">
+    </div>
+    <div class="footer">
+        Page <span class="pagenum"></span>
+    </div>
+    <div class="content">
+        <h2>Class: {{ class_name }}</h2>
+        <table class="table-responsive">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Admission No</th>
+                    <th>Improvement</th>
+                    <th>Weakness</th>
+                    <th>Status</th>
+                    <th>Photo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in predictions %}
+                <tr>
+                    <td>{{ prediction.student_name }}</td>
+                    <td>{{ prediction.admn_no }}</td>
+                    <td>{{ prediction.improvement|join:", " }}</td>
+                    <td>{{ prediction.weakness|join:", " }}</td>
+                    <td>{{ prediction.top_scorer_status }}</td>
+                    <td><img src="{{ prediction.photourl }}" alt="Photo" height="50"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

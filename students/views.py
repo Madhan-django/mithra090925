@@ -1,74 +1,160 @@
 from django.shortcuts import render,redirect,HttpResponse
 from django.contrib.auth.models import User,Group
-from django.core.paginator import Paginator
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator,EmptyPage
+from django.http import Http404
 from admission.models import students
 from institutions.models import school
-from setup.models import sclass,section,currentacademicyr,academicyr
+from setup.models import sclass,section,currentacademicyr,academicyr,subjects
 from .forms import addattendanceform,attendancegen,attendanceview
 from admission.forms import add_studentsForm,trans_students
 from django.contrib import messages
 from authenticate.decorators import allowed_users
+from django.contrib.auth.hashers import make_password
 from .models import attendance
 from .utils import render_to_pdf
 import csv
-
+import os
+from django.contrib.auth import update_session_auth_hash
 
 
 # Create your views here.
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def students_list(request):
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    year = currentacademicyr.objects.get(school_name=sch_id)
-    ayear = academicyr.objects.get(acad_year=year,school_name=sdata)
-    data = students.objects.filter(school_student=sdata,ac_year=ayear,student_status='Active')
-    paginator = Paginator(data, 30)  # Show 30 items per page
-    page_number = request.GET.get('page')  # Get the current page number from the request's GET parameters
-    page_obj = paginator.get_page(page_number)  # Get the corresponding page object
-    return render(request, 'students/sstudents.html', context={'data': page_obj, 'skool': sdata, 'year': year})
+    try:
+        sch_id = request.session['sch_id']
+        sdata = school.objects.get(pk=sch_id)
+        year = currentacademicyr.objects.get(school_name=sch_id)
+        ayear = academicyr.objects.get(acad_year=year, school_name=sdata)
+        data = students.objects.filter(
+            school_student=sdata, ac_year=ayear, student_status='Active'
+        )
+        cnt = data.count()
+        cls = sclass.objects.filter(school_name=sdata, acad_year=year)
+
+        paginator = Paginator(data, 30)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        return render(
+            request,
+            'students/sstudents.html',
+            {
+                'data': page_obj,
+                'skool': sdata,
+                'year': year,
+                'cnt': cnt,
+                'cls': cls,
+            },
+        )
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
+
+
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
-def delstud(request,stud_id):
+def dels_stud(request,stud_id):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
     data = students.objects.get(pk=stud_id)
-    duser = User.objects.get(username=data.usernm)
-    duser.delete()
+    if User.objects.filter(username=data.usernm).exists():
+        print('data deleted yes')
+        duser = User.objects.get(username=data.usernm)
+        duser.delete()
     data.delete()
     messages.success(request,'Record Deleted Successfully')
     return redirect('students_list')
 
-@allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
-def updatestud(request,stud_id):
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    cdata = sclass.objects.filter(school_name=sdata).values()
-    year = currentacademicyr.objects.get(school_name=sch_id)
-    yr = academicyr.objects.get(school_name=sch_id, acad_year=year)
-    data = students.objects.get(pk=stud_id)
-    if request.method=='POST':
-        form = add_studentsForm(request.POST,request.FILES,instance=data,)
-        if form.is_valid():
-            ussr = form.cleaned_data['usernm']
-            eml = form.cleaned_data['email']
-            if not User.objects.filter(username=ussr).exists():
-                tmp = User.objects.create(username=ussr, email=eml, password='welcome@123')
-                grp = Group.objects.get(name='student')
-                tmp.groups.add(grp)
 
-            form.save()
-            messages.success(request,'Student updated successfully')
-            return redirect('students_list')
+   
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def updatestud(request, stud_id):
+    try:
+        sch_id = request.session['sch_id']
+    except KeyError:
+        return HttpResponse("School not found in session", status=400)
+
+    sdata = school.objects.get(pk=sch_id)
+    cls = sclass.objects.filter(school_name=sdata)
+    year = currentacademicyr.objects.get(school_name=sdata)
+    yr = academicyr.objects.get(school_name=sdata, acad_year=year)
+    data = students.objects.get(pk=stud_id)
+    selcls = data.class_name
+    sec = section.objects.filter(class_sec_name=data.class_name)
+    sel = data.secs
+
+    # Determine "next" (the URL to return to). Prefer GET (link), then POST (hidden input),
+    # then fallback to HTTP_REFERER for best-effort.
+    next_url = request.GET.get('next') or request.POST.get('next') or request.META.get('HTTP_REFERER')
+
+    if request.method == 'POST':
+        form = add_studentsForm(request.POST, request.FILES, instance=data)
+        if form.is_valid():
+            try:
+                # Photo replacement (delete old file if replaced)
+                if 'student_photo' in request.FILES:
+                    new_photo = request.FILES['student_photo']
+                    if data.student_photo and hasattr(data.student_photo, 'path') and os.path.isfile(data.student_photo.path):
+                        try:
+                            os.remove(data.student_photo.path)
+                        except Exception:
+                            # don't break the update for a failure to delete file
+                            pass
+                    data.student_photo = new_photo
+
+                # Create User if username provided & not exists
+                ussr = form.cleaned_data.get('usernm')
+                eml = form.cleaned_data.get('email')
+                if ussr and not User.objects.filter(username=ussr).exists():
+                    tmp = User.objects.create(
+                        username=ussr,
+                        email=eml,
+                        password=make_password('student@123')
+                    )
+                    grp = Group.objects.get(name='student')
+                    tmp.groups.add(grp)
+
+                form.save()
+                messages.success(request, '✅ Student details updated successfully!')
+
+                # If next_url exists and doesn't point back to the update page itself, redirect there
+                if next_url:
+                    # avoid redirect loop: ensure the returned url is not the update page itself
+                    if 'updatestud' not in str(next_url):
+                        return redirect(next_url)
+                    else:
+                        # if next is update page, fallback to students_list
+                        return redirect('students_list')
+                else:
+                    return redirect('students_list')
+
+            except Exception as e:
+                messages.error(request, f"Error saving student: {e}")
+        else:
+            messages.error(request, "Please correct the errors below.")
+
     else:
         form = add_studentsForm(instance=data)
 
-    return render(request, 'students/updatestudent.html', context={'form': form})
+    # Pass next to template so it will be preserved on POST
+    return render(request, 'students/updatestudent.html', {
+        'form': form,
+        'cls': cls,
+        'skool': sdata,
+        'year': year,
+        'sec': sec,
+        'sel': sel,
+        'selcls': selcls,
+        'next': next_url,
+    })
+
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def addattendance(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
+    cls = sclass.objects.filter(school_name=sdata)
     year = currentacademicyr.objects.get(school_name=sch_id)
     data =''
     if request.method == 'POST':
@@ -86,10 +172,12 @@ def addattendance(request):
                 attendance.objects.create(aclass=glob_aclass, sec=glob_asec, attndate=glob_attndate,
                                           student_name=stud, status='Present')
             data = attendance.objects.filter(aclass=glob_aclass, sec=glob_asec, attndate=glob_attndate)
+            return render(request,'attendance/addattendance.html',context={'data':data})
+
         else:
             messages.success(request,'Attendance Already Marked')
     form = attendancegen()
-    return render(request,'attendance/addattendance.html',context={'form':form,'skool':sdata,'data':data,'year':year})
+    return render(request,'attendance/addattendance.html',context={'form':form,'skool':sdata,'cls':cls,'year':year})
 
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
@@ -118,7 +206,7 @@ def markholiday(request):
         student.save()
     data = attendance.objects.filter(aclass=glob_aclass, sec=glob_asec, attndate=glob_attndate)
     form = attendancegen()
-    return render(request,'attendance/viewattendance.html', context={'form': form, 'skool': sdata, 'data': data})
+    return render(request,'attendance/addattendance.html', context={'form': form, 'skool': sdata, 'data': data})
 
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
@@ -147,13 +235,14 @@ def markallpresent(request):
         student.save()
     data = attendance.objects.filter(aclass=glob_aclass, sec=glob_asec, attndate=glob_attndate)
     form = attendancegen()
-    return render(request, 'attendance/viewattendance.html', context={'form': form, 'skool': sdata, 'data': data})
+    return render(request, 'attendance/addattendance.html', context={'form': form, 'skool': sdata, 'data': data})
 
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def viewattendance(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
+    cls = sclass.objects.filter(school_name=sdata)
     year = currentacademicyr.objects.get(school_name=sch_id)
     data = ''
     global glob_aclass
@@ -168,7 +257,7 @@ def viewattendance(request):
             data = attendance.objects.filter(aclass=glob_aclass, sec=glob_asec,attndate=glob_attndate)
             print(data)
     form = attendanceview()
-    return render(request, 'attendance/viewattendance.html', context={'form': form, 'skool': sdata, 'data': data,'year':year})
+    return render(request, 'attendance/viewattendance.html', context={'form': form, 'skool': sdata, 'data': data,'year':year,'cls':cls})
 
 def load_section(request):
     class_id = request.GET.get('Class_Id')
@@ -201,27 +290,78 @@ def students_promote(request):
             stud.secs=prosection
             stud.save()
         messages.success(request,'Students Promoted Successfully')
-    return render(request,'students/students_promote.html',context={'sdata':sdata,'cls':cls,'year':year,'year2':year2})
+    return render(request,'students/students_promote.html',context={'sdata':sdata,'cls':cls,'year':year,'year2':year2,'skool':sdata})
 
 
-@allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
 def students_search(request):
-    sch_id = sch_id = request.session['sch_id']
+    sch_id = request.session.get('sch_id')
+    if sch_id is None:
+        raise Http404("School ID not found in session")
+
     sdata = school.objects.get(pk=sch_id)
     year = currentacademicyr.objects.get(school_name=sch_id)
-    Searchby = request.POST['searchby']
-    Searched = request.POST['searched']
-    if Searchby == 'studname':
-        data = students.objects.filter(first_name__startswith=Searched)
-    elif Searchby == 'fathername':
-        data = students.objects.filter(father_name__startswith = Searched)
-    elif Searchby == 'studmob':
-        data = students.objects.filter(phone__startswith = Searched)
-    elif Searchby == 'studclass':
-        data = students.objects.filter(class_name=Searched)
+    data = students.objects.none()
+
+    # Handle both GET and POST
+    if request.method == 'POST':
+        Searchby = request.POST.get('searchby', '')
+        Searched = request.POST.get('searched', '')
+        class_id = request.POST.get('class_name')
+        section_id = request.POST.get('section_name')
     else:
-        data=students.objects.filter(student_status=Searched)
-    return render(request,'students/sstudents.html',context={'data':data,'skool':sdata,'year':year})
+        Searchby = request.GET.get('searchby', '')
+        Searched = request.GET.get('searched', '')
+        class_id = request.GET.get('class_name')
+        section_id = request.GET.get('section_name')
+
+    # === Main search logic ===
+    if Searchby:
+        if Searchby == 'studname' and Searched:
+            data = students.objects.filter(first_name__istartswith=Searched, school_student=sdata)
+        elif Searchby == 'fathername' and Searched:
+            data = students.objects.filter(father_name__istartswith=Searched, school_student=sdata)
+        elif Searchby == 'studmob' and Searched:
+            data = students.objects.filter(phone__startswith=Searched, school_student=sdata)
+        elif Searchby == 'userid' and Searched:
+            data = students.objects.filter(usernm__iexact=Searched, school_student=sdata)
+        elif Searchby == 'studstatus' and Searched:
+            data = students.objects.filter(student_status__icontains=Searched, school_student=sdata)
+
+        elif Searchby in ['studclass', 'studsec']:
+            # Filter by class and optionally by section
+            filters = {'school_student': sdata}
+            if class_id:
+                filters['class_name__id'] = class_id
+            if section_id:
+                filters['secs__id'] = section_id
+            data = students.objects.filter(**filters)
+
+        else:
+            # fallback: if nothing matches, return none
+            data = students.objects.none()
+
+    cnt = data.count()
+
+    # === Pagination ===
+    paginator = Paginator(data, 500)
+    page_number = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_number)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    return render(request, 'students/sstudents.html', {
+        'data': page_obj,
+        'skool': sdata,
+        'year': year,
+        'cnt': cnt,
+        'cls': sclass.objects.filter(school_name=sdata, acad_year=year),
+    })
+
+
+
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
 def student_transfer(request):
@@ -268,19 +408,17 @@ def student_csv(request):
     response['Content-Disposition'] = 'attachment; filename="students.csv"'
     writer = csv.writer(response)
     writer.writerow( [sdata,])
-    writer.writerow(['First Name','Last_name','Gender','DOB','Admn No','Roll No','Class','Section','Admn Date','Phone','Email','Address','Religion','Caste','Blood Group','Father Name'
-                     'Mother Name','Father Occupation','Mother Occupation''Academic Year',])
+    writer.writerow(['First Name','Last_name','Gender','DOB','Admn No','Roll No','Class','Section','Admn Date','Phone','Email','Address','Religion','Caste','Blood Group','Father Name',
+                     'Mother Name','Father Occupation','Mother Occupation','Academic Year','Username'])
     stud_data= students.objects.filter(school_student=sdata,ac_year=year)
     for obj in stud_data:
         writer.writerow([obj.first_name,obj.last_name,obj.gender,obj.dob_date, obj.admn_no,obj.roll_no,obj.class_name,obj.secs,obj.admn_date,
                          obj.phone,obj.email,obj.address,obj.religion,obj.caste,obj. blood_group,
                          obj.father_name,obj.mother_name,obj.father_occupation,obj.mother_occupation,
-                         obj.ac_year,])
-
+                         obj.ac_year,obj.usernm])
     return response
 
-
-
+  
 @allowed_users(allowed_roles=['superadmin','Admin'])
 def stud_import_csv(request):
     sch_id = request.session['sch_id']
@@ -296,50 +434,64 @@ def stud_import_csv(request):
             return redirect('import_csv')  # Redirect to the import page
 
         # Read the CSV file
-        csv_data = csv.reader(csv_file)
+        csv_data = csv.reader(csv_file.read().decode('utf-8').splitlines())
+        next(csv_data)
+        try:
 
-        # Process the CSV data and create students objects
-        for row in csv_data:
-            # Create a new students object and set its attributes from CSV data
-            student = students()
-            student.first_name = row[0]
-            student.last_name = row[1]
-            student.gender = row[2]
-            student.dob_date = row[3]
-            student.phone = row[4]
-            student.email = row[5]
-            student.address = row[6]
-            student.admn_no = row[7]
-            student.admn_date = row[8]
-            student.religion = row[9]
-            student.caste = row[10]
-            student.blood_group = row[11]
-            student.father_name = row[12]
-            student.mother_name = row[13]
-            student.father_occupation = row[14]
-            student.mother_occupation = row[15]
-            student.roll_no = row[16]
+            for row in csv_data:
 
-            # Get the associated objects for foreign key fields
-            ac_year = academicyr.objects.get(acad_year=row[17])
-            student.ac_year = ac_year
-            class_name = sclass.objects.get(class_name=row[18])
-            student.class_name = class_name
-            secs = section.objects.get(section_name=row[19])
-            student.secs = secs
-            school_student = sdata
-            student.school_student = school_student
+                # Create a new student object and set its attributes from CSV data
+                student = students()
+                student.first_name = row[0]
+                student.last_name = row[1]
+                student.gender = row[2]
+                student.dob_date = row[3]
+                student.phone = row[4]
+                student.email = row[5]
+                student.address = row[6]
+                student.admn_no = row[7]
+                student.admn_date = row[8]
+                student.religion = row[9]
+                student.caste = row[10]
+                student.blood_group = row[11]
+                student.father_name = row[12]
+                student.mother_name = row[13]
+                student.father_occupation = row[14]
+                student.mother_occupation = row[15]
+                student.roll_no = row[16]
 
-            # Set additional fields
-            student.student_status = 'active'
+                # Get the associated objects for foreign key fields
+                ac_year_value = row[17].strip()  # remove spaces/newlines
+                ac_year_value = ac_year_value[-9:]
+                ac_year = academicyr.objects.get(acad_year=ac_year_value, school_name=sdata)
 
-            # Save the student object
-            student.save()
-        # Redirect to a success page or do something else
-        return redirect('success')
-    return render(request,'admission/import_csv.html',context={'skool':sdata,'year':year})
+                student.ac_year = ac_year
+                class_name = sclass.objects.get(name=row[18], school_name=sdata)
+                student.class_name = class_name
+                secs = section.objects.get(section_name=row[19], class_sec_name=student.class_name, school_name=sdata)
+                student.secs = secs
+                school_student = sdata
+                student.school_student = school_student
 
+                # Set additional fields
+                student.student_status = 'Active'
 
+                # Save the student object
+
+                student.save()
+
+            # Redirect to a success page or do something else
+            messages.success(request, 'Students imported Successfully')
+            return redirect('students_list')
+        except Exception as e:
+            error = str(e)
+            messages.error(request, 'Students imported failure')
+            return HttpResponse(e)
+
+        # Process the CSV data and create student objects
+
+    return render(request, 'admission/import_csv.html', context={'skool': sdata, 'year': year})
+               
 
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
@@ -380,4 +532,221 @@ def download_csv_template(request):
     ])
 
     return response
+
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def deactivate_user(request,stud_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    data = students.objects.get(pk=stud_id)
+    if User.objects.filter(username=data.usernm).exists():
+        usr = User.objects.get(username=data.usernm)
+        usr.is_active=False
+        usr.save()
+        data.account = "Locked"
+        data.save()
+        messages.info(request,'User Locked Successfully')
+    else:
+        messages.info(request,'User Not Found')
+    return redirect('students_list')
+
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def activate_user(request,stud_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    data = students.objects.get(pk=stud_id)
+    if User.objects.filter(username=data.usernm).exists():
+        usr = User.objects.get(username=data.usernm)
+        usr.is_active = True
+        usr.save()
+        data.account = "UnLocked"
+        data.save()
+        messages.info(request,'User Locked Successfully')
+    return redirect('students_login')
+
+
+def load_uclass(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    class_id = request.GET.get('Class_Id')
+    ssection = sclass.objects.filter(school_name=sdata)
+    return render(request, 'students/selectclass.html', context={'ssection': ssection})
+
+def load_section(request):
+    class_id = request.GET.get('Class_Id')
+    ssection = section.objects.filter(class_sec_name=class_id).order_by('class_sec_name')
+    return render(request, 'admission/selectsection.html',context={'ssection': ssection})
+
+def class_sec_search(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    if request.method == "POST":
+        cls_search = request.POST.get('class_name')
+        sec_search = request.POST.get('secs')
+        data = students.objects.filter(class_name=cls_search,secs=sec_search,school_student=sdata,ac_year=year)
+        cnt = data.count()
+        cls = sclass.objects.filter(school_name=sdata)
+        paginator = Paginator(data, 100)  # Show 30 items per page
+        page_number = request.GET.get('page')
+
+        # Ensure that page_number is an integer (with validation)
+        try:
+            page_number = int(page_number)
+        except (TypeError, ValueError):
+            # Handle the case where page_number is not an integer (e.g., redirect to the first page)
+            page_number = 1
+
+        try:
+            page_obj = paginator.page(page_number)
+        except EmptyPage:
+            # Handle the case where the requested page number is out of range, e.g., by redirecting to the last page
+            page_obj = paginator.page(paginator.num_pages)
+
+        return render(request, 'students/sstudents.html',
+                      context={'data': page_obj, 'skool': sdata, 'year': year, 'cnt': cnt,'cls':cls})
+
+
+def student_password_reset(request, stud_usernm):
+    try:
+        userid = User.objects.get(username=stud_usernm)
+        userid.set_password("student@123")
+        userid.save()
+        update_session_auth_hash(request, userid)
+        messages.success(request, 'Your password was successfully updated!')
+        return redirect('students_login')
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('students_list')
+    except Exception as e:
+        error_msg = f'An error occurred: {e}'
+        messages.error(request, error_msg)
+        return redirect('students_list')
+
+def student_password_resetall(request):
+    # Assuming you have a group named 'student'
+    student_group = Group.objects.get(name='student')
+    students = User.objects.filter(groups=student_group)
+
+    for student in students:
+        student.set_password("student@123")
+        student.save()
+        update_session_auth_hash(request, student)
+
+    messages.success(request, 'Passwords for students were RESET Successfully')
+    return redirect('students_login')
+
+
+def load_subject(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    year = currentacademicyr.objects.get(school_name=sch_id)
+    ayear = academicyr.objects.get(acad_year=year, school_name=sdata)
+    class_id = request.GET.get('Class_Id')
+    ssubjects = subjects.objects.filter(subject_class=class_id,subject_year=ayear)
+    return render(request, 'students/selectsubjects.html',context={'ssection': ssubjects})
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
+def students_login(request):
+    try:
+        sch_id = request.session['sch_id']
+        sdata = school.objects.get(pk=sch_id)
+        year = currentacademicyr.objects.get(school_name=sch_id)
+        ayear = academicyr.objects.get(acad_year=year, school_name=sdata)
+
+        data = students.objects.filter(
+            school_student=sdata,
+            ac_year=ayear,
+            student_status='Active'
+        )
+
+        cnt = data.count()
+        cls = sclass.objects.filter(school_name=sdata)
+
+        paginator = Paginator(data, 30)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        return render(request, 'students/studentslogin.html', {
+            'page_obj': page_obj,
+            'cnt': cnt,
+            'cls': cls,
+            'skool': sdata,
+            'year': year
+        })
+
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
+
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
+def login_search(request):
+    sch_id = request.session.get('sch_id')
+    if sch_id is None:
+        raise Http404("School ID not found in session")
+
+    sdata = school.objects.get(pk=sch_id)
+    year = currentacademicyr.objects.get(school_name=sch_id)
+
+    data = students.objects.none()  # default empty queryset
+
+    if request.method == 'POST':
+        Searchby = request.POST.get('searchby', '')
+        Searched = request.POST.get('searched', '')
+
+        if Searchby == 'studname':
+            data = students.objects.filter(
+                first_name__istartswith=Searched,
+                school_student=sdata
+            )
+
+        elif Searchby == 'fathername':
+            data = students.objects.filter(
+                father_name__istartswith=Searched,
+                school_student=sdata
+            )
+
+        elif Searchby == 'studmob':
+            data = students.objects.filter(
+                phone__startswith=Searched,
+                school_student=sdata
+            )
+
+        elif Searchby == 'studclass':
+            srh = sclass.objects.get(
+                name=Searched,
+                school_name=sdata,
+                acad_year=year
+            )
+            data = students.objects.filter(
+                class_name=srh,
+                school_student=sdata
+            )
+
+        elif Searchby == 'userid':
+            data = students.objects.filter(usernm=Searched)
+
+        else:
+            # Status search
+            data = students.objects.filter(
+                student_status=Searched,
+                school_student=sdata
+            )
+
+    cnt = data.count()
+
+    # Pagination with 30 per page (same as your students_login view)
+    paginator = Paginator(data, 30)
+    page_number = request.GET.get('page')
+
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'students/studentslogin.html', {
+        'page_obj': page_obj,     # MAIN FIX ✔
+        'skool': sdata,
+        'year': year,
+        'cnt': cnt
+    })
 

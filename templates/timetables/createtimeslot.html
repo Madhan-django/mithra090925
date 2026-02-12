@@ -1,0 +1,70 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h4>Time Slot</h4>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                {% if existing_slots %}
+<!-- Modal -->
+<div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Time Slots Already Exist</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Time slots already exist for this school. Do you want to overwrite or continue?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="{% url 'delete_timeslot' %}" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endif %}
+<form method="post">
+  {% csrf_token %}
+  <div class="row g-6">
+        <div class="col-md-6">
+            <div class="form-floating form-floating-outline">
+                <select class="form-select" id="working_days" name="working_days" required>
+                   <option value="">Select...</option>
+                   <option value="mon-fri">Monday to Friday(5-Days per Week)</option>
+                   <option value="mon-sat">Monday to Saturday(6-Days per Week)</option>
+                </select>
+                <label for="working_days">Working Days Per Week</label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating form-floating-outline">
+                <input type="number" class="form-control" id="periods_per_day" name="periods_per_day" min="1" max="10" required>
+                <label for="periods_per_day>Exam Code">Periods Per Day</label>
+            </div>
+        </div>
+    </div>
+    <br>
+   <div class="text-end">
+        <button type="submit" class="btn btn-primary">Submit</button>
+   </div>
+    </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Script to auto-open -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var myModal = new bootstrap.Modal(document.getElementById('basicModal'));
+    myModal.show();
+  });
+</script>
+
+{% endblock %}

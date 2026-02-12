@@ -1,0 +1,178 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (Style A) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 6px;
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+}
+
+.card-title h3 span {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 14px;
+    padding: 5px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ===== ACTION BAR ===== */
+.align-right {
+    text-align: right;
+    padding: 15px 25px 0;
+}
+
+/* ===== TABLE ===== */
+.table {
+    margin-top: 10px;
+}
+
+.table thead {
+    background-color: #212529;
+    color: #fff;
+}
+
+.table th {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    text-align: center;
+}
+
+.table td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(90deg, #f0ad4e, #f7c873);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+    justify-content: center;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title">
+            <h3><span class="badge">Designation</span></h3>
+        </div>
+
+        <!-- ACTION BUTTON -->
+        <div class="align-right">
+            <a href="{% url 'add_desg' %}" class="btn btn-sm btn-primary">
+                + New Designation
+            </a>
+        </div>
+
+        {% if data %}
+        <div class="card-body">
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Designation</th>
+                        <th>Department</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for frm in data %}
+                    <tr>
+                        <td>{{ frm.title }}</td>
+                        <td>{{ frm.department }}</td>
+                        <td>
+                            <form action="{% url 'update_desg' frm.id %}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    Update
+                                </button>
+                            </form>
+
+                            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                            <form action="{% url 'del_desg' frm.id %}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="container-fluid mb-3">
+            <nav>
+                <ul class="pagination">
+                    {% if data.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in data.paginator.page_range %}
+                        {% if data.number == num %}
+                            <li class="page-item active">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if data.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+        {% else %}
+        <div class="alert alert-danger m-3 text-center">
+            No Records are available to show
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

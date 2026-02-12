@@ -1,107 +1,268 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
+
 {% block content %}
-<div class="wlsm-main-header card col">
-	<div class="school_header">
-		<h1 class="h3 text-center">
-			<i class="fa fa-graduation-cap text-light"></i>
-			{{skool}}<small class="wlsm_text_secondary">{{year}}</small>
 
-					</h1>
-			</div>
+<style>
+/* GLOBAL FONT */
+body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
+    font-family: 'Roboto', sans-serif;
+}
 
-<div class="mt-3 text-center wlsm-section-heading-block">
-			<span class="wlsm-section-heading-box">
-				<span class="wlsm-section-heading">
-                    Reciepts
-				</span>
-			</span>
-</div>
+td {
+  font-family: 'Roboto', sans-serif;
+  font-size:13px;
+}
+
+/* CARD */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.18);
+    overflow: hidden;
+    background: #fff;
+}
+
+/* TITLE BAR - REDUCED HEIGHT */
+.card-title {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    padding: 6px 0;   /* reduced from 10px */
+}
+
+/* BADGE TITLE STYLE A */
+.card-title h5 span {
+    background: #ffffff;
+    color: #000;
+    padding: 4px 14px;
+    border-radius: 8px;
+    font-size: 18px;   /* reduced */
+    font-weight: 600;
+}
+
+/* DATE INPUT */
+input[type="date"].form-control {
+    min-width: 250px;
+    width: 250px;
+    height: 45px;
+    font-size: 1rem;
+    border-radius: 10px;
+}
+
+/* FORM FLOAT LABEL */
+.form-floating > label {
+    font-size: 14px;
+}
+
+/* SEARCH FORM TABLE */
+table.table td {
+    vertical-align: middle;
+}
+
+.form-control {
+    height: 45px;
+    border-radius: 10px !important;
+    font-size: 15px;
+}
+
+/* SEARCH DROPDOWN */
+#searchby.form-control {
+    height: 45px;
+    border-radius: 10px;
+}
+
+/* BUTTONS */
+.btn-primary {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    border: none;
+    padding: 8px 20px;
+    border-radius: 10px;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056d6, #1a73e8);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #218838);
+    border: none;
+    padding: 8px 20px;
+    border-radius: 10px;
+}
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838, #28a745);
+}
+
+/* TABLE HEADER DARK — REDUCED HEIGHT */
+.table-dark th {
+    background: #212529 !important;
+    color: #fff !important;
+    padding-top: 6px !important;   /* reduced */
+    padding-bottom: 6px !important;
+    font-size: 14px !important;     /* smaller text */
+}
+
+/* PAGINATION */
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 3px;
+}
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    border: none;
+}
+
+/* DROPDOWN MENU */
+.dropdown-menu a {
+    font-size: 14px;
+}
+</style>
+
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Title -->
+        <div class="card-title text-center">
+           <h5 class="mb-0"><span>Fee Receipts</span></h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Date Filter -->
+            <div class="d-flex justify-content-end align-items-center gap-2 mb-4">
+                <form method="POST" action="{% url 'daily_collection' %}" class="d-flex align-items-center gap-2">
+                    {% csrf_token %}
+                    <div class="form-floating">
+                        <input type="date" class="form-control" id="flatpickr-date" name="date_by" placeholder="YYYY-MM-DD">
+                        <label for="flatpickr-date">Select a date</label>
+                    </div>
+                    <button type="submit" class="btn btn-info">Export</button>
+                </form>
+            </div>
+
+            <!-- Search Row -->
+            <div class="col-md">
+                <form action="{% url 'reciept_search' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table border-0">
+                        <tr>
+                            <td style="width: 250px;">
+                                <select name="searchby" id="searchby" class="form-control">
+                                    <option value="student_name">Student Name</option>
+                                    <option value="reciept_date">Receipt Date ('yyyy-mm-dd')</option>
+                                    <option value="reciept_no">Receipt No</option>
+                                    <option value="payment_id">Payment Id</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="search" placeholder="Search" name="searched" required class="form-control">
+                            </td>
+                            <td style="width: 150px;">
+                                <button type="submit" class="btn btn-success w-100">Search</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+
+            <!-- Table -->
+            {% if data %}
+            <table class="table">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Receipt Date</th>
+                        <th>Invoice</th>
+                        <th>Payment Type</th>
+                        <th>Total</th>
+                        <th>Paid Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for frm in data %}
+                    <tr class="text-center">
+                        <td>{{ frm.reciept_inv.stud_name.first_name }} {{ frm.reciept_inv.stud_name.last_name }}</td>
+                        <td>{{ frm.reciept_date }}</td>
+                        <td>{{ frm.reciept_inv }}</td>
+                        <td>{{ frm.payment_type }}</td>
+                        <td>{{ frm.total }}</td>
+                        <td>{{ frm.paid_amt }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="ri-more-2-line"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{% url 'reprint_reciept' frm.id %}">
+                                        <i class="ri-receipt-line"></i> Reprint
+                                    </a>
+                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                    <a class="dropdown-item" href="{% url 'del_reciept' frm.id %}">
+                                        <i class="ri-delete-bin-2-line"></i> Delete
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="pagination-container">
+                <ul class="pagination justify-content-center">
+                    {% if data.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+
+                    {% with total_pages=data.paginator.num_pages current=data.number %}
+                        {% if total_pages <= 7 %}
+                            {% for num in data.paginator.page_range %}
+                                <li class="page-item {% if current == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            {% if current > 4 %}
+                                <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+                                {% if current > 5 %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endif %}
+
+                            {% for num in data.paginator.page_range %}
+                                {% if num >= current|add:'-3' and num <= current|add:'3' %}
+                                    <li class="page-item {% if current == num %}active{% endif %}">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if current < total_pages|add:'-3' %}
+                                {% if current < total_pages|add:'-4' %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                                <li class="page-item"><a class="page-link" href="?page={{ total_pages }}">{{ total_pages }}</a></li>
+                            {% endif %}
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if data.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ data.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            {% else %}
+            <div class="alert alert-danger mt-3">
+                No Records are available to show.
+            </div>
+            {% endif %}
+
+        </div>
+
     </div>
-
-<br>
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Student Name </th>
-      <th>Reciept Date </th>
-      <th>Reciept Invoice</th>
-      <th>Payment Type</th>
-      <th>Total</th>
-      <th>Paid Amount</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-
-  <tbody>
-
-
-   {% for frm in data %}
-
-
-
-    <tr align="center">
-      <td>{{frm.reciept_inv.stud_name}}</td>
-      <td>{{frm.reciept_date}}</td>
-      <td>{{frm.reciept_inv}}</td>
-      <td>{{frm.payment_type}}</td>
-      <td>{{frm.total}}</td>
-      <td>{{frm.paid_amt}}</td>
-
-        <td>
-          {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-          <form action="{% url 'del_reciept' frm.id %}" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-danger" value="Delete">
-          </form>
-          {% endif %}
-          <form action="{% url 'reprint_reciept' frm.id %}" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-primary" value="Re-Print Reciept">
-          </form>
-      </td>
-    </tr>
-
-   {% endfor %}
-  </tbody>
-</table>
-<nav aria-label="Page navigation">
-  <ul class="pagination">
-    {% if data.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
-      </li>
-    {% endif %}
-
-    {% for num in data.paginator.page_range %}
-      {% if data.number == num %}
-        <li class="page-item active">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% else %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% endif %}
-    {% endfor %}
-
-    {% if data.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
-      </li>
-    {% endif %}
-  </ul>
-</nav>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
 </div>
-
-{% endif %}
-
-
 
 {% endblock %}
-

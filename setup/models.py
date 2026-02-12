@@ -42,6 +42,14 @@ class section(models.Model):
 
     def __str__(self):
         return self.section_name
+        
+        
+class homework_time(models.Model):
+    time = models.TimeField()
+    homework_school = models.ForeignKey(school,on_delete=models.CASCADE)
+    
+    def __str__(slf):
+        return self.time
 
 
 class subjects(models.Model):
@@ -54,3 +62,10 @@ class subjects(models.Model):
     def __str__(self):
         return self.subject_name
 
+class receipt_template(models.Model):
+    template = models.CharField(max_length=50)
+    school_name = models.ForeignKey(school, on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return self.template

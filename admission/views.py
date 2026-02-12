@@ -14,11 +14,14 @@ from django.contrib import messages
 # Create your views here.
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def enquiry_list(request):
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    year = currentacademicyr.objects.get(school_name=sch_id)
-    data = enquiry.objects.filter(school_name=sch_id,acad_year=year)
-    return render(request,'admission\enquiry_list.html',context={'data':data,'skool':sdata,'year':year})
+    try:
+        sch_id = request.session['sch_id']
+        sdata = school.objects.get(pk=sch_id)
+        year = currentacademicyr.objects.get(school_name=sch_id)
+        data = enquiry.objects.filter(school_name=sch_id, acad_year=year)
+    except SomeException as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+    return render(request,'admission/enquiry_list.html',context={'data':data,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def add_enquiry(request):
@@ -79,11 +82,11 @@ def search_enquiry(request):
         srch = request.POST['searched']
         srchby = request.POST['searchby']
         if srchby == 'enq_student':
-            data = enquiry.objects.filter(enq_student__icontains=srch)
+            data = enquiry.objects.filter(enq_student__icontains=srch,school_name=sdata)
         elif srchby == 'enq_name':
-            data = enquiry.objects.filter(enq_name__icontains=srch)
+            data = enquiry.objects.filter(enq_name__icontains=srch,school_name=sdata)
         else:
-            data = enquiry.objects.filter(enq_date=srch)
+            data = enquiry.objects.filter(enq_date=srch,school_name=sdata)
 
         print('search-',srch,'searchby-',srchby)
         return render(request,'admission/search_enquiry.html',context={'data':data,'skool':sdata,'year':year})
@@ -92,9 +95,10 @@ def search_enquiry(request):
 def addstudents(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
-    cdata = sclass.objects.filter(school_name=sdata).values()
+    cdata = sclass.objects.filter(school_name=sdata)
     year = currentacademicyr.objects.get(school_name=sch_id)
     yr = academicyr.objects.get(school_name=sch_id,acad_year=year)
+
     initial_data = {
         'ac_year':yr,
         'school_student':sdata,
@@ -116,7 +120,7 @@ def addstudents(request):
             messages.success(request, 'Student Admitted Successfully')
             return redirect('students_list')
     form = add_studentsForm(initial=initial_data)
-    return render(request,'admission/Admit.html',context={'form':form,'cdata':cdata,'skool':sdata,'year':year})
+    return render(request,'admission/Admit.html',context={'form':form,'cls':cdata,'skool':sdata,'year':year})
 
 def load_section(request):
     class_id = request.GET.get('Class_Id')

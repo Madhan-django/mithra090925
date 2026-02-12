@@ -1,0 +1,114 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    h1, h3 {
+        font-family: Roboto;
+    }
+    th {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+    .align-right {
+        display: block;
+        padding: 30px;
+
+        text-align: right;
+    }
+    #searchby {
+        height: 50px;
+        font-family: Roboto;
+        font-size: 16px;
+    }
+    .table{
+    padding:15px;
+    }
+</style>
+
+<div class="pb-0 text-center">
+    <div class="flex-wrap d-flex justify-content-center align-items-center">
+        <span>
+            <img src="https://mithran.co.in/media/{{ skool.logo }}" alt="School Logo" width="50" height="50" style="margin-right: 10px;">
+            <h1 style="display: inline-block; vertical-align: middle; margin-bottom: 0;">{{ skool }}</h1>
+        </span>
+    </div>
+</div>
+<br><br>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>Notifications</h3>
+        </div>
+     <div class="align-right">
+         <a href="{% url 'push_messages' %}" class="btn btn-sm btn-primary">New Notification</a>
+     </div>
+    <div class="card-body">
+
+{% if data %}
+        <div class="table-responsive">
+<table class="table table-hover table-striped table-bordered">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Id</th>
+      <th>Notification Title </th>
+      <th>Creation Date </th>
+      <th>Schedule Date</th>
+      <th>Messenger </th>
+      <th>Sent </th>
+      <th>Total </th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+   {% for notification in data %}
+    <tr align="center">
+      <td>{{notification.id}}</td>
+      <td>{{notification.title}}</td>
+      <td>{{notification.create_date}}</td>
+      <td>{{notification.post_date}}</td>
+
+      <td>{{notification.created_by}}</td>
+      <td>{{notification.success_count}}</td>
+      <td>{{notification.total_count}}</td>
+      <td>{{notification.status}}</td>
+      <td>
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Clone">
+          </form>
+
+           {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+            {% endif %}
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+            </div>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+</div>
+    </div>
+</div>
+{% endblock %}
+

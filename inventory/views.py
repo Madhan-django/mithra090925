@@ -1,11 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
-from .models import Category, Supplier,Order,product_set,stock,products,Purchase,book_set_issue,ind_book
-from .forms import CategoryForm, SupplierForm, PurchaseForm, OrderForm,book_set_issue_form,ProductSetForm,stockForm,ProductForm,ind_bookForm
+from .models import Category, Supplier,Order,product_set,stock,products,Purchase,book_set_issue,ind_book,group_set
+from .forms import (
+    CategoryForm,
+    SupplierForm,
+    PurchaseForm,
+    OrderForm,
+    book_set_issue_form,
+    ProductSetForm,
+    stockForm,
+    ProductForm,
+    ind_bookForm,
+    group_set_form,
+    UpdatePurchaseForm
+)
 from institutions.models import school
 from setup.models import academicyr,currentacademicyr,sclass,section
 from authenticate.decorators import allowed_users
 from django.contrib import messages
 from admission.models import students
+from django.core.paginator import Paginator
 from django.db.models import Q
 from .utils import render_to_pdf
 import datetime
@@ -37,17 +50,7 @@ def category_list(request):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     categories = Category.objects.filter(Cat_school=sdata)
-    initial_data = {
-        'Cat_school': sdata
-    }
-    if request.method == 'POST':
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'New Category has been Added Successfully')
-            return redirect('category_list')
-    form = CategoryForm(initial=initial_data)
-    return render(request, 'inventory/category_list.html', {'data': categories,'form':form})
+    return render(request, 'inventory/category_list.html', {'data': categories,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def category_update(request, pk):
@@ -100,22 +103,44 @@ def supplier_list(request):
     data = Supplier.objects.filter(Sup_school=sdata)
     return render(request, 'inventory/supplier_list.html', {'data': data,'skool':sdata,'year':year})
 
-@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
 def supplier_update(request, pk):
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    yr = currentacademicyr.objects.get(school_name=sdata)
-    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    # Fetch school info from session
+    sch_id = request.session.get('sch_id')
+    if not sch_id:
+        messages.error(request, "Session expired or invalid. Please log in again.")
+        return redirect('login')
+
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    # Get academic year details safely
+    try:
+        yr = currentacademicyr.objects.get(school_name=sdata)
+        year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    except (currentacademicyr.DoesNotExist, academicyr.DoesNotExist):
+        messages.warning(request, "Academic year data is missing for this school.")
+        year = None
+
+    # Get supplier record
     supplier = get_object_or_404(Supplier, pk=pk)
+
+    # Handle form submission
     if request.method == 'POST':
         form = SupplierForm(request.POST, instance=supplier)
         if form.is_valid():
             form.save()
-            messages.success(request,'Supplier Contacts updated Successfully')
+            messages.success(request, 'Supplier details updated successfully.')
             return redirect('supplier_list')
-    else:
-        form = SupplierForm(instance=supplier)
-    return render(request, 'inventory/supplier_update.html', {'form': form,'skool':sdata,'year':year})
+
+    form = SupplierForm(instance=supplier)
+
+    # Render template
+    return render(request, 'inventory/supplier_update.html', {
+        'form': form,
+        'skool': sdata,
+        'year': year
+    })
+
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
 def supplier_delete(request, pk):
@@ -130,6 +155,9 @@ def purchase_entry(request):
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    cty = Category.objects.filter(Cat_school=sdata)
+    supl = Supplier.objects.filter(Sup_school=sdata)
+    prods = products.objects.filter(sch=sdata)
     initial_data = {
         'Prod_school':sdata
     }
@@ -141,6 +169,7 @@ def purchase_entry(request):
             desc = form.cleaned_data['description']
             cat = form.cleaned_data['category']
             stk = stock.objects.filter(Prod_school=sdata,name= pur_name).exists()
+
             if stk:
                 stk_add = stock.objects.get(Prod_school=sdata,name= pur_name)
                 stk_add.quantity = stk_add.quantity + qty
@@ -150,9 +179,12 @@ def purchase_entry(request):
                 stk_add = stock(name=pur_name,description=desc,category=cat,quantity=qty,Prod_school=sdata)
                 stk_add.save()
             form.save()
-            return redirect('/')
+            return redirect('purchase_list')
     else:
         form = PurchaseForm(initial=initial_data)
+        form.fields['name'].queryset=prods
+        form.fields['category'].queryset=cty
+        form.fields['supplier'].queryset= supl
     return render(request, 'inventory/purchase_entry.html', {'form': form,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
@@ -175,9 +207,9 @@ def product_update(request,pk):
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             form.save()
-            return redirect('product_list')
-    else:
-        form = ProductForm(instance=product)
+            return redirect('products_list')
+
+    form = ProductForm(instance=product)
     return render(request, 'inventory/product_update.html', {'form': form,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
@@ -202,8 +234,12 @@ def product_set_create(request):
         if form.is_valid():
             form.save()
             return redirect('product_set_list')
+        else:
+            print("0------------invalid")
     else:
         form = ProductSetForm(initial=initial_data)
+        form.fields['prod_set']=prod
+
     return render(request, 'inventory/product_set_create.html', {'form': form,'cls':cls,'prod':prod,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
@@ -212,28 +248,36 @@ def product_set_list(request):
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-    data = product_set.objects.filter(prod_set__Prod_school=sdata)
+    data = product_set.objects.filter(prod_set__sch=sdata)
     return render(request, 'inventory/product_set_list.html',context={'data':data,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def product_set_update(request, pk):
-    prod_set = get_object_or_404(product_set, pk=pk)
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    prod_set = product_set.objects.get(pk=pk)
+    cls = sclass.objects.filter(school_name=sdata,acad_year=yr)
+    prods = products.objects.filter(sch=sdata)
     if request.method == 'POST':
         form = ProductSetForm(request.POST, instance=prod_set)
         if form.is_valid():
             form.save()
-            return redirect('your_app_name:product_set_list')
+            return redirect('product_set_list')
     else:
         form = ProductSetForm(instance=prod_set)
-    return render(request, 'your_app_name/product_set_update.html', {'form': form, 'prod_set': prod_set})
+        form.fields['pclass'].queryset=cls
+        form.fields['prod_set'].queryset= prods
+    return render(request, 'inventory/product_set_update.html', {'form': form, 'prod_set': prod_set,'cls':cls,'skool':sdata,'year':year})
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
 def product_set_delete(request, pk):
-    prod_set = get_object_or_404(product_set, pk=pk)
-    if request.method == 'POST':
-        prod_set.delete()
-        return redirect('product_set_list')
-    return render(request, 'inventory/product_set_delete.html', {'prod_set': prod_set})
+    prod_set = product_set.objects.get(id=pk)
+    prod_set.delete()
+    messages.success(request,"Product Deleted Successfully")
+    return redirect('product_set_list')
+
 
 def load_class_prod(request):
     print('########## in func')
@@ -247,12 +291,11 @@ def reciept_book_set(request):
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = students.objects.filter(school_student=sdata, ac_year=year, student_status='Active')
     initial_data = {
         'set_school':sdata
     }
-    initial_data1 = {
-        'ind_school': sdata
-    }
+
     bkset = book_set_issue.objects.filter(set_school=sdata)
     if request.method == 'POST':
         form = book_set_issue_form(request.POST)
@@ -270,8 +313,11 @@ def reciept_book_set(request):
         return redirect('reciept_book_set')
     else:
         form = book_set_issue_form(initial=initial_data)
+    paginator = Paginator(data, 30)  # Show 30 items per page
+    page_number = request.GET.get('page')  # Get the current page number from the request's GET parameters
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page object
 
-    return render(request, 'inventory/book_set_issue.html', {'form': form,'bkset':bkset,'skool':sdata,'year':year})
+    return render(request, 'inventory/book_set_issue.html', {'bkset':bkset,'skool':sdata,'year':year,'data': page_obj})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def product_create(request):
@@ -316,24 +362,47 @@ def purchase_list(request):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = Purchase.objects.filter(Prod_school=sdata)
+    print("ssssssssssssssssssssssssssssssssssssss",data)
     return render(request, 'inventory/purchase.html', context={'data': data, 'skool': sdata, 'year': year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
-def purchase_update(request,pur_id):
+def purchase_update(request, pur_id):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = Purchase.objects.get(id=pur_id)
+    prods = products.objects.filter(sch=sdata)
+    cats = Category.objects.filter(Cat_school=sdata)
+    supls = Supplier.objects.filter(Sup_school=sdata)
+
     if request.method == 'POST':
-        form = PurchaseForm(request.POST,instance=data)
+        form = UpdatePurchaseForm(request.POST, instance=data)
+        form.fields['name'].queryset = prods
+        form.fields['category'].queryset = cats
+        form.fields['supplier'].queryset = supls
+
         if form.is_valid():
             form.save()
-            messages.success(request,'Purchase Added Successfully')
+            messages.success(request, 'Purchase Updated Successfully')
             return redirect('purchase_list')
+        else:
+            # If form is invalid → fall through to render again
+            messages.error(request, 'Please correct the errors below.')
+            print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",form.errors)
     else:
-        form = PurchaseForm(instance=data)
-        return render(request,'inventory/purchase_update.html',context={'form':form,'skool':sdata,'year':year})
+        form = UpdatePurchaseForm(instance=data)
+
+        form.fields['category'].queryset = cats
+        form.fields['supplier'].queryset = supls
+
+
+    # Always return a response (even when form invalid)
+    return render(
+        request,
+        'inventory/purchase_update.html',
+        {'form': form, 'skool': sdata, 'year': year}
+    )
 
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
@@ -347,35 +416,75 @@ def purchase_delete(request,pur_id):
     messages.success(request,'Purchase Entry Deleted Successfully')
     return redirect('purchase_list')
 
-@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
-def reciept_ind_book(request):
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def reciept_ind_book(request, stud_id):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
+
+    # Get current academic year
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-    ind_bk = ind_book.objects.filter(ind_school=sdata)
-    initial_data = {
-        'ind_school':sdata
-    }
+
+    # Get student details
+    student_id = students.objects.get(pk=stud_id)
+
+    # All stock entries for this school
     stk = stock.objects.filter(Prod_school=sdata)
+
+    # ✅ Corresponding product list
+    product_qs = products.objects.filter(stock__Prod_school=sdata).distinct()
+
+    # Pre-fill form defaults
+    initial_data = {
+        'ind_school': sdata,
+        'bclass': student_id.class_name,
+        'stud': student_id
+    }
+
+    # --- POST ---
     if request.method == 'POST':
         form = ind_bookForm(request.POST)
+        form.fields['inv_prod'].queryset = product_qs   # ✅ correct queryset
+
         if form.is_valid():
-            fprod = form.cleaned_data['inv_prod']
+            fprod = form.cleaned_data['inv_prod']  # this is a products instance
             quanty = form.cleaned_data['qty']
 
-            for pro in stk:
-                if fprod == pro.name:
+            print("Selected product:", fprod.name)
 
-                    pro.quantity = pro.quantity-quanty
+            try:
+                pro = stk.get(name=fprod)
+                if pro.quantity >= quanty:
+                    pro.quantity -= quanty
                     pro.save()
-            form.save()
-            messages.success(request,'Bill Added Successfully')
-            return redirect('reciept_book_set')
+                    form.save()
+                    messages.success(request, 'Bill Added Successfully')
+                    return redirect('reciept_book_set')
+                else:
+                    messages.error(request, f"Not enough stock for {fprod.name}. Available: {pro.quantity}")
+                    return redirect('reciept_ind_book', stud_id=stud_id)
+            except stock.DoesNotExist:
+                messages.warning(request, f"Product '{fprod.name}' not found in stock list.")
         else:
-            print('form invalid')
-    form = ind_bookForm(initial=initial_data)
-    return render(request,'inventory/ind_book_reciept.html',context={'form':form,'skool':sdata,'year':year,'ind_bk':ind_bk})
+            print("Form invalid:", form.errors)
+
+    # --- GET ---
+    else:
+        form = ind_bookForm(initial=initial_data)
+        form.fields['inv_prod'].queryset = product_qs   # ✅ correct queryset for dropdown
+
+    return render(
+        request,
+        'inventory/ind_book_reciept.html',
+        {
+            'form': form,
+            'skool': sdata,
+            'year': year,
+            'stk': stk
+        }
+    )
+
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def set_search_view(request):
@@ -478,3 +587,242 @@ def load_section(request):
     class_id = request.GET.get('Class_Id')
     sstudents = students.objects.filter(class_name=class_id).order_by('first_name')
     return render(request, 'inventory/selectstudent.html',context={'ssection': sstudents})
+
+
+
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def book_set_rec(request,stud_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = students.objects.get(pk=stud_id)
+    prod_set = group_set.objects.filter(group_school=sdata,acad_year=year)
+
+    initial_data = {
+        'book_student' : data,
+        'stud_class':data.class_name,
+        'set_school':sdata
+
+    }
+    if request.method == 'POST':
+        form = book_set_issue_form(request.POST)
+        if form.is_valid():
+            book_set = form.cleaned_data['book_set']
+            grp_set = group_set.objects.get(name=book_set,acad_year=year,group_school=sdata)
+            books = product_set.objects.filter(name=grp_set)
+            stk = stock.objects.filter(Prod_school=sdata)
+            for book in books:
+                for prod in stk:
+                    if prod.name==book.prod_set:
+                        prod.quantity=prod.quantity-book.qty
+                        prod.save()
+
+            form.save()
+            messages.success(request,"Book Set Issued successfully")
+            return redirect('reciept_book_set')
+    form = book_set_issue_form(initial=initial_data)
+    return render(request, 'inventory/book_set_rec.html', {'form': form,'bkset':prod_set,'skool':sdata,'year':year})
+
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def bootset_issued(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data  = book_set_issue.objects.filter(set_school=sdata)
+    paginator = Paginator(data, 30)  # Show 30 items per page
+    page_number = request.GET.get('page')  # Get the current page number from the request's GET parameters
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page object
+    return render(request, 'inventory/book_reciept.html',
+                  context={'bkset': page_obj, 'skool': sdata, 'year': year})
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def bookset_delete(request,set_id):
+    print("ddddddddddddddddddddddddddd",set_id)
+    data = book_set_issue.objects.all()
+    for dt in data:
+        print("sssssssssssssssssssssss",dt,dt.id)
+
+
+    messages.success(request,"Book Set Deleted Successfully")
+    return redirect('bootset_issued')
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def group_set_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = group_set.objects.filter(group_school = sdata,acad_year = year)
+    return render(request,'inventory/group_list.html',context={'data':data,'skool':sdata,'year':year})
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def group_set_create(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    initial_data = {
+        'acad_year':year,
+        'group_school':sdata
+    }
+
+    if request.method=='POST':
+        form = group_set_form(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request,'Group Created Successfully')
+            return redirect('group_set_list')
+    form = group_set_form(initial=initial_data)
+    return render(request,'inventory/group_set_create.html',context={'form':form,'skool':sdata,'year':year})
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def group_set_update(request, pk):
+    # Fetch school info from session
+    sch_id = request.session.get('sch_id')
+    if not sch_id:
+        messages.error(request, "Session expired or invalid. Please log in again.")
+        return redirect('login')
+
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    # Get academic year details safely
+    try:
+        yr = currentacademicyr.objects.get(school_name=sdata)
+        year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    except (currentacademicyr.DoesNotExist, academicyr.DoesNotExist):
+        messages.warning(request, "Academic year data is missing for this school.")
+        year = None
+
+    # Get the group record to update
+    group = get_object_or_404(group_set, pk=pk)
+
+    if request.method == 'POST':
+        form = group_set_form(request.POST, instance=group)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Group updated successfully.")
+            return redirect('group_set_list')
+
+    form = group_set_form(instance=group)
+
+    return render(request, 'inventory/group_set_update.html', {
+        'form': form,
+        'skool': sdata,
+        'year': year,
+        'update': True  # optional flag if you want to show "Update" in template
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def group_set_delete(request, pk):
+    # Fetch the group record
+    group = get_object_or_404(group_set, pk=pk)
+
+    # Optional: Only allow POST for deleting
+    if request.method == 'POST':
+        group.delete()
+        messages.success(request, "Group deleted successfully.")
+        return redirect('group_set_list')
+
+    # If GET request, redirect to list with warning
+    messages.warning(request, "Invalid request to delete group.")
+    return redirect('group_set_list')
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
+def indbook_issued(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data  = ind_book.objects.filter(ind_school=sdata)
+    paginator = Paginator(data, 30)  # Show 30 items per page
+    page_number = request.GET.get('page')  # Get the current page number from the request's GET parameters
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page object
+    return render(request, 'inventory/indbook_reciept.html',
+                  context={'bkset': page_obj, 'skool': sdata, 'year': year})
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def indbook_delete(request, ind_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    # Get the issued record
+    indbook = get_object_or_404(ind_book, id=ind_id)
+
+    # --- Find category via Purchase ---
+    purchase = Purchase.objects.filter(name=indbook.inv_prod).first()
+    category = purchase.category if purchase else None
+
+    # --- Update or create stock ---
+    try:
+        stk = stock.objects.get(name=indbook.inv_prod, Prod_school=sdata)
+        stk.quantity += indbook.qty
+        stk.save()
+    except stock.DoesNotExist:
+        stock.objects.create(
+            name=indbook.inv_prod,
+            description=f"Auto-added on delete of issued product {indbook.inv_prod.name}",
+            category=category if category else Category.objects.first(),  # fallback if missing
+            quantity=indbook.qty,
+            Prod_school=sdata
+        )
+
+    # --- Delete the issued book record ---
+    indbook.delete()
+
+    messages.success(request, "Issued book deleted and stock updated successfully.")
+    return redirect('indbook_issued')  # update with your redirect
+
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
+def stud_search(request):
+    sch_id = request.session.get('sch_id')
+    if not sch_id:
+        raise Http404("School ID not found in session")
+
+    sdata = school.objects.get(pk=sch_id)
+    curr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=curr, school_name=sdata)
+
+    # default empty queryset
+    data = students.objects.none()
+
+    # handle search params
+    Searchby = request.GET.get('searchby') or request.POST.get('searchby')
+    Searched = request.GET.get('searched') or request.POST.get('searched')
+
+    if Searchby and Searched:
+        if Searchby == 'studname':
+            data = students.objects.filter(first_name__istartswith=Searched, school_student=sdata)
+        elif Searchby == 'fathername':
+            data = students.objects.filter(father_name__istartswith=Searched, school_student=sdata)
+        elif Searchby == 'studmob':
+            data = students.objects.filter(phone__startswith=Searched, school_student=sdata)
+        elif Searchby == 'studclass':
+            try:
+                srh = sclass.objects.get(name=Searched, school_name=sdata, acad_year=year)
+                data = students.objects.filter(class_name=srh, school_student=sdata)
+            except sclass.DoesNotExist:
+                messages.info(request, "No Class Found")
+                data = students.objects.none()
+        elif Searchby == 'userid':
+            data = students.objects.filter(usernm=Searched)
+        else:
+            data = students.objects.filter(student_status=Searched, school_student=sdata)
+
+    paginator = Paginator(data, 30)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'inventory/book_set_issue.html', {
+        'data': page_obj,
+        'skool': sdata,
+        'year': year,
+        'searchby': Searchby,
+        'searched': Searched,
+    })
+

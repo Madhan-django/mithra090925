@@ -1,0 +1,56 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+    h1, h3, h4 {
+        font-family: Roboto;
+    }
+
+    .align-right{
+       text-align:right;
+       padding:15px;
+
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>New Floor</h3>
+        </div>
+		<div class="card-body">
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="id_name" class="form-label">Floor Name</label>
+      <input type="text" name="name" class="form-control" maxlength="100" required id="id_name">
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label for="id_block" class="form-label">Select Block</label>
+      <select name="block" class="form-control" required id="id_block">
+        <option value="" selected>---------</option>
+        {% for block in blk %}
+          <option value="{{ block.id }}">{{ block.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="text-end">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+		</div>
+  </div>
+</div>
+
+<!-- Include the necessary JavaScript files for datepicker -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
+
+
+{% endblock %}
