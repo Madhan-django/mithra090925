@@ -1,0 +1,153 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+
+<style>
+    /* ===== GLOBAL FONT ===== */
+    body, h1, h3, h4, h5, th, td, label, button, a {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+        border-radius: 22px;
+        box-shadow: 0px 4px 14px rgba(0,0,0,0.18);
+        border: none;
+        overflow: hidden;
+    }
+
+    /* ===== TITLE BAR — REDUCED HEIGHT ===== */
+    .card-title {
+        background: linear-gradient(90deg, #1E3C72, #2A5298);
+        padding: 6px 0;
+        border-top-left-radius: 22px;
+        border-top-right-radius: 22px;
+        margin-bottom: 0;
+        text-align: center;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .card-title .badge {
+        background: #fff;
+        color: #000;
+        padding: 4px 14px;
+        border-radius: 18px;
+        font-size: 14px;   /* updated size */
+        font-weight: normal !important; /* removed bold */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.22);
+    }
+
+    /* ===== BUTTON SECTION ===== */
+    .text-end {
+        padding: 15px;
+        padding-bottom: 0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #1e5799, #207cca);
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .btn-info {
+        background: linear-gradient(to right, #17a2b8, #138496);
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .btn-danger {
+        background: linear-gradient(to right, #e63946, #d62839);
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    /* ===== TABLE HEADER — REDUCED SIZE ===== */
+    thead.table-dark th {
+        background-color: #212529 !important;
+        color: #fff !important;
+        font-size: 13px;
+        padding: 6px 8px !important;
+    }
+
+    tbody td {
+        vertical-align: middle;
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .alert {
+        font-size: 15px;
+        font-weight: 500;
+    }
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Title -->
+        <div class="card-title text-center">
+            <h5><span class="badge">Cash Register</span></h5>
+        </div>
+
+        <!-- Add Button -->
+        <div class="text-end">
+            <a href="{% url 'addexpense' %}" class="btn btn-sm btn-primary">New Expense</a>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Expense No</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Balance</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% if data %}
+                        {% for exp in data %}
+                        <tr class="text-center">
+                            <td>{{ exp.expense_no }}</td>
+                            <td>{{ exp.date_spent }}</td>
+                            <td>{{ exp.description }}</td>
+                            <td>{{ exp.category }}</td>
+                            <td>{{ exp.amount }}</td>
+                            <td>{{ exp.balance }}</td>
+                            <td>
+                                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+                                    <form action="{% url 'pettycashvoucher' exp.id %}" method="" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-info btn-sm">Print</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                <div class="alert alert-danger">No Records available to show</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

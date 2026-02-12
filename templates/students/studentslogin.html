@@ -1,0 +1,238 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (Style A) ===== */
+ /* ===== TITLE BAR (Gradient + Badge) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px  !important;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 {
+    margin: 0;
+    font-size: 17px;                  /* reduced */
+    font-weight: 500;
+
+}
+
+.card-title span.badge {
+    background: #f8f9fa;
+    color: #000;
+    font-size: 13px;                  /* reduced badge font */
+    padding: 4px 20px;                /* reduced badge padding */
+    border-radius: 6px;
+}
+
+
+/* ===== FORM SPACING ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* ===== PHOTO PREVIEW ===== */
+#camera-box {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+#video-preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+}
+
+#captured-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #d9534f, #ff6b60);
+    border: none;
+}
+</style>
+
+{% if page_obj %}
+<br><br>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Authentication</span></h5>
+        </div>
+
+        <div class="card-body" style="padding: 10px;">
+
+            <!-- Search Form -->
+            <form action="{% url 'login_search' %}" method="POST" class="mb-4">
+                {% csrf_token %}
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="searchby">Search By:</label>
+                        <select name="searchby" id="searchby" class="form-control">
+                            <option value="studname">Student Name</option>
+                            <option value="fathername">Father Name</option>
+                            <option value="studmob">Mobile No</option>
+                            <option value="studclass">Class</option>
+                            <option value="studstatus">Status</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="searched">Search Term:</label>
+                        <input type="search" placeholder="Search..." name="searched" required class="form-control">
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-success me-2">Search</button>
+                        <a href="{% url 'students_login' %}" class="btn btn-danger">Clear</a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Student Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>S.No</th>
+                            <th>Name</th>
+                            <th>Admn No</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>User Name</th>
+                            <th>Account</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for stud in page_obj %}
+                        <tr align="left">
+                            <td><span class="serial-number"></span></td>
+                            <td>{{ stud.first_name }} {{ stud.last_name }}</td>
+                            <td>{{ stud.admn_no }}</td>
+                            <td>{{ stud.class_name }}</td>
+                            <td>{{ stud.secs }}</td>
+                            <td>{{ stud.usernm }}</td>
+
+                            <td align="center">
+                                {% if stud.account == 'Locked' %}
+                                    <i class="ri-lock-fill" style="color:red;"></i>
+                                {% else %}
+                                    <i class="ri-lock-unlock-fill" style="color:green;"></i>
+                                {% endif %}
+                            </td>
+
+                            <td align="center">
+                                <a href="{% url 'student_password_reset' stud.usernm %}"
+                                   class="action-btn reset-btn"
+                                   title="Reset Password">
+                                    <i class="ri-key-2-fill"></i>
+                                </a>
+
+                                {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                    {% if stud.account != 'Locked' %}
+                                        <a href="{% url 'deactivate_user' stud.id %}"
+                                           class="action-btn lock-btn"
+                                           title="Lock Account">
+                                           <i class="ri-lock-fill"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'activate_user' stud.id %}"
+                                           class="action-btn unlock-btn"
+                                           title="Unlock Account">
+                                           <i class="ri-lock-unlock-fill"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <b>{{ cnt }} - Records Available</b>
+
+            <!-- PAGINATION -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-3">
+                <ul class="pagination">
+
+                    <!-- Previous -->
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+
+                    <!-- Current Page -->
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }}</span>
+                    </li>
+
+                    <!-- Next -->
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-danger mt-5" role="alert">
+    No Student Records are available to show.
+</div>
+{% endif %}
+
+<!-- SERIAL NUMBER SCRIPT -->
+<script>
+$(document).ready(function(){
+    const serialNumberElements = document.getElementsByClassName("serial-number");
+    let startSerial = ({{ page_obj.number }} - 1) * {{ page_obj.paginator.per_page }};
+    for (let i = 0; i < serialNumberElements.length; i++) {
+        serialNumberElements[i].textContent = startSerial + i + 1;
+    }
+});
+</script>
+
+{% endblock %}

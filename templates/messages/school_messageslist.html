@@ -1,0 +1,82 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+.text-end{
+    padding-right:20px;
+    }
+</style>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0">School Notifications</h5>
+        </div>
+        <div class="text-end">
+         <a href="{% url 'new_notify' %}" class="btn btn-sm btn-primary">New Notification</a>
+        </div>
+
+<div class="card-body">
+
+{% if data %}
+        <div class="table-responsive">
+<table class="table table-hover table-striped table-bordered">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>S.No</th>
+      <th>Notification Title </th>
+      <th>Creation Date </th>
+      <th>Schedule Date</th>
+      <th>Messenger </th>
+      <th>Sent </th>
+      <th>Total </th>
+
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+   {% for notification in data %}
+    <tr align="center">
+      <td>{{forloop.counter}}</td>
+      <td>{{notification.title_msg}}</td>
+      <td>{{notification.create_date |date:"d-m-y - h:i A" }}</td>
+      <td>{{notification.post_date |date:"d-m-y - h:i A"}}</td>
+      <td>{{notification.created_by}}</td>
+      <td>{{notification.success_count}}</td>
+      <td>{{notification.total_count}}</td>
+	   <td>{{notification.status}}</td>
+      <td>
+          <div class="dropdown">
+              <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                      <i class="ri-more-2-line"></i>
+              </button>
+                      <div class="dropdown-menu">
+                          <a class="dropdown-item" href="#">
+                                <i class="ri-pencil-line me-1"></i> Edit</a>
+                          {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                              <a class="dropdown-item" href="#">
+                                <i class="ri-delete-bin-7-line me-1"></i> Delete</a>
+                          {% endif %}
+                      </div>
+          </div>
+          </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+            </div>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+</div>
+    </div>
+</div>
+
+{% endblock %}
+

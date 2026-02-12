@@ -1,0 +1,5 @@
+WARNINGS:
+?: (mysql.W002) MySQL Strict Mode is not set for database connection 'default'
+        HINT: MySQL's Strict Mode fixes many data integrity problems in MySQL, such as data truncation upon insertion, by escalating warnings into errors. It is strongly recommended you activate it. See: https://docs.djangoproject.com/en/5.2/ref/databases/#mysql-sql-mode
+django_q.Task: (models.W037) MySQL does not support indexes with conditions.
+        HINT: Conditions will be ignored. Silence this warning if you don't care about it.

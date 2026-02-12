@@ -1,0 +1,167 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+    /* General Typography */
+    h1, h3, h5, th, td {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Card Layout */
+    .col-lg-12.grid-margin.stretch-card {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    /* Card Header */
+    .card-title {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+        height: 50px;
+        padding: 12px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 18px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Table Styling */
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .table thead {
+        background-color: #212529 !important;
+        color: #fff !important;
+    }
+
+    .table thead th {
+        font-weight: 600;
+        font-size: 14px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 6px 10px !important;
+        vertical-align: middle !important;
+    }
+
+    .table tbody td {
+        background-color: #ffffff;
+        vertical-align: middle;
+        font-size: 15px !important;
+        padding: 10px 10px !important;
+        border: none;
+    }
+
+    tr {
+        transition: all 0.2s ease;
+    }
+
+    tr:hover td {
+        background-color: #f6f8ff;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #bb2d3b;
+    }
+
+    /* Alert Styling */
+    .alert {
+        width: 95%;
+        margin: 10px auto;
+        font-size: 15px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card mt-4">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">Individual Sale</span></h5>
+        </div>
+        <div class="card-body">
+            {% if bkset %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>S.No</th>
+                            <th>Date</th>
+                            <th>Book Set</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Quantity</th>
+                            <th>Group</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for set in bkset %}
+                        <tr>
+                            <td><span class="serial-number"></span></td>
+                            <td>{{ set.issue_date }}</td>
+                            <td>{{ set.inv_prod }}</td>
+                            <td>{{ set.stud }}</td>
+                            <td>{{ set.stud.class_name }}</td>
+                            <td>{{ set.stud.secs }}</td>
+                            <td>{{ set.qty }}</td>
+                            <td>{{ set.isbook_set }}</td>
+                            <td>{{ set.status }}</td>
+                            <td>
+                                <a href="{% url 'indbook_delete' set.id %}" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-danger text-center" role="alert">
+                No Record are available to Show
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    const serialNumberElements = $(".serial-number");
+    serialNumberElements.each(function(index) {
+        $(this).text(index + 1);
+    });
+});
+</script>
+{% endblock %}

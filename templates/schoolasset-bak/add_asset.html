@@ -1,0 +1,206 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+
+            <h3>New Asset</h3>
+        </div>
+
+    <div class="card-body">
+        <br>
+<div class="container mt-4">
+    <!-- Brand Modal -->
+              <div class="modal fade" id="new_brand" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+                  <div class="modal-content">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-body p-0">
+                      <div class="text-center mb-6">
+                        <h4 class="mb-2">Brand Name</h4>
+
+                      </div>
+                     <form method="POST" action ="{% url 'add_newbrand' %}" class="row g-5" >
+                         {% csrf_token %}
+                        <div class="col-12">
+
+
+                            <div class="form-floating form-floating-outline">
+                               {{form2.as_p}}
+
+                            </div>
+
+                        </div>
+                        <div class="col-12 d-flex flex-wrap justify-content-center gap-4 row-gap-4">
+
+                          <button type="submit" class="btn btn-primary">Submit</button>
+                          <button
+                            type="reset"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!--/ Brand Modal -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form.asset_name.label_tag }}
+                {{ form.asset_name }}
+                {% if form.asset_name.errors %}
+                    <div class="text-danger">{{ form.asset_name.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {{ form.room.label_tag }}
+                <select name="room" class="form-control" required="" id="id_room">
+                     <option value="" selected="">---------</option>
+                    {% for room in rms %}
+                     <option value="{{room.id}}" >{{room}}</option>
+                    {% endfor %}
+                </select>
+
+                {% if form.room.errors %}
+                    <div class="text-danger">{{ form.room.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form.asset_type.label_tag }}
+                <select name="asset_type" class="form-control" required="" id="id_asset_type">
+                    <option value="" selected="">---------</option>
+                    {% for typ in asstyp %}
+                    <option value="{{typ.id}}">{{typ}}</option>
+                    {% endfor %}
+                </select>
+
+                {% if form.asset_type.errors %}
+                    <div class="text-danger">{{ form.asset_type.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-5">
+                {{ form.brand.label_tag }}
+                {{ form.brand }}
+                {% if form.brand.errors %}
+                    <div class="text-danger">{{ form.brand.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-1">
+                <br>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new_brand">+</button>
+            </div>
+        </div>
+
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form.serial_number.label_tag }}
+                {{ form.serial_number }}
+                {% if form.serial_number.errors %}
+                    <div class="text-danger">{{ form.serial_number.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {{ form.asset_tag.label_tag }}
+                {{ form.asset_tag }}
+                {% if form.asset_tag.errors %}
+                    <div class="text-danger">{{ form.asset_tag.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form.purchase_date.label_tag }}
+                {{ form.purchase_date }}
+                {% if form.purchase_date.errors %}
+                    <div class="text-danger">{{ form.purchase_date.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {{ form.warranty_end_date.label_tag }}
+                {{ form.warranty_end_date }}
+                {% if form.warranty_end_date.errors %}
+                    <div class="text-danger">{{ form.warranty_end_date.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form.vendor.label_tag }}
+                {{ form.vendor }}
+                {% if form.vendor.errors %}
+                    <div class="text-danger">{{ form.vendor.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {{ form.asset_school.label_tag }}
+               <select name="asset_school" class="form-control" required="" id="id_asset_school">
+                  <option value="{{skool.id}}" selected="">{{skool}}</option>
+               </select>
+                {% if form.asset_school.errors %}
+                    <div class="text-danger">{{ form.asset_school.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form.condition.label_tag }}
+                {{ form.condition }}
+                {% if form.condition.errors %}
+                    <div class="text-danger">{{ form.condition.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {{ form.assign.label_tag }}
+                <select name="assign" class="form-control" id="id_assign">
+                    <option value="" selected="">---------</option>
+                    {% for staff in staffs %}
+                      <option value="{{staff.id}}" >{{staff.first_name}}&nbsp;{{staff.last_name}}</option>
+                    {% endfor %}
+                {% if form.assign.errors %}
+                    <div class="text-danger">{{ form.assign.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+
+                     {{ form.remark.label_tag }}
+                      {{form.remark}}
+                   </div>
+
+                  <div class="col-md-6">
+                      <input type="checkbox" name="is_discarded" id="customCheckPrimary" class="form-check-input" id="id_is_discarded">
+                     {{ form.is_discarded.label_tag }}
+                {% if form.is_discarded.errors %}
+                    <div class="text-danger">{{ form.is_discarded.errors }}</div>
+                {% endif %}
+                   </div>
+            </div>
+           </div>
+        <div class="text-end">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="reset" class="btn btn-warning">Clear</button>
+        </div>
+    </form>
+</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,225 @@
+from django.shortcuts import render,HttpResponse
+from rest_framework.views import APIView
+from .serializers import (studentserializer,homeworkserializer,attendanceserializer,MonthlyAttendanceSerializer,
+                          indfeeserializer,noticeboardserializer,eventsserializer,DeviceFcmSerializer,MessageSerializer,
+                          ExamSerializer)
+
+from admission.models import students
+from staff.models import homework
+from global_login_required import login_not_required
+from functools import wraps
+from fees.models import addindfee
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from students.models import attendance
+from academic.models import noticeboard,events
+from examination.models import admit_card,exam_subjectmap
+from .models import DeviceFCMToken
+from pushMessages.models import GeneralNotification
+import calendar
+
+
+# Create your views here.
+
+class studentsapi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+
+        if username:
+            try:
+                student = students.objects.get(usernm=username)
+                serializer = studentserializer(student)
+
+                return Response(serializer.data)
+            except students.DoesNotExist:
+                return Response({"detail": "Student not found"})
+
+class homeworkapi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+        if username:
+            try:
+
+                student = students.objects.get(usernm=username)
+                homewk = homework.objects.filter(hclass=student.class_name).order_by('-homework_date')
+                serializer = homeworkserializer(homewk, many=True)
+
+                return Response(serializer.data)
+
+            except homewk.DoesNotExist:
+                return Response({"detail": "Student/homework not found"})
+
+
+class attendanceapi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+        try:
+            # Using a context manager for better resource handling
+            student =students.objects.get(usernm=username)
+            # List to store attendance data for each month
+            monthly_attendance = []
+            year= str(student.ac_year)
+            for month in range(1, 13):
+                # Filter attendance records for the specified month
+                days = attendance.objects.filter(student_name=student, attndate__month=month).count()
+                absent = attendance.objects.filter(student_name=student, attndate__month=month,status='Absent').count()
+
+                monthly_attendance.append({
+                    'month': calendar.month_name[month],
+                    'attendance_data': days,
+                    'absent' : absent,
+                    })
+
+                # Serialize the attendance data
+          
+            serializer = MonthlyAttendanceSerializer(monthly_attendance, many=True)
+
+
+            return Response(serializer.data)
+        except :
+            return Response({"Attendance not found"})
+
+
+class indfeeApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+
+        try:
+            # Assuming you want to filter students by the provided username
+            student = students.objects.get(usernm=username)
+            feelist = addindfee.objects.filter(stud_name=student)
+            serializer = indfeeserializer(feelist, many=True)
+            return Response(serializer.data)
+        except students.DoesNotExist:
+            return Response("Student not Found")
+        except addindfee.DoesNotExist:
+            return Response("Fee not Found")
+
+
+class noticeboardApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+
+        try:
+            # Assuming you want to filter students by the provided username
+            student = students.objects.get(usernm=username)
+            notice = noticeboard.objects.filter(notice_school=student.school_student).order_by('-notice_date')
+            serializer = noticeboardserializer(notice, many=True)
+
+            return Response(serializer.data)
+        except notice.DoesNotExist:
+            return Response("Notice not Found")
+
+class eventsApi(APIView):
+    
+    
+    def get(self, request):
+        
+        student= students.objects.get(usernm="2026151999")
+        school_events = events.objects.filter(event_school=school_student)
+        serializer = eventsserializer(school_events,many=True)
+        json_data = serializer.data
+        return Response(json_data)
+
+class FCMSaveApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+    def post(self, request):
+        username = request.query_params.get('username')
+        firebaseToken = request.data.get('firecmToken')
+        user= str(username)
+        fbToken=str(firebaseToken)
+        if username and firebaseToken:
+            try:
+                if DeviceFCMToken.objects.filter(username=user).exists():
+                    devices = DeviceFCMToken.objects.filter(username=user)
+                    for device in devices:
+                        device.delete()
+                if DeviceFCMToken.objects.filter(firecmToken=fbToken).exists():
+                    fcmTokens = DeviceFCMToken.objects.filter(firecmToken=fbToken)
+                    for fcmToken in fcmTokens:
+                        fcmToken.delete()
+                DeviceFCMToken.objects.create(firecmToken=firebaseToken, username=username)
+
+
+                return Response({"message": "Device FCM Token updated successfully."})
+            except Exception as e:
+
+                return Response({"message": "Cannot create User."})
+        else:
+            return Response({"error": "Both username and FCM token are required."})
+
+
+class MessageApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        student = students.objects.get(usernm=username)
+
+        notifications = GeneralNotification.objects.filter(post_to=student).order_by('-create_date')
+        serializer = MessageSerializer(notifications, many=True, context={'student': student})
+
+        return Response(serializer.data)
+
+
+class ExamTimetable(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        student = students.objects.get(usernm=username)
+        data = admit_card.objects.filter(exam_stu=student)
+        exam_list = []
+        for dt in data:
+            exams = exam_subjectmap.objects.filter(exname__exam_title=dt.exam_label,exname__exam_school=student.school_student).order_by('-paper_date')
+            exam_list.extend(exams)
+
+        serializer = ExamSerializer(exam_list, many=True)
+        json_data = serializer.data
+
+        return Response(json_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

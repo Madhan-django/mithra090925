@@ -1,0 +1,71 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+ .text-end{
+    padding:20px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>Supplier List</h3>
+        </div>
+    <div class="text-end">
+        <a href ="{% url 'supplier_create' %}" class="btn btn-sm btn-primary">New Supplier</a>
+    </div>
+
+<br>
+{% if data %}
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Suplier Name</th>
+      <th>Contact_No </th>
+      <th>Address</th>
+      <th>School</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for sup in data %}
+
+    <tr align="center">
+      <td>{{sup.name}}</td>
+      <td>{{sup.contact_number}}</td>
+      <td>{{sup.address}}</td>
+      <td>{{sup.Sup_school}}</td>
+      <td>
+          <form action="{% url 'supplier_update' sup.id %}" method="" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class ="btn btn-info">Edit</button>
+
+          </form>
+ {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+            <form action="{% url 'supplier_delete' sup.id %}" method="" class="d-inline">
+              {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+
+          </form>
+  {% endif %}
+        </td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+{% endif %}
+        </div>
+    </div>
+
+
+{% endblock %}
+

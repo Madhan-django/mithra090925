@@ -1,0 +1,147 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    h1, h3 {
+        font-family: Roboto;
+    }
+    th {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+    .align-right {
+        display: block;
+        padding: 30px;
+
+        text-align: right;
+    }
+    #searchby {
+        height: 50px;
+        font-family: Roboto;
+        font-size: 16px;
+    }
+    .table{
+    padding:15px;
+    }
+</style>
+
+<div class="pb-0 text-center">
+    <div class="flex-wrap d-flex justify-content-center align-items-center">
+        <span>
+            <img src="https://mithran.co.in/media/{{ skool.logo }}" alt="School Logo" width="50" height="50" style="margin-right: 10px;">
+            <h1 style="display: inline-block; vertical-align: middle; margin-bottom: 0;">{{ skool }}</h1>
+        </span>
+    </div>
+</div>
+
+<br><br>
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h3>Loans</h3>
+        </div>
+     <div class="align-right">
+					<a href="{% url 'new_loan' %}" class="btn btn-sm btn-primary">New Loan</a><br>
+
+
+     </div>
+
+
+{% if loans %}
+<div class="card-body">
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Employee Name </th>
+       <th>Loan Type</th>
+      <th>Loan Amount</th>
+      <th>EMI</th>
+      <th>Balance</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+       <th>Action</th>
+
+
+    </tr>
+  </thead>
+
+  <tbody>
+
+
+   {% for loan in loans %}
+
+    <tr align="center">
+
+      <td>{{loan.employee}}</td>
+      <td>{{loan.loan_name}}</td>
+      <td>{{loan.loan_amount}}</td>
+      <td>{{loan.monthly_installment}}</td>
+      <td>{{loan.remaining_amount}}</td>
+      <td>{{loan.start_date}}</td>
+      <td>{{loan.end_date}}</td>
+
+        <td>
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-warning" value="Update">
+          </form>
+
+{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+          <form action="{% url 'del_loan' loan.id %}" method="POST" class="d-inline">
+              {% csrf_token %}
+
+               <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+ {% endif %}
+      </td>
+    </tr>
+
+   {% endfor %}
+  </tbody>
+</table>
+</div>
+<div class="container-fluid">
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if data.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for num in data.paginator.page_range %}
+      {% if data.number == num %}
+        <li class="page-item active">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if data.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+</div>
+{% else %}
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+
+{% endif %}
+
+
+</div>
+    </div>
+
+{% endblock %}
+

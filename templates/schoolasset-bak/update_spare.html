@@ -1,0 +1,242 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- ✅ jQuery (only if not already in base) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- ✅ Select2 CSS & JS -->
+<link href="{% static 'dash/assets/vendor/libs/select2/select2.css' %}" rel="stylesheet">
+<script src="{% static 'dash/assets/vendor/libs/select2/select2.full.min.js' %}"></script>
+
+<style>
+    h1, h3, h5, th, td, label {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .card-title {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+        padding: 15px 0;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .card-title h5 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn {
+        padding: 8px 18px;
+        font-size: 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        letter-spacing: 0.4px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056d2;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        background-color: #565e64;
+        transform: translateY(-1px);
+    }
+
+    .text-danger {
+        font-size: 13px;
+    }
+
+    .form-section {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #dee2e6;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark px-3 py-2">Update Sub-Asset</span></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="container-fluid mt-3">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Section 1: Basic Info -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.parent_asset.label_tag }}
+                                {{ form.parent_asset }}
+                                {% for error in form.parent_asset.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.name.label_tag }}
+                                {{ form.name }}
+                                {% for error in form.name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Specs -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.capacity_or_spec.label_tag }}
+                                {{ form.capacity_or_spec }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.serial_number.label_tag }}
+                                {{ form.serial_number }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Asset Info -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.sub_asset_tag.label_tag }}
+                                {{ form.sub_asset_tag }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.assigned_to.label_tag }}
+                                {{ form.assigned_to }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Purchase Info -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.purchase_date.label_tag }}
+                                {{ form.purchase_date }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.warranty_end_date.label_tag }}
+                                {{ form.warranty_end_date }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Vendor / School -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.vendor.label_tag }}
+                                {{ form.vendor }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.subasset_school.label_tag }}
+                                {{ form.subasset_school }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Condition -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.condition.label_tag }}
+                                {{ form.condition }}
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="form-check mt-3">
+                                    {{ form.is_discarded }}
+                                    <label class="form-check-label" for="id_is_discarded">
+                                        {{ form.is_discarded.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        <!-- Section 7: Remark -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.remark.label_tag }}
+                                {{ form.remark }}
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <!-- Buttons -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-save"></i> Update
+                        </button>
+                        <a href="{% url 'sub_assets' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Initialize Select2 -->
+<script>
+$(document).ready(function () {
+    console.log("✅ jQuery loaded");
+
+    if (typeof $.fn.select2 !== 'undefined') {
+        console.log("✅ Select2 found — initializing...");
+        $('select').select2({
+            width: '100%',
+            placeholder: 'Select an option',
+            allowClear: true
+        });
+    } else {
+        console.error("❌ Select2 plugin NOT found — check static path.");
+    }
+});
+</script>
+{% endblock %}

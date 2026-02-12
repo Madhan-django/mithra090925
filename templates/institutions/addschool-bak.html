@@ -1,0 +1,36 @@
+{% extends 'adminpanel/index.html' %}
+
+{% block content %}
+<div class="mt-3 text-center wlsm-section-heading-block">
+			<span class="wlsm-section-heading-box">
+				<span class="wlsm-section-heading">
+					 New Institutions
+				</span>
+			</span>
+</div>
+         <div class="container">
+            <div class="row">
+                <div class="col-sm">
+                    <form action="{% url 'addschool' %}" method ="POST" enctype="multipart/form-data">
+                         {% csrf_token %}
+
+                          {{form.as_p}}
+                         <div class="d-flex justify-content-end mt-3">
+                               <div class="mr-2">
+                                      <button type="submit" class="btn btn-warning btn-lg">Submit</button>
+                                </div>
+                                 <div>
+                                     <button type="reset" class="btn btn-success btn-lg">Clear</button>
+
+                                 </div>
+                         </div>
+
+
+
+                    </form>
+                </div></div></div>
+
+
+
+
+{% endblock %}

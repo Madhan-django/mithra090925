@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Balance Summary</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        h3 {
+            text-align: center;
+        }
+        .ctr{
+          text-align:center;
+        }
+        .sub_head{
+
+        }
+        td{
+         font-size:18px;
+        }
+    </style>
+</head>
+<body>
+   <p class="ctr" style="font-size:22px;">{{skool}}</p>
+   <p class ="ctr" style="font-size:14px;">Balance Summary</p>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50px;">S.No</th>
+                <th>Date</th>
+                <th>Opening Balance</th>
+                <th>Closing Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if data %}
+                {% for bal in data %}
+                <tr style="height: 40px;">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ bal.date }}</td>
+                    <td>{{ bal.opening_balance }}</td>
+                    <td>{{ bal.closing_balance }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4">No data available</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</body>
+</html>

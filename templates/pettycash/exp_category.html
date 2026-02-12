@@ -1,0 +1,67 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+ .text-end{
+    padding:20px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0 text-center">Expenses Category</h5>
+        </div>
+     <div class="text-end">
+         <a href="{% url 'addexpensecategory' %}" type="button"  class="btn btn-sm btn-primary">New Category</a>
+     </div>
+        <div class="card-body">
+
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>S.No</th>
+      <th>Category Name</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+    <tbody>
+  {% if data %}
+   {% for cat in data %}
+    <tr align="center">
+        <td>{{forloop.counter}}</td>
+        <td>{{cat.name}}</td>
+
+        <td>
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-info">Edit</button>
+
+          </form>
+          {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+          <form action="#" method="" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Delete</button>
+
+          </form>
+          {% endif %}
+        </td>
+    </tr>
+   {% endfor %}
+  {% else %}
+  <tr><td colspan="5">
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+        </td></tr>
+{% endif %}
+  </tbody>
+</table>
+    </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

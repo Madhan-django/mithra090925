@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+            .top_rw {
+            background-color: #f4f4f4;
+        }
+
+        .td_w {}
+
+        button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .invoice-box {
+            max-width: 700px;
+            margin-right: 25px;
+            margin-left: 25px;
+            padding: 10px;
+            border: 1px solid #eee;
+            font-size: 11px;
+            line-height: 18px;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: #555;
+        }
+
+
+        .invoice-box td {
+            border: none;
+            vertical-align: top;
+        }
+
+        .invoice-box-border {
+            border: 1px solid;
+            vertical-align: top;
+        }
+
+
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+            border-bottom: solid 1px #ccc;
+        }
+
+        .invoice-box table td {
+            padding-left: 5px;
+            vertical-align: middle;
+        }
+
+        .info-border {
+            border-collapse: collapse;
+        }
+
+        .info-border tr:first-child td {
+            border-top: 1px solid black;
+            border-right: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+            /* Added bottom border */
+        }
+
+        .info-border tr:first-child td {
+            border-top: 1px solid black;
+            border-right: 1px solid black;
+            border-left: 1px solid black;
+        }
+
+        .info-border td {
+            padding: 4px;
+            text-align: center;
+            border-right: 1px solid black;
+            border-left: 1px solid black;
+        }
+
+
+        .info-border td {
+            padding: 4px;
+            text-align: center;
+            border-right: 1px solid black;
+            border-left: 1px solid black;
+        }
+
+
+
+        .invoice-box table tr.top table td {
+            padding-bottom: 1px;
+        }
+
+        .invoice-box table tr.top table td.title {
+            font-size: 45px;
+            line-height: 45px;
+            color: #333;
+        }
+
+        .invoice-box table tr.information table td {
+            padding-bottom: 40px;
+        }
+
+        .invoice-box table tr.heading td {
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-box table tr.item.last td {
+            border-bottom: none;
+        }
+
+        .invoice-box table tr.total td:nth-child(2) {
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .invoice-box table tr.top table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+
+            .invoice-box table tr.information table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+        }
+
+        /** RTL **/
+        .rtl {
+            direction: rtl;
+            font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        }
+
+        .rtl table {
+            text-align: right;
+        }
+
+        .rtl table tr td:nth-child(2) {
+            text-align: left;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding-right: 5px;
+        }
+       tr{
+       padding:5px;
+
+    }
+    .auth{
+       height:80px;
+
+    }
+    .container{
+      height:60px;
+    }
+</style>
+<body>
+
+    <div class="invoice-box">
+
+        <table>
+            <tr>
+                <td>
+
+                </td>
+                <td style="text-align: center; color: darkblue;">
+                    <h2>Payment Voucher </h2>
+                </td>
+                <td style="text-align: right;">
+
+                </td>
+            </tr>
+
+
+        </table>
+        <table>
+
+
+            <tr>
+
+
+                <td style="text-align: center; border: 1px solid;" colspan="8">
+                <div class="container" align="center">
+                   <div id="image" style="display: inline-block; vertical-align: middle;">
+                  <img src="{{ skoollogo }}" alt="School Logo" width="85" height="75">
+                 </div>
+               <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
+                  <h1 style=" margin: 0;"><b>{{ skool }}</b></h1>
+                 <p style="font-size: 14px; margin: 0;">{{ skool.address }}</p>
+               </div>
+               </div>
+
+           </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="border-right: 1px solid;"></td>
+                 </tr>
+
+            <tr>
+                <td style="font-size: 15px;">Payable To :  <b>{{record.spent_by}}</b></td>
+                <td style="border-right: 1px solid; font-size: 16px;"></td>
+                 <td style="font-size: 15px;">No</td>
+                <td style="border-right: 1px solid; font-size: 16px;">{{record.expense_no}}</td>
+
+            </tr>
+            <tr>
+                <td style="font-size: 15px;"></td>
+                <td style="border-right: 1px solid; font-size: 16px;"></td>
+                <td style="font-size: 15px;">Date</td>
+                <td style="border-right: 1px solid; font-size: 16px;">{{ record.date_spent|date:"d-m-Y" }}</td>
+
+
+            </tr>
+
+            <tr>
+                <td style="font-size: 15px;"> </td>
+                <td style="border-right: 1px solid; font-size: 16px;"></td>
+
+            </tr>
+
+
+        </table>
+        <table style="border: 1px solid black; width: 100%;">
+    <tr>
+        <td style="width: 10%;">
+            <h3>For:</h3>
+        </td>
+        <td colspan="3"></td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <div style="padding-left: 50px;">
+                <h3>{{ record.description }}</h3>
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+        <table style="border-collapse: collapse;">
+            <tr>
+                <td colspan="2" style="text-align: center; border-right: 1px solid; font-size:12px;"> <b> Total in words </b>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="2" rowspan="2" style="text-align: center; border-right: 1px solid; font-size:16px;">{{amt_words}} only/-
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="border-bottom: 1px solid;">
+                <td style="font-size:12px;"><b>Amount </b></td>
+                <td style="text-align: right; font-size:20px;">{{record.amount}}₹</td>
+            </tr>
+
+
+
+
+
+
+        </table>
+
+        <table class="auth">
+             <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"></td>
+            </tr>
+             <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"></td>
+            </tr>
+            <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"></td>
+            </tr>
+            <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"></td>
+            </tr>
+            <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"></td>
+            </tr>
+            <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"></td>
+            </tr>
+             <tr>
+
+                <td style="text-align:right; border-left: 1px solid;"><b> Authorised Signatory</b></td>
+            </tr>
+        </table>
+
+    </div>
+
+</body>
+</html>

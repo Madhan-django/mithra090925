@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+        }
+
+        .text-end {
+            padding: 20px;
+            text-align: right;
+        }
+
+        h5 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .status-ok {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-issue {
+            color: red;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Export PDF Button -->
+
+<!-- Title -->
+<h5>Timetable Check Logs</h5>
+
+<!-- Table -->
+<table>
+    <thead>
+        <tr>
+            <th>Class</th>
+            <th>Section</th>
+            <th>Total Periods</th>
+            <th>Allocated Periods</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if sections_issue %}
+            {% for dt in sections_issue %}
+                <tr>
+                    <td>
+                        {% if dt.status == "No issue found" %}
+                            <span class="status-ok">{{ dt.cls }}</span>
+                        {% else %}
+                            <span class="status-issue">{{ dt.cls }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ dt.sect }}</td>
+                    <td>{{ dt.tot }}</td>
+                    <td>{{ dt.cnt }}</td>
+                    <td>
+                        {% if dt.status == "No issue found" %}
+                            <span class="status-ok">PASS - {{ dt.status }}</span>
+                        {% else %}
+                            <span class="status-issue">FAIL - {{ dt.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="5">No data found</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+</body>
+</html>

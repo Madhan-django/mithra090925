@@ -1,0 +1,74 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+{% load static %}
+<style>
+
+</style>
+ <!-- Modal -->
+  <div class="modal fade" id="myModal" >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Individual Sale</h4>
+
+          <a href="{% url 'reciept_book_set' %}" type="button" class="btn btn-danger btn-sm">&times;</a>
+        </div>
+        <div class="modal-body">
+          {% if form %}
+         <form method="POST">
+              {% csrf_token %}
+             <p>
+             <label for="id_inv_prod">Product:</label>
+                     <select name="inv_prod" class="form-control" required="" id="id_inv_prod">
+                       <option value="" selected="">---------</option>
+                        {% for bk in stk %}
+                               <option value="{{bk.id}}">{{bk.name}}</option>
+                         {% endfor %}
+                     </select>
+             </p>
+             <p>
+             <label for="id_issue_date">Product:</label>
+                    {{form.issue_date}}
+             </p>
+             {{form.bclass}}
+             {{form.stud}}
+             {{form.ind_school}}
+
+             <p>
+             <label for="id_isbook_set">Is Set:</label>
+                    {{form.isbook_set}}
+             </p>
+             <p>
+             <label for="id_qty">Quantity:</label>
+                    {{form.qty}}
+             </p>
+             <p>
+             <label for="id_status">Status:</label>
+                    {{form.status}}
+             </p>
+             <div class="text-end">
+             <button type="submit" class="btn btn-info">Submit</button>
+             <a href = "{% url 'reciept_book_set' %}" class="btn btn-danger">Close</a>
+
+             </div>
+</form>
+{% endif %}
+        </div>
+        <div class="modal-footer">
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#myModal').modal('show');
+
+  });
+</script>
+
+{% endblock %}
+
+

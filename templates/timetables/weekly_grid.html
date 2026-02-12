@@ -1,0 +1,123 @@
+{% extends 'panel/index.html' %}
+{% load custom_filters %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    h2 {
+        background-color: #f2f2f2;
+        padding: 10px;
+        border-left: 5px solid #4CAF50;
+    }
+    h3 {
+        margin-top: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #e0e0e0;
+    }
+</style>
+
+
+{% if not section_timetables %}
+    <form method="POST" action="{% url 'generate_timetable' %}">
+        {% csrf_token %}
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">Generate Timetable</button>
+        </div>
+    </form>
+{% else %}
+     {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        <div class="text-end">
+            <button
+                          type="button"
+                          class="btn btn-danger"
+                          data-bs-toggle="modal"
+                          data-bs-target="#basicModal">
+                          Delete Timetable
+                        </button>
+        </div>
+     {% endif %}
+        <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h6 class="modal-title text-danger" id="exampleModalLabel1"></h6>
+                                <button
+                                  type="button"
+                                  class="btn-close"
+                                  data-bs-dismiss="modal"
+                                  aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                <h5 class="text-danger" align="center">Are you sure want to Delete the previous Timetable ?</h5>
+
+                              </div>
+                              <div class="modal-footer" >
+                                 <form method="POST" action="{% url 'delete_timetable' %}">
+                                     {% csrf_token %}
+                                     <button type="button" class="btn btn-danger">Delete</button>
+                                 </form>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                  Close
+                                </button>
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+
+    <div class="text-end">
+
+    <a href ="{% url 'school_export_pdf' %}" ><button type="submit" class="btn btn-primary btn-sm">Export to PDF</button></a>
+    <a href ="{% url 'school_export_excel' %}" ><button type="submit" class="btn btn-primary btn-sm">Export to Excel</button></a>
+    </div>
+{% endif %}
+
+
+<h5 align="center">Timetable</h5>
+<div class="text-end">
+<a href ="{% url 'view_section_timetable' %}" ><button type="submit" class="btn btn-info btn-sm">Classwise Timetable</button></a>
+<a href ="{% url 'view_teacher_timetable' %}" ><button type="submit" class="btn btn-info btn-sm">Teacherwise Timetable</button></a>
+</div>
+{% for group in section_timetables %}
+    <h6>{{ group.section.class_sec_name.name }} - {{ group.section.section_name }}</h6>
+    <table>
+        <thead>
+            <tr>
+                <th>Day / Period</th>
+                {% for p in group.grid %}
+                    <th>Period {{ p.period }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for day_index in group.days|length|make_range %}
+                <tr>
+                    <td>{{ group.days|index:day_index }}</td>
+                    {% for period_row in group.grid %}
+                        <td>{{ period_row.cells|index:day_index|safe }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br><br>
+{% empty %}
+    <p>No timetable data available.</p>
+{% endfor %}
+
+{% endblock %}

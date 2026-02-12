@@ -1,0 +1,136 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD STYLE ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: none;
+}
+
+
+/* ===== GRADIENT TITLE BAR (REDUCED HEIGHT) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 4px 0;   /* FINAL reduced size */
+    margin-bottom: 10px;
+}
+
+.card-title h5 {
+    margin: 0;   /* remove extra space */
+    padding: 0;
+}
+
+.card-title h5 span {
+    font-size: 15px;
+    background: #ffffff;
+    color: #000;
+    padding: 3px 14px;   /* reduced badge padding */
+    border-radius: 6px;
+}
+
+/* ===== FORM SPACING ===== */
+.form-floating {
+    margin-bottom: 10px;
+}
+
+.form-control, .form-select {
+    border-radius: 10px !important;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #005C97, #363795);
+    border: none;
+    padding: 10px 30px;
+    border-radius: 10px;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #FF4D4D, #CC0000);
+    border: none;
+    padding: 10px 30px;
+    border-radius: 10px;
+}
+
+/* Fix button alignment */
+.text-end button {
+    margin-left: 5px;
+}
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- Title -->
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge bg-light text-dark">New Cash Source</span>
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="container">
+                <form action="" method="POST">
+                    {% csrf_token %}
+
+                    <!-- ROW 1 -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.source_name }}
+                                <label for="id_source_name">Cash Source</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.amount }}
+                                <label for="id_amount">Amount</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 2 -->
+                    <br>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.date_received }}
+                                <label for="id_date_received">Received Date</label>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields included without labels -->
+                        <div class="col-md-6">
+                            {{ form.received_by }}
+                            {{ form.school_year }}
+                            {{ form.source_school }}
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <!-- BUTTONS -->
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-danger">Clear</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

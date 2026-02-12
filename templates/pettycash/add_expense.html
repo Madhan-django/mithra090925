@@ -1,0 +1,211 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+/* ===== Global Font ===== */
+body, h1, h3, h4, h5, th, td, label, input, select, button, .form-floating > label {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== Card Styling ===== */
+.card {
+    border-radius: 22px;
+    box-shadow: 0px 4px 14px rgba(0,0,0,0.18);
+    overflow: hidden;
+    border: none;
+}
+
+/* ===== Card Title ===== */
+.card-title {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    padding: 6px 0;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    text-align: center;
+    margin-bottom: 0;
+}
+.card-title h5 {
+    margin: 0;
+    font-size: 18px;
+    color: #fff;
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #1a73e8, #0056d6);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 18px;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056d6, #1a73e8);
+}
+.btn-danger {
+    background: linear-gradient(135deg, #e63946, #d62839);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 18px;
+}
+.btn-danger:hover {
+    background: linear-gradient(135deg, #d62839, #e63946);
+}
+
+/* ===== Form Fields ===== */
+.form-floating .form-control, select.form-control {
+    border-radius: 10px;
+    font-size: 14px;
+    height: 45px;
+}
+.form-floating > label {
+    font-size: 14px;
+}
+
+/* ===== Spacing & Layout ===== */
+.text-end {
+    padding: 15px 0 0 0;
+}
+.row.g-6 {
+    gap: 1.5rem;
+}
+
+/* ===== Center the form ===== */
+.form-center {
+    display: flex;
+    justify-content: center;
+}
+.col-form-width {
+    flex: 0 0 48%; /* roughly 2 columns per row */
+}
+
+/* ===== Modal Styling ===== */
+.modal-onboarding .modal-content {
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.18);
+}
+.modal-onboarding .btn-primary {
+    border-radius: 8px;
+    padding: 6px 18px;
+}
+.modal-onboarding .btn-outline-secondary {
+    border-radius: 8px;
+    padding: 6px 18px;
+}
+
+/* ===== Badge Styling ===== */
+.badge {
+    font-size: 14px;
+    font-weight: normal;
+    padding: 4px 12px;
+    border-radius: 18px;
+    background-color: #fff;
+    color: #000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge">New Expense</span></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="form-center">
+                <form class="w-100" action="" method="POST">
+                    {% csrf_token %}
+                    <br><br>
+                    <!-- Row 1 -->
+                    <div class="row g-6 mb-3 justify-content-center">
+                        <div class="col-form-width">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.description }}
+                                <label for="id_description">Expense Name</label>
+                            </div>
+                        </div>
+                        <div class="col-form-width">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.amount }}
+                                <label for="id_amount">Amount</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="row g-6 mb-3 justify-content-center">
+                        <div class="col-form-width">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.spent_by }}
+                                <label for="id_spent_by">Receiver</label>
+                            </div>
+                        </div>
+                        <div class="col-form-width d-flex align-items-end gap-2">
+                            <div class="form-floating form-floating-outline flex-grow-1">
+                                {{ form.category }}
+                                <label for="id_category">Expense Category</label>
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#onboardImageModal">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div class="row g-6 mb-3 justify-content-center">
+                        <div class="col-form-width">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.date_spent }}
+                                <label for="id_date_spent">Date</label>
+                            </div>
+                        </div>
+                        <div class="col-form-width">
+                            <div class="form-floating form-floating-outline">
+                                {{ form.remarks }}
+                                <label for="id_remarks">Remark</label>
+                            </div>
+                        </div>
+                    </div>
+                   <br>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary me-2">Submit</button>
+                        <button type="reset" class="btn btn-danger">Clear</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-onboarding modal fade animate__animated" id="onboardImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content text-center">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="onboarding-content mb-0">
+                    <form method="POST" action="{% url 'addexpensecategory' %}">
+                        {% csrf_token %}
+                        <div class="row justify-content-center">
+                            <div class="col-sm-10">
+                                <div class="form-floating form-floating-outline mb-4">
+                                    {{ form1.name }}
+                                    <label for="id_name">Expense Category Name</label>
+                                </div>
+                                {{form1.expense_school}}
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

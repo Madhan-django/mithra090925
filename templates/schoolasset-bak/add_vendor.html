@@ -1,0 +1,126 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+    h1, h3, h4 {
+        font-family: 'Roboto', sans-serif;
+    }
+    th {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+    label {
+        font-weight: bold;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .card {
+        background-color: #f9f9f9;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    .card-title {
+        background-color: #007bff;
+        color: white;
+        padding: 12px;
+        border-radius: 8px 8px 0 0;
+    }
+    .card-title h3 {
+        margin: 0;
+        font-weight: 600;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 5px;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    select,
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        height: 45px;
+    }
+    select {
+        appearance: none;
+    }
+    option {
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+    }
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .col-half {
+        flex: 0 0 48%;
+    }
+    .text-center {
+        text-align: center;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <h5><span class="badge bg-light text-dark">New Vendor</span></h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    {% for field in form %}
+    {% if not field.is_hidden %}
+        <div class="form-group col-half">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger small">{{ field.errors|striptags }}</div>
+            {% endif %}
+        </div>
+    {% else %}
+        {{ field }} {# render hidden field without label #}
+    {% endif %}
+{% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery + Bootstrap Select2 or Datepicker -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<!-- Activate Select2 on all .select2 fields -->
+<script>
+$(document).ready(function() {
+    $('.select2').select2({
+        width: '100%',
+        theme: 'bootstrap4',
+        placeholder: function(){
+            $(this).data('placeholder');
+        }
+    });
+});
+</script>
+
+{% endblock %}

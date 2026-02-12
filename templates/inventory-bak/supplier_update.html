@@ -1,0 +1,52 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<style>
+    h1, h3 {
+        font-family: Roboto;
+    }
+    th, option {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold !important;
+        font-size: 16px !important;
+    }
+	.leftpad{
+
+	   padding :20px;
+
+	}
+    .custom-dropdown select{
+       height:50px;
+    }
+	ul.page-section {
+    margin: 0;
+    padding: 0 38px;
+    list-style: none
+}
+
+</style>
+
+<div class="pb-0 text-center">
+    <div class="d-flex flex-wrap justify-content-center align-items-center">
+        <span>
+            <img src="https://mithran.co.in/media/{{ skool.logo }}" alt="School Logo" width="50" height="50" style="margin-right: 10px;">
+            <h1 style="display: inline-block; vertical-align: middle; margin-bottom: 0;">{{ skool }}</h1>
+        </span>
+    </div>
+</div>
+
+<div class="col-12 grid-margin stretch-card ">
+    <div class="card leftpad">
+        <div class="card-title">
+			<h3 class="card-title text-center">Suplier-Update </h3>
+        </div>
+           <br>
+		<div class="card-body">
+
+			<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Update</button>
+</form>
+</div>
+{% endblock %}
+

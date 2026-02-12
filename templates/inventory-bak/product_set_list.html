@@ -1,0 +1,77 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+ .text-end{
+   padding:20px;
+    }
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-title text-center">
+            <br>
+            <h5 class="mb-0 text-center">Products List</h5>
+        </div>
+
+            <div class="text-end">
+                <form action="{% url 'product_set_create' %}" method="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info" >New Product Set</button>
+                </form>
+            </div>
+        <div class="card-body">
+            <div class="table-responsive">
+<table class="table">
+  <thead class="table-dark" align ="center">
+    <tr>
+      <th>Group Name</th>
+      <th>Class Name</th>
+      <th>Product Category</th>
+      <th>Product Name</th>
+      <th>Quantity</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  {% if data %}
+   {% for set in data %}
+    <tr align="center">
+      <td>{{set.name}}</td>
+      <td>{{set.pclass.name}}</td>
+      <td>{{set.prod_set.category}}</td>
+      <td>{{set.prod_set}}</td>
+      <td>{{set.qty}}</td>
+             <td>
+          <form action="{% url 'product_set_update' set.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-info" value="Update">
+          </form>
+{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+            <form action="{% url 'product_set_delete' set.id %}" method="" class="d-inline">
+              {% csrf_token %}
+               <input type="submit" class="btn btn-warning" value="Delete">
+          </form>
+{% endif %}
+        </td>
+    </tr>
+   {% endfor %}
+   {% else %}
+  <tr><td>
+      <div class="alert alert-danger" role="alert">
+No Record  are available to Show
+</div>
+      </td></tr>
+{% endif %}
+  </tbody>
+</table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

@@ -1,0 +1,84 @@
+{% extends 'panel/index.html' %}
+
+{% block content %}
+<style>
+    .text-end{
+     padding:20px;
+    }
+</style>
+<!-- Bordered Table -->
+
+              <div class="card">
+                  <form method="POST" action="{% url 'timetable_check_pdf' %}"  target="_blank">
+                  {% csrf_token %}
+                 <div class="text-end">
+                   <button type="submit" class="btn btn-primary btn-sm">Export Logs</button>
+                 </div>
+               </form>
+                <h5 class="card-header " align="center">Timetable Check Logs</h5>
+                <div class="card-body">
+                  <div class="table-responsive text-nowrap">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                           <th>Class</th>
+                           <th>Section</th>
+                           <th>Total Periods</th>
+                           <th>Allocated Periods</th>
+                           <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                       {% if sections_issue %}
+                       {% for dt in sections_issue %}
+                        <tr>
+                          <td>
+                              {% if dt.status == "No issue found" %}
+                            <i class="ri-checkbox-circle-fill ri-22px text-success me-4"></i>
+                              {% else %}
+                            <i class="ri-close-circle-fill ri-22px text-danger me-4"></i>
+                              {% endif %}
+
+
+                              <span class="fw-medium">{{dt.cls}}</span>
+                          </td>
+                           <td>{{dt.sect}}</td>
+                           <td>{{dt.tot}}</td>
+                           <td>{{dt.cnt}}</td>
+                           <td>{{dt.status}}</td>
+                        </tr>
+                        {% endfor %}
+                       {% else %}
+                          <tr>
+                        <td colspan="4">No data found</td>
+                         </tr>
+                       {% endif %}
+
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <!--/ Bordered Table -->
+<table>
+  <tr>
+
+
+  </tr>
+
+    
+  <tr>
+      
+      <td>{{dt.cls}}</td>
+
+
+
+
+
+
+  </tr>
+
+</table>
+{% endblock %}
+
