@@ -1,5 +1,5 @@
 from django import forms
-from .models import staff,staff_attendancegen,temp_homework
+from .models import staff,staff_attendancegen,temp_homework,Dept,Shift
 
 state= [
     ('Active','Active'),
@@ -15,14 +15,35 @@ gend = [
     ('Female','Female'),
     ('Transgender','Transgender'),
 ]
+
+
+class add_deptfm(forms.ModelForm):
+    class Meta:
+        model = Dept
+        fields = '__all__'
+        widgets = {
+            'sch':forms.HiddenInput()
+
+        }
+
+class add_shiftform(forms.ModelForm):
+    class Meta:
+        model = Shift
+        fields = '__all__'
+        widgets = {
+            'sch':forms.HiddenInput()
+
+        }
+
 class add_staff_form(forms.ModelForm):
     class Meta:
         model = staff
         exclude = ['staff_user']  # <- Exclude this field from the form
         widgets = {
+            'EmpCode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Employee Code'}),
+            'BioCode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bio Code'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control','placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control','placeholder':'Last Name'}),
-            'status':forms.Select(choices=state),
             'gender':forms.Select(choices=gend,attrs={'class':'form-control','placeholder':'Gender'}),
             'dob':forms.DateInput(attrs={'class': 'form-control','type':'date'}),
             'address':forms.TextInput(attrs={'class': 'form-control'}),
@@ -32,6 +53,7 @@ class add_staff_form(forms.ModelForm):
             'role': forms.TextInput(attrs={'class': 'form-control'}),
             'salary':forms.NumberInput(attrs={'class': 'form-control'}),
             'desg':forms.TextInput(attrs={'class': 'form-control'}),
+            'department': forms.Select(attrs={'class':'form-control'}),
             'qualification':forms.TextInput(attrs={'class': 'form-control'}),
             'status':forms.Select(choices=state,attrs={ 'class':'select2 form-select','data-allow-clear':'true'}),
             'desc':forms.TextInput(attrs={'class': 'form-control'}),

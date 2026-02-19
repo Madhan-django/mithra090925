@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns=[
     path('department',views.PDept_list,name='department'),
-    path('add_dept',views.PDept_add,name='add_dept'),
+    path('add_depts',views.PDept_add,name='add_depts'),
     path('PDept_update/<dept_id>',views.PDept_update,name='update_dept'),
     path('PDept_del/<dept_id>',views.PDept_del,name='del_dept'),
     path('designation',views.PDesignation_list,name='designation'),
@@ -31,7 +31,12 @@ urlpatterns=[
     path('del_loan/<loan_id>',views.Del_Loan,name='del_loan'),
     path('day_attendance',views.daily_attendance_view,name='day_attendance'),
     path('import_employees/', views.import_employees, name='import_employees'),
-    path('export_employee_sample',views.export_employee_sample,name='export_employee_sample')
+    path('export_employee_sample',views.export_employee_sample,name='export_employee_sample'),
+    path('fetch_attendance',views.sync_attendance_from_device,name='fetch_attendance'),
+    path('Staff_Monthly_Attendance',views.Staff_Monthly_Attendance,name='Staff_Monthly_Attendance'),
+    path('holidays',views.Holiday_List,name='Holidays'),
+    path('add_holiday',views.add_holiday,name='add_holiday'),
+    path('holiday/<int:id>', views.delete_holiday, name='delete_holiday'),
 
 
 

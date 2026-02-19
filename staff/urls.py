@@ -3,6 +3,15 @@ from django.contrib.auth.decorators import login_required
 from . import views
 
 urlpatterns = [
+
+    path('dept',views.Dept_list,name='dept'),
+    path('add_dept',views.Dept_add,name='add_dept'),
+    path('update_dept/<dept_id>',views.Dept_update,name='update_dept'),
+    path('del_dept/<dept_id>',views.Dept_del,name='del_dept'),
+    path('shifts',views.shifts,name='shifts'),
+    path('shift_add',views.shift_add,name='shift_add'),
+    path('shift_update/<shift_id>',views.shift_update,name='shift_update'),
+    path('shift_del/<shift_id>',views.shift_del,name='shift_del'),
     path('stafflist', login_required(views.stafflist), name='stafflist'),
     path('add_staff', login_required(views.add_staff), name='add_staff'),
     path('staff_update/<staff_id>', login_required(views.staff_update), name='staff_update'),
@@ -24,5 +33,6 @@ urlpatterns = [
     path('staff_search', login_required(views.staff_search), name='staff_search'),
     path('homework_search', login_required(views.homework_search), name='homework_search'),
     path('homework_manual',views.homework_manual,name='homework_manual'),
-    path('homeworkreal_view',views.homeworkreal_view,name='homeworkreal_view')
+    path('homeworkreal_view',views.homeworkreal_view,name='homeworkreal_view'),
+
 ]

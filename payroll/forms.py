@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Loan
+from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Loan,Holiday
 emp_type_choice = [
     (1,'PF-ESI'),
     (0,'NON-PF&ESI')
@@ -16,6 +16,15 @@ class add_deptform(forms.ModelForm):
 
         }
 
+class add_holidayform(forms.ModelForm):
+    class Meta:
+        model = Holiday
+        fields = '__all__'
+        widgets = {
+            'date': forms.DateInput(attrs={'class':'form-control', 'type': 'date'}),
+            'sch':forms.HiddenInput()
+
+        }
 
 
 class add_desgform(forms.ModelForm):

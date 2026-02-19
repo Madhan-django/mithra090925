@@ -1,5 +1,6 @@
 from django.db import models
 from institutions.models import school
+from staff.models import staff
 import datetime
 from django.utils import timezone
 from datetime import date
@@ -10,6 +11,14 @@ ded_from =[
     ('Basic','Basic')
 
 ]
+
+
+Hol =[
+    ('Weekly-OFF','Weekly-OFF'),
+    ('Special-OFF','Special-OFF')
+
+]
+
 
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -56,13 +65,7 @@ class PayrollBank(models.Model):
         return self.CustName
 
 
-class Attendance(models.Model):
-    employee = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)
-    date = models.DateField()
-    status = models.CharField(max_length=10, choices=[('Present', 'Present'), ('Absent', 'Absent'), ('Leave', 'Leave')])
 
-    def __str__(self):
-        return f"{self.employee.name} - {self.date}"
 
 class Allowance(models.Model):
     name = models.CharField(max_length=100)
@@ -164,3 +167,147 @@ class Payslip(models.Model):
 class tempattend(models.Model):
     employee = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)
     days = models.DecimalField(max_digits=3, decimal_places=1, default=0)
+
+
+
+
+class Attendance(models.Model):
+    STATUS_CHOICES = (
+        ("PRESENT", "Present"),
+        ("ABSENT", "Absent"),
+        ("HALF_DAY", "Half Day"),
+        ("MIS_PUNCH", "Miss Punch"),
+
+        # 🔥 Leave Types
+        ("CL", "Casual Leave"),
+        ("ML", "Medical Leave"),
+        ("PERMISSION", "Permission"),
+        ("LOP", "Loss of Pay"),
+
+        # 🔥 Special Days
+        ("HOLIDAY", "Holiday"),
+
+    )
+
+    sch = models.ForeignKey(school, on_delete=models.CASCADE)
+    staff = models.ForeignKey(staff,on_delete=models.CASCADE)
+
+
+    date = models.DateField()
+
+    # ========== RAW DEVICE DATA ==========
+    first_in = models.DateTimeField(null=True, blank=True)
+    last_out = models.DateTimeField(null=True, blank=True)
+    punch_count = models.IntegerField(default=0)
+
+    # ========== CALCULATED VALUES ==========
+    work_duration = models.DurationField(null=True, blank=True)
+    late_minutes = models.IntegerField(default=0)
+
+    # ========== FLAGS ==========
+    late = models.BooleanField(default=False)
+    mis_punch = models.BooleanField(default=False)
+    is_manual = models.BooleanField(default=False)  # HR edited
+
+    # ========== FINAL STATUS ==========
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="PRESENT"
+    )
+
+    leave_type = models.CharField(max_length=20, blank=True, null=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+
+    # ========== PAYROLL LOCK ==========
+    is_finalized = models.BooleanField(default=False)
+
+    # ========== SYSTEM FIELDS ==========
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('staff', 'date')
+        ordering = ['-date']
+        indexes = [
+            models.Index(fields=['date']),
+            models.Index(fields=['staff']),
+        ]
+
+    def __str__(self):
+        return f"{self.staff} - {self.date} - {self.status}"
+
+
+class Holiday(models.Model):
+    sch = models.ForeignKey(school, on_delete=models.CASCADE)
+    date = models.DateField()
+    name = models.CharField(max_length=20,choices=Hol)
+
+    class Meta:
+        unique_together = ('sch', 'date')
+
+    def __str__(self):
+        return f"{self.date} - {self.name}"
+
+class LeaveBalance(models.Model):
+    staff = models.ForeignKey(staff, on_delete=models.CASCADE)
+    year = models.IntegerField()
+    cl_balance = models.DecimalField(max_digits=4, decimal_places=1, default=12)
+    ml_balance = models.DecimalField(max_digits=4, decimal_places=1, default=10)
+
+    class Meta:
+        unique_together = ('staff', 'year')
+
+
+class PayrollSettings(models.Model):
+
+    PAYROLL_MONTH_CHOICES = [
+        ("JAN-DEC", "JAN - DEC"),
+        ("JUN-MAY", "JUN - MAY"),
+        ("APR-MAR", "APR - MAR"),
+    ]
+
+    school = models.OneToOneField(
+        school,
+        on_delete=models.CASCADE,
+        related_name="payroll_settings"
+    )
+
+    payroll_date = models.PositiveIntegerField(default=5)  # 5th of every month
+
+    payroll_month_cycle = models.CharField(
+        max_length=20,
+        choices=PAYROLL_MONTH_CHOICES,
+        default="JUN-MAY"
+    )
+
+    # Leave Settings
+    total_cl = models.PositiveIntegerField(default=12)
+    cl_per_month = models.PositiveIntegerField(default=1)
+    allow_previous_cl_usage = models.BooleanField(default=True)
+
+    total_ml = models.PositiveIntegerField(default=3)
+
+    # Late Settings
+    grace_late_count = models.PositiveIntegerField(default=3)
+    lop_after_grace = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=0.25
+    )
+
+    late_cutoff_hour = models.PositiveIntegerField(default=9)
+
+    # Permission Settings
+    permission_hours = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=1.0
+    )
+
+    permission_per_month = models.PositiveIntegerField(default=2)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.school.name} Payroll Settings"

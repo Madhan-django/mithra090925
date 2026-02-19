@@ -73,7 +73,7 @@ input[type="date"] {
         </div>
 
         <div class="card-body">
-
+            <a href="{% url 'fetch_attendance' %}" class="btn btn-primary">Fetch Attendance</a>
             <!-- ===== SEARCH + EXPORT FORM ===== -->
             <form method="get" class="row g-3 align-items-center mb-4">
                 <div class="col-md-3">
@@ -105,6 +105,9 @@ input[type="date"] {
                     <thead>
                         <tr>
                             <th>User ID</th>
+                            <th>Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
                             <th>IN Time</th>
                             <th>OUT Time</th>
                             <th>Work Hours</th>
@@ -117,6 +120,9 @@ input[type="date"] {
                         {% for row in attendance %}
                         <tr>
                             <td>{{ row.user_id }}</td>
+                            <th>{{row.staff}}</th>
+                            <th>{{row.Designation}}</th>
+                            <th>{{row.Department}}</th>
                             <td>{{ row.in_time|default:"-" }}</td>
                             <td>{{ row.out_time|default:"-" }}</td>
                             <td>{{ row.work_hours|default:"-" }}</td>
