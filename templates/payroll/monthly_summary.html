@@ -1,0 +1,97 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h4 class="text-center mb-4">Monthly Attendance Summary</h4>
+
+    <!-- =================== FILTER SECTION =================== -->
+
+    <form method="GET" class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <label class="form-label">Select Month</label>
+            <select name="month" class="form-control" required>
+                <option value="">-- Select Month --</option>
+                {% for value, name in months %}
+                    <option value="{{ value }}"
+                        {% if value == selected_month %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Year</label>
+            <input type="number"
+                   name="year"
+                   value="{{ selected_year }}"
+                   class="form-control"
+                   required>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">
+                Generate Report
+            </button>
+        </div>
+
+    </form>
+
+    <!-- =================== REPORT SECTION =================== -->
+
+    {% if summary_data %}
+
+    <div class="card shadow-sm">
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Staff</th>
+                        <th>Total</th>
+                        <th>Working</th>
+                        <th>Present</th>
+                        <th>Half</th>
+                        <th>CL</th>
+                        <th>ML</th>
+                        <th>Permission</th>
+                        <th>LOP</th>
+                        <th>Late</th>
+                        <th>Week Off</th>
+                        <th>Holiday</th>
+                        <th>Miss Punch</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in summary_data %}
+                    <tr>
+                        <td>{{ row.employee.first_name}}&nbsp;{{ row.employee.last_name}}</td>
+                        <td>{{ row.total_days }}</td>
+                        <td>{{ row.working_days }}</td>
+                        <td>{{ row.present }}</td>
+                        <td>{{ row.half_day }}</td>
+                        <td>{{ row.cl }}</td>
+                        <td>{{ row.ml }}</td>
+                        <td>{{ row.permission }}</td>
+                        <td>{{ row.lop }}</td>
+                        <td>{{ row.late }}</td>
+                        <td>{{ row.weekly_off }}</td>
+                        <td>{{ row.holiday }}</td>
+                        <td>{{ row.mispunch }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

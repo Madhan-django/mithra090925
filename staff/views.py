@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect,HttpResponse
 from django.utils import timezone
-from .models import staff,staff_attendance,staff_attendancegen,homework,temp_homework
+from .models import staff,staff_attendance,staff_attendancegen,homework,temp_homework,Dept,Shift
 from institutions.models import school
 from setup.models import academicyr,currentacademicyr,sclass,subjects
-from .forms import add_staff_form,add_staff_attendance_gen,add_homework_form,edit_homework_form
+from .forms import add_staff_form,add_staff_attendance_gen,add_homework_form,edit_homework_form,add_deptfm,add_shiftform
 from datetime import timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
@@ -19,6 +19,112 @@ import csv
 
 
 # Create your views here.
+
+def Dept_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = Dept.objects.filter(sch=sdata)
+    return render(request, 'staff/DeptList.html', context={'data': data, 'skool': sdata, 'year': year})
+
+def Dept_add(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    initial_data = {
+        'sch':sdata
+    }
+    if request.method == 'POST':
+        form  = add_deptfm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Department Added successfully")
+            return redirect('dept')
+    else:
+        form = add_deptfm(initial=initial_data)
+    return render(request,'staff/add_dept.html',context={'form':form,'skool':sdata,'year':year})
+
+def Dept_update(request,dept_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = Dept.objects.get(id=dept_id)
+    if request.method == 'POST':
+        form = add_deptfm(request.POST or None,instance=data)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Department updated successfully")
+            return redirect('dept')
+    else:
+        form  = add_deptfm(instance = data)
+    return render(request,'staff/add_dept.html',context={'form':form,'skool':sdata,'year':year})
+
+def Dept_del(request,dept_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = Department.objects.get(id=dept_id)
+    data.delete()
+    messages.success(request,"Department deleted successfully")
+    return redirect('dept')
+
+def shifts(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = Shift.objects.filter(sch=sdata)
+    return render(request, 'staff/shifts.html', context={'data': data, 'skool': sdata, 'year': year})
+
+def shift_add(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    initial_data = {
+        'sch':sdata
+    }
+    if request.method == 'POST':
+        form  = add_shiftform(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Shift Added successfully")
+            return redirect('shifts')
+    else:
+        form = add_shiftform(initial=initial_data)
+    return render(request,'staff/add_shift.html',context={'form':form,'skool':sdata,'year':year})
+
+def shift_update(request,shift_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = Shift.objects.get(id=shift_id)
+    if request.method == 'POST':
+        form = add_shiftform(request.POST or None,instance=data)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Shift updated successfully")
+            return redirect('shifts')
+    else:
+        form  = add_shiftform(instance = data)
+    return render(request,'staff/update_shift.html',context={'form':form,'skool':sdata,'year':year})
+
+def shift_del(request,shift_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = Shift.objects.get(id=shift_id)
+    data.delete()
+    messages.success(request,"Shift deleted successfully")
+    return redirect('shifts')
+
+
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def stafflist(request):
@@ -409,8 +515,17 @@ def homework_view(request):
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-    data = temp_homework.objects.filter(school_homework=sdata).order_by('-id')
-    return render(request,'staff/homework.html',context={'data':data,'skool':sdata,'year':year})
+
+    today = now().date()
+    seven_days_ago = today - timedelta(days=7)
+
+    data = temp_homework.objects.filter(
+        school_homework=sdata,
+        homework_date__gte=seven_days_ago   # change 'date' to your actual field name
+    ).order_by('-id')
+
+    return render(request, 'staff/homework.html',
+                  context={'data': data, 'skool': sdata, 'year': year})
 
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
@@ -675,3 +790,5 @@ def homeworkreal_view(request):
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = homework.objects.filter(school_homework=sdata).order_by('-id')
     return render(request,'staff/homework.html',context={'data':data,'skool':sdata,'year':year})
+
+

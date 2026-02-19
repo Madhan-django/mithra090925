@@ -92,6 +92,9 @@ h6 {
                   <form class="card-body"  method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                   <h6>1. Personal Information</h6>
+
+
+
                   <div class="row g-6">
                     <div class="col-md-6">
                        <div class="form-floating form-floating-outline">
@@ -189,6 +192,17 @@ h6 {
                  <hr class="my-6 mx-n4" />
                   <h6>2. Acaademic Info</h6>
                     <br>
+                      <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating form-floating-outline">
+                        {{ form.department }}
+                        <label>Department</label>
+                    </div>
+                </div>
+
+
+            </div>
+            <br>
                     <div class="row g-6">
                    <div class="col-md-6">
                       <div class="form-floating form-floating-outline">
@@ -241,6 +255,33 @@ h6 {
                    </div>
                  </div>
                     <br>
+
+
+                  <div class="row g-6">
+                    <div class="col-md-6">
+                       <div class="form-floating form-floating-outline">
+                        {{form.EmpCode}}
+                        <label>Employee Code</label>
+                      </div>
+                    </div>
+                      <div class="col-md-6">
+                      <div class="form-floating form-floating-outline">
+                         {{form.BioCode}}
+                        <label>Bio Code</label>
+                      </div>
+                    </div>
+                  </div>
+                  <br>
+                   <div class="row g-6">
+                    <div class="col-md-6">
+                       <div class="form-floating form-floating-outline">
+                        {{form.shift}}
+                        <label>Shift</label>
+                      </div>
+                    </div>
+
+                  </div>
+                  <br>
                      <div class="row g-6">
 
                    <div class="col-md-6">

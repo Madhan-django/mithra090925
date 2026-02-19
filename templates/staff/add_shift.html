@@ -1,0 +1,105 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ===== GLOBAL FONT ===== */
+body, h1, h3, h4, h5, label, input, textarea, select, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+    overflow: hidden;
+}
+
+/* ===== TITLE BAR (Style A) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 6px;
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+}
+
+.card-title h4 span {
+    background: #f8f9fa;
+    color: #000;
+    padding: 5px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== FORM ===== */
+.card-body {
+    padding: 30px;
+}
+
+form p {
+    margin-bottom: 18px;
+}
+
+label {
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+/* Inputs */
+input, textarea, select {
+    height: 50px;
+    font-size: 16px;
+}
+
+textarea {
+    height: auto;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+    padding: 8px 22px;
+}
+
+.btn-warning {
+    background: linear-gradient(90deg, #f0ad4e, #f7c873);
+    border: none;
+    font-weight: 500;
+    padding: 8px 22px;
+}
+
+/* ===== BUTTON BAR ===== */
+.button-bar {
+    text-align: center;
+    margin-top: 25px;
+}
+</style>
+
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- TITLE -->
+        <div class="card-title">
+            <h4><span class="badge">New Shift</span></h4>
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <div class="button-bar">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="reset" class="btn btn-warning">Reset</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

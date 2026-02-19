@@ -1,0 +1,147 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .card-header-gradient {
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-primary-gradient {
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary-gradient:hover {
+        opacity: 0.9;
+    }
+
+    .btn-cancel-gradient {
+        background: linear-gradient(45deg, #dc3545, #b02a37);
+        border: none;
+        color: white;
+    }
+
+    .btn-cancel-gradient:hover {
+        opacity: 0.9;
+    }
+
+    thead {
+        background-color: #212529;
+        color: white;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- ================= Payroll Settings Card ================= -->
+
+    <div class="card card-custom">
+
+        <div class="card-header-gradient">
+            <div class="card-title text-center">
+                <h5>
+                    <span class="badge bg-light text-dark">
+                        Payroll Settings - {{ skool.name }} ({{ year }})
+                    </span>
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            {% if payroll %}
+
+            <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Payroll Date</th>
+                <th>Month Cycle</th>
+                <th>Total CL</th>
+                <th>CL / Month</th>
+                <th>Prev CL Usage</th>
+                <th>Total ML</th>
+                <th>Grace Late</th>
+                <th>LOP After Grace</th>
+                <th>Late Cutoff</th>
+                <th>Permission Hours</th>
+                <th>Permission / Month</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ payroll.payroll_date }}th</td>
+                <td>{{ payroll.get_payroll_month_cycle_display }}</td>
+                <td>{{ payroll.total_cl }}</td>
+                <td>{{ payroll.cl_per_month }}</td>
+                <td>
+                    {% if payroll.allow_previous_cl_usage %}
+                        <span class="badge bg-success">YES</span>
+                    {% else %}
+                        <span class="badge bg-danger">NO</span>
+                    {% endif %}
+                </td>
+                <td>{{ payroll.total_ml }}</td>
+                <td>{{ payroll.grace_late_count }}</td>
+                <td>{{ payroll.lop_after_grace }}</td>
+                <td>{{ payroll.late_cutoff_hour }}:00</td>
+                <td>{{ payroll.permission_hours }} hr</td>
+                <td>{{ payroll.permission_per_month }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex justify-content-end mt-3 gap-2">
+    <a href="{% url 'edit_payroll_settings' %}" class="btn btn-primary-gradient">
+        Edit Settings
+    </a>
+
+    <form method="POST" action="{% url 'delete_payroll_settings' %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-cancel-gradient"
+                onclick="return confirm('Are you sure you want to delete payroll settings?');">
+            Delete
+        </button>
+    </form>
+</div>
+
+{% else %}
+
+<div class="alert alert-warning text-center">
+    Payroll settings not configured for this school.
+</div>
+
+<div class="text-center">
+    <a href="{% url 'create_payroll_settings' %}" class="btn btn-primary-gradient">
+        Create Payroll Settings
+    </a>
+</div>
+
+{% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -175,9 +175,9 @@ WSGI_APPLICATION = 'mithran.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mithra100226',
+        'NAME': 'mithra220226',
         'USER': 'root',
-        'PASSWORD':'MithranMithra123',
+        'PASSWORD':'MithranMithra@123',
         'HOST': 'localhost',  # or your MySQL host IP address
         'PORT': '3306',      # or your MySQL port
     }

@@ -5,6 +5,7 @@ from institutions.models import school
 from admission.models import students
 from setup.models import subjects,sclass,section,currentacademicyr
 from django.contrib.auth.models import User
+from datetime import time
 from django.utils import timezone
 # Create your models here.
 
@@ -14,9 +15,28 @@ class Skill(models.Model):
     def __str__(self):
         return self.name
 
+class Dept(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    sch = models.ForeignKey(school,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class Shift(models.Model):
+    shift_name = models.CharField(max_length=50, default='Basic_shift')
+    start_time = models.TimeField(default=time(8, 35))
+    end_time = models.TimeField(default=time(17, 0))
+    sch = models.ForeignKey(school, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.shift_name
+
+
 class staff(models.Model):
     EmpCode = models.CharField(max_length=20, blank=True, null=True)
-    BioCode = models.CharField(max_length=10, blank=True, null=True)
+    BioCode = models.CharField(max_length=15, blank=True, null=True)
+    shift = models.ForeignKey(Shift,on_delete=models.SET_NULL,null=True,blank=True)
     first_name = models.CharField(max_length=35)
     last_name = models.CharField(max_length=35)
     gender = models.CharField(max_length=12)
@@ -29,6 +49,7 @@ class staff(models.Model):
     role = models.CharField(max_length=150)
     salary = models.FloatField()
     desg = models.CharField(max_length=150)
+    department = models.ForeignKey(Dept,on_delete=models.SET_NULL,null=True)
     qualification = models.CharField(max_length=150)
     status = models.CharField(max_length=10,default='Active')
     desc = models.CharField(max_length=150,blank=True,null=True)
@@ -98,6 +119,12 @@ class temp_homework(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+
+
+
 
 
 
