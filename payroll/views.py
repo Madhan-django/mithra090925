@@ -8,7 +8,7 @@ from staff.models import staff
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Employee_allowance_Details,Employee_deduction_Details,Loan,Attendance,Holiday,PayrollSettings
+from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Employee_allowance_Details,Employee_deduction_Details,Loan,Attendance,Holiday,PayrollSettings,StatutorySettings
 from django.contrib import messages
 from .forms import add_deptform,add_desgform,PayrollEmployeeForm,PayrollBankForm,PayrollBankFormSet,payrollBankFormupdate,Allowanceform,Deductionform,NewLoanForm,add_holidayform,PayrollSettingsForm
 import math
@@ -2012,3 +2012,102 @@ def reapply_holidays_attendance(request):
     )
 
     return redirect('Holidays')
+
+# ================= LIST VIEW =================
+def statutory_settings_list(request):
+    sch_id = request.session.get('sch_id')
+
+    if not sch_id:
+        return render(request, "error.html", {"message": "School not found in session"})
+
+    sch = get_object_or_404(school, pk=sch_id)
+
+    settings = StatutorySettings.objects.filter(sch=sch).first()
+
+    return render(request, "payroll/statutory_list.html", {
+        "settings": settings
+    })
+
+
+# ================= ADD VIEW =================
+def statutory_settings_add(request):
+    sch_id = request.session.get('sch_id')
+
+    if not sch_id:
+        return render(request, "error.html", {"message": "School not found in session"})
+
+    sch = get_object_or_404(school, pk=sch_id)
+
+    # Prevent duplicate creation
+    if StatutorySettings.objects.filter(sch=sch).exists():
+        messages.error(request, "Statutory Settings already exist for this school.")
+        return redirect("statutory_settings_list")
+
+    if request.method == "POST":
+        StatutorySettings.objects.create(
+            sch=sch,
+            pf_employee_percent=request.POST.get("pf_employee_percent"),
+            pf_employer_percent=request.POST.get("pf_employer_percent"),
+            pf_basic_limit=request.POST.get("pf_basic_limit"),
+            esi_employee_percent=request.POST.get("esi_employee_percent"),
+            esi_employer_percent=request.POST.get("esi_employer_percent"),
+            esi_gross_limit=request.POST.get("esi_gross_limit"),
+        )
+
+        messages.success(request, "Statutory Settings created successfully.")
+        return redirect("statutory_settings_list")
+
+    return render(request, "payroll/statutory_add.html")
+
+
+# ================= DELETE VIEW =================
+def statutory_settings_delete(request):
+    sch_id = request.session.get('sch_id')
+
+    if not sch_id:
+        return render(request, "error.html", {"message": "School not found in session"})
+
+    sch = get_object_or_404(school, pk=sch_id)
+
+    settings = get_object_or_404(StatutorySettings, sch=sch)
+
+    settings.delete()
+
+    messages.success(request, "Statutory Settings deleted successfully.")
+    return redirect("statutory_settings_list")
+
+# ================= EDIT =================
+def statutory_settings_edit(request):
+    sch_id = request.session.get('sch_id')
+
+    if not sch_id:
+        return render(request, "error.html", {"message": "School not found in session"})
+
+    sch = get_object_or_404(school, pk=sch_id)
+    settings = get_object_or_404(StatutorySettings, sch=sch)
+
+    if request.method == "POST":
+
+        pf_emp = float(request.POST.get("pf_employee_percent"))
+        pf_empr = float(request.POST.get("pf_employer_percent"))
+
+        if pf_emp > 100 or pf_empr > 100:
+            messages.error(request, "PF percentage cannot exceed 100%.")
+            return redirect("statutory_settings_edit")
+
+        settings.pf_employee_percent = pf_emp
+        settings.pf_employer_percent = pf_empr
+        settings.pf_basic_limit = request.POST.get("pf_basic_limit")
+
+        settings.esi_employee_percent = request.POST.get("esi_employee_percent")
+        settings.esi_employer_percent = request.POST.get("esi_employer_percent")
+        settings.esi_gross_limit = request.POST.get("esi_gross_limit")
+
+        settings.save()
+
+        messages.success(request, "Statutory Settings Updated Successfully.")
+        return redirect("statutory_settings_list")
+
+    return render(request, "payroll/statutory_edit.html", {
+        "settings": settings
+    })

@@ -42,7 +42,11 @@ urlpatterns=[
     path('psettings',views.PayrollSet,name='psettings'),
     path('create_payroll_settings',views.create_payroll_settings,name='create_payroll_settings'),
     path('edit_payroll_settings',views.edit_payroll_settings,name='edit_payroll_settings'),
-    path('delete_payroll_settings',views.delete_payroll_settings,name='delete_payroll_settings')
+    path('delete_payroll_settings',views.delete_payroll_settings,name='delete_payroll_settings'),
+    path("statutory/", views.statutory_settings_list, name="statutory_settings_list"),
+    path("statutory/add/", views.statutory_settings_add, name="statutory_settings_add"),
+    path("statutory/delete/", views.statutory_settings_delete, name="statutory_settings_delete"),
+    path("statutory/edit/", views.statutory_settings_edit, name="statutory_settings_edit"),
 
 
 
