@@ -1018,12 +1018,249 @@ def sync_attendance_from_device(request):
     messages.success(request, "Sync Completed Successfully")
     return redirect('day_attendance')
 
-from datetime import datetime, date
-import calendar
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.urls import reverse
+# def Staff_Monthly_Attendance(request):
+#
+#     sch_id = request.session.get('sch_id')
+#     sdata = get_object_or_404(school, pk=sch_id)
+#
+#     yr = currentacademicyr.objects.get(school_name=sdata)
+#     acad_year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+#     try:
+#         payroll_settings = sdata.payroll_settings
+#     except PayrollSettings.DoesNotExist:
+#         payroll_settings = None
+#     employees = staff.objects.filter(staff_school=sch_id)
+#
+#     employee_id = request.GET.get("employee")
+#     month = int(request.GET.get("month", date.today().month))
+#     year = int(request.GET.get("year", date.today().year))
+#
+#     selected_employee = None
+#     attendance_list = []
+#     status_choices = Attendance.STATUS_CHOICES
+#
+#     total_present = 0
+#     total_absent = 0
+#     total_half = 0
+#     total_late = 0
+#     total_mis = 0
+#
+#     if employee_id:
+#
+#         selected_employee = get_object_or_404(staff, id=employee_id)
+#         total_days = calendar.monthrange(year, month)[1]
+#
+#         # =====================================================
+#         # ✅ POST SECTION
+#         # =====================================================
+#         if request.method == "POST":
+#
+#             for day in range(1, total_days + 1):
+#
+#                 attendance_date = date(year, month, day)
+#
+#                 selected_status = request.POST.get(f"status_{day}")
+#                 first_in_time = request.POST.get(f"first_in_{day}")
+#                 last_out_time = request.POST.get(f"last_out_{day}")
+#
+#                 first_in_value = None
+#                 last_out_value = None
+#
+#                 if first_in_time:
+#                     naive_dt = datetime.strptime(
+#                         f"{attendance_date} {first_in_time}",
+#                         "%Y-%m-%d %H:%M"
+#                     )
+#                     first_in_value = timezone.make_aware(
+#                         naive_dt, timezone.get_current_timezone()
+#                     )
+#
+#                 if last_out_time:
+#                     naive_dt = datetime.strptime(
+#                         f"{attendance_date} {last_out_time}",
+#                         "%Y-%m-%d %H:%M"
+#                     )
+#                     last_out_value = timezone.make_aware(
+#                         naive_dt, timezone.get_current_timezone()
+#                     )
+#
+#                 record = Attendance.objects.filter(
+#                     staff_id=selected_employee.id,
+#                     sch_id=sch_id,
+#                     date=attendance_date
+#                 ).first()
+#
+#                 if record:
+#
+#                     # Apply manual status first
+#                     if selected_status:
+#                         record.status = selected_status
+#
+#                     if first_in_value:
+#                         record.first_in = first_in_value
+#
+#                     if last_out_value:
+#                         record.last_out = last_out_value
+#
+#                     # =====================================================
+#                     # 🔥 SHIFT RECALCULATION
+#                     # =====================================================
+#                     if record.first_in and record.last_out:
+#
+#                         shift = selected_employee.shift
+#
+#                         if shift:
+#
+#                             shift_start_naive = datetime.combine(
+#                                 attendance_date,
+#                                 shift.start_time
+#                             )
+#
+#                             shift_end_naive = datetime.combine(
+#                                 attendance_date,
+#                                 shift.end_time
+#                             )
+#
+#                             shift_start = timezone.make_aware(
+#                                 shift_start_naive,
+#                                 timezone.get_current_timezone()
+#                             )
+#
+#                             shift_end = timezone.make_aware(
+#                                 shift_end_naive,
+#                                 timezone.get_current_timezone()
+#                             )
+#
+#                             # Work Duration
+#                             work_duration = record.last_out - record.first_in
+#                             record.work_duration = work_duration
+#
+#                             # Late Calculation
+#                             if record.first_in > shift_start:
+#                                 late_minutes = int(
+#                                     (record.first_in - shift_start).total_seconds() / 60
+#                                 )
+#                                 record.late = True
+#                                 record.late_minutes = late_minutes
+#                                 # ✅ Apply late cutoff hour setting
+#                                 if payroll_settings and record.first_in.hour >= payroll_settings.late_cutoff_hour:
+#                                     record.status = "HALF_DAY"
+#
+#                             else:
+#                                 record.late = False
+#                                 record.late_minutes = 0
+#
+#                             # =====================================================
+#                             # 🚫 DO NOT OVERRIDE MANUAL SPECIAL STATUSES
+#                             # =====================================================
+#
+#                             manual_statuses = [
+#                                 "CL", "ML", "PERMISSION",
+#                                 "WEEKLY_OFF", "HOLIDAY"
+#                             ]
+#
+#                             if record.status not in manual_statuses:
+#
+#                                 shift_seconds = (shift_end - shift_start).total_seconds()
+#                                 worked_seconds = work_duration.total_seconds()
+#
+#                                 tolerance_seconds = 15 * 60  # 15 min grace
+#
+#                                 if worked_seconds >= (shift_seconds - tolerance_seconds):
+#                                     record.status = "PRESENT"
+#                                 elif worked_seconds >= (shift_seconds / 2):
+#                                     record.status = "HALF_DAY"
+#                                 else:
+#                                     record.status = "LOP"
+#
+#                             # If permission selected → remove late
+#                             if record.status == "PERMISSION":
+#                                 record.late = False
+#                                 record.late_minutes = 0
+#
+#                     record.save()
+#
+#                 else:
+#                     if selected_status or first_in_value or last_out_value:
+#                         Attendance.objects.create(
+#                             staff_id=selected_employee.id,
+#                             sch_id=sch_id,
+#                             date=attendance_date,
+#                             status=selected_status if selected_status else "LOP",
+#                             first_in=first_in_value,
+#                             last_out=last_out_value
+#                         )
+#
+#             return redirect(
+#                 f"{reverse('Staff_Monthly_Attendance')}?employee={employee_id}&month={month}&year={year}"
+#             )
+#
+#         # =====================================================
+#         # ✅ GET SECTION
+#         # =====================================================
+#
+#         records = Attendance.objects.filter(
+#             staff_id=employee_id,
+#             sch_id=sch_id,
+#             date__year=year,
+#             date__month=month
+#         )
+#
+#         attendance_dict = {
+#             record.date.day: record
+#             for record in records
+#         }
+#
+#         for day in range(1, total_days + 1):
+#
+#             attendance_date = date(year, month, day)
+#             record = attendance_dict.get(day)
+#
+#             status = record.status if record else "LOP"
+#
+#             if status == "PRESENT":
+#                 total_present += 1
+#             elif status in ["LOP", "ABSENT"]:
+#                 total_absent += 1
+#             elif status == "HALF_DAY":
+#                 total_half += 1
+#             elif status == "MIS_PUNCH":
+#                 total_mis += 1
+#             elif status in ["CL", "ML", "PERMISSION", "WEEKLY_OFF", "HOLIDAY"]:
+#                 total_present += 1
+#
+#             if record and record.late:
+#                 total_late += 1
+#
+#             attendance_list.append({
+#                 "day": day,
+#                 "full_date": attendance_date,
+#                 "status": status,
+#                 "first_in": record.first_in if record else None,
+#                 "last_out": record.last_out if record else None,
+#                 "work_duration": record.work_duration if record else None,
+#                 "punch_count": record.punch_count if record else 0,
+#                 "late": record.late if record else False,
+#                 "late_minutes": record.late_minutes if record else 0,
+#                 "mis_punch": record.mis_punch if record else False,
+#             })
+#
+#     context = {
+#         "employees": employees,
+#         "selected_employee": selected_employee,
+#         "month": month,
+#         "year": year,
+#         "attendance_list": attendance_list,
+#         "status_choices": status_choices,
+#         "total_present": total_present,
+#         "total_absent": total_absent,
+#         "total_half": total_half,
+#         "total_late": total_late,
+#         "total_mis": total_mis,
+#     }
+#
+#     return render(request, "payroll/monthlyattendance.html", context)
 
 def Staff_Monthly_Attendance(request):
 
@@ -1032,6 +1269,11 @@ def Staff_Monthly_Attendance(request):
 
     yr = currentacademicyr.objects.get(school_name=sdata)
     acad_year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    try:
+        payroll_settings = sdata.payroll_settings
+    except PayrollSettings.DoesNotExist:
+        payroll_settings = None
 
     employees = staff.objects.filter(staff_school=sch_id)
 
@@ -1059,6 +1301,117 @@ def Staff_Monthly_Attendance(request):
         # =====================================================
         if request.method == "POST":
 
+            # =====================================================
+            # 🚨 MONTHLY LEAVE VALIDATION (CL / ML / PERMISSION)
+            # =====================================================
+            if payroll_settings:
+
+                post_cl_count = 0
+                post_ml_count = 0
+                post_permission_count = 0
+                post_permission_minutes = 0
+
+                for d in range(1, total_days + 1):
+
+                    post_status = request.POST.get(f"status_{d}")
+
+                    if post_status == "CL":
+                        post_cl_count += 1
+
+                    elif post_status == "ML":
+                        post_ml_count += 1
+
+                    elif post_status == "PERMISSION":
+                        post_permission_count += 1
+
+                        post_first = request.POST.get(f"first_in_{d}")
+                        post_last = request.POST.get(f"last_out_{d}")
+
+                        if post_first and post_last:
+                            naive_start = datetime.strptime(
+                                f"{date(year, month, d)} {post_first}",
+                                "%Y-%m-%d %H:%M"
+                            )
+                            naive_end = datetime.strptime(
+                                f"{date(year, month, d)} {post_last}",
+                                "%Y-%m-%d %H:%M"
+                            )
+
+                            aware_start = timezone.make_aware(
+                                naive_start, timezone.get_current_timezone()
+                            )
+                            aware_end = timezone.make_aware(
+                                naive_end, timezone.get_current_timezone()
+                            )
+
+                            minutes = (aware_end - aware_start).total_seconds() / 60
+                            post_permission_minutes += minutes
+
+                # 🔹 CL Validation
+                if payroll_settings.cl_per_month is not None:
+                    if post_cl_count > payroll_settings.cl_per_month:
+                        messages.error(
+                            request,
+                            f"Only {payroll_settings.cl_per_month} Casual Leave allowed per month."
+                        )
+                        return redirect(
+                            f"{reverse('Staff_Monthly_Attendance')}?employee={employee_id}&month={month}&year={year}"
+                        )
+
+                # 🔹 ML Validation
+                if payroll_settings.total_ml is not None:
+
+                    # Count existing ML in this year from DB
+                    existing_ml_year = Attendance.objects.filter(
+                        staff_id=selected_employee.id,
+                        sch_id=sch_id,
+                        date__year=year,
+                        status="ML"
+                    ).count()
+
+                    # Count ML from current POST
+                    post_ml_count = 0
+                    for d in range(1, total_days + 1):
+                        if request.POST.get(f"status_{d}") == "ML":
+                            post_ml_count += 1
+
+                    total_ml = post_ml_count  # since month is overwritten fully
+
+                    if total_ml > payroll_settings.total_ml:
+                        messages.error(
+                            request,
+                            f"Only {payroll_settings.total_ml} Medical Leave allowed per year."
+                        )
+                        return redirect(
+                            f"{reverse('Staff_Monthly_Attendance')}?employee={employee_id}&month={month}&year={year}"
+                        )
+
+                # 🔹 Permission Count Validation
+                if payroll_settings.permission_per_month is not None:
+                    if post_permission_count > payroll_settings.permission_per_month:
+                        messages.error(
+                            request,
+                            f"Only {payroll_settings.permission_per_month} Permissions allowed per month."
+                        )
+                        return redirect(
+                            f"{reverse('Staff_Monthly_Attendance')}?employee={employee_id}&month={month}&year={year}"
+                        )
+
+                # 🔹 Permission Hours Validation
+                if payroll_settings.permission_per_month:
+                    allowed_minutes = payroll_settings.permission_per_month * 60
+                    if post_permission_minutes > allowed_minutes:
+                        messages.error(
+                            request,
+                            f"Permission hour limit exceeded. Allowed: {payroll_settings.permission_per_month} hour(s) per month."
+                        )
+                        return redirect(
+                            f"{reverse('Staff_Monthly_Attendance')}?employee={employee_id}&month={month}&year={year}"
+                        )
+
+            # =====================================================
+            # 🔁 YOUR ORIGINAL SAVE LOOP (UNCHANGED)
+            # =====================================================
             for day in range(1, total_days + 1):
 
                 attendance_date = date(year, month, day)
@@ -1096,7 +1449,6 @@ def Staff_Monthly_Attendance(request):
 
                 if record:
 
-                    # Apply manual status first
                     if selected_status:
                         record.status = selected_status
 
@@ -1106,9 +1458,6 @@ def Staff_Monthly_Attendance(request):
                     if last_out_value:
                         record.last_out = last_out_value
 
-                    # =====================================================
-                    # 🔥 SHIFT RECALCULATION
-                    # =====================================================
                     if record.first_in and record.last_out:
 
                         shift = selected_employee.shift
@@ -1135,24 +1484,21 @@ def Staff_Monthly_Attendance(request):
                                 timezone.get_current_timezone()
                             )
 
-                            # Work Duration
                             work_duration = record.last_out - record.first_in
                             record.work_duration = work_duration
 
-                            # Late Calculation
                             if record.first_in > shift_start:
                                 late_minutes = int(
                                     (record.first_in - shift_start).total_seconds() / 60
                                 )
                                 record.late = True
                                 record.late_minutes = late_minutes
+
+                                if payroll_settings and record.first_in.hour >= payroll_settings.late_cutoff_hour:
+                                    record.status = "HALF_DAY"
                             else:
                                 record.late = False
                                 record.late_minutes = 0
-
-                            # =====================================================
-                            # 🚫 DO NOT OVERRIDE MANUAL SPECIAL STATUSES
-                            # =====================================================
 
                             manual_statuses = [
                                 "CL", "ML", "PERMISSION",
@@ -1163,8 +1509,7 @@ def Staff_Monthly_Attendance(request):
 
                                 shift_seconds = (shift_end - shift_start).total_seconds()
                                 worked_seconds = work_duration.total_seconds()
-
-                                tolerance_seconds = 15 * 60  # 15 min grace
+                                tolerance_seconds = 15 * 60
 
                                 if worked_seconds >= (shift_seconds - tolerance_seconds):
                                     record.status = "PRESENT"
@@ -1173,7 +1518,6 @@ def Staff_Monthly_Attendance(request):
                                 else:
                                     record.status = "LOP"
 
-                            # If permission selected → remove late
                             if record.status == "PERMISSION":
                                 record.late = False
                                 record.late_minutes = 0
@@ -1198,7 +1542,6 @@ def Staff_Monthly_Attendance(request):
         # =====================================================
         # ✅ GET SECTION
         # =====================================================
-
         records = Attendance.objects.filter(
             staff_id=employee_id,
             sch_id=sch_id,
@@ -1264,6 +1607,13 @@ def Staff_Monthly_Attendance(request):
 def staff_monthly_summary(request):
 
     sch_id = request.session.get("sch_id")
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    # Get Payroll Settings
+    try:
+        payroll_settings = sdata.payroll_settings
+    except PayrollSettings.DoesNotExist:
+        payroll_settings = None
 
     month = request.GET.get("month")
     year = request.GET.get("year")
@@ -1276,10 +1626,10 @@ def staff_monthly_summary(request):
         year = int(year)
 
         total_days = calendar.monthrange(year, month)[1]
-
         employees = staff.objects.filter(staff_school=sch_id)
 
         for emp in employees:
+
             records = Attendance.objects.filter(
                 staff_id=emp.id,
                 sch_id=sch_id,
@@ -1298,7 +1648,41 @@ def staff_monthly_summary(request):
             mispunch = records.filter(status="MIS_PUNCH").count()
             late = records.filter(late=True).count()
 
+            # --------------------------------------------------
+            # WORKING DAYS
+            # --------------------------------------------------
             working_days = total_days - weekly_off - holiday
+
+            total_lop_days = lop
+
+            if payroll_settings:
+
+                # -------------------------
+                # HALF DAY CALCULATION
+                # -------------------------
+                half_day_lop = half_day * 0.5
+
+                # -------------------------
+                # LATE CALCULATION
+                # -------------------------
+                grace = payroll_settings.grace_late_count
+                lop_after_grace = float(payroll_settings.lop_after_grace)
+
+                remaining_late = max(late - grace, 0)
+                late_lop = remaining_late * lop_after_grace
+
+                # -------------------------
+                # TOTAL LOP
+                # -------------------------
+                total_lop_days = lop + half_day_lop + late_lop
+
+            # --------------------------------------------------
+            # SALARY DAYS
+            # --------------------------------------------------
+            salary_days = total_days - total_lop_days
+
+            if salary_days < 0:
+                salary_days = 0
 
             summary_data.append({
                 "employee": emp,
@@ -1313,6 +1697,8 @@ def staff_monthly_summary(request):
                 "mispunch": mispunch,
                 "late": late,
                 "working_days": working_days,
+                "total_lop_days": round(total_lop_days, 2),
+                "salary_days": round(salary_days, 2),
                 "total_days": total_days
             })
 
@@ -1562,5 +1948,67 @@ def delete_holiday(request,id):
     holiday.delete()
 
     messages.success(request, "Holiday Deleted & Attendance Reverted Successfully")
+
+    return redirect('Holidays')
+
+
+@transaction.atomic
+def reapply_holidays_attendance(request):
+
+    sch_id = request.session.get('sch_id')
+    if not sch_id:
+        return render(request, "error.html", {"message": "School not found in session"})
+
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    # Academic Year
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    acad_year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    # Get all holidays for this school
+    holidays = Holiday.objects.filter(
+        sch=sdata,
+
+    )
+
+    # Get all staff
+    all_staff = staff.objects.filter(staff_school=sdata)
+
+    total_created = 0
+    total_updated = 0
+
+    for holiday in holidays:
+
+        holiday_date = holiday.date
+        holiday_status = holiday.name  # Example: HOLIDAY
+
+        for emp in all_staff:
+
+            attendance_obj, created = Attendance.objects.get_or_create(
+                sch=sdata,
+                staff=emp,
+                date=holiday_date,
+                defaults={
+                    "status": holiday_status,
+                    "is_manual": True,
+                    "remarks": holiday_status
+                }
+            )
+
+            if created:
+                total_created += 1
+            else:
+                # If attendance exists but not holiday → update
+                if attendance_obj.status != holiday_status:
+                    attendance_obj.status = holiday_status
+                    attendance_obj.is_manual = True
+                    attendance_obj.remarks = holiday_status
+                    attendance_obj.save()
+                    total_updated += 1
+
+    messages.success(
+        request,
+        f"Holidays Reapplied Successfully. Created: {total_created}, Updated: {total_updated}"
+    )
 
     return redirect('Holidays')

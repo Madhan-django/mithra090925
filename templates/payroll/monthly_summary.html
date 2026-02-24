@@ -46,29 +46,33 @@
     <div class="card shadow-sm">
         <div class="card-body table-responsive">
 
-            <table class="table table-bordered text-center">
+            <table class="table table-bordered text-center align-middle">
                 <thead class="table-dark">
                     <tr>
                         <th>Staff</th>
-                        <th>Total</th>
-                        <th>Working</th>
+                        <th>Total Days</th>
+                        <th>Working Days</th>
                         <th>Present</th>
                         <th>Half</th>
                         <th>CL</th>
                         <th>ML</th>
                         <th>Permission</th>
-                        <th>LOP</th>
+                        <th>Basic LOP</th>
                         <th>Late</th>
                         <th>Week Off</th>
                         <th>Holiday</th>
                         <th>Miss Punch</th>
+                        <th>Total LOP</th>
+                        <th class="bg-success text-white">Salary Days</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     {% for row in summary_data %}
                     <tr>
-                        <td>{{ row.employee.first_name}}&nbsp;{{ row.employee.last_name}}</td>
+                        <td>
+                            {{ row.employee.first_name }} {{ row.employee.last_name }}
+                        </td>
                         <td>{{ row.total_days }}</td>
                         <td>{{ row.working_days }}</td>
                         <td>{{ row.present }}</td>
@@ -81,6 +85,12 @@
                         <td>{{ row.weekly_off }}</td>
                         <td>{{ row.holiday }}</td>
                         <td>{{ row.mispunch }}</td>
+                        <td class="fw-bold text-danger">
+                            {{ row.total_lop_days }}
+                        </td>
+                        <td class="fw-bold text-success">
+                            {{ row.salary_days }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

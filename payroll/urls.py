@@ -38,6 +38,7 @@ urlpatterns=[
     path('holidays',views.Holiday_List,name='Holidays'),
     path('add_holiday',views.add_holiday,name='add_holiday'),
     path('holiday/<int:id>', views.delete_holiday, name='delete_holiday'),
+    path('reapply_holidays_attendance',views.reapply_holidays_attendance,name='reapply_holidays_attendance'),
     path('psettings',views.PayrollSet,name='psettings'),
     path('create_payroll_settings',views.create_payroll_settings,name='create_payroll_settings'),
     path('edit_payroll_settings',views.edit_payroll_settings,name='edit_payroll_settings'),
