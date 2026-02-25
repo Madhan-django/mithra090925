@@ -1,0 +1,110 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Payroll Register</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Month</label>
+                    <input type="number" name="month" class="form-control"
+                           value="{{ month }}" min="1" max="12" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Year</label>
+                    <input type="number" name="year" class="form-control"
+                           value="{{ year }}" required>
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        Check Payroll
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    {% if payrolls %}
+
+    <!-- Payroll Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h6 class="mb-0">
+                Payroll for {{ month }}/{{ year }}
+            </h6>
+        </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Employee</th>
+                        <th>Gross Salary</th>
+                        <th>LOP Days</th>
+                        <th>Basic</th>
+                        <th>HRA</th>
+                        <th>Net Salary</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payrolls %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ p.payroll_employee.staff.name }}</td>
+                        <td>₹ {{ p.gross_salary }}</td>
+                        <td>{{ p.total_lop_days }}</td>
+                        <td>₹ {{ p.basic_da }}</td>
+                        <td>₹ {{ p.hra }}</td>
+                        <td><strong>₹ {{ p.net_salary }}</strong></td>
+                        <td>
+                            {% if p.is_finalized %}
+                                <span class="badge bg-success">Finalized</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Draft</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals Section -->
+        <div class="card-footer bg-light">
+            <div class="row text-end">
+                <div class="col-md-4">
+                    <strong>Total Gross:</strong> ₹ {{ total_gross }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Total LOP Days:</strong> {{ total_lop }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Total Net:</strong> ₹ {{ total_net }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif month and year %}
+
+        <div class="alert alert-warning mt-3">
+            No payroll generated for this month.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

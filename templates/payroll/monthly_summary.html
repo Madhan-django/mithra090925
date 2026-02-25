@@ -99,7 +99,15 @@
 
         </div>
     </div>
-
+        <br>
+    <form method="POST" action="{% url 'generate_payroll' %}">
+    {% csrf_token %}
+    <input type="hidden" name="month" value="{{ selected_month }}">
+    <input type="hidden" name="year" value="{{ selected_year }}">
+    <button type="submit" class="btn btn-success">
+        Generate Payroll
+    </button>
+</form>
     {% endif %}
 
 </div>

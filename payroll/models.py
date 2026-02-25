@@ -37,24 +37,24 @@ class Designation(models.Model):
 
 
 class PayrollEmployee(models.Model):
-    emp_code = models.CharField(max_length=20, unique=True)
-    name = models.CharField(max_length=100)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    designation = models.ForeignKey(Designation, on_delete=models.CASCADE)
-    date_of_joining = models.DateField()
-    emp_type = models.CharField(max_length=25,default=1)
-    basic_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    employee = models.ForeignKey(staff, on_delete=models.CASCADE)
+    school = models.ForeignKey(school, on_delete=models.CASCADE)
+
     gross_salary = models.DecimalField(max_digits=10, decimal_places=2)
-    contact = models.CharField(max_length=15, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    status = models.BooleanField(default=True)  # Active/Inactive
-    emp_sch = models.ForeignKey(school, on_delete=models.CASCADE)
+
+    # salary breakup
+    basic_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=70)
+    hra_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=30)
+    wages_per_day = models.DecimalField(max_digits=10, decimal_places=2)
+
+
 
     def __str__(self):
-        return self.name
+        return self.staff.first_name + " " + self.staff.last_name
+
 
 class PayrollBank(models.Model):
-    CustName = models.ForeignKey(PayrollEmployee,on_delete=models.CASCADE)
+    CustName = models.ForeignKey(staff,on_delete=models.CASCADE)
     AccNo = models.CharField(max_length=25)
     CIFNo = models.CharField(max_length=25,blank=True,null=True)
     BankName = models.CharField(max_length=100)
@@ -151,6 +151,26 @@ class PayrollPeriod(models.Model):
 
     def __str__(self):
         return f"{self.month}/{self.year}"
+
+class PayrollMonthly(models.Model):
+    employee = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)
+    school = models.ForeignKey(school, on_delete=models.CASCADE)
+
+    month = models.IntegerField()
+    year = models.IntegerField()
+
+    total_days = models.IntegerField()
+    working_days = models.DecimalField(max_digits=5, decimal_places=2)
+    total_lop_days = models.DecimalField(max_digits=5, decimal_places=2)
+    salary_days = models.DecimalField(max_digits=5, decimal_places=2)
+
+    gross_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    net_salary = models.DecimalField(max_digits=10, decimal_places=2)
+
+    generated_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('employee', 'month', 'year')
 
 class Payslip(models.Model):
     employee = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)

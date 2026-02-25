@@ -1,16 +1,14 @@
 from django.shortcuts import render,HttpResponse,redirect,get_object_or_404
 from django.urls import reverse
 from django.db import transaction
-from django.http import JsonResponse
 from institutions.models import school
 from setup.models import currentacademicyr,academicyr
 from staff.models import staff
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Employee_allowance_Details,Employee_deduction_Details,Loan,Attendance,Holiday,PayrollSettings
-from django.contrib import messages
-from .forms import add_deptform,add_desgform,PayrollEmployeeForm,PayrollBankForm,PayrollBankFormSet,payrollBankFormupdate,Allowanceform,Deductionform,NewLoanForm,add_holidayform,PayrollSettingsForm
+from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Employee_allowance_Details,Employee_deduction_Details,Loan,Attendance,Holiday,PayrollSettings,PayrollMonthly
+from .forms import add_deptform,add_desgform,PayrollEmployeeForm,Allowanceform,Deductionform,NewLoanForm,add_holidayform,PayrollSettingsForm
 import math
 from dateutil.relativedelta import relativedelta
 from django.db import connection
@@ -20,7 +18,8 @@ from django.utils.timezone import now
 from django.utils import timezone
 from datetime import date
 from openpyxl import Workbook
-from calendar import monthrange
+from django.db.models import Sum
+from decimal import Decimal
 import calendar
 
 # Create your views here.
@@ -1710,6 +1709,139 @@ def staff_monthly_summary(request):
     }
 
     return render(request, "payroll/monthly_summary.html", context)
+
+@transaction.atomic
+def generate_payroll(request):
+
+    if request.method != "POST":
+        return redirect("staff_monthly_summary")
+
+    sch_id = request.session.get("sch_id")
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    month = int(request.POST.get("month"))
+    year = int(request.POST.get("year"))
+
+    payroll_employees = PayrollEmployee.objects.filter(
+        school=sdata,
+        employee_id__status='Active'
+    )
+
+    for emp in payroll_employees:
+
+        # --------------------------------------
+        # FETCH ATTENDANCE
+        # --------------------------------------
+        records = Attendance.objects.filter(
+            staff=emp.staff,
+            sch_id=sch_id,
+            date__year=year,
+            date__month=month
+        )
+
+        lop = records.filter(status__in=["LOP", "ABSENT"]).count()
+        half_day = records.filter(status="HALF_DAY").count()
+        late = records.filter(late=True).count()
+
+        # --------------------------------------
+        # LOP CALCULATION
+        # --------------------------------------
+        total_lop_days = Decimal(lop) + (Decimal(half_day) * Decimal('0.5'))
+
+        # (Optional: Late logic can be added later)
+
+        # --------------------------------------
+        # SALARY CALCULATION (Fixed 30 Days)
+        # --------------------------------------
+        gross = emp.gross_salary
+
+        basic = gross * (emp.basic_percentage / Decimal('100'))
+        hra = gross * (emp.hra_percentage / Decimal('100'))
+
+        per_day = gross / Decimal('30')
+        lop_amount = per_day * total_lop_days
+
+        net_salary = gross - lop_amount
+
+        # --------------------------------------
+        # CHECK IF FINALIZED
+        # --------------------------------------
+        existing = PayrollMonthly.objects.filter(
+            payroll_employee=emp,
+            month=month,
+            year=year
+        ).first()
+
+        if existing and existing.is_finalized:
+            continue  # Skip finalized payroll
+
+        # --------------------------------------
+        # CREATE OR UPDATE
+        # --------------------------------------
+        PayrollMonthly.objects.update_or_create(
+            payroll_employee=emp,
+            month=month,
+            year=year,
+            defaults={
+                "school": sdata,
+                "total_lop_days": total_lop_days,
+                "gross_salary": gross,
+                "basic_da": basic,
+                "hra": hra,
+                "net_salary": net_salary,
+            }
+        )
+
+    messages.success(request, "Payroll Generated Successfully")
+    return redirect(
+        f"{reverse('Staff_Monthly_Summary')}?employee={employee_id}&month={month}&year={year}"
+    )
+
+
+def payroll_register(request):
+
+    sch_id = request.session.get("sch_id")
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    month = request.GET.get("month")
+    year = request.GET.get("year")
+
+    payrolls = None
+    total_gross = Decimal('0.00')
+    total_net = Decimal('0.00')
+    total_lop = Decimal('0.00')
+
+    if month and year:
+        month = int(month)
+        year = int(year)
+
+        payrolls = PayrollMonthly.objects.filter(
+            school=sdata,
+            month=month,
+            year=year
+        ).select_related("payroll_employee", "payroll_employee__staff")
+
+        totals = payrolls.aggregate(
+            gross_sum=Sum("gross_salary"),
+            net_sum=Sum("net_salary"),
+            lop_sum=Sum("total_lop_days")
+        )
+
+        total_gross = totals["gross_sum"] or Decimal('0.00')
+        total_net = totals["net_sum"] or Decimal('0.00')
+        total_lop = totals["lop_sum"] or Decimal('0.00')
+
+    context = {
+        "payrolls": payrolls,
+        "month": month,
+        "year": year,
+        "total_gross": total_gross,
+        "total_net": total_net,
+        "total_lop": total_lop,
+    }
+
+    return render(request, "payroll/payroll_register.html", context)
+
 
 def PayrollSet(request):
     sch_id = request.session.get('sch_id')

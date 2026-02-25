@@ -41,13 +41,6 @@ class PayrollEmployeeForm(forms.ModelForm):
             'emp_type' : forms.Select(choices=emp_type_choice)
         }
 
-class PayrollBankForm(forms.ModelForm):
-    class Meta:
-        model = PayrollBank
-        fields = '__all__'
-
-PayrollBankFormSet = inlineformset_factory(PayrollEmployee, PayrollBank,fields='__all__', extra=1)
-payrollBankFormupdate = inlineformset_factory(PayrollEmployee, PayrollBank,fields='__all__', extra=0)
 
 class Allowanceform(forms.ModelForm):
     class Meta:

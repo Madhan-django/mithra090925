@@ -26,11 +26,6 @@ class DesignationAdmin(admin.ModelAdmin):
 
 
 # ===================== Payroll Employee =====================
-@admin.register(PayrollEmployee)
-class PayrollEmployeeAdmin(admin.ModelAdmin):
-    list_display = ('emp_code', 'name', 'department', 'designation', 'basic_salary', 'gross_salary', 'status')
-    search_fields = ('emp_code', 'name')
-    list_filter = ('department', 'designation', 'status', 'emp_sch')
 
 
 # ===================== Payroll Bank =====================
