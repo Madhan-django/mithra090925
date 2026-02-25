@@ -331,3 +331,21 @@ class PayrollSettings(models.Model):
 
     def __str__(self):
         return f"{self.school.name} Payroll Settings"
+
+class StatutorySettings(models.Model):
+    sch = models.OneToOneField(school, on_delete=models.CASCADE)
+
+    # PF
+    pf_employee_percent = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    pf_employer_percent = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    pf_basic_limit = models.DecimalField(max_digits=10, decimal_places=2, default=15000)
+
+    # ESI
+    esi_employee_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0.75)
+    esi_employer_percent = models.DecimalField(max_digits=5, decimal_places=2, default=3.25)
+    esi_gross_limit = models.DecimalField(max_digits=10, decimal_places=2, default=21000)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sch.name} Statutory Settings"

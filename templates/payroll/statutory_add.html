@@ -1,0 +1,91 @@
+{% extends "panel/index.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg rounded-4">
+
+        <div class="card-header text-white text-center"
+             style="background: linear-gradient(45deg,#1e3c72,#2a5298); height:70px;">
+
+            <div class="card-title text-center">
+                <h5>
+                    <span class="badge bg-light text-dark">
+                        Add Statutory Settings
+                    </span>
+                </h5>
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label>PF Employee %</label>
+                        <input type="number" step="0.01"
+                               name="pf_employee_percent"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>PF Employer %</label>
+                        <input type="number" step="0.01"
+                               name="pf_employer_percent"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>PF Basic Limit</label>
+                        <input type="number" step="0.01"
+                               name="pf_basic_limit"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>ESI Employee %</label>
+                        <input type="number" step="0.01"
+                               name="esi_employee_percent"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>ESI Employer %</label>
+                        <input type="number" step="0.01"
+                               name="esi_employer_percent"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>ESI Gross Limit</label>
+                        <input type="number" step="0.01"
+                               name="esi_gross_limit"
+                               class="form-control" required>
+                    </div>
+
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button type="submit" class="btn btn-success">
+                        Save Settings
+                    </button>
+
+                    <a href="{% url 'statutory_settings_list' %}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

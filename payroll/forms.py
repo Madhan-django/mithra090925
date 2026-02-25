@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Loan,Holiday,PayrollSettings
+from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Loan,Holiday,PayrollSettings,StatutorySettings
 emp_type_choice = [
     (1,'PF-ESI'),
     (0,'NON-PF&ESI')
@@ -152,3 +152,16 @@ class PayrollSettingsForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+class StatutorySettingsForm(forms.ModelForm):
+    class Meta:
+        model = StatutorySettings
+        exclude = ['sch', 'created_at']
+        widgets = {
+            'pf_employee_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+            'pf_employer_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+            'pf_basic_limit': forms.NumberInput(attrs={'class': 'form-control'}),
+            'esi_employee_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+            'esi_employer_percent': forms.NumberInput(attrs={'class': 'form-control'}),
+            'esi_gross_limit': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
