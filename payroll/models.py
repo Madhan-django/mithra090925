@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models import SET_NULL
+from django.contrib.auth.models import User
+
 from institutions.models import school
 from staff.models import staff
 import datetime
@@ -18,7 +21,47 @@ Hol =[
     ('Special-OFF','Special-OFF')
 
 ]
+BANK_CHOICES = [
 
+    # Public Sector Banks
+    ('State Bank of India', 'State Bank of India'),
+    ('Punjab National Bank', 'Punjab National Bank'),
+    ('Bank of Baroda', 'Bank of Baroda'),
+    ('Canara Bank', 'Canara Bank'),
+    ('Union Bank of India', 'Union Bank of India'),
+    ('Indian Bank', 'Indian Bank'),
+    ('Bank of India', 'Bank of India'),
+    ('Central Bank of India', 'Central Bank of India'),
+    ('Indian Overseas Bank', 'Indian Overseas Bank'),
+    ('UCO Bank', 'UCO Bank'),
+    ('Bank of Maharashtra', 'Bank of Maharashtra'),
+    ('Punjab & Sind Bank', 'Punjab & Sind Bank'),
+
+    # Private Sector Banks
+    ('HDFC Bank', 'HDFC Bank'),
+    ('ICICI Bank', 'ICICI Bank'),
+    ('Axis Bank', 'Axis Bank'),
+    ('Kotak Mahindra Bank', 'Kotak Mahindra Bank'),
+    ('IndusInd Bank', 'IndusInd Bank'),
+    ('IDFC First Bank', 'IDFC First Bank'),
+    ('Federal Bank', 'Federal Bank'),
+    ('RBL Bank', 'RBL Bank'),
+    ('Bandhan Bank', 'Bandhan Bank'),
+    ('South Indian Bank', 'South Indian Bank'),
+    ('Yes Bank', 'Yes Bank'),
+
+    # Small Finance Banks
+    ('AU Small Finance Bank', 'AU Small Finance Bank'),
+    ('Ujjivan Small Finance Bank', 'Ujjivan Small Finance Bank'),
+    ('Equitas Small Finance Bank', 'Equitas Small Finance Bank'),
+    ('ESAF Small Finance Bank', 'ESAF Small Finance Bank'),
+    ('Suryoday Small Finance Bank', 'Suryoday Small Finance Bank'),
+
+    # Payments Banks
+    ('India Post Payments Bank', 'India Post Payments Bank'),
+    ('Airtel Payments Bank', 'Airtel Payments Bank'),
+    ('Paytm Payments Bank', 'Paytm Payments Bank'),
+]
 
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -28,12 +71,6 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
-class Designation(models.Model):
-    title = models.CharField(max_length=100, unique=True)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
 
 
 class PayrollEmployee(models.Model):
@@ -47,22 +84,21 @@ class PayrollEmployee(models.Model):
     hra_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=30)
     wages_per_day = models.DecimalField(max_digits=10, decimal_places=2)
 
-
-
     def __str__(self):
-        return self.staff.first_name + " " + self.staff.last_name
+        return f"{self.employee.first_name} {self.employee.last_name}"
 
 
 class PayrollBank(models.Model):
     CustName = models.ForeignKey(staff,on_delete=models.CASCADE)
+    home_school = models.ForeignKey(school,on_delete=models.CASCADE)
     AccNo = models.CharField(max_length=25)
     CIFNo = models.CharField(max_length=25,blank=True,null=True)
-    BankName = models.CharField(max_length=100)
+    BankName = models.CharField(choices=BANK_CHOICES,max_length=100)
     Branch = models.CharField(max_length=25)
-    IFSC = models.CharField(max_length=10)
+    IFSC = models.CharField(max_length=13)
 
     def __str__(self):
-        return self.CustName
+        return self.CustName.first_name+ " "+self.CustName.last_name
 
 
 
@@ -75,37 +111,27 @@ class Allowance(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-class Deduction(models.Model):
-    METHOD_CHOICES = [
-        ('percentage_basic', 'Percentage of Basic Salary'),
-        ('percentage_gross', 'Percentage of Gross Salary'),
-        ('fixed_amount', 'Fixed Monthly Amount'),
-        ('emi', 'EMI Based Deduction'),
-    ]
+class Deductions(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    sch = models.ForeignKey(school,on_delete=models.CASCADE)
 
-    CEIL_BASED_ON_CHOICES = [
-        ('basic', 'Basic Salary'),
-        ('gross', 'Gross Salary'),
-    ]
+    def __str__(self):
+        return f"{self.name}"
 
-    name = models.CharField(max_length=100, unique=True)
-    method = models.CharField(max_length=20, choices=METHOD_CHOICES)
-
-    value = models.DecimalField(max_digits=10, decimal_places=2, help_text="Percentage or fixed")
-    emi_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=date(2900, 1, 1))
-
-    # NEW: Ceiling limits based on salary type
-    ciel_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Min salary to apply this deduction")
-    ciel_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Max salary to apply this deduction")
-    ciel_based_on = models.CharField(max_length=10, choices=CEIL_BASED_ON_CHOICES, null=True, blank=True, help_text="Check ceiling based on Basic/Gross salary")
+class staff_deduction(models.Model):
+    name = models.ForeignKey(Deductions,on_delete=SET_NULL,null=True)
+    staff = models.ForeignKey(staff,on_delete=SET_NULL,null=True)
+    ded_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    active = models.BooleanField(default=True)
     sch = models.ForeignKey(school, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.name} ({self.method})"
+        return f"{self.employee_name.name} - {self.deduction_name.name}"
+
+
+
 
 
 
@@ -119,21 +145,10 @@ class Employee_allowance_Details(models.Model):
 
 
 
-class Employee_deduction_Details(models.Model):
-    employee_name = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)
-    deduction_name = models.ForeignKey(Deduction, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    emi_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    start_date = models.DateField()
-    end_date = models.DateField(blank=True,null=True)
-    active = models.BooleanField(default=True)
 
-    def __str__(self):
-        return f"{self.employee_name.name} - {self.deduction_name.name}"
 
 class Loan(models.Model):
-    employee = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)
+    employee = models.ForeignKey(staff, on_delete=models.CASCADE)
     loan_name = models.CharField(max_length=25)
     loan_amount = models.DecimalField(max_digits=10, decimal_places=2)
     monthly_installment = models.DecimalField(max_digits=10, decimal_places=2)
@@ -158,19 +173,41 @@ class PayrollMonthly(models.Model):
 
     month = models.IntegerField()
     year = models.IntegerField()
-
-    total_days = models.IntegerField()
-    working_days = models.DecimalField(max_digits=5, decimal_places=2)
     total_lop_days = models.DecimalField(max_digits=5, decimal_places=2)
-    salary_days = models.DecimalField(max_digits=5, decimal_places=2)
-
     gross_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    total_sal_month = models.DecimalField(max_digits=10, decimal_places=2)
     net_salary = models.DecimalField(max_digits=10, decimal_places=2)
-
+    basic_da = models.DecimalField(max_digits=10, decimal_places=2)
+    hra = models.DecimalField(max_digits=10, decimal_places=2)
+    esi = models.DecimalField(max_digits=10, decimal_places=2)
+    pf= models.DecimalField(max_digits=10, decimal_places=2)
+    ded = models.DecimalField(max_digits=10, decimal_places=2)
+    total_ded = models.DecimalField(max_digits=10, decimal_places=2)
     generated_on = models.DateTimeField(auto_now_add=True)
+    total_days = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    working_days = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    salary_days = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    is_finalized = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('employee', 'month', 'year')
+
+class PayrollBankReconciliation(models.Model):
+    school = models.ForeignKey(school, on_delete=models.CASCADE)
+    month = models.IntegerField()
+    year = models.IntegerField()
+
+    payroll_total = models.DecimalField(max_digits=12, decimal_places=2)
+    bank_total = models.DecimalField(max_digits=12, decimal_places=2)
+    difference = models.DecimalField(max_digits=12, decimal_places=2)
+
+    reconciled_on = models.DateTimeField(auto_now_add=True)
+    reconciled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    is_locked = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('school', 'month', 'year')
 
 class Payslip(models.Model):
     employee = models.ForeignKey(PayrollEmployee, on_delete=models.CASCADE)
@@ -307,9 +344,11 @@ class PayrollSettings(models.Model):
     allow_previous_cl_usage = models.BooleanField(default=True)
 
     total_ml = models.PositiveIntegerField(default=3)
-
+    Sandwich_Leave_Policy = models.BooleanField(default=False)
+    half_day_as_cl = models.BooleanField(default=False)
     # Late Settings
     grace_late_count = models.PositiveIntegerField(default=3)
+    grace_mins = models.PositiveIntegerField(default=0)
     lop_after_grace = models.DecimalField(
         max_digits=4,
         decimal_places=2,
@@ -349,3 +388,4 @@ class StatutorySettings(models.Model):
 
     def __str__(self):
         return f"{self.sch.name} Statutory Settings"
+

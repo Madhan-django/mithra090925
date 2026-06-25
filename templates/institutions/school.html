@@ -3,225 +3,354 @@
 
 {% if sch %}
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+:root {
+  --bg:        #f3f5fb;
+  --surface:   #ffffff;
+  --border:    #e4e9f5;
+  --accent:    #4f46e5;
+  --accent-lt: #eef2ff;
+  --green:     #059669;
+  --green-lt:  #ecfdf5;
+  --rose:      #e11d48;
+  --rose-lt:   #fff1f2;
+  --sky:       #0284c7;
+  --sky-lt:    #e0f2fe;
+  --text:      #0f172a;
+  --text-md:   #475569;
+  --muted:     #94a3b8;
+  --r:         16px;
+  --sh:        0 2px 12px rgba(15,23,42,.07);
+  --sh-hover:  0 8px 32px rgba(15,23,42,.12);
+  --spring:    cubic-bezier(0.34,1.56,0.64,1);
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+.inst-page {
+  font-family: var(--font-body);
+  padding: 28px 0 60px;
+  color: var(--text);
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+/* ── Page header ── */
+.inst-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.inst-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.inst-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px; height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.inst-title {
+  font-family: var(--font-head);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.5px;
+}
+.inst-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .18s var(--spring), box-shadow .2s;
+}
+.inst-add-btn:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79,70,229,.35);
+}
+.inst-add-btn i { font-size: 15px; }
+
+/* ── Info card ── */
+.inst-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--sh);
+  overflow: hidden;
+  animation: fadeUp .45s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+/* ── Card top stripe ── */
+.inst-card-stripe {
+  height: 5px;
+  background: linear-gradient(90deg, var(--accent) 0%, #818cf8 100%);
 }
 
+/* ── Institution identity block ── */
+.inst-identity {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 28px 22px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.inst-avatar {
+  width: 64px; height: 64px;
+  border-radius: 18px;
+  background: var(--accent-lt);
+  border: 1px solid rgba(79,70,229,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.inst-name {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.3px;
+  margin-bottom: 5px;
+}
+.inst-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+.inst-status.active   { background: var(--green-lt); color: var(--green); }
+.inst-status.inactive { background: var(--rose-lt);  color: var(--rose); }
+.inst-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.inst-status.active   .inst-status-dot { background: var(--green); }
+.inst-status.inactive .inst-status-dot { background: var(--rose); }
 
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
+/* ── Detail grid ── */
+.inst-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0;
+  padding: 0 28px;
+}
+.inst-detail-item {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding-right: 24px;
+  padding-left: 4px;
+}
+.inst-detail-item:last-child,
+.inst-detail-item:nth-last-child(-n+2):not(:nth-child(2n+1)) {
+  border-bottom: none;
+}
+.inst-detail-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.inst-detail-label i { font-size: 12px; }
+.inst-detail-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.inst-detail-value a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.inst-detail-value a:hover { text-decoration: underline; }
 
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
+/* ── Actions footer ── */
+.inst-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px 28px;
+  background: #fafbff;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
+.act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform .18s var(--spring), box-shadow .2s, background .15s;
 }
-    .text-center{
-    text-align:center;
-    }
+.act-btn:hover { transform: translateY(-2px); }
+.act-btn i { font-size: 14px; }
+
+.act-btn-update {
+  background: var(--accent-lt);
+  color: var(--accent);
+}
+.act-btn-update:hover {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(79,70,229,.3);
+}
+
+.act-btn-delete {
+  background: var(--rose-lt);
+  color: var(--rose);
+}
+.act-btn-delete:hover {
+  background: var(--rose);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(225,29,72,.25);
+}
+
+/* confirm dialog for delete */
+.act-btn-delete:not([data-confirmed]) {
+  position: relative;
+}
+
+@media (max-width: 600px) {
+  .inst-identity { padding: 20px 18px 16px; }
+  .inst-detail-grid { padding: 0 18px; }
+  .inst-actions { padding: 16px 18px; }
+  .inst-title { font-size: 20px; }
+}
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="inst-page">
+  <div class="container-xxl">
 
-        <!-- ===== TITLE ===== -->
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                    Institutions
-                </span>
-            </h5>
-        </div>
-
-        <!-- ===== ADD BUTTON ===== -->
-        <div class="text-end mt-3 mb-3">
-            <a href="{% url 'addschool' %}" class="btn btn-primary">
-                <i class="ri-add-line me-1"></i> New Institution
-            </a>
-        </div>
-
-        <!-- ===== TABLE ===== -->
-        <div class="card-body pt-0">
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-dark">
-                        <tr class="text-center">
-                            <th>Institution Name</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th width="20%">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ sch.name }}</td>
-                            <td>{{ sch.phone }}</td>
-                            <td>{{ sch.email }}</td>
-                            <td>
-                                {% if sch.isactive %}
-                                    <span class="badge bg-success">Active</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <form action="{% url 'updateschool' sch.id %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        <i class="ri-pencil-line"></i> Update
-                                    </button>
-                                </form>
-
-                                {% if request.user.groups.all.0.name == "superadmin" %}
-                                <form action="{% url 'delschool' sch.id %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="ri-delete-bin-line"></i> Delete
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+    <!-- Header -->
+    <div class="inst-header">
+      <div>
+        <div class="inst-eyebrow">Administration</div>
+        <div class="inst-title">Institution Profile</div>
+      </div>
+      <a href="{% url 'addschool' %}" class="inst-add-btn">
+        <i class="ri-add-line"></i> New Institution
+      </a>
     </div>
+
+    <!-- Main card -->
+    <div class="inst-card">
+      <div class="inst-card-stripe"></div>
+
+      <!-- Identity block -->
+      <div class="inst-identity">
+        <div class="inst-avatar">
+          <i class="ri-building-4-line"></i>
+        </div>
+        <div>
+          <div class="inst-name">{{ sch.name }}</div>
+          {% if sch.isactive %}
+            <span class="inst-status active">
+              <span class="inst-status-dot"></span> Active
+            </span>
+          {% else %}
+            <span class="inst-status inactive">
+              <span class="inst-status-dot"></span> Inactive
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Detail grid -->
+      <div class="inst-detail-grid">
+
+        <div class="inst-detail-item">
+          <div class="inst-detail-label"><i class="ri-phone-line"></i> Phone</div>
+          <div class="inst-detail-value">{{ sch.phone|default:"—" }}</div>
+        </div>
+
+        <div class="inst-detail-item">
+          <div class="inst-detail-label"><i class="ri-mail-line"></i> Email</div>
+          <div class="inst-detail-value">
+            {% if sch.email %}
+              <a href="mailto:{{ sch.email }}">{{ sch.email }}</a>
+            {% else %}—{% endif %}
+          </div>
+        </div>
+
+        <div class="inst-detail-item">
+          <div class="inst-detail-label"><i class="ri-map-pin-2-line"></i> Address</div>
+          <div class="inst-detail-value">{{ sch.address|default:"—" }}</div>
+        </div>
+
+        <div class="inst-detail-item">
+          <div class="inst-detail-label"><i class="ri-toggle-line"></i> Status</div>
+          <div class="inst-detail-value">
+            {% if sch.isactive %}Active{% else %}Inactive{% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="inst-actions">
+
+        <form action="{% url 'updateschool' sch.id %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="act-btn act-btn-update">
+            <i class="ri-pencil-line"></i> Update
+          </button>
+        </form>
+
+        {% if request.user.groups.all.0.name == "superadmin" %}
+        <form action="{% url 'delschool' sch.id %}" method="post" class="d-inline"
+              onsubmit="return confirm('Delete {{ sch.name }}? This cannot be undone.');">
+          {% csrf_token %}
+          <button type="submit" class="act-btn act-btn-delete">
+            <i class="ri-delete-bin-line"></i> Delete
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
 </div>
 
 {% endif %}

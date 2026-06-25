@@ -1,18 +1,340 @@
-{% extends 'adminpanel/index.html' %}
-
+{% extends 'panel/index.html' %}
 {% block content %}
 
-<div class="text-danger bg-primary bg-light"><h2 align="center" style="color:red"><i class="fa fa-graduation-cap" aria-hidden="true"></i>&nbsp;&nbsp;{{skool}}-({{year}})</h2></div><br>
-<center><p class="h3 text-dark" >Update Enquiry</p></center><br><br>
-  <div class="col-11">
-      <br><br><br>
-      <form action="" method="POST">
-          {% csrf_token %}
-          {{ form.as_p }}
+<div class="container-fluid" style="max-width: 1200px; padding: 24px;">
 
-          <button type="submit" class="btn btn-success">Submit</button>
-      </form>
-{{data }}
+    <!-- Page Header -->
+    <div class="pc-page-header">
+        <div class="pc-page-header-left">
+            <div class="pc-breadcrumb">
+                <a href="{% url 'home_dashboard' %}">Dashboard</a>
+                <span class="pc-breadcrumb-sep">/</span>
 
-  </div>
+                <a href="{%  url 'enquiry_list' %}">Enquiries</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <span>New Enquiry</span>
+            </div>
+            <h1 class="pc-page-title">New Admission Enquiry</h1>
+            <p class="pc-page-sub">Register a new student admission enquiry</p>
+        </div>
+        <div class="pc-page-header-right">
+            <a href="#" class="pc-btn pc-btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Enquiries
+            </a>
+        </div>
+    </div>
+
+    <form action="{% url 'add_enquiry' %}" method="POST">
+        {% csrf_token %}
+
+        <!-- Enquirer & Student Information Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-user-friends" style="color:var(--accent);margin-right:6px;"></i>
+                        Enquirer & Student Information
+                    </div>
+                    <div class="pc-card-sub">Basic details about the enquirer and prospective student</div>
+                </div>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                    <i class="fas fa-clipboard-list"></i> Section 1
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-user"></i> Enquirer Name
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_student }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Name of the parent/guardian making the enquiry
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-child"></i> Student Name
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_name }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Name of the prospective student
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-venus-mars"></i> Gender
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_gender }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-graduation-cap"></i> Standard / Class
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_class }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Class the student wishes to join
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Contact Information Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-phone" style="color:var(--accent);margin-right:6px;"></i>
+                        Contact Information
+                    </div>
+                    <div class="pc-card-sub">Phone numbers and email address for communication</div>
+                </div>
+                <span class="pc-badge pc-badge-info pc-badge-no-dot">
+                    <i class="fas fa-address-card"></i> Section 2
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-mobile-alt"></i> Primary Contact Number
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_mob }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                10-digit mobile number
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-phone-alt"></i> Alternate Contact Number
+                            </label>
+                            {{ form.enq_altmob }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Alternative phone number (optional)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            {{ form.enq_email }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Email for sending information and updates
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-user-check"></i> Reference Name
+                            </label>
+                            {{ form.enq_ref }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                If referred by someone (optional)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Enquiry Details Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-calendar-alt" style="color:var(--accent);margin-right:6px;"></i>
+                        Enquiry Details & Follow-up
+                    </div>
+                    <div class="pc-card-sub">Enquiry dates and communication channel information</div>
+                </div>
+                <span class="pc-badge pc-badge-success pc-badge-no-dot">
+                    <i class="fas fa-info-circle"></i> Section 3
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-calendar"></i> Date of Enquiry
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_date }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Date when enquiry was made
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-calendar-check"></i> Next Follow-up Date
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_followup }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Schedule next follow-up contact
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-bullhorn"></i> How did you hear about us?
+                            </label>
+                            {{ form.enq_communication }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Communication channel (Social media, Word of mouth, etc.)
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-clipboard"></i> Additional Details
+                            </label>
+                            {{ form.enq_det }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Any additional information or notes
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-tasks"></i> Enquiry Status
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.enq_status }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Current status of the enquiry
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pc-alert pc-alert-info" style="margin-top: 20px; margin-bottom: 0;">
+                    <i class="fas fa-lightbulb"></i>
+                    <div>
+                        <strong>Tip:</strong> Set a follow-up date to ensure timely contact with the enquirer. Regular follow-ups increase conversion chances.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Action Buttons Card -->
+        <div class="pc-card">
+            <div class="pc-card-body" style="padding: 24px;">
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <button type="submit" class="pc-btn pc-btn-primary pc-btn-lg">
+                        <i class="fas fa-check"></i> Submit Enquiry
+                    </button>
+                    <button type="reset" class="pc-btn pc-btn-danger pc-btn-lg">
+                        <i class="fas fa-redo"></i> Reset Form
+                    </button>
+                    <a href="#" class="pc-btn pc-btn-outline pc-btn-lg">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<style>
+/* Ensure form fields use the panel component styling */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+select,
+textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--muted);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+</style>
+
+<script>
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Add pc-input class to all form inputs
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"], input[type="tel"], select, textarea');
+    inputs.forEach(input => {
+        if (!input.classList.contains('pc-select')) {
+            input.classList.add('pc-input');
+        }
+    });
+});
+</script>
+
 {% endblock %}

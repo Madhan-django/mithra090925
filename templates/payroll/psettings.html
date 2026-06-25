@@ -2,146 +2,373 @@
 {% load static %}
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
-    body {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Modal overlay ── */
+.pc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  backdrop-filter: blur(4px);
+  z-index: 1040;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.pc-modal-backdrop.show { display: flex; }
 
-    .card-custom {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
+.pc-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%;
+  max-width: 420px;
+  margin: 16px;
+  animation: modalIn .22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.93) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
 
-    .card-header-gradient {
-        background: linear-gradient(45deg, #0d6efd, #0a58ca);
-        height: 70px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.pc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.pc-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pc-modal-title i { color: var(--rose); font-size: 18px; }
+.pc-modal-close {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: background .15s, color .15s;
+}
+.pc-modal-close:hover { background: var(--rose-lt); color: var(--rose); }
 
-    .btn-primary-gradient {
-        background: linear-gradient(45deg, #0d6efd, #0a58ca);
-        border: none;
-        color: white;
-    }
+.pc-modal-body {
+  padding: 20px 22px;
+}
+.pc-modal-body p {
+  font-size: 13.5px;
+  color: var(--text-md);
+  line-height: 1.6;
+  margin: 0;
+}
+.pc-modal-body .del-name {
+  font-weight: 700;
+  color: var(--text);
+}
 
-    .btn-primary-gradient:hover {
-        opacity: 0.9;
-    }
+.pc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
+}
 
-    .btn-cancel-gradient {
-        background: linear-gradient(45deg, #dc3545, #b02a37);
-        border: none;
-        color: white;
-    }
+/* ── School year badge ── */
+.school-year-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-lt);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-family: var(--f-sans);
+}
+.school-year-badge i { font-size: 14px; }
 
-    .btn-cancel-gradient:hover {
-        opacity: 0.9;
-    }
+/* ── Status badge styling ── */
+.status-yes {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--green-lt);
+  color: var(--green);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+.status-no {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--rose-lt);
+  color: var(--rose);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
 
-    thead {
-        background-color: #212529;
-        color: white;
-    }
+/* ── Value highlight ── */
+.value-highlight {
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: 13px;
+}
+
+/* ── Empty state for no settings ── */
+.pc-setup-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--amber-lt) 0%, #fde68a 100%);
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--amber);
+  font-size: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(217,119,6,.15);
+}
 </style>
 
-<div class="container mt-4">
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Payroll Settings</span>
+    </div>
+    <div class="pc-page-title">Payroll Settings</div>
+    <div class="pc-page-sub">Configure payroll parameters for {{ skool.name }}</div>
+  </div>
+  <div class="pc-page-header-right">
+    <span class="school-year-badge">
+      <i class="ri-calendar-line"></i>{{ year }}
+    </span>
+  </div>
+</div>
 
-    <!-- ================= Payroll Settings Card ================= -->
+<!-- ═══════════════════════════════
+     MAIN CARD - SETTINGS CONFIGURED
+     ═══════════════════════════════ -->
+{% if payroll %}
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-settings-3-line me-2" style="color:var(--accent);"></i>Current Payroll Configuration
+      </div>
+      <div class="pc-card-sub">Active settings for {{ skool.name }}</div>
+    </div>
+    <span class="pc-badge pc-badge-success pc-badge-no-dot">
+      <i class="ri-checkbox-circle-line"></i> Configured
+    </span>
+  </div>
 
-    <div class="card card-custom">
-
-        <div class="card-header-gradient">
-            <div class="card-title text-center">
-                <h5>
-                    <span class="badge bg-light text-dark">
-                        Payroll Settings - {{ skool.name }} ({{ year }})
-                    </span>
-                </h5>
-            </div>
-        </div>
-
-        <div class="card-body">
-
-            {% if payroll %}
-
-            <div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle">
-        <thead>
+  <div class="pc-card-body" style="padding:0;">
+    <div class="table-responsive">
+      <div class="pc-table-wrap" style="border:none;border-radius:0;">
+        <table class="pc-table">
+          <thead>
             <tr>
-                <th>Payroll Date</th>
-                <th>Month Cycle</th>
-                <th>Total CL</th>
-                <th>CL / Month</th>
-                <th>Prev CL Usage</th>
-                <th>Total ML</th>
-                <th>Grace Late</th>
-                <th>LOP After Grace</th>
-                <th>Late Cutoff</th>
-                <th>Permission Hours</th>
-                <th>Permission / Month</th>
+              <th>Payroll Date</th>
+              <th>Month Cycle</th>
+              <th>Total CL</th>
+              <th>CL / Month</th>
+              <th>Prev CL Usage</th>
+              <th>Total ML</th>
+              <th>Grace Late</th>
+              <th>LOP After Grace</th>
+              <th>Late Cutoff</th>
+              <th>Permission Hrs</th>
+              <th>Permission / Month</th>
+              <th>Sandwich Policy</th>
+              <th>2 Half = 1 CL</th>
             </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             <tr>
-                <td>{{ payroll.payroll_date }}th</td>
-                <td>{{ payroll.get_payroll_month_cycle_display }}</td>
-                <td>{{ payroll.total_cl }}</td>
-                <td>{{ payroll.cl_per_month }}</td>
-                <td>
-                    {% if payroll.allow_previous_cl_usage %}
-                        <span class="badge bg-success">YES</span>
-                    {% else %}
-                        <span class="badge bg-danger">NO</span>
-                    {% endif %}
-                </td>
-                <td>{{ payroll.total_ml }}</td>
-                <td>{{ payroll.grace_late_count }}</td>
-                <td>{{ payroll.lop_after_grace }}</td>
-                <td>{{ payroll.late_cutoff_hour }}:00</td>
-                <td>{{ payroll.permission_hours }} hr</td>
-                <td>{{ payroll.permission_per_month }}</td>
+              <td>
+                <span class="value-highlight">{{ payroll.payroll_date }}th</span>
+              </td>
+              <td>{{ payroll.get_payroll_month_cycle_display }}</td>
+              <td>
+                <span class="value-highlight">{{ payroll.total_cl }}</span>
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.cl_per_month }}</span>
+              </td>
+              <td>
+                {% if payroll.allow_previous_cl_usage %}
+                  <span class="status-yes">
+                    <i class="ri-check-line"></i>YES
+                  </span>
+                {% else %}
+                  <span class="status-no">
+                    <i class="ri-close-line"></i>NO
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.total_ml }}</span>
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.grace_late_count }}</span>
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.lop_after_grace }}</span>
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.late_cutoff_hour }}:00</span>
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.permission_hours }} hr</span>
+              </td>
+              <td>
+                <span class="value-highlight">{{ payroll.permission_per_month }}</span>
+              </td>
+              <td>
+                {% if payroll.Sandwich_Leave_Policy %}
+                  <span class="status-yes"><i class="ri-check-line"></i>YES</span>
+                {% else %}
+                  <span class="status-no"><i class="ri-close-line"></i>NO</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if payroll.half_day_as_cl %}
+                  <span class="status-yes"><i class="ri-check-line"></i>YES</span>
+                {% else %}
+                  <span class="status-no"><i class="ri-close-line"></i>NO</span>
+                {% endif %}
+              </td>
             </tr>
-        </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="pc-card-footer">
+    <div style="display:flex;gap:10px;align-items:center;margin-left:auto;">
+      <a href="{% url 'edit_payroll_settings' %}" class="pc-btn pc-btn-secondary">
+        <i class="ri-pencil-line"></i> Edit Settings
+      </a>
+      <button type="button" class="pc-btn pc-btn-danger" onclick="openDeleteModal('modal-delete-payroll')">
+        <i class="ri-delete-bin-6-line"></i> Delete
+      </button>
+    </div>
+  </div>
 </div>
 
-<div class="d-flex justify-content-end mt-3 gap-2">
-    <a href="{% url 'edit_payroll_settings' %}" class="btn btn-primary-gradient">
-        Edit Settings
-    </a>
-
-    <form method="POST" action="{% url 'delete_payroll_settings' %}">
-        {% csrf_token %}
-        <button type="submit"
-                class="btn btn-cancel-gradient"
-                onclick="return confirm('Are you sure you want to delete payroll settings?');">
-            Delete
-        </button>
-    </form>
-</div>
-
-{% else %}
-
-<div class="alert alert-warning text-center">
-    Payroll settings not configured for this school.
-</div>
-
-<div class="text-center">
-    <a href="{% url 'create_payroll_settings' %}" class="btn btn-primary-gradient">
-        Create Payroll Settings
-    </a>
-</div>
-
-{% endif %}
-
-        </div>
+<!-- ═══ Delete Confirmation Modal ═══ -->
+<div class="pc-modal-backdrop" id="modal-delete-payroll">
+  <div class="pc-modal">
+    <div class="pc-modal-header">
+      <div class="pc-modal-title">
+        <i class="ri-error-warning-line"></i> Delete Payroll Settings
+      </div>
+      <button class="pc-modal-close" onclick="closeDeleteModal('modal-delete-payroll')">
+        <i class="ri-close-line"></i>
+      </button>
     </div>
 
+    <div class="pc-modal-body">
+      <p>
+        Are you sure you want to delete the payroll settings for
+        <span class="del-name">{{ skool.name }}</span>?
+        This action <strong>cannot be undone</strong> and will remove all payroll configuration.
+      </p>
+    </div>
+
+    <div class="pc-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal('modal-delete-payroll')">
+        <i class="ri-close-line"></i> Cancel
+      </button>
+      <form method="POST" action="{% url 'delete_payroll_settings' %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Delete
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════
+     EMPTY STATE - NO SETTINGS
+     ═══════════════════════════════ -->
+{% else %}
+<div class="pc-card">
+  <div class="pc-card-body" style="text-align:center;padding:48px 32px;">
+    <div class="pc-setup-icon" style="margin-left:auto;margin-right:auto;">
+      <i class="ri-settings-3-line"></i>
+    </div>
+    <div style="max-width:480px;margin:0 auto 32px;">
+      <h3 style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.3px;">
+        Payroll Settings Not Configured
+      </h3>
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;">
+        You haven't set up payroll settings for <strong>{{ skool.name }}</strong> yet. Configure your payroll parameters to get started.
+      </p>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <a href="{% url 'create_payroll_settings' %}" class="pc-btn pc-btn-primary pc-btn-lg">
+        <i class="ri-settings-3-line"></i> Create Payroll Settings
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Info Alert ═══ -->
+<div class="pc-alert pc-alert-info" style="margin-top:20px;">
+  <i class="ri-information-line"></i>
+  <div>
+    <strong>What you'll configure:</strong> Payroll date, leave policies (CL, ML), grace periods, late policies, and permission allowances for your organization.
+  </div>
+</div>
+{% endif %}
+
+<script>
+function openDeleteModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+}
+function closeDeleteModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+// Close on backdrop click
+document.querySelectorAll('.pc-modal-backdrop').forEach(function(backdrop) {
+  backdrop.addEventListener('click', function(e) {
+    if (e.target === backdrop) backdrop.classList.remove('show');
+  });
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.pc-modal-backdrop.show').forEach(function(el) {
+      el.classList.remove('show');
+    });
+  }
+});
+</script>
 
 {% endblock %}

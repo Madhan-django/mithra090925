@@ -1,10 +1,18 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Department,Designation,PayrollEmployee,PayrollBank,Allowance,Deduction,Loan,Holiday,PayrollSettings,StatutorySettings
+from .models import Department,PayrollEmployee,PayrollBank,Allowance,Loan,Holiday,PayrollSettings,StatutorySettings,Deductions,staff_deduction,PayrollSettings
+
 emp_type_choice = [
     (1,'PF-ESI'),
     (0,'NON-PF&ESI')
 ]
+
+sts = [
+    ('Active','Active'),
+    ('Inactive','Inactive')
+]
+
+
 
 
 class add_deptform(forms.ModelForm):
@@ -20,26 +28,28 @@ class add_holidayform(forms.ModelForm):
     class Meta:
         model = Holiday
         fields = '__all__'
+        labels = {
+            'name':'Holiday Category',
+
+        }
         widgets = {
             'date': forms.DateInput(attrs={'class':'form-control', 'type': 'date'}),
-            'sch':forms.HiddenInput()
+            'sch':forms.HiddenInput(),
+
 
         }
 
 
-class add_desgform(forms.ModelForm):
-    class Meta:
-        model = Designation
-        fields = '__all__'
 
 class PayrollEmployeeForm(forms.ModelForm):
     class Meta:
         model = PayrollEmployee
-        fields = '__all__'
-        widgets = {
-            'date_of_joining': forms.DateInput(attrs={'type': 'date'}),
-            'emp_type' : forms.Select(choices=emp_type_choice)
-        }
+        fields = [
+            "gross_salary",
+            "basic_percentage",
+            "hra_percentage",
+            "wages_per_day",
+        ]
 
 
 class Allowanceform(forms.ModelForm):
@@ -49,8 +59,27 @@ class Allowanceform(forms.ModelForm):
 
 class Deductionform(forms.ModelForm):
     class Meta:
-        model = Deduction
+        model = Deductions
         fields ='__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class':'form-control'}),
+            'sch': forms.HiddenInput()
+        }
+
+class staff_Deductionform(forms.ModelForm):
+    class Meta:
+        model = staff_deduction
+        fields ='__all__'
+        widgets={
+            'name' :forms.Select(attrs={'class':'form-control'}),
+            'staff' : forms.Select(attrs={'class':'form-control'}),
+            'ded_amount' : forms.NumberInput(attrs={'class':'form-control'}),
+            'start_date' : forms.DateInput(attrs={'class':'form-control','type': 'date'}),
+            'end_date' : forms.DateInput(attrs={'class':'form-control','type': 'date'}),
+            'active' : forms.Select(choices=sts,attrs={'class':'form-control'}),
+            'sch' : forms.HiddenInput()
+        }
+
 
 
 class NewLoanForm(forms.ModelForm):
@@ -61,8 +90,7 @@ class NewLoanForm(forms.ModelForm):
             'end_date':forms.HiddenInput()
         }
 
-from django import forms
-from .models import PayrollSettings
+
 
 
 class PayrollSettingsForm(forms.ModelForm):
@@ -101,11 +129,22 @@ class PayrollSettingsForm(forms.ModelForm):
                 "min": 0
             }),
 
+            "Sandwich_Leave_Policy": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+
+            "half_day_as_cl": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+
             "grace_late_count": forms.NumberInput(attrs={
                 "class": "form-control",
                 "min": 0
             }),
-
+            "grace_mins": forms.NumberInput(attrs={
+                "class": "form-control",
+                "min": 0
+            }),
             "lop_after_grace": forms.NumberInput(attrs={
                 "class": "form-control",
                 "step": "0.25",
@@ -153,6 +192,7 @@ class PayrollSettingsForm(forms.ModelForm):
 
         return cleaned_data
 
+
 class StatutorySettingsForm(forms.ModelForm):
     class Meta:
         model = StatutorySettings
@@ -164,4 +204,44 @@ class StatutorySettingsForm(forms.ModelForm):
             'esi_employee_percent': forms.NumberInput(attrs={'class': 'form-control'}),
             'esi_employer_percent': forms.NumberInput(attrs={'class': 'form-control'}),
             'esi_gross_limit': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+class PayrollBankForm(forms.ModelForm):
+    class Meta:
+        model = PayrollBank
+        fields= '__all__'
+
+        widgets = {
+
+            'CustName': forms.Select(attrs={
+                'class': 'form-control select2'
+            }),
+
+            'home_school': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+
+            'AccNo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Account Number'
+            }),
+
+            'CIFNo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter CIF Number (Optional)'
+            }),
+
+            'BankName': forms.Select(attrs={
+                'class': 'form-control select2'
+            }),
+
+            'Branch': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Branch Name'
+            }),
+
+            'IFSC': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter IFSC Code'
+            }),
         }

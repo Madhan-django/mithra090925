@@ -1,0 +1,202 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<!-- Delete Modal -->
+<style>
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(15,23,42,.45); z-index:9999;
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal-box {
+    background:var(--surface); border-radius:var(--r-xl);
+    border:1px solid var(--border);
+    box-shadow:0 20px 50px rgba(15,23,42,.2);
+    width:100%; max-width:400px; overflow:hidden;
+    animation:modalIn 180ms ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.96) translateY(8px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .modal-head {
+    padding:16px 20px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .modal-head-title { font-size:14px; font-weight:700; color:var(--text); margin:0; }
+  .modal-head-sub   { font-size:12px; color:var(--text-sm); margin:2px 0 0; }
+  .modal-close-btn {
+    width:28px; height:28px; border-radius:var(--r-sm);
+    border:1px solid var(--border); background:var(--surface2);
+    color:var(--text-sm); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; transition:background 120ms;
+  }
+  .modal-close-btn:hover { background:var(--rose-lt); color:var(--rose); border-color:#fecdd3; }
+  .modal-body-inner { padding:20px; }
+  .modal-foot {
+    padding:14px 20px; border-top:1px solid var(--border);
+    display:flex; justify-content:flex-end; gap:8px; background:var(--surface2);
+  }
+  .delete-warning {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:14px 16px; background:var(--rose-lt);
+    border:1px solid #fecdd3; border-radius:var(--r-lg);
+  }
+  .delete-warning i { font-size:22px; color:var(--rose); flex-shrink:0; margin-top:1px; }
+  .delete-warning p { margin:0; font-size:13.5px; color:var(--rose); font-weight:500; line-height:1.6; }
+</style>
+
+<!-- Page Header -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <nav class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Receipt Templates</span>
+    </nav>
+    <div class="pc-page-title">Receipt Templates</div>
+    <div class="pc-page-sub">Manage receipt layouts for {{ skool.school_name }}</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'add_receipt_template' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> Add Template
+    </a>
+  </div>
+</div>
+
+<!-- Main Card -->
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-file-list-3-line me-2" style="color:var(--accent);"></i>
+        Assigned Templates
+      </div>
+      <div class="pc-card-sub">Receipt templates assigned to this school</div>
+    </div>
+    {% if data %}
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:12px;padding:5px 14px;">
+      {{ data|length }} template{{ data|length|pluralize }}
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="pc-card-body" style="padding:0;">
+    {% if data %}
+    <div class="pc-table-wrap" style="border:none;border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding-left:18px;width:44px;">#</th>
+            <th style="text-align:left;">Template Name</th>
+            <th style="text-align:left;">File Path</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tmpl in data %}
+          <tr>
+            <td class="td-num">{{ forloop.counter }}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="
+                  width:36px;height:36px;border-radius:var(--r-lg);
+                  background:var(--accent-lt);
+                  display:flex;align-items:center;justify-content:center;
+                  flex-shrink:0;">
+                  <i class="ri-file-text-line" style="color:var(--accent);font-size:16px;"></i>
+                </div>
+                <div>
+                  <div style="font-weight:700;color:var(--text);font-size:13.5px;">
+                    {% if tmpl.template == 'fee/reciept_show.html' %}
+                      Receipt 1
+                    {% elif tmpl.template == 'fee/reciept_show3.html' %}
+                      Receipt 2
+                    {% else %}
+                      {{ tmpl.template }}
+                    {% endif %}
+                  </div>
+                  <div style="font-size:11.5px;color:var(--text-sm);">Standard Layout</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span style="font-family:var(--f-mono);font-size:12px;color:var(--text-sm);">
+                {{ tmpl.template }}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                <button type="button"
+                        class="pc-btn pc-btn-danger pc-btn-sm"
+                        onclick="confirmDelete('{% url 'del_receipt_template' tmpl.id %}', '{{ tmpl.template }}')">
+                  <i class="ri-delete-bin-6-line"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="pc-empty">
+      <i class="ri-file-list-3-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No templates assigned</div>
+      <div class="pc-empty-sub">Click <strong>Add Template</strong> to assign a receipt layout.</div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <p class="modal-head-title">Delete Template</p>
+        <p class="modal-head-sub">This action cannot be undone</p>
+      </div>
+      <button class="modal-close-btn" onclick="closeDeleteModal()">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body-inner">
+      <div class="delete-warning">
+        <i class="ri-alert-line"></i>
+        <p>Are you sure you want to delete
+           <strong id="deleteTmplName"></strong>?
+        </p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <a id="deleteTmplBtn" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmDelete(url, name) {
+    document.getElementById('deleteTmplName').textContent = '"' + name + '"';
+    document.getElementById('deleteTmplBtn').href = url;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('open');
+  }
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+</script>
+
+{% endblock %}

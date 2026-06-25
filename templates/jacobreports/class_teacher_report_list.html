@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- ===================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ===================================== -->
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+        <div class="card-header text-white"
+             style="background: linear-gradient(to right, #0d6efd, #0b5ed7); height:70px;">
+
+            <div class="card-title text-center mt-2">
+                <h5>
+                    <span class="badge bg-light text-dark">
+                        CLASS TEACHER REPORT
+                    </span>
+                </h5>
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <!-- ===================================== -->
+            <!-- FORM -->
+            <!-- ===================================== -->
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <!-- ===================================== -->
+                <!-- BASIC DETAILS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                    <div class="card-header bg-dark text-white">
+                        BASIC DETAILS
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">
+                                    School
+                                </label>
+                                {{ form.school_name }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">
+                                    Class
+                                </label>
+                                {{ form.class_name }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">
+                                    Section
+                                </label>
+                                {{ form.section }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">
+                                    Report Date
+                                </label>
+                                {{ form.report_date }}
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Submitted By
+                                </label>
+                                {{ form.report_submitted_by }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- GENERAL REPORT -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                    <div class="card-header bg-dark text-white">
+                        GENERAL REPORT
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-bordered">
+
+                                <thead style="background-color:#212529;color:white;">
+
+                                    <tr>
+                                        <th>DETAILS</th>
+                                        <th>BOYS</th>
+                                        <th>GIRLS</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>No On Roll</td>
+                                        <td>{{ form.boys_on_roll }}</td>
+                                        <td>{{ form.girls_on_roll }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>No Present</td>
+                                        <td>{{ form.boys_present }}</td>
+                                        <td>{{ form.girls_present }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Uniform Defaulters</td>
+                                        <td>{{ form.boys_uniform_defaulters }}</td>
+                                        <td>{{ form.girls_uniform_defaulters }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Absentees</td>
+                                        <td>{{ form.boys_absentees }}</td>
+                                        <td>{{ form.girls_absentees }}</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        <div class="row mt-3">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Action Taken
+                                </label>
+                                {{ form.action_taken }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Birthday Celebration
+                                </label>
+                                {{ form.birthday_celebration }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- DAILY ROUTINE -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                    <div class="card-header bg-dark text-white">
+                        DAILY ROUTINE REPORT
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Accident Details
+                                </label>
+                                {{ form.accident_details }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Defaulters
+                                </label>
+                                {{ form.defaulters }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Homework Details
+                                </label>
+                                {{ form.homework_details }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Drill Work Details
+                                </label>
+                                {{ form.drill_work_details }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Activity Class
+                                </label>
+                                {{ form.activity_class }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Announcements
+                                </label>
+                                {{ form.announcements }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- REMARKS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                    <div class="card-header bg-dark text-white">
+                        REMARKS
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Teachers Remark
+                                </label>
+                                {{ form.teachers_remark }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Parents Remark
+                                </label>
+                                {{ form.parents_remark }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Pupils Remark
+                                </label>
+                                {{ form.pupils_remark }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- TRANSPORT DETAILS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                    <div class="card-header bg-dark text-white">
+                        TRANSPORT DETAILS
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-bordered">
+
+                                <thead style="background-color:#212529;color:white;">
+
+                                    <tr>
+                                        <th>MODE</th>
+                                        <th>BOYS</th>
+                                        <th>GIRLS</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>Private Auto</td>
+                                        <td>{{ form.private_auto_boys }}</td>
+                                        <td>{{ form.private_auto_girls }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Cycle</td>
+                                        <td>{{ form.cycle_boys }}</td>
+                                        <td>{{ form.cycle_girls }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Walk</td>
+                                        <td>{{ form.walk_boys }}</td>
+                                        <td>{{ form.walk_girls }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>School Van</td>
+                                        <td>{{ form.school_van_boys }}</td>
+                                        <td>{{ form.school_van_girls }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Bus</td>
+                                        <td>{{ form.bus_boys }}</td>
+                                        <td>{{ form.bus_girls }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Others</td>
+                                        <td>{{ form.others_boys }}</td>
+                                        <td>{{ form.others_girls }}</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- MEETING / SUGGESTIONS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                    <div class="card-header bg-dark text-white">
+                        MEETING & SUGGESTIONS
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Meeting Details
+                                </label>
+                                {{ form.meeting_details }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Suggestions & Grievances
+                                </label>
+                                {{ form.suggestions_and_grievances }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- BUTTONS -->
+                <!-- ===================================== -->
+
+                <div class="text-center mb-4">
+
+                    <button type="submit"
+                            class="btn btn-primary px-5 shadow">
+
+                        SAVE REPORT
+
+                    </button>
+
+                    <a href="{% url 'class_teacher_report_list' %}"
+                       class="btn btn-danger px-5 shadow">
+
+                        CANCEL
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

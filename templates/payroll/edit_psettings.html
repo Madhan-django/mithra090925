@@ -2,180 +2,498 @@
 {% load static %}
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
-    body {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Section boxes ── */
+.pc-section-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+}
 
-    .card-custom {
-        border-radius: 12px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
+.pc-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-    .card-header-gradient {
-        background: linear-gradient(45deg, #0d6efd, #0a58ca);
-        height: 70px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.pc-section-title i {
+  font-size: 16px;
+}
 
-    .btn-primary-gradient {
-        background: linear-gradient(45deg, #0d6efd, #0a58ca);
-        border: none;
-        color: white;
-        padding: 8px 20px;
-    }
+/* ── Form grid ── */
+.pc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
 
-    .btn-primary-gradient:hover {
-        opacity: 0.9;
-        color: white;
-    }
+.pc-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
 
-    .btn-cancel-gradient {
-        background: linear-gradient(45deg, #dc3545, #b02a37);
-        border: none;
-        color: white;
-        padding: 8px 20px;
-    }
+.pc-form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
 
-    .btn-cancel-gradient:hover {
-        opacity: 0.9;
-        color: white;
-    }
+.pc-form-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
 
-    .form-label {
-        font-weight: 500;
-    }
+/* ── Checkbox styling ── */
+.pc-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  transition: border-color var(--t) ease, background var(--t) ease;
+}
 
-    .section-title {
-        font-weight: 600;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        color: #0d6efd;
-    }
+.pc-checkbox-group:hover {
+  background: var(--surface2);
+  border-color: var(--accent-mid);
+}
+
+.pc-checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.pc-checkbox-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-md);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* ── Form actions ── */
+.pc-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+}
+
+/* ── School badge ── */
+.school-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 8px;
+}
+
+/* ── Help text styling ── */
+.pc-help-text {
+  font-size: 12px;
+  color: var(--text-sm);
+  margin-top: 6px;
+  display: block;
+  line-height: 1.5;
+}
+
+/* ── Required field indicator ── */
+.pc-required {
+  color: var(--rose);
+  margin-left: 3px;
+  font-weight: 700;
+}
 </style>
 
-<div class="container mt-4">
-
-    <div class="card card-custom">
-
-        <!-- Gradient Header -->
-        <div class="card-header-gradient">
-            <div class="card-title text-center">
-                <h5>
-                    <span class="badge bg-light text-dark">
-                        Create Payroll Settings - {{ skool.name }}
-                    </span>
-                </h5>
-            </div>
-        </div>
-
-        <div class="card-body">
-
-            <form method="POST">
-                {% csrf_token %}
-
-                <!-- ================= BASIC SETTINGS ================= -->
-                <div class="section-title">Basic Payroll Settings</div>
-
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Payroll Date</label>
-                        {{ form.payroll_date }}
-                        {% if form.payroll_date.errors %}
-                            <div class="text-danger small">{{ form.payroll_date.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Payroll Month Cycle</label>
-                        {{ form.payroll_month_cycle }}
-                    </div>
-                </div>
-
-                <!-- ================= LEAVE SETTINGS ================= -->
-                <div class="section-title">Leave Settings</div>
-
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Total CL</label>
-                        {{ form.total_cl }}
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">CL Per Month</label>
-                        {{ form.cl_per_month }}
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Total ML</label>
-                        {{ form.total_ml }}
-                    </div>
-
-                    <div class="col-md-3 d-flex align-items-end">
-                        <div class="form-check">
-                            {{ form.allow_previous_cl_usage }}
-                            <label class="form-check-label ms-2">
-                                Allow Previous CL Usage
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ================= LATE SETTINGS ================= -->
-                <div class="section-title">Late Settings</div>
-
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Grace Late Count</label>
-                        {{ form.grace_late_count }}
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">LOP After Grace</label>
-                        {{ form.lop_after_grace }}
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Late Cutoff Hour</label>
-                        {{ form.late_cutoff_hour }}
-                    </div>
-                </div>
-
-                <!-- ================= PERMISSION SETTINGS ================= -->
-                <div class="section-title">Permission Settings</div>
-
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <label class="form-label">Permission Hours</label>
-                        {{ form.permission_hours }}
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Permission Per Month</label>
-                        {{ form.permission_per_month }}
-                    </div>
-                </div>
-
-                <!-- Buttons -->
-                <div class="text-end">
-                    <a href="{% url 'psettings' %}" class="btn btn-cancel-gradient me-2">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary-gradient">
-                        Save Settings
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'psettings' %}">Payroll Settings</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Create Settings</span>
     </div>
-
+    <div class="pc-page-title">Create Payroll Settings</div>
+    <div class="pc-page-sub">Configure payroll parameters for {{ skool.name }}</div>
+  </div>
+  <div class="pc-page-header-right">
+    <span class="school-badge">
+      <i class="ri-building-line"></i>{{ skool.name }}
+    </span>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════
+     MAIN FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-settings-3-line me-2" style="color:var(--accent);"></i>Payroll Configuration
+      </div>
+      <div class="pc-card-sub">Set up comprehensive payroll settings</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+      <i class="ri-add-line"></i> New Configuration
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- ═══════════════════════════════
+           BASIC PAYROLL SETTINGS
+           ═══════════════════════════════ -->
+      <div class="pc-section-box">
+        <div class="pc-section-title">
+          <i class="ri-calendar-check-line"></i>Basic Payroll Settings
+        </div>
+
+        <div class="pc-form-grid-2">
+          <div class="pc-form-group">
+            <label for="id_payroll_date" class="pc-label">
+              Payroll Date<span class="pc-required">*</span>
+            </label>
+            {{ form.payroll_date }}
+            <span class="pc-help-text">
+              <i class="ri-information-line" style="font-size:11px;"></i>
+              Day of the month when payroll is processed
+            </span>
+            {% if form.payroll_date.errors %}
+              <ul class="errorlist">
+                {% for error in form.payroll_date.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_payroll_month_cycle" class="pc-label">
+              Payroll Month Cycle<span class="pc-required">*</span>
+            </label>
+            {{ form.payroll_month_cycle }}
+            <span class="pc-help-text">
+              <i class="ri-information-line" style="font-size:11px;"></i>
+              Select the monthly cycle for payroll calculation
+            </span>
+            {% if form.payroll_month_cycle.errors %}
+              <ul class="errorlist">
+                {% for error in form.payroll_month_cycle.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════
+           LEAVE SETTINGS
+           ═══════════════════════════════ -->
+      <div class="pc-section-box">
+        <div class="pc-section-title">
+          <i class="ri-calendar-event-line"></i>Leave Settings
+        </div>
+
+        <div class="pc-form-grid-3">
+          <div class="pc-form-group">
+            <label for="id_total_cl" class="pc-label">
+              Total Casual Leave (CL)<span class="pc-required">*</span>
+            </label>
+            {{ form.total_cl }}
+            <span class="pc-help-text">Annual CL allocation</span>
+            {% if form.total_cl.errors %}
+              <ul class="errorlist">
+                {% for error in form.total_cl.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_cl_per_month" class="pc-label">
+              CL Per Month<span class="pc-required">*</span>
+            </label>
+            {{ form.cl_per_month }}
+            <span class="pc-help-text">Monthly CL accrual rate</span>
+            {% if form.cl_per_month.errors %}
+              <ul class="errorlist">
+                {% for error in form.cl_per_month.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_total_ml" class="pc-label">
+              Total Medical Leave (ML)<span class="pc-required">*</span>
+            </label>
+            {{ form.total_ml }}
+            <span class="pc-help-text">Annual ML allocation</span>
+            {% if form.total_ml.errors %}
+              <ul class="errorlist">
+                {% for error in form.total_ml.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Checkbox Options -->
+        <div class="pc-form-grid-3">
+          <div class="pc-checkbox-group">
+            {{ form.allow_previous_cl_usage }}
+            <label for="id_allow_previous_cl_usage">
+              Allow Previous Year CL Usage
+            </label>
+          </div>
+
+          <div class="pc-checkbox-group">
+            {{ form.Sandwich_Leave_Policy }}
+            <label for="id_Sandwich_Leave_Policy">
+              Enable Sandwich Leave Policy
+            </label>
+          </div>
+
+          <div class="pc-checkbox-group">
+            {{ form.half_day_as_cl }}
+            <label for="id_half_day_as_cl">
+              2 Half Days = 1 CL
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════
+           LATE & ATTENDANCE SETTINGS
+           ═══════════════════════════════ -->
+      <div class="pc-section-box">
+        <div class="pc-section-title">
+          <i class="ri-time-line"></i>Late & Attendance Settings
+        </div>
+
+        <div class="pc-form-grid-4">
+          <div class="pc-form-group">
+            <label for="id_grace_late_count" class="pc-label">
+              Grace Late Count<span class="pc-required">*</span>
+            </label>
+            {{ form.grace_late_count }}
+            <span class="pc-help-text">Allowed late arrivals</span>
+            {% if form.grace_late_count.errors %}
+              <ul class="errorlist">
+                {% for error in form.grace_late_count.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_lop_after_grace" class="pc-label">
+              LOP After Grace<span class="pc-required">*</span>
+            </label>
+            {{ form.lop_after_grace }}
+            <span class="pc-help-text">Loss of pay count</span>
+            {% if form.lop_after_grace.errors %}
+              <ul class="errorlist">
+                {% for error in form.lop_after_grace.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_grace_mins" class="pc-label">
+              Grace Minutes<span class="pc-required">*</span>
+            </label>
+            {{ form.grace_mins }}
+            <span class="pc-help-text">Grace period (mins)</span>
+            {% if form.grace_mins.errors %}
+              <ul class="errorlist">
+                {% for error in form.grace_mins.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_late_cutoff_hour" class="pc-label">
+              Late Cutoff Hour<span class="pc-required">*</span>
+            </label>
+            {{ form.late_cutoff_hour }}
+            <span class="pc-help-text">Cutoff hour for late</span>
+            {% if form.late_cutoff_hour.errors %}
+              <ul class="errorlist">
+                {% for error in form.late_cutoff_hour.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════
+           PERMISSION SETTINGS
+           ═══════════════════════════════ -->
+      <div class="pc-section-box">
+        <div class="pc-section-title">
+          <i class="ri-user-settings-line"></i>Permission Settings
+        </div>
+
+        <div class="pc-form-grid-2">
+          <div class="pc-form-group">
+            <label for="id_permission_hours" class="pc-label">
+              Permission Hours<span class="pc-required">*</span>
+            </label>
+            {{ form.permission_hours }}
+            <span class="pc-help-text">
+              <i class="ri-information-line" style="font-size:11px;"></i>
+              Total permission hours allowed per month
+            </span>
+            {% if form.permission_hours.errors %}
+              <ul class="errorlist">
+                {% for error in form.permission_hours.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="pc-form-group">
+            <label for="id_permission_per_month" class="pc-label">
+              Permission Count Per Month<span class="pc-required">*</span>
+            </label>
+            {{ form.permission_per_month }}
+            <span class="pc-help-text">
+              <i class="ri-information-line" style="font-size:11px;"></i>
+              Number of permission requests allowed
+            </span>
+            {% if form.permission_per_month.errors %}
+              <ul class="errorlist">
+                {% for error in form.permission_per_month.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Form Actions ═══ -->
+      <div class="pc-form-actions">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Settings
+        </button>
+        <a href="{% url 'psettings' %}" class="pc-btn pc-btn-danger">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+        <button type="reset" class="pc-btn pc-btn-outline" style="margin-left:auto;">
+          <i class="ri-refresh-line"></i> Reset Form
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+/* ── Style Django form fields to match pc-input ── */
+input[type="text"],
+input[type="number"],
+input[type="time"],
+select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+select {
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  appearance: none;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+/* ── Error messages styling ── */
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.errorlist li {
+  background: var(--rose-lt);
+  color: var(--rose);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border-left: 3px solid var(--rose);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.errorlist li::before {
+  content: '\eb98'; /* RemixIcon error warning line */
+  font-family: 'remixicon';
+  font-size: 14px;
+}
+</style>
 
 {% endblock %}

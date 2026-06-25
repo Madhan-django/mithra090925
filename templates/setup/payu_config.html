@@ -1,0 +1,189 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+  /* Hide native checkbox */
+  label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* Slider track */
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border-dark);
+    border-radius: 24px;
+    transition: background 200ms ease;
+  }
+
+  /* Slider knob */
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 200ms ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  }
+
+  /* Checked state */
+  input[type="checkbox"]:checked + .toggle-slider {
+    background: var(--accent);
+  }
+
+  input[type="checkbox"]:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <nav class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>PayU Configuration</span>
+    </nav>
+    <div class="pc-page-title">PayU Configuration</div>
+    <div class="pc-page-sub">{{ skool.school_name }} — Online Payment Settings</div>
+  </div>
+</div>
+
+<div class="pc-card" style="max-width:580px;">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-secure-payment-line me-2" style="color:var(--accent);"></i>
+        PayU Credentials
+      </div>
+      <div class="pc-card-sub">Enter your PayU merchant credentials</div>
+    </div>
+    {% if config.is_active %}
+    <span class="pc-badge pc-badge-success pc-badge-no-dot">
+      <i class="ri-checkbox-circle-line"></i> Active
+    </span>
+    {% else %}
+    <span class="pc-badge pc-badge-neutral pc-badge-no-dot">
+      <i class="ri-close-circle-line"></i> Inactive
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Merchant Key -->
+      <div class="pc-form-group">
+        <label class="pc-label">
+          <i class="ri-key-line" style="font-size:12px;color:var(--accent);"></i>
+          Merchant Key
+        </label>
+        <div class="pc-input-group">
+          <i class="ri-key-line pc-input-icon"></i>
+          <input type="text" name="merchant_key"
+                 value="{{ config.merchant_key }}"
+                 class="pc-input"
+                 placeholder="e.g. gtKFFx">
+        </div>
+      </div>
+
+      <!-- Merchant Salt -->
+      <div class="pc-form-group">
+        <label class="pc-label">
+          <i class="ri-lock-line" style="font-size:12px;color:var(--accent);"></i>
+          Merchant Salt
+        </label>
+        <div class="pc-input-group">
+          <i class="ri-lock-line pc-input-icon"></i>
+          <input type="password" name="merchant_salt"
+                 value="{{ config.merchant_salt }}"
+                 class="pc-input"
+                 placeholder="Your PayU salt key">
+        </div>
+      </div>
+
+      <!-- Toggles -->
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
+
+        <!-- Enable Online Payment -->
+        <div style="
+          flex:1;min-width:200px;
+          padding:14px 16px;
+          background:var(--surface2);
+          border:1.5px solid var(--border-dark);
+          border-radius:var(--r-lg);
+          display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Enable Online Payment</div>
+            <div style="font-size:11.5px;color:var(--text-sm);">Allow students to pay online</div>
+          </div>
+          <label for="is_active" style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;cursor:pointer;">
+            <input type="checkbox" name="is_active" id="is_active"
+                   {% if config.is_active %}checked{% endif %}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Test Mode -->
+        <div style="
+          flex:1;min-width:200px;
+          padding:14px 16px;
+          background:var(--surface2);
+          border:1.5px solid var(--border-dark);
+          border-radius:var(--r-lg);
+          display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Test Mode</div>
+            <div style="font-size:11.5px;color:var(--text-sm);">Use PayU test environment</div>
+          </div>
+          <label for="is_test" style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;cursor:pointer;">
+            <input type="checkbox" name="is_test" id="is_test"
+                   {% if config.is_test %}checked{% endif %}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Info box -->
+      <div style="
+        padding:12px 14px;
+        background:var(--accent-lt);
+        border:1px solid var(--accent-mid);
+        border-radius:var(--r-lg);
+        font-size:12.5px;
+        color:var(--accent);
+        margin-bottom:20px;
+        display:flex;gap:10px;align-items:flex-start;">
+        <i class="ri-information-line" style="font-size:16px;flex-shrink:0;margin-top:1px;"></i>
+        <span>
+          Get your credentials from
+          <a href="https://onboarding.payu.in" target="_blank"
+             style="color:var(--accent);font-weight:700;text-decoration:underline;">
+            onboarding.payu.in
+          </a>.
+          Use test credentials for development and switch to production before going live.
+        </span>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Configuration
+        </button>
+        <a href="{% url 'home_dashboard' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}

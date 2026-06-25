@@ -1,0 +1,53 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+{% if sch %}
+ <!-- Column Search -->
+              <div class="card">
+
+
+                <h5 class="card-header text-center text-md-start">Institutions</h5>
+                  <div class="text-end mb-4">
+                      <a href="{% url 'addschool' %}" class="btn btn-primary" type="button"><i class="ri-add-line ri-16px me-sm-2"></i>New Institution</a>
+
+                  </div>
+                <div class="card-datatable text-nowrap">
+                  <table class="datatables-basic table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Institution Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                      </tr>
+                    </thead>
+                    <tfoot>
+
+                      <tr>
+                        <th>{{sch.name}}</th>
+                        <th>{{sch.phone}}</th>
+                        <th>{{sch.email}}</th>
+                        <th>{{sch.isactive}}</th>
+                        <th>
+                           <form action="{% url 'updateschool' sch.id %}"  method="" class="d-inline">
+                                   {% csrf_token %}
+                               <button type="submit" class="btn btn-primary" >Update</button>
+                           </form>
+                       {% if request.user.groups.all.0.name == "superadmin" %}
+                           <form action = "{% url 'delschool' sch.id %}" method="" class="d-inline">
+
+                              <button type="submit" class="btn btn-danger" >Delete</button>
+                           </form>
+                         {% endif %}
+                        </th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+              <!--/ Column Search -->
+
+{% endif %}
+
+{% endblock %}

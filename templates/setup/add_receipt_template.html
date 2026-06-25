@@ -1,0 +1,125 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<!-- Page Header -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <nav class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'show_receipt_template' %}">Receipt Templates</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Add Template</span>
+    </nav>
+    <div class="pc-page-title">Add Receipt Template</div>
+    <div class="pc-page-sub">Select a receipt layout for {{ sch.school_name }}</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'show_receipt_template' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<!-- Form Card -->
+<div class="pc-card" style="max-width:560px;">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-file-list-3-line me-2" style="color:var(--accent);"></i>
+        Template Selection
+      </div>
+      <div class="pc-card-sub">Choose a receipt template to assign to your school</div>
+    </div>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Template preview cards -->
+      <div class="pc-form-group">
+        <label class="pc-label">
+          <i class="ri-layout-line" style="font-size:12px;color:var(--accent);"></i>
+          Select Template
+        </label>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
+
+          <!-- Receipt 1 -->
+          <label for="tmpl1" style="cursor:pointer;">
+            <div id="tmpl1-card" style="
+              border:2px solid var(--border-dark);
+              border-radius:var(--r-lg);
+              padding:16px;
+              text-align:center;
+              transition:border-color 150ms,background 150ms;
+              background:var(--surface2);">
+              <i class="ri-file-text-line" style="font-size:32px;color:var(--accent);display:block;margin-bottom:8px;"></i>
+              <div style="font-weight:700;font-size:13px;color:var(--text);">Receipt 1</div>
+              <div style="font-size:11px;color:var(--text-sm);margin-top:3px;">Standard Layout</div>
+              <input type="radio" id="tmpl1" name="template"
+                     value="fee/reciept_show.html"
+                     style="display:none;"
+                     {% if form.template.value == 'fee/reciept_show.html' %}checked{% endif %}>
+            </div>
+          </label>
+
+          <!-- Receipt 2 -->
+          <label for="tmpl2" style="cursor:pointer;">
+            <div id="tmpl2-card" style="
+              border:2px solid var(--border-dark);
+              border-radius:var(--r-lg);
+              padding:16px;
+              text-align:center;
+              transition:border-color 150ms,background 150ms;
+              background:var(--surface2);">
+              <i class="ri-file-chart-line" style="font-size:32px;color:var(--accent);display:block;margin-bottom:8px;"></i>
+              <div style="font-weight:700;font-size:13px;color:var(--text);">Receipt 2</div>
+              <div style="font-size:11px;color:var(--text-sm);margin-top:3px;">Detailed Layout</div>
+              <input type="radio" id="tmpl2" name="template"
+                     value="fee/reciept_show3.html"
+                     style="display:none;"
+                     {% if form.template.value == 'fee/reciept_show3.html' %}checked{% endif %}>
+            </div>
+          </label>
+
+        </div>
+        {% if form.template.errors %}
+          <div class="pc-field-error">{{ form.template.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Hidden school field -->
+      {{ form.school_name }}
+
+      <!-- Actions -->
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Template
+        </button>
+        <a href="{% url 'show_receipt_template' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  // Highlight selected card
+  function updateCards() {
+    const r1 = document.getElementById('tmpl1');
+    const r2 = document.getElementById('tmpl2');
+    document.getElementById('tmpl1-card').style.borderColor = r1.checked ? 'var(--accent)' : 'var(--border-dark)';
+    document.getElementById('tmpl1-card').style.background  = r1.checked ? 'var(--accent-lt)' : 'var(--surface2)';
+    document.getElementById('tmpl2-card').style.borderColor = r2.checked ? 'var(--accent)' : 'var(--border-dark)';
+    document.getElementById('tmpl2-card').style.background  = r2.checked ? 'var(--accent-lt)' : 'var(--surface2)';
+  }
+  document.getElementById('tmpl1').addEventListener('change', updateCards);
+  document.getElementById('tmpl2').addEventListener('change', updateCards);
+  updateCards(); // run on load
+</script>
+
+{% endblock %}

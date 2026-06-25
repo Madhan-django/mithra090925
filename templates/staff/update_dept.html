@@ -1,0 +1,326 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ── Form enhancements ── */
+.pc-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.pc-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+}
+
+/* ── Help text styling ── */
+.pc-help-text {
+  font-size: 12px;
+  color: var(--text-sm);
+  margin-top: 6px;
+  display: block;
+  line-height: 1.5;
+}
+
+/* ── Required field indicator ── */
+.pc-required {
+  color: var(--rose);
+  margin-left: 3px;
+  font-weight: 700;
+}
+
+/* ── Icon decoration ── */
+.pc-form-icon-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pc-form-icon-box {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--accent-lt) 0%, var(--accent-mid) 100%);
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 26px;
+  box-shadow: 0 4px 12px rgba(79,70,229,.15);
+  flex-shrink: 0;
+}
+
+.pc-form-icon-text h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px 0;
+  letter-spacing: -.3px;
+}
+
+.pc-form-icon-text p {
+  font-size: 13px;
+  color: var(--text-md);
+  margin: 0;
+}
+</style>
+
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'dept' %}">Departments</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Department</span>
+    </div>
+    <div class="pc-page-title">Create Department</div>
+    <div class="pc-page-sub">Add a new department to your organization</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'dept' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to Departments
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     MAIN FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-building-line me-2" style="color:var(--accent);"></i>Department Details
+      </div>
+      <div class="pc-card-sub">Enter the information for the new department</div>
+    </div>
+    <span class="pc-badge pc-badge-success pc-badge-no-dot">
+      <i class="ri-add-line"></i> New Entry
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- ═══ Department Name ═══ -->
+      {% for field in form %}
+        {% if field.name == 'name' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            Department Name<span class="pc-required">*</span>
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-building-4-line"></i>
+            {{ field }}
+          </div>
+          <span class="pc-help-text">
+            <i class="ri-information-line" style="font-size:11px;"></i>
+            Enter the official department name (e.g., Computer Science, Mathematics, Human Resources)
+          </span>
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══ Description ═══ -->
+        {% if field.name == 'description' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            Description{% if field.field.required %}<span class="pc-required">*</span>{% endif %}
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-file-text-line"></i>
+            {{ field }}
+          </div>
+          <span class="pc-help-text">
+            <i class="ri-information-line" style="font-size:11px;"></i>
+            Provide a brief description of the department's purpose and responsibilities
+          </span>
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══ Other fields (if any) ═══ -->
+        {% if field.name != 'name' and field.name != 'description' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            {{ field.label }}{% if field.field.required %}<span class="pc-required">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.help_text %}
+            <span class="pc-help-text">{{ field.help_text }}</span>
+          {% endif %}
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      <!-- ═══ Form Actions ═══ -->
+      <div class="pc-form-actions">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Create Department
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Clear Form
+        </button>
+        <a href="{% url 'dept' %}" class="pc-btn pc-btn-outline" style="margin-left:auto;">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     HELPFUL TIPS CARD
+     ═══════════════════════════════ -->
+<div class="pc-card-flat" style="margin-top:20px;">
+  <div style="display:flex;gap:16px;align-items:start;">
+    <div style="flex-shrink:0;">
+      <div style="width:40px;height:40px;background:var(--accent-lt);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--accent);">
+        <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+        Quick Tips
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-md);line-height:1.8;">
+        <li>Department names should be unique and descriptive</li>
+        <li>Use clear descriptions to help users understand the department's role</li>
+        <li>You can edit or delete departments later from the departments list</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Style Django form fields to match pc-input ── */
+#id_name,
+#id_description {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px 9px 38px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+#id_name:focus,
+#id_description:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+/* ── Error messages styling ── */
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.errorlist li {
+  background: var(--rose-lt);
+  color: var(--rose);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border-left: 3px solid var(--rose);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.errorlist li::before {
+  content: '\eb98'; /* RemixIcon error warning line */
+  font-family: 'remixicon';
+  font-size: 14px;
+}
+
+/* ── Style other possible input types ── */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+/* Override textarea to be single-line height like text input */
+textarea {
+  resize: vertical;
+  min-height: auto;
+  height: auto;
+  padding: 9px 13px 9px 38px;
+}
+
+select {
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+</style>
+
+{% endblock %}

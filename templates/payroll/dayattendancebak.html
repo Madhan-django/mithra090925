@@ -1,0 +1,339 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #eef2f7, #f8fafc);
+}
+
+/* ===== MAIN CARD ===== */
+.card {
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    border: none;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+/* ===== TITLE BAR (Style A - Final) ===== */
+.card-title {
+    background: linear-gradient(90deg, #005C97, #363795);
+    padding: 4px;
+    border-radius: 20px 20px 0 0;
+}
+
+.card-title h5 span {
+    padding: 6px 6px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* ===== CARD BODY ===== */
+.card-body {
+    padding: 30px 40px;
+}
+
+/* ===== FILTER / SEARCH SECTION ===== */
+form.row {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: inset 0 0 0 1px #e5e7eb;
+}
+
+/* ===== TABLE ===== */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #212529;
+    color: white;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.table thead th {
+    padding: 4px 8px;
+    font-size: 13px;
+    line-height: 1.1;
+}
+.table th {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+    color:black;
+    font-size: 13px;
+}
+
+.table tbody tr:hover {
+    background-color: #eef2ff;
+    transition: 0.2s ease;
+}
+
+/* ===== INPUT ===== */
+input[type="date"] {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    font-size: 14px;
+}
+
+input[type="date"]:focus {
+    border-color: #2a92ff;
+    box-shadow: 0 0 0 0.15rem rgba(42,146,255,.25);
+    outline: none;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background: linear-gradient(90deg, #0053d6, #2a92ff);
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.btn-success {
+    background: linear-gradient(90deg, #198754, #28c76f);
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.btn-primary:hover,
+.btn-success:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    transition: 0.2s;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* ===== STATUS CHIP STYLE ===== */
+.status-present {
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.status-half {
+    background: #fff3cd;
+    color: #856404;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.status-mis {
+    background: #f8d7da;
+    color: #842029;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.page-link {
+    border-radius: 8px !important;
+    margin: 0 3px;
+    color: #363795;
+}
+
+.page-item.active .page-link {
+    background-color: #363795;
+    border-color: #363795;
+    color: #fff;
+}
+
+</style>
+
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+
+        <!-- ===== TITLE ===== -->
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge bg-light text-dark">
+                    Day Attendance
+                </span>
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Fetch / Sync Buttons -->
+            <div class="mb-3">
+                <a href="{% url 'fetch_attendance' %}" class="btn btn-primary btn-sm">Fetch Attendance</a>
+                <a href="{% url 'sync_attendance' %}" class="btn btn-primary btn-sm">Sync Attendance</a>
+            </div>
+
+            <!-- ===== SEARCH ===== -->
+            <form method="get" class="row g-3 align-items-end mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">Select Date</label>
+                    <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+
+                {% if selected_date %}
+                <!-- Excel Export Button -->
+                <div class="col-md-2">
+                    <a href="{% url 'daily_attendance_excel' %}?date={{ selected_date }}"
+                       class="btn btn-success w-100">
+                        Export to Excel
+                    </a>
+                </div>
+                {% endif %}
+            </form>
+
+            <!-- ===== TABLE ===== -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
+                            <th>IN Time</th>
+                            <th>OUT Time</th>
+                            <th>Work Hours</th>
+                            <th>Late</th>
+                            <th>Mis Punch</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in attendance %}
+                        <tr>
+                            <td>{{ row.user_id }}</td>
+                            <td>{{ row.staff }}</td>
+                            <td>{{ row.Designation }}</td>
+                            <td>{{ row.Department }}</td>
+                           <td>
+                              {% if row.in_time %}
+                                  {{ row.in_time|time:"H:i" }}
+                              {% else %}
+                                    -
+                              {% endif %}
+                           </td>
+
+                           <td>
+                             {% if row.out_time %}
+                                 {{ row.out_time|time:"H:i" }}
+                             {% else %}
+                                -
+                             {% endif %}
+                          </td>
+                            <td>{{ row.work_hours|default:"-" }}</td>
+
+                            <td>
+                                {% if row.late %}
+                                    <span class="badge bg-warning text-dark">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-success">No</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.mispunch %}
+                                    <span class="badge bg-danger">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-success">No</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.status == "PRESENT" %}
+                                    <span class="status-present">PRESENT</span>
+                                {% elif row.status == "HALF DAY" %}
+                                    <span class="status-half">HALF DAY</span>
+                                {% else %}
+                                    <span class="status-mis">MIS PUNCH</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center text-danger fw-bold">
+                                No records found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ===== PAGINATION ===== -->
+            {% if data %}
+            <nav>
+                <ul class="pagination mt-4">
+                    {% if data.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?date={{ selected_date }}&page={{ data.previous_page_number }}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in data.paginator.page_range %}
+                        {% if data.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?date={{ selected_date }}&page={{ num }}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if data.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?date={{ selected_date }}&page={{ data.next_page_number }}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

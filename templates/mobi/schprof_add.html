@@ -1,0 +1,217 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'schprofile_list' %}">School Profile</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Add</span>
+    </div>
+    <div class="pc-page-title">Add School Profile</div>
+    <div class="pc-page-sub">Set up your school's public profile for the mobile app</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'schprofile_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="schProfileForm">
+  {% csrf_token %}
+
+  <!-- ── Basic Info ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-building-2-line me-2" style="color:var(--accent);"></i>Basic Information</div>
+        <div class="pc-card-sub">School name, tagline and description</div>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">Section 1</span>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">School Name <span style="color:var(--rose);">*</span></label>
+        {{ form.school_name }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Tagline</label>
+        {{ form.tagline }}
+        <small style="font-size:11px;color:var(--muted);">e.g. "Excellence in Education since 1978"</small>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">About School <span style="color:var(--rose);">*</span></label>
+        {{ form.about }}
+        <small style="font-size:11px;color:var(--muted);">Short description displayed in the app</small>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">School Logo</label>
+        {{ form.logo }}
+        <small style="font-size:11px;color:var(--muted);">Displayed in the hero banner of the app (PNG/JPG recommended)</small>
+        <div id="logoPreviewWrap" style="display:none;margin-top:10px;">
+          <img id="logoPreview" style="height:64px;border-radius:50%;border:2px solid var(--border);object-fit:cover;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Founder Info ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-user-star-line me-2" style="color:var(--accent);"></i>Founder Details</div>
+        <div class="pc-card-sub">Shown in the About section of the app</div>
+      </div>
+      <span class="pc-badge pc-badge-info pc-badge-no-dot">Section 2</span>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Founder Name <span style="color:var(--rose);">*</span></label>
+        {{ form.founder_name }}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="pc-form-group">
+          <label class="pc-label">Founded Year</label>
+          {{ form.founded_year }}
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">City</label>
+          {{ form.city }}
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Founder Photo <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+        {{ form.founder_pic }}
+        <small style="font-size:11px;color:var(--muted);">Displayed as a circular avatar next to the founder name</small>
+        <div id="founderPreviewWrap" style="display:none;margin-top:10px;">
+          <img id="founderPreview" style="height:56px;width:56px;border-radius:50%;border:2px solid var(--border);object-fit:cover;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Contact Info ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-contacts-line me-2" style="color:var(--accent);"></i>Contact Information</div>
+        <div class="pc-card-sub">Displayed in the Contact Us section</div>
+      </div>
+      <span class="pc-badge pc-badge-success pc-badge-no-dot">Section 3</span>
+    </div>
+    <div class="pc-card-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="pc-form-group">
+          <label class="pc-label">Phone <span style="color:var(--rose);">*</span></label>
+          {{ form.phone }}
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">Email <span style="color:var(--rose);">*</span></label>
+          {{ form.email }}
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Address <span style="color:var(--rose);">*</span></label>
+        {{ form.address }}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Links ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-links-line me-2" style="color:var(--accent);"></i>App Links</div>
+        <div class="pc-card-sub">URLs opened when students tap Admission or Gallery buttons</div>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">Section 4</span>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Admission URL</label>
+        {{ form.admission_url }}
+        <small style="font-size:11px;color:var(--muted);">Google Form, website page, or any link for admissions</small>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Gallery URL</label>
+        {{ form.gallery_url }}
+        <small style="font-size:11px;color:var(--muted);">Google Photos album, Drive folder, or any photo gallery link</small>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+        {{ form.admission_open }}
+        <label style="font-size:13.5px;font-weight:600;color:var(--text);margin:0;cursor:pointer;">
+          Admission currently open
+        </label>
+      </div>
+      <small style="font-size:11px;color:var(--muted);margin-top:4px;display:block;">Shows "Open" or "Closed" badge in the app</small>
+
+    </div>
+  </div>
+
+  <!-- ── Actions ── -->
+  <div class="pc-card" style="margin-bottom:28px;">
+    <div class="pc-card-body">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Profile
+        </button>
+        <a href="{% url 'schprofile_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<script>
+document.getElementById('id_logo').addEventListener('change', function() {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('logoPreview').src = e.target.result;
+      document.getElementById('logoPreviewWrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+document.getElementById('id_founder_pic').addEventListener('change', function() {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('founderPreview').src = e.target.result;
+      document.getElementById('founderPreviewWrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+
+{% endblock %}
