@@ -201,6 +201,7 @@
               <th>Permission / Month</th>
               <th>Sandwich Policy</th>
               <th>2 Half = 1 CL</th>
+              <th>Sat Short Day</th>
             </tr>
           </thead>
           <tbody>
@@ -253,6 +254,13 @@
               </td>
               <td>
                 {% if payroll.half_day_as_cl %}
+                  <span class="status-yes"><i class="ri-check-line"></i>YES</span>
+                {% else %}
+                  <span class="status-no"><i class="ri-close-line"></i>NO</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if payroll.saturday_short_day %}
                   <span class="status-yes"><i class="ri-check-line"></i>YES</span>
                 {% else %}
                   <span class="status-no"><i class="ri-close-line"></i>NO</span>

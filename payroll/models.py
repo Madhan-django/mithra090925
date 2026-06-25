@@ -346,6 +346,7 @@ class PayrollSettings(models.Model):
     total_ml = models.PositiveIntegerField(default=3)
     Sandwich_Leave_Policy = models.BooleanField(default=False)
     half_day_as_cl = models.BooleanField(default=False)
+    saturday_short_day = models.BooleanField(default=False)
     # Late Settings
     grace_late_count = models.PositiveIntegerField(default=3)
     grace_mins = models.PositiveIntegerField(default=0)

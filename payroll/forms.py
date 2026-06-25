@@ -137,6 +137,10 @@ class PayrollSettingsForm(forms.ModelForm):
                 "class": "form-check-input"
             }),
 
+            "saturday_short_day": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+
             "grace_late_count": forms.NumberInput(attrs={
                 "class": "form-control",
                 "min": 0

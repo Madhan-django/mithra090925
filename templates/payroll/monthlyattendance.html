@@ -1,220 +1,718 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
-body, h1, h3, h5, th, td, label, button {
-    font-family: 'Roboto', sans-serif;
+/* ══════════════════════════════════════════════
+   FILTER GRID
+══════════════════════════════════════════════ */
+.ma-filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 14px 18px;
+  align-items: flex-end;
+}
+.ma-field { display: flex; flex-direction: column; gap: 5px; }
+.ma-field label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .7px; color: var(--text-sm);
+}
+.ma-field select,
+.ma-field input {
+  width: 100%; background: var(--surface);
+  border: 1.5px solid var(--border-dark); border-radius: var(--r);
+  padding: 9px 13px; font-family: var(--f-sans); font-size: 13.5px;
+  color: var(--text); outline: none; appearance: none; box-sizing: border-box;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.ma-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  background-size: 12px; padding-right: 36px;
+}
+.ma-field select:focus, .ma-field input:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 
-.card {
-    border-radius: 20px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
-    border: none;
-    overflow: hidden;
+/* ══════════════════════════════════════════════
+   SUMMARY STAT CHIPS
+══════════════════════════════════════════════ */
+.ma-stats {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px;
+  padding-top: 18px; border-top: 1px solid var(--border);
+}
+.ma-stat {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: 10px;
+  font-family: var(--f-sans); font-size: 12px; font-weight: 700;
+  border: 1px solid transparent; cursor: default;
+  transition: transform 140ms, box-shadow 140ms;
+}
+.ma-stat:hover { transform: translateY(-2px); box-shadow: var(--sh-sm); }
+.ma-stat .sv { font-size: 16px; font-weight: 800; min-width: 18px; text-align: center; }
+.ma-stat-p   { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
+.ma-stat-a   { background:#fee2e2; color:#7f1d1d; border-color:#fecaca; }
+.ma-stat-hd  { background:#dbeafe; color:#1e3a8a; border-color:#bfdbfe; }
+.ma-stat-cl  { background:#e0f2fe; color:#075985; border-color:#bae6fd; }
+.ma-stat-ml  { background:#f3e8ff; color:#6b21a8; border-color:#e9d5ff; }
+.ma-stat-lop { background:#fef3c7; color:#92400e; border-color:#fde68a; }
+.ma-stat-late{ background:#fff7ed; color:#c2410c; border-color:#fed7aa; }
+.ma-stat-hol { background:#f1f5f9; color:#475569; border-color:#cbd5e1; }
+.ma-stat-mis { background:#ffedd5; color:#9a3412; border-color:#fdba74; }
+.ma-stat-wd  { background:#f0fdf4; color:#14532d; border-color:#bbf7d0; }
+
+/* ══════════════════════════════════════════════
+   EMPLOYEE INFO BANNER
+══════════════════════════════════════════════ */
+.ma-emp-banner {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; background: var(--accent-lt);
+  border-radius: var(--r-lg); margin-bottom: 0;
+}
+.ma-emp-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; flex-shrink: 0;
+  font-family: var(--f-sans);
+}
+.ma-emp-name { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.ma-emp-meta { font-size: 12px; color: var(--text-sm); margin-top: 3px; }
+.ma-emp-meta span { margin-right: 12px; }
+
+/* ══════════════════════════════════════════════
+   MONTH NAV
+══════════════════════════════════════════════ */
+.ma-month-nav {
+  display: flex; align-items: center; gap: 8px; margin-left: auto;
+}
+.ma-month-nav a {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface); border: 1.5px solid var(--border-dark);
+  color: var(--text-sm); text-decoration: none;
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+.ma-month-nav a:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ma-month-label {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  font-family: var(--f-sans); white-space: nowrap; padding: 0 4px;
 }
 
-.card-header {
-    background: linear-gradient(135deg, #0d6efd, #0a58ca);
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* ══════════════════════════════════════════════
+   HALF-DAY → CL BANNER
+══════════════════════════════════════════════ */
+.ma-cl-banner {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  border: 1.5px solid #7dd3fc; border-radius: var(--r-lg);
+  padding: 16px 20px; margin-bottom: 0;
+}
+.ma-cl-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: #0ea5e9; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.ma-cl-title { font-size: 13px; font-weight: 800; color: #0c4a6e; margin-bottom: 4px; }
+.ma-cl-body  { font-size: 12.5px; color: #0369a1; line-height: 1.6; }
+.ma-cl-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ma-cl-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 700;
+}
+.ma-cl-pill-hd  { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+.ma-cl-pill-cl  { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.ma-cl-pill-lop { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
+.ma-cl-pill-bal { background: #f3e8ff; color: #6b21a8; border: 1px solid #c4b5fd; }
+
+/* ══════════════════════════════════════════════
+   ATTENDANCE TABLE
+══════════════════════════════════════════════ */
+.ma-table-wrap {
+  overflow-x: auto; overflow-y: auto; max-height: 65vh;
+  border-radius: 0;
+}
+.ma-table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--f-sans); font-size: 12.5px; min-width: 820px;
+}
+.ma-table thead {
+  background: #0f172a; position: sticky; top: 0; z-index: 3;
+}
+.ma-table thead th {
+  padding: 11px 12px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px; color: #64748b;
+  text-align: center; border: none; white-space: nowrap;
+}
+.ma-table thead th:first-child { text-align: left; padding-left: 18px; color: #94a3b8; }
+.ma-table thead th.th-accent { color: #818cf8; }
+
+.ma-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 120ms;
+}
+.ma-table tbody tr:last-child { border-bottom: none; }
+.ma-table tbody tr:hover { background: rgba(79,70,229,.04); }
+.ma-table tbody tr.row-holiday { background: #f8fafc; }
+.ma-table tbody tr.row-holiday:hover { background: #f1f5f9; }
+.ma-table tbody tr.row-weekend { background: #fffbeb; }
+.ma-table tbody tr.row-weekend:hover { background: #fef3c7; }
+.ma-table tbody tr.row-saturday { background: #f0fdf4; }
+.ma-table tbody tr.row-saturday:hover { background: #dcfce7; }
+
+.ma-table tbody td {
+  padding: 9px 12px; text-align: center;
+  color: var(--text-md); vertical-align: middle;
+  border: none; border-right: 1px solid var(--border);
+}
+.ma-table tbody td:last-child { border-right: none; }
+.ma-table tbody td:first-child { text-align: left; padding-left: 18px; }
+
+/* date + day cells */
+.td-date {
+  font-family: var(--f-mono); font-size: 12px;
+  font-weight: 700; color: var(--text); white-space: nowrap;
+}
+.td-day {
+  font-size: 11px; font-weight: 700; color: var(--text-sm); white-space: nowrap;
+}
+.td-day.day-sun { color: #ef4444; }
+.td-day.day-sat { color: #f97316; }
+
+/* status select */
+.sta-sel {
+  border: 1.5px solid var(--border-dark); border-radius: 8px;
+  font-family: var(--f-sans); font-size: 11.5px; font-weight: 700;
+  padding: 5px 10px; min-width: 115px; outline: none; cursor: pointer;
+  transition: border-color 150ms, box-shadow 150ms, transform 120ms;
+  appearance: none; -webkit-appearance: none; text-align: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  background-size: 10px; padding-right: 26px;
+}
+.sta-sel:hover { transform: translateY(-1px); box-shadow: var(--sh-xs); }
+.sta-sel:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+.sta-sel.s-present  { background-color:#dcfce7; color:#166534; border-color:#86efac; }
+.sta-sel.s-absent   { background-color:#fee2e2; color:#7f1d1d; border-color:#fca5a5; }
+.sta-sel.s-half     { background-color:#dbeafe; color:#1e3a8a; border-color:#93c5fd; }
+.sta-sel.s-cl       { background-color:#e0f2fe; color:#075985; border-color:#7dd3fc; }
+.sta-sel.s-ml       { background-color:#f3e8ff; color:#6b21a8; border-color:#c4b5fd; }
+.sta-sel.s-lop      { background-color:#fef3c7; color:#78350f; border-color:#fde68a; }
+.sta-sel.s-mispunch { background-color:#fff7ed; color:#c2410c; border-color:#fdba74; }
+.sta-sel.s-permission { background-color:#f0fdf4; color:#14532d; border-color:#86efac; }
+
+/* off badges */
+.off-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 8px;
+  font-size: 11.5px; font-weight: 700;
+}
+.off-weekly  { background:#cffafe; color:#155e75; border: 1px solid #a5f3fc; }
+.off-special { background:#ffe4e6; color:#9f1239; border: 1px solid #fecdd3; }
+
+/* late badge */
+.late-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #fff7ed; color: #c2410c;
+  border: 1px solid #fdba74; border-radius: 20px;
+  font-size: 10px; font-weight: 800; padding: 2px 8px;
 }
 
-thead {
-    background-color: #212529 !important;
-    color: white;
-    text-align: center;
+/* time inputs */
+.att-time {
+  background: var(--surface); border: 1.5px solid var(--border-dark);
+  border-radius: 7px; padding: 5px 8px;
+  font-family: var(--f-mono); font-size: 11.5px; color: var(--text);
+  outline: none; width: 86px; text-align: center;
+  transition: border-color 150ms, box-shadow 150ms;
+  box-sizing: border-box;
+}
+.att-time:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+
+/* duration / punches */
+.td-mono { font-family: var(--f-mono); font-size: 11.5px; color: var(--text-sm); }
+
+/* ══════════════════════════════════════════════
+   LEGEND
+══════════════════════════════════════════════ */
+.ma-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  padding: 14px 20px; border-top: 1px solid var(--border);
+}
+.ma-legend-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text-sm);
+}
+.ma-legend-dot {
+  width: 10px; height: 10px; border-radius: 3px;
 }
 
-td {
-    vertical-align: middle;
-    text-align: center;
+@media (max-width: 768px) {
+  .ma-filter-grid { grid-template-columns: 1fr 1fr; }
+  .ma-month-nav   { display: none; }
 }
-
-.status {
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* STATUS COLORS */
-.p { background-color: #198754; color: white; }
-.a { background-color: #dc3545; color: white; }
-.half { background-color: #fd7e14; color: white; }
-.mis { background-color: #6f42c1; color: white; }
-.late { background-color: #ffc107; color: black; }
-.cl { background-color: #0dcaf0; color: black; }
-.ml { background-color: #20c997; color: white; }
-.perm { background-color: #adb5bd; color: black; }
-.woff { background-color: #343a40; color: white; }
-.holiday { background-color: #6610f2; color: white; }
-.lop { background-color: #000; color: white; }
-
-.btn-primary {
-    background: linear-gradient(135deg, #0d6efd, #0a58ca);
-    border: none;
-    border-radius: 10px;
+@media (max-width: 480px) {
+  .ma-filter-grid { grid-template-columns: 1fr; }
 }
 </style>
 
-<div class="container mt-4">
-<div class="card">
+{% with MONTHS="January February March April May June July August September October November December" %}
 
-<div class="card-header">
-    <h5>
-        <span class="badge bg-light text-dark">
-            Monthly Attendance (Editable)
-        </span>
-    </h5>
-</div>
+<div class="col-lg-12">
 
-<div class="card-body">
-<br>
- <a href="{% url 'Staff_Monthly_Summary' %}" class="btn btn-info">Monthly Summary</a>&nbsp;&nbsp;&nbsp;
- <a href="{% url 'reapply_holidays_attendance' %}" class="btn btn-info">Reply Holiday</a>
- <a href="{% url 'payroll_register' %}" class="btn btn-info">Register</a>
- <br>
-<form method="GET" class="row mb-4">
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Monthly Attendance</span>
+      </nav>
+      <div class="pc-page-title">Monthly Attendance</div>
+      <div class="pc-page-sub">View and manage daily attendance for each staff member.</div>
+    </div>
+    <div class="pc-page-header-right" style="gap:8px;">
+      <a href="{% url 'reapply_holidays_attendance' %}" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-calendar-check-line"></i> Reapply Holidays
+      </a>
+      <a href="{% url 'sync_attendance' %}" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-refresh-line"></i> Sync Attendance
+      </a>
+    </div>
+  </div>
 
-    <div class="col-md-4">
-        <label>Employee</label>
-        <select name="employee" class="form-select" required>
-            <option value="">Select Employee</option>
-            {% for emp in employees %}
-                <option value="{{ emp.id }}"
+  <!-- ② Filter + Stats Card -->
+  <div class="pc-card" style="margin-bottom:18px;">
+    <div class="pc-card-header">
+      <div class="pc-card-title"><i class="ri-filter-3-line me-2" style="color:var(--accent);"></i>Search Attendance</div>
+    </div>
+    <div class="pc-card-body">
+      <form method="GET" id="filterForm">
+        <div class="ma-filter-grid">
+
+          <div class="ma-field">
+            <label>Employee <span style="color:var(--rose);">*</span></label>
+            <select name="employee" required>
+              <option value="">— Select Employee —</option>
+              {% for emp in employees %}
+              <option value="{{ emp.id }}"
                 {% if selected_employee and emp.id == selected_employee.id %}selected{% endif %}>
-                    {{ emp.first_name }} {{ emp.last_name }}
-                </option>
-            {% endfor %}
-        </select>
+                {{ emp.first_name }} {{ emp.last_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="ma-field">
+            <label>Month <span style="color:var(--rose);">*</span></label>
+            <select name="month" required>
+              {% for i in "123456789101112"|make_list %}{% endfor %}
+              <option value="1"  {% if month == 1  %}selected{% endif %}>January</option>
+              <option value="2"  {% if month == 2  %}selected{% endif %}>February</option>
+              <option value="3"  {% if month == 3  %}selected{% endif %}>March</option>
+              <option value="4"  {% if month == 4  %}selected{% endif %}>April</option>
+              <option value="5"  {% if month == 5  %}selected{% endif %}>May</option>
+              <option value="6"  {% if month == 6  %}selected{% endif %}>June</option>
+              <option value="7"  {% if month == 7  %}selected{% endif %}>July</option>
+              <option value="8"  {% if month == 8  %}selected{% endif %}>August</option>
+              <option value="9"  {% if month == 9  %}selected{% endif %}>September</option>
+              <option value="10" {% if month == 10 %}selected{% endif %}>October</option>
+              <option value="11" {% if month == 11 %}selected{% endif %}>November</option>
+              <option value="12" {% if month == 12 %}selected{% endif %}>December</option>
+            </select>
+          </div>
+
+          <div class="ma-field">
+            <label>Year <span style="color:var(--rose);">*</span></label>
+            <input type="number" name="year" value="{{ year }}" min="2020" max="2099" placeholder="e.g. 2025" required>
+          </div>
+
+          <div class="ma-field" style="justify-content:flex-end;">
+            <label style="visibility:hidden;">Go</label>
+            <button type="submit" class="pc-btn pc-btn-primary">
+              <i class="ri-search-line"></i> Search
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Stats row -->
+        {% if attendance_list %}
+        <div class="ma-stats">
+          <div class="ma-stat ma-stat-p">  <span>Present</span>  <span class="sv" id="cnt-p">{{ total_present }}</span></div>
+          <div class="ma-stat ma-stat-a">  <span>Absent</span>   <span class="sv" id="cnt-a">{{ total_absent }}</span></div>
+          <div class="ma-stat ma-stat-hd"> <span>Half Day</span> <span class="sv" id="cnt-hd">{{ total_half }}</span></div>
+          <div class="ma-stat ma-stat-cl"> <span>CL</span>       <span class="sv" id="cnt-cl">0</span></div>
+          <div class="ma-stat ma-stat-ml"> <span>ML</span>       <span class="sv" id="cnt-ml">0</span></div>
+          <div class="ma-stat ma-stat-lop"><span>LOP</span>      <span class="sv" id="cnt-lop">0</span></div>
+          <div class="ma-stat ma-stat-mis"><span>Mis Punch</span><span class="sv" id="cnt-mis">{{ total_mis }}</span></div>
+          <div class="ma-stat ma-stat-late"><span>Late</span>    <span class="sv" id="cnt-late">{{ total_late }}</span></div>
+          <div class="ma-stat ma-stat-hol"><span>Holidays</span><span class="sv" id="cnt-hol">0</span></div>
+          <div class="ma-stat ma-stat-wd"> <span>Working Days</span><span class="sv" id="cnt-wd">0</span></div>
+        </div>
+        {% endif %}
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ③ Attendance Table Card -->
+  {% if attendance_list %}
+  <div class="pc-card">
+
+    <!-- Card Header: Employee info + month nav -->
+    <div class="pc-card-header" style="flex-wrap:wrap; gap:12px;">
+      <div class="ma-emp-banner" style="flex:1; min-width:260px;">
+        <div class="ma-emp-avatar">
+          {{ selected_employee.first_name|slice:":1" }}{{ selected_employee.last_name|slice:":1" }}
+        </div>
+        <div>
+          <div class="ma-emp-name">{{ selected_employee.first_name }} {{ selected_employee.last_name }}</div>
+          <div class="ma-emp-meta">
+            <span><i class="ri-briefcase-line" style="font-size:11px;"></i> {{ selected_employee.desg|default:"—" }}</span>
+            <span><i class="ri-building-line" style="font-size:11px;"></i> {{ skool.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month navigation -->
+      {% with prev_month=month|add:"-1" next_month=month|add:"1" %}
+      <div class="ma-month-nav">
+        {% if prev_month >= 1 %}
+        <a href="?employee={{ selected_employee.id }}&month={{ prev_month }}&year={{ year }}" title="Previous month">
+          <i class="ri-arrow-left-s-line"></i>
+        </a>
+        {% else %}
+        <a href="?employee={{ selected_employee.id }}&month=12&year={{ year|add:"-1" }}" title="Previous month">
+          <i class="ri-arrow-left-s-line"></i>
+        </a>
+        {% endif %}
+
+        <span class="ma-month-label">
+          {% if month == 1 %}January{% elif month == 2 %}February{% elif month == 3 %}March
+          {% elif month == 4 %}April{% elif month == 5 %}May{% elif month == 6 %}June
+          {% elif month == 7 %}July{% elif month == 8 %}August{% elif month == 9 %}September
+          {% elif month == 10 %}October{% elif month == 11 %}November{% else %}December{% endif %}
+          {{ year }}
+        </span>
+
+        {% if next_month <= 12 %}
+        <a href="?employee={{ selected_employee.id }}&month={{ next_month }}&year={{ year }}" title="Next month">
+          <i class="ri-arrow-right-s-line"></i>
+        </a>
+        {% else %}
+        <a href="?employee={{ selected_employee.id }}&month=1&year={{ year|add:"1" }}" title="Next month">
+          <i class="ri-arrow-right-s-line"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% endwith %}
     </div>
 
-    <div class="col-md-3">
-        <label>Month</label>
-        <input type="number" name="month" value="{{ month }}" min="1" max="12" class="form-control" required>
-    </div>
+    <div class="pc-card-body" style="padding: 0;">
 
-    <div class="col-md-3">
-        <label>Year</label>
-        <input type="number" name="year" value="{{ year }}" class="form-control" required>
-    </div>
+      <!-- Half-Day → CL Banner -->
+      {% if payroll_settings and payroll_settings.half_day_as_cl %}
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+        <div class="ma-cl-banner" id="clBanner">
+          <div class="ma-cl-icon"><i class="ri-exchange-line"></i></div>
+          <div style="flex:1;">
+            <div class="ma-cl-title"><i class="ri-information-line"></i> Half-Day → CL Conversion is Active</div>
+            <div class="ma-cl-body">
+              2 half-days are counted as 1 CL. Use the button to auto-convert half-day entries to CL in this form.
+            </div>
+            <div class="ma-cl-pills" id="clPills">
+              <span class="ma-cl-pill ma-cl-pill-hd"><i class="ri-calendar-2-line"></i> <span id="pill-hd">{{ total_half }}</span> Half Days</span>
+              <span class="ma-cl-pill ma-cl-pill-bal"><i class="ri-shield-check-line"></i> CL Balance: <span id="pill-bal">{{ cl_remaining }}</span> of {{ payroll_settings.total_cl }}</span>
+              <span class="ma-cl-pill ma-cl-pill-cl"><i class="ri-check-double-line"></i> <span id="pill-pairs">0</span> pairs → CL</span>
+              <span class="ma-cl-pill ma-cl-pill-lop"><i class="ri-alert-line"></i> <span id="pill-rem">0</span> half-day(s) → LOP</span>
+            </div>
+          </div>
+          <div style="flex-shrink:0;">
+            <button type="button" class="pc-btn pc-btn-primary pc-btn-sm" onclick="convertHalfDaysToCL()" id="btnConvert">
+              <i class="ri-magic-line"></i> Auto-Convert
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
 
-    <div class="col-md-2 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">Search</button>
-    </div>
+      <form method="POST" id="attendanceForm">
+        {% csrf_token %}
 
-</form>
-
-{% if attendance_list %}
-
-<form method="POST">
-    {% csrf_token %}
-
-    <div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>Date</th>
+        <div class="ma-table-wrap">
+          <table class="ma-table">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding-left:18px;">Date</th>
                 <th>Day</th>
-                <th>Status</th>
+                <th class="th-accent">Status</th>
                 <th>Late</th>
                 <th>First In</th>
                 <th>Last Out</th>
-                <th>Work Duration</th>
-                <th>Punch Count</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        {% for item in attendance_list %}
-        <tr>
-
-            <td>{{ item.full_date }}</td>
-            <td>{{ item.full_date|date:"l" }}</td>
-            <!-- STATUS DROPDOWN -->
-
-                {% if item.status == 'Weekly-OFF' %}
-                 <td>
-                     <span class="badge bg-primary">Weekly Off</span>
-                 </td>
-                {% elif item.status == 'Special-OFF' %}
-                 <td ><span class="badge bg-info">Special OFF</span></td>
-                {% else %}
-                <td>
-                <select name="status_{{ item.day }}" class="form-select form-select-sm">
-                    {% for key, value in status_choices %}
-                        <option value="{{ key }}"
-                        {% if item.status == key %}selected{% endif %}>
-                            {{ value }}
-                        </option>
-                    {% endfor %}
-                </select>
-              </td>
-             {% endif %}
-
-            <!-- LATE -->
-            <td>
-                {% if item.late %}
-                    <span class="status late">
-                        YES{% if item.late_minutes %} ({{ item.late_minutes }} mins){% endif %}
-                    </span>
-                {% else %}
-                    -
+                <th>Duration</th>
+                <th>Punches</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in attendance_list %}
+              {% with wd=item.full_date|date:"D" %}
+              <tr class="
+                {% if item.status == 'Weekly-OFF' or item.status == 'Special-OFF' %}row-holiday
+                {% elif wd == 'Sun' %}row-weekend
+                {% elif wd == 'Sat' %}row-saturday
                 {% endif %}
-            </td>
+              " data-day="{{ item.day }}"
+              {% if wd == 'Sat' and payroll_settings and payroll_settings.saturday_short_day %}
+                title="Saturday Short Day — Half Day & Late not counted for LOP"
+              {% endif %}>
 
-            <td>
-              {% if item.status == 'MIS_PUNCH' %}
-                     <input type="time"
-                         name="first_in_{{ item.day }}"
-                         value="{% if item.first_in %}{{ item.first_in|time:'H:i' }}{% endif %}"
-                         class="form-control form-control-sm">
-              {% else %}
-                    <input type="time"
-                         value="{% if item.first_in %}{{ item.first_in|time:'H:i' }}{% endif %}"
-                         class="form-control form-control-sm"
-                         readonly>
-              {% endif %}
-             </td>
-            <td>
-    {% if item.status == 'MIS_PUNCH' %}
-        <input type="time"
-               name="last_out_{{ item.day }}"
-               value="{% if item.last_out %}{{ item.last_out|time:'H:i' }}{% endif %}"
-               class="form-control form-control-sm">
-    {% else %}
-        <input type="time"
-               value="{% if item.last_out %}{{ item.last_out|time:'H:i' }}{% endif %}"
-               class="form-control form-control-sm"
-               readonly>
-    {% endif %}
-</td>
+                <!-- Date -->
+                <td>
+                  <span class="td-date">{{ item.full_date|date:"d M" }}</span>
+                </td>
 
-            <td>{{ item.work_duration|default:"-" }}</td>
-            <td>{{ item.punch_count }}</td>
+                <!-- Day -->
+                <td>
+                  <span class="td-day {% if wd == 'Sun' %}day-sun{% elif wd == 'Sat' %}day-sat{% endif %}">
+                    {{ wd }}
+                  </span>
+                </td>
 
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                <!-- Status -->
+                <td>
+                  {% if item.status == 'Weekly-OFF' %}
+                    <span class="off-badge off-weekly"><i class="ri-rest-time-line"></i> Weekly Off</span>
+                  {% elif item.status == 'Special-OFF' %}
+                    <span class="off-badge off-special"><i class="ri-sun-line"></i> Holiday</span>
+                  {% else %}
+                    <select name="status_{{ item.day }}"
+                            class="sta-sel"
+                            data-day="{{ item.day }}">
+                      {% for key, value in status_choices %}
+                      <option value="{{ key }}" {% if item.status == key %}selected{% endif %}>{{ value }}</option>
+                      {% endfor %}
+                    </select>
+                  {% endif %}
+                </td>
+
+                <!-- Late -->
+                <td>
+                  {% if wd == 'Sat' and payroll_settings and payroll_settings.saturday_short_day %}
+                    <span style="display:inline-flex;align-items:center;gap:3px;background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:20px;font-size:10px;font-weight:800;padding:2px 8px;">
+                      <i class="ri-checkbox-circle-line"></i> SAT
+                    </span>
+                  {% elif item.late %}
+                    <span class="late-badge"><i class="ri-time-line"></i> {{ item.late_minutes }}m</span>
+                  {% else %}
+                    <span style="color:var(--muted);font-size:13px;">—</span>
+                  {% endif %}
+                </td>
+
+                <!-- First In -->
+                <td>
+                  <input type="time"
+                    name="first_in_{{ item.day }}"
+                    value="{% if item.first_in %}{{ item.first_in|time:'H:i' }}{% endif %}"
+                    class="att-time">
+                </td>
+
+                <!-- Last Out -->
+                <td>
+                  <input type="time"
+                    name="last_out_{{ item.day }}"
+                    value="{% if item.last_out %}{{ item.last_out|time:'H:i' }}{% endif %}"
+                    class="att-time">
+                </td>
+
+                <!-- Duration -->
+                <td class="td-mono">
+                  {% if item.work_duration %}
+                    {{ item.work_duration }}
+                  {% else %}
+                    <span style="color:var(--muted);">—</span>
+                  {% endif %}
+                </td>
+
+                <!-- Punches -->
+                <td class="td-mono">
+                  {% if item.punch_count %}
+                    {{ item.punch_count }}
+                  {% else %}
+                    <span style="color:var(--muted);">—</span>
+                  {% endif %}
+                </td>
+
+              </tr>
+              {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Legend + Save -->
+        <div class="ma-legend">
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#dcfce7;border:1px solid #86efac;"></span>Present</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#fee2e2;border:1px solid #fca5a5;"></span>Absent / LOP</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#dbeafe;border:1px solid #93c5fd;"></span>Half Day</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#e0f2fe;border:1px solid #7dd3fc;"></span>CL</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#f3e8ff;border:1px solid #c4b5fd;"></span>ML</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#fff7ed;border:1px solid #fdba74;"></span>Mis Punch</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#fffbeb;border:1px solid #fde68a;"></span>Sunday</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#cffafe;border:1px solid #a5f3fc;"></span>Weekly Off</span>
+          <span class="ma-legend-item"><span class="ma-legend-dot" style="background:#ffe4e6;border:1px solid #fecdd3;"></span>Holiday</span>
+        </div>
+
+        <div class="pc-card-footer">
+          <span style="font-size:12px; color:var(--text-sm);">
+            <i class="ri-information-line" style="color:var(--accent);"></i>
+            All changes are saved together when you click Save.
+          </span>
+          <button type="submit" class="pc-btn pc-btn-primary">
+            <i class="ri-save-line"></i> Save Changes
+          </button>
+        </div>
+
+      </form>
     </div>
-
-    <div class="text-end mt-3">
-        <button type="submit" class="btn btn-success">
-            Save Changes
-        </button>
-    </div>
-
-</form>
-
-{% endif %}
+  </div>
+  {% endif %}
 
 </div>
-</div>
-</div>
+
+{% endwith %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const CL_REMAINING = {{ cl_remaining|default:0 }};
+
+  /* ── status → css class map ── */
+  const STATUS_CLASS = {
+    "PRESENT":    "s-present",
+    "ABSENT":     "s-absent",
+    "HALF_DAY":   "s-half",
+    "CL":         "s-cl",
+    "ML":         "s-ml",
+    "LOP":        "s-lop",
+    "MIS_PUNCH":  "s-mispunch",
+    "PERMISSION": "s-permission",
+  };
+
+  function applyColor(sel) {
+    sel.className = "sta-sel";
+    if (STATUS_CLASS[sel.value]) sel.classList.add(STATUS_CLASS[sel.value]);
+  }
+
+  /* ── live summary ── */
+  function updateSummary() {
+    let p=0, a=0, hd=0, cl=0, ml=0, lop=0, mis=0, hol=0;
+
+    document.querySelectorAll(".sta-sel").forEach(function(s) {
+      switch(s.value) {
+        case "PRESENT":    p++;   break;
+        case "ABSENT":     a++;   break;
+        case "HALF_DAY":   hd++;  break;
+        case "CL":         cl++;  break;
+        case "ML":         ml++;  break;
+        case "LOP":        lop++; break;
+        case "MIS_PUNCH":  mis++; break;
+      }
+    });
+
+    // count permission as present for summary
+    document.querySelectorAll(".sta-sel").forEach(function(s) {
+      if (s.value === "PERMISSION") p++;
+    });
+
+    var weeklyOff  = document.querySelectorAll(".off-badge.off-weekly").length;
+    var specialOff = document.querySelectorAll(".off-badge.off-special").length;
+    var totalOff   = weeklyOff + specialOff + document.querySelectorAll(".sta-sel[value='HOLIDAY']").length;
+    var totalDays  = document.querySelectorAll(".sta-sel").length + weeklyOff + specialOff;
+    var wd         = totalDays - weeklyOff - specialOff;
+
+    const s = (id, v) => { var el=document.getElementById(id); if(el) el.innerText=v; };
+    s("cnt-p",   p);
+    s("cnt-a",   a);
+    s("cnt-hd",  hd);
+    s("cnt-cl",  cl);
+    s("cnt-ml",  ml);
+    s("cnt-lop", lop);
+    s("cnt-mis", mis);
+    s("cnt-hol", weeklyOff + specialOff);
+    s("cnt-wd",  wd);
+
+    // update CL banner pills
+    updateCLBanner(hd);
+  }
+
+  /* ── CL conversion banner ── */
+  function updateCLBanner(halfCount) {
+    var pillHd    = document.getElementById("pill-hd");
+    var pillPairs = document.getElementById("pill-pairs");
+    var pillRem   = document.getElementById("pill-rem");
+
+    if (!pillHd) return;
+
+    var pairs     = Math.floor(halfCount / 2);
+    var clCanUse  = Math.min(pairs, CL_REMAINING);
+    var hdCovered = clCanUse * 2;
+    var hdAsLop   = halfCount - hdCovered;
+
+    if (pillHd)    pillHd.innerText    = halfCount;
+    if (pillPairs) pillPairs.innerText = clCanUse;
+    if (pillRem)   pillRem.innerText   = hdAsLop;
+
+    // disable button if nothing to convert
+    var btn = document.getElementById("btnConvert");
+    if (btn) btn.disabled = (clCanUse === 0);
+  }
+
+  /* ── auto-convert half days to CL ── */
+  window.convertHalfDaysToCL = function() {
+    var halfSelects = [...document.querySelectorAll(".sta-sel")]
+      .filter(s => s.value === "HALF_DAY");
+
+    var pairs    = Math.floor(halfSelects.length / 2);
+    var clToUse  = Math.min(pairs, CL_REMAINING);
+    var convert  = clToUse * 2;
+
+    if (convert === 0) {
+      alert("No half-days can be converted — either none exist or CL balance is 0.");
+      return;
+    }
+
+    for (var i = 0; i < convert; i++) {
+      halfSelects[i].value = "CL";
+      applyColor(halfSelects[i]);
+    }
+
+    updateSummary();
+
+    // show confirmation in banner
+    var banner = document.getElementById("clBanner");
+    if (banner) {
+      banner.style.background = "linear-gradient(135deg,#dcfce7 0%,#f0fdf4 100%)";
+      banner.style.borderColor = "#86efac";
+      var title = banner.querySelector(".ma-cl-title");
+      if (title) title.innerHTML = '<i class="ri-checkbox-circle-line"></i> ' + convert + ' half-day(s) converted to ' + clToUse + ' CL';
+    }
+  };
+
+  /* ── init ── */
+  document.querySelectorAll(".sta-sel").forEach(applyColor);
+  updateSummary();
+
+  /* ── on change ── */
+  document.querySelectorAll(".sta-sel").forEach(function(sel) {
+    sel.addEventListener("change", function() {
+      applyColor(this);
+      updateSummary();
+    });
+  });
+
+});
+</script>
 
 {% endblock %}

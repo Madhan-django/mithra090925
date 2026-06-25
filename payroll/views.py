@@ -1755,6 +1755,13 @@ def sync_attendance_from_device(request):
             late = False
             work_duration = None
 
+            is_saturday = (current_date.weekday() == 5)
+            try:
+                pset = stf.staff_school.payroll_settings
+                sat_short = pset.saturday_short_day
+            except Exception:
+                sat_short = False
+
             # ================= MIS PUNCH =================
             if punch_count == 1:
                 status = "MIS_PUNCH"
@@ -1765,21 +1772,22 @@ def sync_attendance_from_device(request):
 
                 work_duration = out_time - in_time
 
-                # HALF DAY
-                if work_duration < MIN_WORK_HOURS:
+                # HALF DAY — skip on Saturday short day
+                if work_duration < MIN_WORK_HOURS and not (is_saturday and sat_short):
                     status = "HALF_DAY"
 
-                # SHIFT CHECK
-                if stf.shift:
-                    shift_time = stf.shift.start_time
-                else:
-                    shift_time = datetime.strptime("09:00:00", "%H:%M:%S").time()
+                # LATE CHECK — skip on Saturday short day
+                if not (is_saturday and sat_short):
+                    if stf.shift:
+                        shift_time = stf.shift.start_time
+                    else:
+                        shift_time = datetime.strptime("09:00:00", "%H:%M:%S").time()
 
-                shift_datetime = datetime.combine(current_date, shift_time)
-                grace_datetime = shift_datetime + timedelta(minutes=GRACE_MINUTES)
+                    shift_datetime = datetime.combine(current_date, shift_time)
+                    grace_datetime = shift_datetime + timedelta(minutes=GRACE_MINUTES)
 
-                if in_time > grace_datetime:
-                    late = True
+                    if in_time > grace_datetime:
+                        late = True
 
             Attendance.objects.update_or_create(
                 staff=stf,
@@ -1861,6 +1869,13 @@ def force_sync_attendance_from_device(request):
                     late = False
                     work_duration = None
 
+                    is_saturday = (current_date.weekday() == 5)
+                    try:
+                        pset = stf.staff_school.payroll_settings
+                        sat_short = pset.saturday_short_day
+                    except Exception:
+                        sat_short = False
+
                     # -------- MIS PUNCH --------
                     if punch_count == 1:
                         status = "MIS_PUNCH"
@@ -1871,19 +1886,20 @@ def force_sync_attendance_from_device(request):
 
                         work_duration = out_time - in_time
 
-                        if work_duration < MIN_WORK_HOURS:
+                        if work_duration < MIN_WORK_HOURS and not (is_saturday and sat_short):
                             status = "HALF_DAY"
 
-                        if stf.shift:
-                            shift_time = stf.shift.start_time
-                        else:
-                            shift_time = datetime.strptime("09:00:00", "%H:%M:%S").time()
+                        if not (is_saturday and sat_short):
+                            if stf.shift:
+                                shift_time = stf.shift.start_time
+                            else:
+                                shift_time = datetime.strptime("09:00:00", "%H:%M:%S").time()
 
-                        shift_datetime = datetime.combine(current_date, shift_time)
-                        grace_datetime = shift_datetime + timedelta(minutes=GRACE_MINUTES)
+                            shift_datetime = datetime.combine(current_date, shift_time)
+                            grace_datetime = shift_datetime + timedelta(minutes=GRACE_MINUTES)
 
-                        if in_time > grace_datetime:
-                            late = True
+                            if in_time > grace_datetime:
+                                late = True
 
                     # -------- CHECK EXISTING ATTENDANCE --------
                     attendance = Attendance.objects.filter(
@@ -2352,6 +2368,17 @@ def Staff_Monthly_Attendance(request):
                 "mis_punch": record.mis_punch if record else False,
             })
 
+    cl_used_year = 0
+    cl_remaining = 0
+    if payroll_settings and selected_employee:
+        cl_used_year = Attendance.objects.filter(
+            staff_id=selected_employee.id,
+            sch_id=sch_id,
+            date__year=year,
+            status="CL"
+        ).count()
+        cl_remaining = max(payroll_settings.total_cl - cl_used_year, 0)
+
     context = {
         "employees": employees,
         "selected_employee": selected_employee,
@@ -2364,6 +2391,9 @@ def Staff_Monthly_Attendance(request):
         "total_half": total_half,
         "total_late": total_late,
         "total_mis": total_mis,
+        "payroll_settings": payroll_settings,
+        "cl_used_year": cl_used_year,
+        "cl_remaining": cl_remaining,
         "skool": sdata
     }
 
@@ -2405,7 +2435,6 @@ def staff_monthly_summary(request):
             )
 
             present = records.filter(status="PRESENT").count()
-            half_day = records.filter(status="HALF_DAY").count()
             cl = records.filter(status="CL").count()
             ml = records.filter(status="ML").count()
             permission = records.filter(status="PERMISSION").count()
@@ -2413,7 +2442,14 @@ def staff_monthly_summary(request):
             weekly_off = records.filter(remarks="Weekly-OFF").count()
             holiday = records.filter(remarks="Special-OFF").count()
             mispunch = records.filter(status="MIS_PUNCH").count()
-            late = records.filter(late=True).count()
+
+            if payroll_settings and payroll_settings.saturday_short_day:
+                # Saturday (week_day=7) half-days and lates are ignored
+                half_day = records.filter(status="HALF_DAY").exclude(date__week_day=7).count()
+                late = records.filter(late=True).exclude(date__week_day=7).count()
+            else:
+                half_day = records.filter(status="HALF_DAY").count()
+                late = records.filter(late=True).count()
 
             # --------------------------------------------------
             # WORKING DAYS
@@ -2620,10 +2656,15 @@ def generate_payroll(request):
         )
 
         lop = records.filter(status__in=["LOP", "ABSENT"]).count()
-        half_day = records.filter(status="HALF_DAY").count()
-        late = records.filter(late=True).count()
         weekly_off = records.filter(remarks="Weekly-OFF").count()
         holiday = records.filter(remarks="Special-OFF").count()
+
+        if payroll_settings and payroll_settings.saturday_short_day:
+            half_day = records.filter(status="HALF_DAY").exclude(date__week_day=7).count()
+            late = records.filter(late=True).exclude(date__week_day=7).count()
+        else:
+            half_day = records.filter(status="HALF_DAY").count()
+            late = records.filter(late=True).count()
 
         # ---------------- LOP Calculation ----------------
         total_lop_days = Decimal(lop)
