@@ -1,37 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Periods</title>
-</head>
-<body>
-<table>
-  <tr>
-    <th>Days</th>
-    <th>Periods</th>
-    <th>School</th>
+{% extends 'panel/index.html' %}
+{% block content %}
 
-  </tr>
-  {% if data %}
-  {% for dt in data %}
-    
-  <tr>
-      
-      <td>{{dt.day}}</td>
-      <td>{{dt.period_number}}</td>
-      <td>{{dt.period_school}}</td>
+<div class="col-lg-12">
 
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'create_timeslot' %}">Time Slots</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Period List</span>
+      </nav>
+      <h1 class="pc-page-title">Period List</h1>
+      <p class="pc-page-sub">All configured time slots for this school.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'create_timeslot' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-settings-3-line"></i> Manage Slots
+      </a>
+    </div>
+  </div>
 
+  <!-- ② Slots Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Periods</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} slot{{ data|length|pluralize }} configured{% else %}No slots configured{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-time-line" style="font-size:12px;"></i>
+        {{ data|length }} Total
+      </span>
+      {% endif %}
+    </div>
 
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:60px;">#</th>
+              <th style="text-align:left;">Day</th>
+              <th>Period Number</th>
+              <th style="text-align:left;">School</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dt in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td style="font-weight:600; color:var(--text);">{{ dt.day }}</td>
+              <td>
+                <span style="font-family:var(--f-mono); font-size:12px; font-weight:700;
+                  background:var(--accent-lt); color:var(--accent);
+                  border:1px solid var(--accent-mid); border-radius:6px;
+                  padding:3px 10px; display:inline-block;">
+                  Period {{ dt.period_number }}
+                </span>
+              </td>
+              <td style="color:var(--text-sm);">{{ dt.period_school }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-time-line"></i></span>
+        <p class="pc-empty-title">No time slots configured</p>
+        <p class="pc-empty-sub">
+          <a href="{% url 'create_timeslot' %}">Configure time slots</a> to get started.
+        </p>
+      </div>
+      {% endif %}
+    </div>
 
-
-  </tr>
-  {% endfor %}
-  {% else %}
-    <tr>
-        <td colspan="4">No data found</td>
-    </tr>
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> slot{{ data|length|pluralize }}
+      </span>
+    </div>
     {% endif %}
-</table>
-</body>
-</html>
+
+  </div>
+
+</div>
+
+{% endblock %}

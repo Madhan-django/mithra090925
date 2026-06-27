@@ -1,0 +1,276 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ── Day section card ── */
+.ftg-day-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+  animation: ftgCardIn .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes ftgCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ftg-day-header {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ftg-day-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Availability table ── */
+.ftg-scroll { overflow-x: auto; }
+.ftg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  min-width: 400px;
+}
+.ftg-table th {
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--text-sm);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  text-align: center;
+  white-space: nowrap;
+}
+.ftg-table th:last-child { border-right: none; }
+.ftg-table td {
+  padding: 9px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+}
+.ftg-table td:last-child { border-right: none; }
+.ftg-table tr:last-child td { border-bottom: none; }
+.ftg-table tr:hover td { filter: brightness(.97); }
+
+/* ── Sticky teacher column ── */
+.ftg-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  text-align: left !important;
+  padding-left: 18px !important;
+  font-weight: 600;
+  color: var(--text);
+  border-right: 2px solid var(--border-dark) !important;
+  white-space: nowrap;
+  min-width: 170px;
+}
+.ftg-table tr:hover .ftg-sticky { background: #f5f7ff; }
+.ftg-table th.ftg-sticky {
+  background: var(--surface2);
+  color: var(--text-sm);
+  font-weight: 700;
+}
+
+/* ── Period header accent ── */
+.ftg-period-head {
+  background: var(--accent-lt) !important;
+  color: var(--accent) !important;
+  min-width: 90px;
+}
+
+/* ── Cell states ── */
+.ftg-free  { background: #ecfdf5; }
+.ftg-busy  { background: #fff7ed; }
+.ftg-na    { background: #f9fafb; }
+
+/* ── Cell content ── */
+.ftg-badge-free {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.ftg-busy-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.ftg-busy-subj {
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+}
+.ftg-busy-cls {
+  font-size: 10px;
+  color: #b45309;
+}
+.ftg-na-dash {
+  font-size: 16px;
+  color: var(--muted);
+  opacity: .4;
+}
+
+/* ── Legend ── */
+.ftg-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.ftg-legend-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+}
+.ftg-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 3px 10px;
+  border: 1px solid;
+}
+.ftg-legend-free { color: #059669; background: #d1fae5; border-color: #a7f3d0; }
+.ftg-legend-busy { color: #92400e; background: #fff7ed; border-color: #fde68a; }
+.ftg-legend-na   { color: var(--muted); background: #f9fafb; border-color: var(--border); }
+</style>
+
+<div class="col-lg-12">
+
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'view_timetable' %}">Timetable</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Free Teachers</span>
+      </nav>
+      <h1 class="pc-page-title">Free Teachers Availability</h1>
+      <p class="pc-page-sub">Weekly grid showing free and occupied periods for all teachers.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'export_free_teachers_excel' %}" class="pc-btn pc-btn-outline">
+        <i class="ri-file-excel-line"></i> Export Excel
+      </a>
+    </div>
+  </div>
+
+  <!-- ② Legend -->
+  <div class="ftg-legend">
+    <span class="ftg-legend-label">Legend:</span>
+    <span class="ftg-legend-item ftg-legend-free">
+      <i class="ri-checkbox-circle-fill" style="font-size:12px;"></i> Free
+    </span>
+    <span class="ftg-legend-item ftg-legend-busy">
+      <i class="ri-book-open-line" style="font-size:12px;"></i> Occupied
+    </span>
+    <span class="ftg-legend-item ftg-legend-na">— N/A</span>
+  </div>
+
+  <!-- ③ Day Blocks -->
+  {% if day_blocks %}
+  {% for block in day_blocks %}
+  <div class="ftg-day-card" style="animation-delay:{{ forloop.counter0 }}0ms;">
+
+    <div class="ftg-day-header">
+      <div class="ftg-day-label">
+        <i class="ri-calendar-2-line"></i>
+        {{ block.day_label }}
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:11px;">
+        {{ period_numbers|length }} Period{{ period_numbers|length|pluralize }}
+      </span>
+    </div>
+
+    <div class="ftg-scroll">
+      <table class="ftg-table">
+        <thead>
+          <tr>
+            <th class="ftg-sticky">Teacher</th>
+            {% for p in period_numbers %}
+            <th class="ftg-period-head">Period {{ p }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in block.rows %}
+          <tr>
+            <td class="ftg-sticky">{{ row.teacher_name }}</td>
+            {% for cell in row.cells %}
+            {% if not cell.exists %}
+            <td class="ftg-na"><span class="ftg-na-dash">—</span></td>
+            {% elif cell.free %}
+            <td class="ftg-free">
+              <span class="ftg-badge-free">
+                <i class="ri-checkbox-circle-fill" style="font-size:11px;"></i> Free
+              </span>
+            </td>
+            {% else %}
+            <td class="ftg-busy" title="{{ cell.detail }}">
+              <div class="ftg-busy-content">
+                <span class="ftg-busy-subj">{{ cell.label }}</span>
+                <span class="ftg-busy-cls">{{ cell.detail }}</span>
+              </div>
+            </td>
+            {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div class="pc-empty" style="padding:60px 20px;">
+        <span class="pc-empty-icon"><i class="ri-team-line"></i></span>
+        <p class="pc-empty-title">No availability data found</p>
+        <p class="pc-empty-sub">
+          Configure time slots and generate a timetable first from the
+          <a href="{% url 'view_timetable' %}">Timetable page</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

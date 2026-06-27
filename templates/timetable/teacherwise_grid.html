@@ -1,93 +1,267 @@
 {% extends 'panel/index.html' %}
-{% load custom_filters %}
 {% block content %}
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-    }
-    h2 {
-        background-color: #f2f2f2;
-        padding: 10px;
-        border-left: 5px solid #4CAF50;
-    }
-    h3 {
-        margin-top: 20px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 40px;
-    }
-    th, td {
-        border: 1px solid #000;
-        padding: 8px;
-        text-align: center;
-    }
-    th {
-        background-color: #e0e0e0;
-    }
+/* ── Timetable grid ── */
+.tt-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+}
+.tt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 500px;
+}
+.tt-table thead {
+  background: #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.tt-table thead th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: #94a3b8;
+  text-align: center;
+  border: none;
+  white-space: nowrap;
+}
+.tt-table thead th:first-child {
+  text-align: left;
+  padding-left: 18px;
+  width: 80px;
+}
+.tt-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+}
+.tt-table tbody tr:last-child { border-bottom: none; }
+.tt-table tbody tr:hover { background: #f5f7ff; }
+.tt-table tbody td {
+  padding: 11px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 13px;
+  min-width: 100px;
+}
+.tt-table tbody td:last-child { border-right: none; }
+.tt-table tbody td:first-child {
+  text-align: left;
+  padding-left: 18px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface2);
+  border-right: 2px solid var(--border-dark);
+  white-space: nowrap;
+  min-width: 70px;
+}
+.tt-filled { color: var(--text); line-height: 1.5; }
+.tt-filled small { color: var(--text-sm); font-size: 11px; }
+.tt-empty { color: var(--muted) !important; font-size: 18px; letter-spacing: 1px; }
+
+/* ── Teacher card ── */
+.tt-teacher-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+  animation: ttCardIn .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes ttCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tt-teacher-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tt-teacher-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tt-teacher-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent-lt);
+  border: 1.5px solid var(--accent-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── PDF export panel ── */
+.tt-export-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  box-shadow: var(--sh-sm);
+}
+.tt-export-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tt-export-select {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 36px 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  cursor: pointer;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.tt-export-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
 </style>
 
+<div class="col-lg-12">
 
- <div class="text-end">
-    <a href ="{% url 'all_teacher_timetable_pdf' %}" target="_blank" ><button type="submit" class="btn btn-primary btn-sm">Export to PDF</button></a>
- </div>
-<h5 align="center">Timetable</h5>
-<form method="POST" action="{% url 'teacher_timetable_pdf' %}" target="_blank" class="row align-items-end">
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'view_timetable' %}">Timetable</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Teacherwise View</span>
+      </nav>
+      <h1 class="pc-page-title">Teacherwise Timetable</h1>
+      <p class="pc-page-sub">Weekly schedule for every teacher in the school.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'all_teacher_timetable_pdf' %}" target="_blank" class="pc-btn pc-btn-outline">
+        <i class="ri-file-pdf-line"></i> Export All PDF
+      </a>
+    </div>
+  </div>
+
+  <!-- ② Individual Teacher PDF Export -->
+  <form method="POST" action="{% url 'teacher_timetable_pdf' %}" target="_blank">
     {% csrf_token %}
+    <div class="tt-export-panel">
+      <span class="tt-export-label">
+        <i class="ri-user-line"></i> Export Individual
+      </span>
+      <select name="teacher_id" class="tt-export-select" required>
+        <option value="">— Select a teacher —</option>
+        {% for t in teachers %}
+        <option value="{{ t.id }}">{{ t.first_name }} {{ t.last_name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="pc-btn pc-btn-primary">
+        <i class="ri-download-line"></i> Export PDF
+      </button>
+    </div>
+  </form>
 
-    <!-- Dropdown -->
-    <div class="col-md-6 mb-3">
-        <div class="form-floating form-floating-outline h-100">
-            <select
-                name="teacher_id"
-                class="select2 form-select"
-                id="teacher_id"
-                required
-                style="height: calc(3.5rem + 2px);"  <!-- Matches button height -->
-            >
-                <option value="">Select a teacher</option>
-                {% for t in teachers %}
-                    <option value="{{ t.id }}">{{ t.first_name }} {{ t.last_name }}</option>
-                {% endfor %}
-            </select>
-            <label for="teacher_id">Teacher</label>
-        </div>
+  <!-- ③ Teacher Timetable Cards -->
+  {% if teacher_timetables %}
+  {% for data in teacher_timetables %}
+  <div class="tt-teacher-card" style="animation-delay:{{ forloop.counter0 }}0ms;">
+
+    <div class="tt-teacher-header">
+      <div class="tt-teacher-name">
+        <div class="tt-teacher-avatar"><i class="ri-user-line"></i></div>
+        {{ data.teacher.first_name }} {{ data.teacher.last_name }}
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-time-line" style="font-size:11px;"></i>
+        {{ data.periods|length }} Period{{ data.periods|length|pluralize }}
+      </span>
     </div>
 
-    <!-- Submit Button -->
-    <div class="col-md-3 mb-3 d-flex align-items-stretch">
-        <button type="submit" class="btn btn-primary " style="height: calc(3.0rem + 1px);">
-            Export Timetable
-        </button>
-    </div>
-</form>
-
-{% for data in teacher_timetables %}
-<h4>{{ data.teacher.first_name }} {{ data.teacher.last_name }}</h4>
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
+    <div class="tt-table-wrap">
+      <table class="tt-table">
+        <thead>
+          <tr>
             <th>Day</th>
             {% for p in data.periods %}
-                <th>Period {{ p }}</th>
+            <th>Period {{ p }}</th>
             {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in data.grid %}
-        <tr>
-            <td><b>{{ row.day }}</b></td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in data.grid %}
+          <tr>
+            <td>{{ row.day }}</td>
             {% for cell in row.cells %}
-            <td>{{ cell|safe }}</td>
+            {% if cell == "-" %}
+            <td class="tt-empty">—</td>
+            {% else %}
+            <td class="tt-filled">{{ cell|safe }}</td>
+            {% endif %}
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<br><br>
-{% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div class="pc-empty" style="padding:60px 20px;">
+        <span class="pc-empty-icon"><i class="ri-user-line"></i></span>
+        <p class="pc-empty-title">No teacher timetables available</p>
+        <p class="pc-empty-sub">
+          Generate a timetable first from the <a href="{% url 'view_timetable' %}">Timetable page</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
 
 {% endblock %}
