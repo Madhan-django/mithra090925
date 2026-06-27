@@ -1,18 +1,21 @@
+import logging
 from django.shortcuts import render,redirect,get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from institutions.models import school
 from .forms import TeachingAllocationForm,EditTeachingAllocationForm,ReservedSlotForm
 from setup.models import section,subjects,academicyr,currentacademicyr,sclass,section
 from staff.models import staff
-from .models import Timetable, TimeSlot, Teacher,TeachingAllocation,ReservedSlot
-from django.http import JsonResponse
+from .models import Timetable, TimeSlot, TeachingAllocation, ReservedSlot
 from .pulp_generator import generate_timetable_with_pulp
 from django.contrib import messages
 from .utils import render_to_pdf
 import openpyxl
-from openpyxl.styles import Font, Alignment,Border, Side
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from django.db.models import Sum
+
+logger = logging.getLogger(__name__)
 
 
 def generate_timetable(request):
@@ -43,20 +46,15 @@ def view_timetable(request):
 
     for sec in section_list:
         entries = Timetable.objects.filter(section=sec, timetable_school=sdata).select_related('timeslot', 'subject', 'teacher')
-
-        # Periods in ascending order
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
         period_set = sorted(set(e.timeslot.period_number for e in entries))
         grid = []
 
         for period in period_set:
             row = []
             for day in days:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
-                    # Use correct teacher name
                     cell = f"{match.subject.subject_name}<br><small>{match.teacher.first_name}</small>"
                 else:
                     cell = "-"
@@ -244,7 +242,7 @@ def export_timetable_excel(request):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    section_ids = Timetable.objects.values_list("section_id", flat=True).distinct()
+    section_ids = Timetable.objects.filter(timetable_school=sdata).values_list("section_id", flat=True).distinct()
     section_list = section.objects.filter(id__in=section_ids, school_name=sdata)
 
     wb = openpyxl.Workbook()
@@ -253,7 +251,7 @@ def export_timetable_excel(request):
     for sec in section_list:
         ws = wb.create_sheet(title=f"{sec.class_sec_name.name}-{sec.section_name}")
         entries = Timetable.objects.filter(section=sec).select_related('timeslot', 'subject', 'teacher__staff_user')
-
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
         period_set = sorted(set(e.timeslot.period_number for e in entries))
 
         # Header row (Period labels)
@@ -265,10 +263,7 @@ def export_timetable_excel(request):
         for day_idx, day in enumerate(days):
             ws.cell(row=day_idx + 2, column=1, value=day).font = Font(bold=True)
             for period_idx, period in enumerate(period_set):
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
                     content = f"{match.subject.subject_name}\n{match.teacher.first_name}"
                 else:
@@ -311,17 +306,14 @@ def view_section_timetable(request):
             return HttpResponse("Section not found", status=404)
 
         entries = Timetable.objects.filter(section=sec).select_related("timeslot", "teacher__staff_user", "subject")
-
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
         period_set = sorted(set(e.timeslot.period_number for e in entries))
         grid = []
 
         for period in period_set:
             row = []
             for day in days:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
                     cell = f"{match.subject.subject_name}<br><small>{match.teacher.first_name}</small>"
                 else:
@@ -367,21 +359,16 @@ def export_pdf(request, section_id=None):
         if not entries.exists():
             continue
 
-        # Get unique period numbers
         period_set = sorted(set(e.timeslot.period_number for e in entries))
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
 
-        # Create grid: one row per day, each column for a period
         grid = []
         for day in days:
             row = []
             for period in period_set:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
-                    teacher_name = match.teacher.first_name if hasattr(match.teacher, 'staff_user') else match.teacher.first_name
-                    cell = f"{match.subject.subject_name} ({teacher_name})"
+                    cell = f"{match.subject.subject_name} ({match.teacher.first_name})"
                 else:
                     cell = "-"
                 row.append(cell)
@@ -422,6 +409,7 @@ def export_excel(request, section_id):
     entries = Timetable.objects.filter(section=sec).select_related("timeslot", "teacher__staff_user", "subject")
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     period_set = sorted(set(e.timeslot.period_number for e in entries))
+    entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
 
     # Create a new Excel workbook
     wb = openpyxl.Workbook()
@@ -444,14 +432,9 @@ def export_excel(request, section_id):
     for day_index, day in enumerate(days, start=3):
         ws.cell(row=day_index, column=1).value = day
         for col_index, period in enumerate(period_set, start=2):
-            match = next(
-                (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                None
-            )
+            match = entry_map.get((day, period))
             if match:
-                subject = match.subject.subject_name
-                teacher = match.teacher.first_name
-                cell_value = f"{subject}\n({teacher})"
+                cell_value = f"{match.subject.subject_name}\n({match.teacher.first_name})"
             else:
                 cell_value = "-"
             cell = ws.cell(row=day_index, column=col_index)
@@ -475,37 +458,29 @@ def school_export_pdf(request):
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-    section_ids = Timetable.objects.values_list("section_id", flat=True).distinct()
+    section_ids = Timetable.objects.filter(timetable_school=sdata).values_list("section_id", flat=True).distinct()
     section_list = section.objects.filter(id__in=section_ids, school_name=sdata)
 
     section_timetables = []
 
     for sec in section_list:
-        entries = Timetable.objects.filter(section=sec).select_related(
+        entries = Timetable.objects.filter(section=sec, timetable_school=sdata).select_related(
             'timeslot', 'subject', 'teacher__staff_user'
         )
 
         if not entries.exists():
             continue
 
-        # Get all periods used for this section
         period_set = sorted(set(e.timeslot.period_number for e in entries))
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
 
-        # Build the grid: rows = days, columns = periods
         grid = []
         for day in days:
             row = []
             for period in period_set:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
-                    try:
-                        teacher_name = match.teacher.first_name
-                    except:
-                        teacher_name = match.teacher.first_name or ""
-                    cell = f"{match.subject.subject_name} ({teacher_name})"
+                    cell = f"{match.subject.subject_name} ({match.teacher.first_name})"
                 else:
                     cell = "-"
                 row.append(cell)
@@ -568,6 +543,7 @@ def school_export_excel(request):
             continue
 
         period_set = sorted(set(e.timeslot.period_number for e in entries))
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
         ws = wb.create_sheet(title=f"{sec.class_sec_name.name}-{sec.section_name}")
 
         # Set column A width (Day) to small value
@@ -597,13 +573,9 @@ def school_export_excel(request):
             day_cell.border = thin_border
 
             for col_index, period in enumerate(period_set, start=2):
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
-                    teacher_name = match.teacher.first_name or ""
-                    cell_value = f"{match.subject.subject_name} ({teacher_name})"
+                    cell_value = f"{match.subject.subject_name} ({match.teacher.first_name or ''})"
                 else:
                     cell_value = "-"
                 cell = ws.cell(row=row_index, column=col_index, value=cell_value)
@@ -745,15 +717,13 @@ def view_teacher_timetable(request):
         if not entries.exists():
             continue
 
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
         grid = []
 
         for day in days:
             row = []
             for period in periods:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
                     cell = f"{match.subject.subject_name} <br><small>{match.section.class_sec_name.name}-{match.section.section_name}</small>"
                 else:
@@ -796,14 +766,12 @@ def all_teacher_timetable_pdf(request):
         if not entries.exists():
             continue
 
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
         grid = []
         for day in days:
             row = []
             for period in periods:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
                     cell = f"{match.subject.subject_name}<br><small>{match.section.class_sec_name.name}-{match.section.section_name}</small>"
                 else:
@@ -853,15 +821,13 @@ def teacher_timetable_pdf(request):
             return HttpResponse("Teacher not found", status=404)
 
         entries = Timetable.objects.filter(teacher=tchr).select_related("timeslot", "subject", "section__class_sec_name")
+        entry_map = {(e.timeslot.day, e.timeslot.period_number): e for e in entries}
 
         grid = []
         for day in days:
             row = []
             for period in periods:
-                match = next(
-                    (e for e in entries if e.timeslot.day == day and e.timeslot.period_number == period),
-                    None
-                )
+                match = entry_map.get((day, period))
                 if match:
                     cell = f"{match.subject.subject_name}<br><small>{match.section.class_sec_name.name}-{match.section.section_name}</small>"
                 else:
@@ -905,7 +871,7 @@ def add_reservation(request):
             form.save()
             messages.success(request,"Reservation Created Successfully")
         else:
-            messages.success(request,"Invalid Form")
+            messages.error(request,"Invalid Form")
     form = ReservedSlotForm(initial=initial_data)
     return render(request,"timetable/new_reservation.html",context={'form':form,'skool':sdata,'year':year,'cls':cls,'data':data})
 
@@ -946,3 +912,169 @@ def edit_reservation(request, pk):
         'data': data,
         'reservation': reservation
     })
+
+
+
+def free_teachers_grid(request):
+    try:
+        sch_id = request.session['sch_id']
+        sdata = school.objects.get(pk=sch_id)
+
+        day_order = [code for code, _ in TimeSlot.DAYS]
+
+        timeslots = list(TimeSlot.objects.filter(period_school=sdata))
+
+        # Only show days/periods that actually exist for this school
+        days_present = sorted(set(ts.day for ts in timeslots), key=lambda d: day_order.index(d))
+        day_headers = [(code, label) for code, label in TimeSlot.DAYS if code in days_present]
+        period_numbers = sorted(set(ts.period_number for ts in timeslots))
+
+        ts_lookup = {(ts.day, ts.period_number): ts.id for ts in timeslots}
+
+        # Teachers who have at least one allocation in this school.
+        # NOTE: derived via TeachingAllocation.teacher_school since `staff`
+        # has no school field visible here — adjust if staff.school exists.
+        teachers = list(
+            TeachingAllocation.objects.filter(teacher_school=sdata)
+            .values_list('teacher_id', 'teacher__first_name', 'teacher__last_name')
+            .distinct()
+            .order_by('teacher__first_name', 'teacher__last_name')
+        )
+
+        # Build occupied lookup: (teacher_id, timeslot_id) -> Timetable entry
+        occupied = {}
+        tt_entries = Timetable.objects.filter(timetable_school=sdata).select_related(
+            'subject', 'section', 'section__class_sec_name'
+        )
+        for entry in tt_entries:
+            occupied[(entry.teacher_id, entry.timeslot_id)] = entry
+
+        # One block per day, stacked vertically (instead of one wide table)
+        day_blocks = []
+        for day_code, day_label in day_headers:
+            rows = []
+            for t_id, fname, lname in teachers:
+                cells = []
+                for p in period_numbers:
+                    ts_id = ts_lookup.get((day_code, p))
+                    if ts_id is None:
+                        cells.append({'exists': False})
+                        continue
+                    entry = occupied.get((t_id, ts_id))
+                    if entry:
+                        cells.append({
+                            'exists': True,
+                            'free': False,
+                            'label': entry.subject.subject_name,
+                            'detail': f"{entry.section.class_sec_name.name}-{entry.section.section_name}",
+                        })
+                    else:
+                        cells.append({'exists': True, 'free': True})
+                rows.append({'teacher_name': f"{fname} {lname}", 'cells': cells})
+            day_blocks.append({'day_label': day_label, 'rows': rows})
+
+        context = {
+            'school': sdata,
+            'period_numbers': period_numbers,
+            'day_blocks': day_blocks,
+        }
+        return render(request, 'timetable/free_teachers_grid.html', context)
+
+    except Exception:
+        logger.exception("Error in free_teachers_grid")
+        return HttpResponse("An error occurred generating the free teachers grid.", status=500)
+        
+        
+def export_free_teachers_excel(request):
+    try:
+        sch_id = request.session['sch_id']
+        sdata = school.objects.get(pk=sch_id)
+
+        day_order = [code for code, _ in TimeSlot.DAYS]
+        timeslots = list(TimeSlot.objects.filter(period_school=sdata))
+
+        days_present = sorted(set(ts.day for ts in timeslots), key=lambda d: day_order.index(d))
+        day_headers = [(code, label) for code, label in TimeSlot.DAYS if code in days_present]
+        period_numbers = sorted(set(ts.period_number for ts in timeslots))
+        ts_lookup = {(ts.day, ts.period_number): ts.id for ts in timeslots}
+
+        teachers = list(
+            TeachingAllocation.objects.filter(teacher_school=sdata)
+            .values_list('teacher_id', 'teacher__first_name', 'teacher__last_name')
+            .distinct()
+            .order_by('teacher__first_name', 'teacher__last_name')
+        )
+
+        occupied = {}
+        tt_entries = Timetable.objects.filter(timetable_school=sdata).select_related(
+            'subject', 'section', 'section__class_sec_name'
+        )
+        for entry in tt_entries:
+            occupied[(entry.teacher_id, entry.timeslot_id)] = entry
+
+        wb = Workbook()
+        wb.remove(wb.active)  # drop default blank sheet
+
+        header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True)
+        free_fill = PatternFill(start_color="ECFDF5", end_color="ECFDF5", fill_type="solid")
+        busy_fill = PatternFill(start_color="FFF7ED", end_color="FFF7ED", fill_type="solid")
+        na_fill = PatternFill(start_color="F9FAFB", end_color="F9FAFB", fill_type="solid")
+        thin_side = Side(style="thin", color="E5E7EB")
+        thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+        center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        for day_code, day_label in day_headers:
+            ws = wb.create_sheet(title=day_label[:31])  # Excel sheet name limit = 31 chars
+
+            header_cell = ws.cell(row=1, column=1, value="Teacher")
+            header_cell.font = header_font
+            header_cell.fill = header_fill
+            header_cell.border = thin_border
+            ws.column_dimensions['A'].width = 26
+
+            for idx, p in enumerate(period_numbers, start=2):
+                c = ws.cell(row=1, column=idx, value=f"P{p}")
+                c.font = header_font
+                c.fill = header_fill
+                c.alignment = center
+                c.border = thin_border
+                ws.column_dimensions[get_column_letter(idx)].width = 18
+
+            row_num = 2
+            for t_id, fname, lname in teachers:
+                name_cell = ws.cell(row=row_num, column=1, value=f"{fname} {lname}")
+                name_cell.border = thin_border
+                for idx, p in enumerate(period_numbers, start=2):
+                    ts_id = ts_lookup.get((day_code, p))
+                    cell = ws.cell(row=row_num, column=idx)
+                    cell.alignment = center
+                    cell.border = thin_border
+                    if ts_id is None:
+                        cell.value = "-"
+                        cell.fill = na_fill
+                    else:
+                        entry = occupied.get((t_id, ts_id))
+                        if entry:
+                            cell.value = (
+                                f"{entry.subject.subject_name}\n"
+                                f"{entry.section.class_sec_name.name}-{entry.section.section_name}"
+                            )
+                            cell.fill = busy_fill
+                        else:
+                            cell.value = "Free"
+                            cell.fill = free_fill
+                row_num += 1
+
+            ws.freeze_panes = "B2"
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="Free_Teachers_Availability.xlsx"'
+        wb.save(response)
+        return response
+
+    except Exception:
+        logger.exception("Error in export_free_teachers_excel")
+        return HttpResponse("An error occurred exporting the free teachers grid.", status=500)

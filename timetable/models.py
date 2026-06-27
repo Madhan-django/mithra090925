@@ -4,12 +4,6 @@ from staff.models import staff
 from setup.models import subjects, section, sclass
 from institutions.models import school
 
-class Teacher(models.Model):
-    name = models.ForeignKey(staff, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.name.first_name} {self.name.last_name}"
-
 class TimeSlot(models.Model):
     DAYS = [
         ('Mon', 'Monday'),
@@ -38,6 +32,9 @@ class TeachingAllocation(models.Model):
     is_classteacher = models.BooleanField(default=False)
 
 
+    class Meta:
+        unique_together = ('teacher', 'subject', 'section', 'teacher_school')
+
     def __str__(self):
         return f"{self.section.class_sec_name.name} - {self.section.section_name} | {self.subject.subject_name} by {self.teacher} - {self.hours_per_week} hrs"
 
@@ -59,3 +56,6 @@ class ReservedSlot(models.Model):
     adaptive_day= models.BooleanField(default=False,blank=True,null=True)
     adaptive_period = models.BooleanField(default=False, blank=True, null=True)
     school = models.ForeignKey(school, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('section', 'timeslot', 'school')

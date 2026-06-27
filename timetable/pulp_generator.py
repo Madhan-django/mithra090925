@@ -1,9 +1,12 @@
+import logging
 from django.shortcuts import redirect
 from django.contrib import messages
 from pulp import LpProblem, LpVariable, LpMinimize, LpBinary, lpSum, LpStatus, PULP_CBC_CMD
 from timetable.models import TeachingAllocation, TimeSlot, Timetable, ReservedSlot
 from institutions.models import school
 from setup.models import currentacademicyr, academicyr
+
+logger = logging.getLogger(__name__)
 
 # ------------------- Build Model -------------------
 def build_model(allocations, timeslots, reserved_slots, allow_adaptive=False):
@@ -137,8 +140,58 @@ def build_model(allocations, timeslots, reserved_slots, allow_adaptive=False):
                 f"TeacherMax_{t_id}_{day}"
             )
 
-    # Objective: dummy, focus is on feasibility and per-day max
-    model += 0
+    # 8️⃣ Soft constraint: penalise consecutive same-subject periods for a section
+    #
+    # For every section, subject, day — find pairs of timeslots whose
+    # period_numbers are consecutive (p and p+1).  A binary penalty variable
+    # "consec" is 1 when BOTH slots are assigned to the same allocation
+    # (same subject, same section).  Consecutive periods across different
+    # days are NOT penalised (they don't feel consecutive to students).
+    #
+    # Linearisation of  consec >= x_a_ts1 + x_a_ts2 - 1
+    #   =>  consec >= x1 + x2 - 1   (consec is driven to 1 when both are 1)
+    #   =>  consec <= x1             (can't be 1 if first slot isn't used)
+    #   =>  consec <= x2             (can't be 1 if second slot isn't used)
+    #
+    # We then minimise the weighted sum of all consec variables.
+
+    consec_vars = {}
+    penalty_weight = 10   # tune higher to discourage more aggressively
+
+    # Build a quick lookup: (day, period_number) -> TimeSlot
+    ts_by_day_period = {}
+    for ts in timeslots:
+        ts_by_day_period[(ts.day, ts.period_number)] = ts
+
+    consec_counter = 0
+    for a in allocations:
+        for ts in timeslots:
+            next_ts = ts_by_day_period.get((ts.day, ts.period_number + 1))
+            if next_ts is None:
+                continue  # ts is the last period of the day
+
+            consec_counter += 1
+            cvar_name = f"Consec_{a.id}_{ts.id}_{next_ts.id}"
+            cvar = LpVariable(cvar_name, 0, 1, LpBinary)
+            consec_vars[(a.id, ts.id, next_ts.id)] = cvar
+
+            x1 = alloc_vars[(a.id, ts.id)]
+            x2 = alloc_vars[(a.id, next_ts.id)]
+
+            # cvar >= x1 + x2 - 1  →  x1 + x2 - cvar <= 1
+            model += (
+                x1 + x2 - cvar <= 1,
+                f"ConsecLB_{a.id}_{ts.id}_{next_ts.id}"
+            )
+            # cvar <= x1  and  cvar <= x2  (redundant but tighten LP relaxation)
+            model += cvar <= x1, f"ConsecUB1_{a.id}_{ts.id}_{next_ts.id}"
+            model += cvar <= x2, f"ConsecUB2_{a.id}_{ts.id}_{next_ts.id}"
+
+    # Objective: minimise total consecutive same-subject periods (soft penalty)
+    if consec_vars:
+        model += penalty_weight * lpSum(consec_vars.values())
+    else:
+        model += 0
 
     return model, alloc_vars, adaptive_info, problematic_allocations
 
@@ -173,9 +226,8 @@ def generate_timetable_with_pulp(sch_id):
         )
         status = model.solve(PULP_CBC_CMD(msg=0))
 
-    # Log adaptive info
     for msg in adaptive_info:
-        print(msg)
+        logger.info(msg)
 
     if LpStatus[status] != "Optimal":
         return (

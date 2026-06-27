@@ -2,9 +2,10 @@ from django.urls import path
 from django.contrib.auth.decorators import login_required
 from . import views
 
+
 urlpatterns = [
 
-    path('',views.view_timetable,name='view_timetable'),
+    path('',login_required(views.view_timetable),name='view_timetable'),
     path('period_list',login_required(views.period_list),name='period_list'),
     path('create_teaching_allocation',login_required(views.create_teaching_allocation),name='create_teaching_allocation'),
     path('generate_timetable',login_required(views.generate_timetable),name='generate_timetable'),
@@ -25,12 +26,12 @@ urlpatterns = [
     path('timetable_check_pdf',login_required(views.timetable_check_pdf),name='timetable_check_pdf'),
     path('view_teacher_timetable',login_required(views.view_teacher_timetable),name='view_teacher_timetable'),
     path('teacher_timetable_pdf',login_required(views.teacher_timetable_pdf),name='teacher_timetable_pdf'),
-    path('teacher_timetable_pdf',login_required(views.teacher_timetable_pdf),name='teacher_timetable_pdf'),
     path('all_teacher_timetable_pdf',login_required(views.all_teacher_timetable_pdf),name='all_teacher_timetable_pdf'),
     path('add_reservation',login_required(views.add_reservation),name='add_reservation'),
     path('edit_reservation/<pk>',login_required(views.edit_reservation),name='edit_reservation'),
-    path('delete_reservation/<pk>',login_required(views.delete_reservation),name='delete_reservation')
-
+    path('delete_reservation/<pk>',login_required(views.delete_reservation),name='delete_reservation'),
+    path('free-teachers/', login_required(views.free_teachers_grid), name='free_teachers_grid'),
+    path('free-teachers/export/', login_required(views.export_free_teachers_excel), name='export_free_teachers_excel'),
 
 ]
 
