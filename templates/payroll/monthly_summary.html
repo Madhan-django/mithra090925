@@ -1,115 +1,639 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<div class="container mt-4">
+<style>
+/* ══════════════════════════════════════
+   MONTHLY SUMMARY — Page Styles
+══════════════════════════════════════ */
 
-    <h4 class="text-center mb-4">Monthly Attendance Summary</h4>
+/* ── Hero banner ── */
+.ms-hero {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 60%, #1e1b4b 100%);
+  border-radius: var(--r-xl);
+  padding: 28px 32px;
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.ms-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,70,229,.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ms-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 40%;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ms-hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+.ms-hero-left {}
+.ms-hero-crumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 600;
+  color: rgba(148,163,184,.7);
+  margin-bottom: 8px;
+}
+.ms-hero-crumb a { color: rgba(148,163,184,.9); text-decoration: none; }
+.ms-hero-crumb a:hover { color: #c7d2fe; }
+.ms-hero-crumb-sep { color: rgba(148,163,184,.4); }
+.ms-hero-title {
+  font-size: 24px; font-weight: 800; color: #f8fafc;
+  letter-spacing: -.5px; margin: 0 0 5px;
+}
+.ms-hero-sub {
+  font-size: 13px; color: rgba(148,163,184,.8); font-weight: 500;
+}
+.ms-period-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(99,102,241,.25);
+  border: 1px solid rgba(99,102,241,.45);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 13.5px; font-weight: 700; color: #c7d2fe;
+  white-space: nowrap;
+}
+.ms-period-pill i { font-size: 15px; }
 
-    <!-- =================== FILTER SECTION =================== -->
+/* ── Stat chips ── */
+.ms-stat-row {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.ms-stat-chip {
+  flex: 1 1 160px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+  box-shadow: var(--sh-xs);
+  display: flex; align-items: center; gap: 14px;
+  transition: box-shadow var(--t) ease, transform var(--t-md) ease;
+}
+.ms-stat-chip:hover { box-shadow: var(--sh-sm); transform: translateY(-2px); }
+.ms-stat-icon {
+  width: 42px; height: 42px; border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; flex-shrink: 0;
+}
+.ms-stat-icon.purple { background: #eef2ff; color: var(--accent); }
+.ms-stat-icon.green  { background: var(--green-lt); color: var(--green); }
+.ms-stat-icon.rose   { background: var(--rose-lt); color: var(--rose); }
+.ms-stat-icon.amber  { background: var(--amber-lt); color: var(--amber); }
+.ms-stat-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--text-sm); margin-bottom: 3px;
+}
+.ms-stat-value {
+  font-size: 22px; font-weight: 800; color: var(--text);
+  font-family: var(--f-mono); letter-spacing: -.5px;
+}
+.ms-stat-value.rose  { color: var(--rose); }
+.ms-stat-value.green { color: var(--green); }
 
-    <form method="GET" class="row g-3 mb-4">
+/* ── Filter card ── */
+.ms-filter-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-xs);
+  padding: 20px 24px;
+  margin-bottom: 22px;
+}
+.ms-filter-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--text-sm);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 7px;
+}
+.ms-filter-title i { color: var(--accent); font-size: 14px; }
+.ms-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px 16px;
+  align-items: flex-end;
+}
+.ms-field { display: flex; flex-direction: column; gap: 5px; }
+.ms-field label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--text-sm);
+}
+.ms-field select,
+.ms-field input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px; font-weight: 500;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease, background var(--t) ease;
+  box-sizing: border-box;
+}
+.ms-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+.ms-field input:focus,
+.ms-field select:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
 
-        <div class="col-md-4">
-            <label class="form-label">Select Month</label>
-            <select name="month" class="form-control" required>
-                <option value="">-- Select Month --</option>
-                {% for value, name in months %}
-                    <option value="{{ value }}"
-                        {% if value == selected_month %}selected{% endif %}>
-                        {{ name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
+/* ── Search box (inline table filter) ── */
+.ms-table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.ms-search-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 7px 12px;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+.ms-search-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+.ms-search-wrap i { color: var(--muted); font-size: 15px; }
+.ms-search-wrap input {
+  border: none; outline: none; background: transparent;
+  font-family: var(--f-sans); font-size: 13px;
+  color: var(--text); width: 200px;
+}
+.ms-search-wrap input::placeholder { color: var(--muted); }
 
-        <div class="col-md-4">
-            <label class="form-label">Year</label>
-            <input type="number"
-                   name="year"
-                   value="{{ selected_year }}"
-                   class="form-control"
-                   required>
-        </div>
+/* ── Summary table ── */
+.ms-table-wrap {
+  overflow-x: auto;
+}
+.ms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-sans);
+  font-size: 12.5px;
+  min-width: 1140px;
+}
 
-        <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">
-                Generate Report
-            </button>
-        </div>
+/* group header row */
+.ms-table thead tr.grp-row th {
+  padding: 7px 6px 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.ms-table thead tr.grp-row th.grp-staff { text-align: left; padding-left: 18px; }
+.grp-attend { background: #1e293b; color: #818cf8; }
+.grp-leave  { background: #1e293b; color: #fbbf24; }
+.grp-summary{ background: #1e293b; color: #34d399; }
+.grp-staff-hdr { background: #1e293b; color: transparent; }
 
-    </form>
+/* column header row */
+.ms-table thead tr.col-row th {
+  padding: 9px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #94a3b8;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: none;
+}
+.ms-table thead tr.col-row th:first-child { text-align: left; padding-left: 18px; }
+.ms-table thead { background: #1e293b; position: sticky; top: 0; z-index: 2; }
 
-    <!-- =================== REPORT SECTION =================== -->
+/* dividers between groups */
+.ms-table thead th.grp-divider { border-left: 1px solid rgba(255,255,255,.08) !important; }
 
-    {% if summary_data %}
+/* body */
+.ms-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t) ease;
+}
+.ms-table tbody tr:nth-child(even) { background: var(--surface2); }
+.ms-table tbody tr:last-child { border-bottom: none; }
+.ms-table tbody tr:hover { background: #f0f4ff; }
 
-    <div class="card shadow-sm">
-        <div class="card-body table-responsive">
+.ms-table tbody td {
+  padding: 10px 8px;
+  text-align: center;
+  color: var(--text-md);
+  font-size: 12.5px;
+  border: none;
+  border-right: 1px solid var(--border-soft, #f1f5f9);
+  vertical-align: middle;
+}
+.ms-table tbody td:last-child { border-right: none; }
+.ms-table tbody td:first-child { text-align: left; padding-left: 18px; }
+.ms-table tbody td.grp-divider { border-left: 1px solid var(--border) !important; }
 
-            <table class="table table-bordered text-center align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Staff</th>
-                        <th>Total Days</th>
-                        <th>Working Days</th>
-                        <th>Present</th>
-                        <th>Half</th>
-                        <th>CL</th>
-                        <th>ML</th>
-                        <th>Permission</th>
-                        <th>Basic LOP</th>
-                        <th>Late</th>
-                        <th>Week Off</th>
-                        <th>Holiday</th>
-                        <th>Miss Punch</th>
-                        <th>Total LOP</th>
-                        <th class="bg-success text-white">Salary Days</th>
-                    </tr>
-                </thead>
+/* number cells */
+.num { font-family: var(--f-mono); font-size: 12px; color: var(--text-md); }
+.num-zero { color: var(--muted); }
 
-                <tbody>
-                    {% for row in summary_data %}
-                    <tr>
-                        <td>
-                            {{ row.employee.first_name }} {{ row.employee.last_name }}
-                        </td>
-                        <td>{{ row.total_days }}</td>
-                        <td>{{ row.working_days }}</td>
-                        <td>{{ row.present }}</td>
-                        <td>{{ row.half_day }}</td>
-                        <td>{{ row.cl }}</td>
-                        <td>{{ row.ml }}</td>
-                        <td>{{ row.permission }}</td>
-                        <td>{{ row.lop }}</td>
-                        <td>{{ row.late }}</td>
-                        <td>{{ row.weekly_off }}</td>
-                        <td>{{ row.holiday }}</td>
-                        <td>{{ row.mispunch }}</td>
-                        <td class="fw-bold text-danger">
-                            {{ row.total_lop_days }}
-                        </td>
-                        <td class="fw-bold text-success">
-                            {{ row.salary_days }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+/* avatar */
+.ms-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+  letter-spacing: -.3px;
+}
+.av-0 { background: #eef2ff; color: #4f46e5; border: 1.5px solid #c7d2fe; }
+.av-1 { background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; }
+.av-2 { background: #fffbeb; color: #d97706; border: 1.5px solid #fde68a; }
+.av-3 { background: #fff1f2; color: #e11d48; border: 1.5px solid #fecdd3; }
+.av-4 { background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; }
+.av-5 { background: #fdf4ff; color: #9333ea; border: 1.5px solid #e9d5ff; }
 
-            </table>
+.ms-name { font-weight: 700; color: var(--text); font-size: 13px; }
+.ms-emp-id { font-size: 10.5px; color: var(--muted); font-weight: 500; margin-top: 1px; }
 
-        </div>
+/* pill badges */
+.pill-lop {
+  display: inline-flex; align-items: center;
+  font-family: var(--f-mono); font-size: 12px; font-weight: 700;
+  color: var(--rose); background: var(--rose-lt);
+  border: 1px solid #fecdd3; border-radius: 20px;
+  padding: 2px 10px; min-width: 38px; justify-content: center;
+}
+.pill-salary {
+  display: inline-flex; align-items: center;
+  font-family: var(--f-mono); font-size: 12px; font-weight: 700;
+  color: var(--green); background: var(--green-lt);
+  border: 1px solid #a7f3d0; border-radius: 20px;
+  padding: 2px 10px; min-width: 38px; justify-content: center;
+}
+.pill-zero {
+  color: var(--muted) !important;
+  background: var(--surface2) !important;
+  border-color: var(--border) !important;
+}
+
+/* row stagger animation */
+.ms-table tbody tr {
+  animation: msRowIn .28s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes msRowIn {
+  from { opacity:0; transform:translateY(4px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.ms-table tbody tr:nth-child(1)  { animation-delay:  0ms; }
+.ms-table tbody tr:nth-child(2)  { animation-delay: 20ms; }
+.ms-table tbody tr:nth-child(3)  { animation-delay: 40ms; }
+.ms-table tbody tr:nth-child(4)  { animation-delay: 60ms; }
+.ms-table tbody tr:nth-child(5)  { animation-delay: 80ms; }
+.ms-table tbody tr:nth-child(6)  { animation-delay:100ms; }
+.ms-table tbody tr:nth-child(7)  { animation-delay:120ms; }
+.ms-table tbody tr:nth-child(8)  { animation-delay:140ms; }
+.ms-table tbody tr:nth-child(9)  { animation-delay:160ms; }
+.ms-table tbody tr:nth-child(10) { animation-delay:180ms; }
+
+/* ── Footer ── */
+.ms-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.ms-footer-note {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--text-sm); font-weight: 500;
+}
+.ms-footer-note i { color: var(--accent); font-size: 15px; flex-shrink: 0; }
+.ms-footer-actions { display: flex; gap: 10px; align-items: center; }
+
+/* ── Empty state ── */
+.ms-empty {
+  padding: 56px 24px;
+  text-align: center;
+}
+.ms-empty-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--accent-lt); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin: 0 auto 16px;
+}
+.ms-empty-title {
+  font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 5px;
+}
+.ms-empty-sub {
+  font-size: 13px; color: var(--text-sm);
+}
+
+@media (max-width: 680px) {
+  .ms-filter-grid { grid-template-columns: 1fr; }
+  .ms-stat-row { gap: 10px; }
+  .ms-stat-chip { flex: 1 1 140px; }
+  .ms-hero { padding: 20px 18px; }
+  .ms-hero-title { font-size: 19px; }
+}
+</style>
+
+<div class="col-lg-12">
+
+  <!-- ① Hero Banner -->
+  <div class="ms-hero">
+    <div class="ms-hero-inner">
+      <div class="ms-hero-left">
+        <nav class="ms-hero-crumb">
+          <a href="{% url 'home_dashboard' %}">Dashboard</a>
+          <span class="ms-hero-crumb-sep">›</span>
+          <span>Payroll</span>
+          <span class="ms-hero-crumb-sep">›</span>
+          <span>Monthly Summary</span>
+        </nav>
+        <h1 class="ms-hero-title">Monthly Attendance Summary</h1>
+        <p class="ms-hero-sub">Salary days, LOP deductions &amp; full attendance breakdown for all staff.</p>
+      </div>
+      {% if summary_data %}
+      <div class="ms-period-pill">
+        <i class="ri-calendar-2-line"></i>
+        {% for value, name in months %}{% if value == selected_month %}{{ name }}{% endif %}{% endfor %}
+        {{ selected_year }}
+      </div>
+      {% endif %}
     </div>
-        <br>
-    <form method="POST" action="{% url 'generate_payroll' %}">
-    {% csrf_token %}
-    <input type="hidden" name="month" value="{{ selected_month }}">
-    <input type="hidden" name="year" value="{{ selected_year }}">
-    <button type="submit" class="btn btn-success">
-        Generate Payroll
-    </button>
-</form>
-    {% endif %}
+  </div>
+
+  <!-- ② Stat Chips (only when data is loaded) -->
+  {% if summary_data %}
+  <div class="ms-stat-row">
+    <div class="ms-stat-chip">
+      <div class="ms-stat-icon purple"><i class="ri-team-line"></i></div>
+      <div>
+        <div class="ms-stat-label">Total Staff</div>
+        <div class="ms-stat-value">{{ summary_data|length }}</div>
+      </div>
+    </div>
+    <div class="ms-stat-chip">
+      <div class="ms-stat-icon green"><i class="ri-calendar-check-line"></i></div>
+      <div>
+        <div class="ms-stat-label">Total Days</div>
+        <div class="ms-stat-value green">{{ summary_data.0.total_days }}</div>
+      </div>
+    </div>
+    <div class="ms-stat-chip">
+      <div class="ms-stat-icon rose"><i class="ri-subtract-line"></i></div>
+      <div>
+        <div class="ms-stat-label">Avg LOP Days</div>
+        {% with total_lop=0 %}
+        <div class="ms-stat-value rose" id="avg-lop-val">—</div>
+        {% endwith %}
+      </div>
+    </div>
+    <div class="ms-stat-chip">
+      <div class="ms-stat-icon amber"><i class="ri-user-unfollow-line"></i></div>
+      <div>
+        <div class="ms-stat-label">Staff on LOP</div>
+        <div class="ms-stat-value" id="lop-count-val">—</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ③ Filter Card -->
+  <div class="ms-filter-card">
+    <div class="ms-filter-title">
+      <i class="ri-filter-3-line"></i> Filter Report
+    </div>
+    <form method="GET" id="ms-filter-form">
+      <div class="ms-filter-grid">
+
+        <div class="ms-field">
+          <label>Month <span style="color:var(--rose)">*</span></label>
+          <select name="month" required>
+            <option value="">— Select Month —</option>
+            {% for value, name in months %}
+            <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="ms-field">
+          <label>Year <span style="color:var(--rose)">*</span></label>
+          <input type="number" name="year" value="{{ selected_year }}"
+                 placeholder="e.g. 2025" min="2000" max="2099" required>
+        </div>
+
+        <div class="ms-field" style="justify-content:flex-end;">
+          <label style="visibility:hidden;">go</label>
+          <button type="submit" class="pc-btn pc-btn-primary">
+            <i class="ri-bar-chart-line"></i> Generate
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- ④ Results Table -->
+  {% if summary_data %}
+  <div class="pc-card" style="overflow:hidden;">
+
+    <!-- toolbar -->
+    <div class="ms-table-toolbar">
+      <div>
+        <div style="font-size:14px; font-weight:700; color:var(--text);">Attendance Breakdown</div>
+        <div style="font-size:11.5px; color:var(--text-sm); margin-top:2px;">
+          {{ summary_data|length }} employee{{ summary_data|length|pluralize }} &nbsp;·&nbsp;
+          {% for value, name in months %}{% if value == selected_month %}{{ name }}{% endif %}{% endfor %}
+          {{ selected_year }}
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="ms-search-wrap">
+          <i class="ri-search-line"></i>
+          <input type="text" id="ms-search" placeholder="Search staff…">
+        </div>
+      </div>
+    </div>
+
+    <!-- table -->
+    <div class="ms-table-wrap">
+      <table class="ms-table" id="ms-table">
+        <thead>
+          <!-- Group row -->
+          <tr class="grp-row">
+            <th class="grp-staff-hdr" rowspan="1" style="background:#1e293b;"></th>
+            <th class="grp-attend" colspan="7">Attendance</th>
+            <th class="grp-leave grp-divider" colspan="4">Leaves &amp; Deductions</th>
+            <th class="grp-summary grp-divider" colspan="2">Summary</th>
+          </tr>
+          <!-- Column row -->
+          <tr class="col-row">
+            <th>Staff</th>
+            <th>Total</th>
+            <th>Working</th>
+            <th>Present</th>
+            <th>Half Day</th>
+            <th>Week Off</th>
+            <th>Holiday</th>
+            <th>Miss Punch</th>
+            <th class="grp-divider">CL</th>
+            <th>ML</th>
+            <th>Permission</th>
+            <th>Late</th>
+            <th class="grp-divider">Total LOP</th>
+            <th>Salary Days</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in summary_data %}
+          <tr>
+            <!-- Staff -->
+            <td style="white-space:nowrap;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div class="ms-avatar {% cycle 'av-0' 'av-1' 'av-2' 'av-3' 'av-4' 'av-5' %}">
+                  {{ row.employee.first_name|first|upper }}{{ row.employee.last_name|first|upper }}
+                </div>
+                <div>
+                  <div class="ms-name">{{ row.employee.first_name }} {{ row.employee.last_name }}</div>
+                </div>
+              </div>
+            </td>
+            <!-- Attendance group -->
+            <td class="num">{{ row.total_days }}</td>
+            <td class="num">{{ row.working_days }}</td>
+            <td class="num {% if row.present == 0 %}num-zero{% endif %}">{{ row.present }}</td>
+            <td class="num {% if row.half_day == 0 %}num-zero{% endif %}">{{ row.half_day }}</td>
+            <td class="num {% if row.weekly_off == 0 %}num-zero{% endif %}">{{ row.weekly_off }}</td>
+            <td class="num {% if row.holiday == 0 %}num-zero{% endif %}">{{ row.holiday }}</td>
+            <td class="num {% if row.mispunch == 0 %}num-zero{% endif %}">{{ row.mispunch }}</td>
+            <!-- Leaves group -->
+            <td class="num grp-divider {% if row.cl == 0 %}num-zero{% endif %}">{{ row.cl }}</td>
+            <td class="num {% if row.ml == 0 %}num-zero{% endif %}">{{ row.ml }}</td>
+            <td class="num {% if row.permission == 0 %}num-zero{% endif %}">{{ row.permission }}</td>
+            <td class="num {% if row.late == 0 %}num-zero{% endif %}">{{ row.late }}</td>
+            <!-- Summary group -->
+            <td class="grp-divider">
+              <span class="pill-lop {% if row.total_lop_days == 0 %}pill-zero{% endif %}">
+                {{ row.total_lop_days }}
+              </span>
+            </td>
+            <td>
+              <span class="pill-salary">{{ row.salary_days }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- footer -->
+    <div class="ms-footer">
+      <div class="ms-footer-note">
+        <i class="ri-information-line"></i>
+        Review all LOP deductions carefully before generating payroll.
+      </div>
+      <div class="ms-footer-actions">
+        <a href="{% url 'Staff_Monthly_Summary_Excel' %}?month={{ selected_month }}&year={{ selected_year }}"
+           class="pc-btn pc-btn-outline">
+          <i class="ri-file-excel-2-line" style="color:#22c55e;"></i> Download Excel
+        </a>
+        <form method="POST" action="{% url 'generate_payroll' %}" style="margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="month" value="{{ selected_month }}">
+          <input type="hidden" name="year" value="{{ selected_year }}">
+          <button type="submit" class="pc-btn pc-btn-success">
+            <i class="ri-money-dollar-circle-line"></i> Generate Payroll
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  {% else %}
+
+  <!-- Empty state (when no month/year selected yet) -->
+  {% if selected_month %}
+  <div class="pc-card">
+    <div class="ms-empty">
+      <div class="ms-empty-icon"><i class="ri-inbox-2-line"></i></div>
+      <div class="ms-empty-title">No data found</div>
+      <div class="ms-empty-sub">No attendance records for the selected period.</div>
+    </div>
+  </div>
+  {% else %}
+  <div class="pc-card">
+    <div class="ms-empty">
+      <div class="ms-empty-icon"><i class="ri-bar-chart-grouped-line"></i></div>
+      <div class="ms-empty-title">Select a month to generate the report</div>
+      <div class="ms-empty-sub">Choose a month and year above, then click Generate.</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
 
 </div>
+
+<script>
+/* ── Live search ── */
+(function () {
+  const inp = document.getElementById('ms-search');
+  if (!inp) return;
+  inp.addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#ms-table tbody tr').forEach(function (tr) {
+      const name = tr.querySelector('.ms-name');
+      tr.style.display = (name && name.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+  });
+})();
+
+/* ── Stat chip computation ── */
+(function () {
+  const rows = document.querySelectorAll('#ms-table tbody tr');
+  if (!rows.length) return;
+
+  let totalLop = 0, lopCount = 0;
+  rows.forEach(function (tr) {
+    const lopPill = tr.querySelector('.pill-lop');
+    if (!lopPill) return;
+    const val = parseFloat(lopPill.textContent.trim()) || 0;
+    totalLop += val;
+    if (val > 0) lopCount++;
+  });
+
+  const avgEl = document.getElementById('avg-lop-val');
+  const cntEl = document.getElementById('lop-count-val');
+  if (avgEl) avgEl.textContent = rows.length ? (totalLop / rows.length).toFixed(1) : '0';
+  if (cntEl) cntEl.textContent = lopCount;
+})();
+</script>
 
 {% endblock %}

@@ -2220,6 +2220,9 @@ def Staff_Monthly_Attendance(request):
 
                     record.is_manual = True
 
+                    # If user explicitly chose a status, only update late info — never override their choice
+                    user_set_status = bool(selected_status)
+
                     if shift:
 
                         shift_start_naive = datetime.combine(
@@ -2254,7 +2257,7 @@ def Staff_Monthly_Attendance(request):
                             record.late = True
                             record.late_minutes = late_minutes
 
-                            if payroll_settings and record.first_in.hour >= payroll_settings.late_cutoff_hour:
+                            if not user_set_status and payroll_settings and record.first_in.hour >= payroll_settings.late_cutoff_hour:
                                 record.status = "HALF_DAY"
 
                         else:
@@ -2266,7 +2269,7 @@ def Staff_Monthly_Attendance(request):
                             "WEEKLY_OFF", "HOLIDAY"
                         ]
 
-                        if record.status not in manual_statuses:
+                        if not user_set_status and record.status not in manual_statuses:
 
                             shift_seconds = (shift_end - shift_start).total_seconds()
                             worked_seconds = work_duration.total_seconds()
@@ -2352,10 +2355,11 @@ def Staff_Monthly_Attendance(request):
             elif status in ["CL", "ML", "PERMISSION", "WEEKLY_OFF", "HOLIDAY"]:
                 total_present += 1
 
-            if record and record.late:
+            if record and record.late and not record.late_exempted:
                 total_late += 1
 
             attendance_list.append({
+                "id": record.id if record else None,
                 "day": day,
                 "full_date": attendance_date,
                 "status": status,
@@ -2365,6 +2369,7 @@ def Staff_Monthly_Attendance(request):
                 "punch_count": record.punch_count if record else 0,
                 "late": record.late if record else False,
                 "late_minutes": record.late_minutes if record else 0,
+                "late_exempted": record.late_exempted if record else False,
                 "mis_punch": record.mis_punch if record else False,
             })
 
@@ -2394,10 +2399,24 @@ def Staff_Monthly_Attendance(request):
         "payroll_settings": payroll_settings,
         "cl_used_year": cl_used_year,
         "cl_remaining": cl_remaining,
+        "can_exempt_late": request.user.groups.filter(name__in=["superadmin", "Admin"]).exists(),
         "skool": sdata
     }
 
     return render(request, "payroll/monthlyattendance.html", context)
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def toggle_late_exemption(request, attendance_id):
+    if request.method != "POST":
+        from django.http import JsonResponse
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    from django.http import JsonResponse
+    sch_id = request.session.get("sch_id")
+    record = get_object_or_404(Attendance, pk=attendance_id, sch_id=sch_id)
+    record.late_exempted = not record.late_exempted
+    record.save(update_fields=["late_exempted"])
+    return JsonResponse({"exempted": record.late_exempted})
 
 
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
@@ -2446,10 +2465,10 @@ def staff_monthly_summary(request):
             if payroll_settings and payroll_settings.saturday_short_day:
                 # Saturday (week_day=7) half-days and lates are ignored
                 half_day = records.filter(status="HALF_DAY").exclude(date__week_day=7).count()
-                late = records.filter(late=True).exclude(date__week_day=7).count()
+                late = records.filter(late=True, late_exempted=False).exclude(date__week_day=7).count()
             else:
                 half_day = records.filter(status="HALF_DAY").count()
-                late = records.filter(late=True).count()
+                late = records.filter(late=True, late_exempted=False).count()
 
             # --------------------------------------------------
             # WORKING DAYS
@@ -2530,6 +2549,134 @@ def staff_monthly_summary(request):
     return render(request, "payroll/monthly_summary.html", context)
 
 
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def staff_monthly_summary_excel(request):
+    sch_id = request.session.get("sch_id")
+    sdata = get_object_or_404(school, pk=sch_id)
+
+    month = request.GET.get("month")
+    year = request.GET.get("year")
+
+    if not month or not year:
+        return HttpResponse("Month and Year are required.", status=400)
+
+    month = int(month)
+    year = int(year)
+
+    try:
+        payroll_settings = sdata.payroll_settings
+    except PayrollSettings.DoesNotExist:
+        payroll_settings = None
+
+    total_days = calendar.monthrange(year, month)[1]
+    employees = staff.objects.filter(staff_school=sch_id)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Monthly Summary"
+
+    month_name_str = date(year, month, 1).strftime('%B')
+    ws.merge_cells("A1:O1")
+    title_cell = ws["A1"]
+    title_cell.value = f"{sdata.name} — {month_name_str} {year} — Monthly Attendance Summary"
+    title_cell.font = Font(bold=True, size=13)
+    title_cell.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[1].height = 22
+
+    headers = [
+        "Staff Name", "Total Days", "Working Days", "Present", "Half Day",
+        "CL", "ML", "Permission", "Basic LOP", "Late", "Week Off",
+        "Holiday", "Miss Punch", "Total LOP", "Salary Days"
+    ]
+    header_row = 2
+    for col, h in enumerate(headers, start=1):
+        cell = ws.cell(row=header_row, column=col, value=h)
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        from openpyxl.styles import PatternFill
+        cell.fill = PatternFill(fill_type="solid", fgColor="1E293B")
+
+    from openpyxl.utils import get_column_letter
+    col_widths = [28, 11, 13, 9, 10, 7, 7, 12, 11, 7, 10, 10, 12, 11, 12]
+    for i, w in enumerate(col_widths, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = w
+
+    for emp in employees:
+        records = Attendance.objects.filter(
+            staff_id=emp.id, sch_id=sch_id,
+            date__year=year, date__month=month
+        )
+
+        present = records.filter(status="PRESENT").count()
+        cl = records.filter(status="CL").count()
+        ml = records.filter(status="ML").count()
+        permission = records.filter(status="PERMISSION").count()
+        lop = records.filter(status__in=["LOP", "ABSENT"]).count()
+        weekly_off = records.filter(remarks="Weekly-OFF").count()
+        holiday = records.filter(remarks="Special-OFF").count()
+        mispunch = records.filter(status="MIS_PUNCH").count()
+
+        if payroll_settings and payroll_settings.saturday_short_day:
+            half_day = records.filter(status="HALF_DAY").exclude(date__week_day=7).count()
+            late = records.filter(late=True, late_exempted=False).exclude(date__week_day=7).count()
+        else:
+            half_day = records.filter(status="HALF_DAY").count()
+            late = records.filter(late=True, late_exempted=False).count()
+
+        working_days = total_days - weekly_off - holiday
+        total_lop_days = lop
+
+        if payroll_settings:
+            if payroll_settings.half_day_as_cl and half_day > 0:
+                cl_used_year = Attendance.objects.filter(
+                    staff_id=emp.id, sch_id=sch_id,
+                    date__year=year, status="CL"
+                ).count()
+                cl_remaining = max(payroll_settings.total_cl - cl_used_year, 0)
+                cl_pairs = half_day // 2
+                cl_used_for_half = min(cl_pairs, cl_remaining)
+                half_days_as_lop = half_day - (cl_used_for_half * 2)
+                half_day_lop = half_days_as_lop * 0.5
+            else:
+                half_day_lop = half_day * 0.5
+
+            grace = payroll_settings.grace_late_count
+            lop_after_grace = float(payroll_settings.lop_after_grace)
+            remaining_late = max(late - grace, 0)
+            late_lop = remaining_late * lop_after_grace
+            total_lop_days = lop + half_day_lop + late_lop
+
+        salary_days = max(total_days - total_lop_days, 0)
+
+        ws.append([
+            f"{emp.first_name} {emp.last_name}",
+            total_days,
+            working_days,
+            present,
+            half_day,
+            cl,
+            ml,
+            permission,
+            lop,
+            late,
+            weekly_off,
+            holiday,
+            mispunch,
+            round(total_lop_days, 2),
+            round(salary_days, 2),
+        ])
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename = f"Monthly_Summary_{month_name_str}_{year}.xlsx"
+    response = HttpResponse(
+        output,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
@@ -2661,10 +2808,10 @@ def generate_payroll(request):
 
         if payroll_settings and payroll_settings.saturday_short_day:
             half_day = records.filter(status="HALF_DAY").exclude(date__week_day=7).count()
-            late = records.filter(late=True).exclude(date__week_day=7).count()
+            late = records.filter(late=True, late_exempted=False).exclude(date__week_day=7).count()
         else:
             half_day = records.filter(status="HALF_DAY").count()
-            late = records.filter(late=True).count()
+            late = records.filter(late=True, late_exempted=False).count()
 
         # ---------------- LOP Calculation ----------------
         total_lop_days = Decimal(lop)
