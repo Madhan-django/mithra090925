@@ -1,0 +1,213 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.qf-option-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+.qf-panel { display:none; }
+.qf-panel.active { display:block; }
+</style>
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'question_list' %}">Question Bank</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Edit Question</span>
+      </nav>
+      <h1 class="pc-page-title">Edit Question #{{ q.pk }}</h1>
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="qform">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
+
+      <div>
+        <div class="pc-card" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">Question Details</p></div>
+          <div class="pc-card-body">
+            <div class="nb-form-grid" style="--cols:2;">
+              <div class="nb-field">
+                <label class="nb-label">Class</label>
+                <select class="nb-select" name="cls" id="cls_sel">
+                  {% for c in classes %}
+                  <option value="{{ c.id }}" {% if c.id == q.cls_id %}selected{% endif %}>{{ c.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="nb-field">
+                <label class="nb-label">Subject</label>
+                <select class="nb-select" name="subject" id="subj_sel">
+                  {% for s in subj_list %}
+                  <option value="{{ s.id }}" {% if s.id == q.subject_id %}selected{% endif %}>{{ s.subject_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="nb-field">
+                <label class="nb-label">Chapter</label>
+                <select class="nb-select" name="chapter" id="chapter_sel">
+                  <option value="">— No Chapter —</option>
+                  {% for ch in chapters %}
+                  <option value="{{ ch.id }}" {% if ch.id == q.chapter_id %}selected{% endif %}>{{ ch.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="nb-field">
+                <label class="nb-label">Tags</label>
+                <input type="text" class="nb-input" name="tags" value="{{ q.tags }}">
+              </div>
+            </div>
+            <div class="nb-field" style="margin-top:4px;">
+              <label class="nb-label">Question Text</label>
+              <textarea class="nb-textarea" name="question_text" rows="4" required>{{ q.question_text }}</textarea>
+            </div>
+            <div class="nb-field" style="margin-top:8px;">
+              <label class="nb-label">Image</label>
+              {% if q.image %}
+              <div style="margin-bottom:8px;">
+                <img src="{{ q.image.url }}" style="height:80px;border-radius:var(--r);border:1px solid var(--border);">
+              </div>
+              {% endif %}
+              <input type="file" class="nb-input" name="image" accept="image/*">
+            </div>
+          </div>
+        </div>
+
+        <!-- MCQ -->
+        <div class="pc-card qf-panel" id="panel-MCQ" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">MCQ Options</p></div>
+          <div class="pc-card-body">
+            {% for opt in options %}
+            <div class="qf-option-row">
+              <input type="radio" name="correct_option" value="{{ forloop.counter0 }}"
+                {% if opt.is_correct %}checked{% endif %}
+                style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;">
+              <input type="text" class="nb-input" name="option_text[]" value="{{ opt.option_text }}">
+            </div>
+            {% endfor %}
+            {% with remaining=options|length %}
+            {% if remaining < 4 %}
+            {% for i in "1234"|slice:remaining %}
+            <div class="qf-option-row">
+              <input type="radio" name="correct_option" value="{{ forloop.counter0|add:remaining }}"
+                style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;">
+              <input type="text" class="nb-input" name="option_text[]" placeholder="Option {{ forloop.counter|add:remaining }}">
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+
+        <!-- True/False -->
+        <div class="pc-card qf-panel" id="panel-TF" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">True / False</p></div>
+          <div class="pc-card-body">
+            <label class="nb-label">Correct Answer</label>
+            <div style="display:flex;gap:20px;margin-top:8px;">
+              {% for opt in options %}
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="correct_tf" value="{{ opt.option_text }}"
+                  {% if opt.is_correct %}checked{% endif %} style="accent-color:var(--accent);">
+                {{ opt.option_text }}
+              </label>
+              {% empty %}
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="correct_tf" value="True" checked style="accent-color:var(--accent);">
+                True
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="correct_tf" value="False" style="accent-color:var(--accent);">
+                False
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Answer -->
+        <div class="pc-card qf-panel" id="panel-ANSWER" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">Answer &amp; Explanation</p></div>
+          <div class="pc-card-body">
+            <div class="nb-field">
+              <label class="nb-label">Answer</label>
+              <textarea class="nb-textarea" name="answer_text" rows="3">{% if answer %}{{ answer.answer_text }}{% endif %}</textarea>
+            </div>
+            <div class="nb-field">
+              <label class="nb-label">Explanation</label>
+              <textarea class="nb-textarea" name="explanation" rows="2">{% if answer %}{{ answer.explanation }}{% endif %}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div>
+        <div class="pc-card" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">Settings</p></div>
+          <div class="pc-card-body">
+            <div class="nb-field">
+              <label class="nb-label">Question Type</label>
+              <select class="nb-select" name="question_type" id="qtype_sel">
+                <option value="MCQ" {% if q.question_type == 'MCQ' %}selected{% endif %}>Multiple Choice (MCQ)</option>
+                <option value="SHORT" {% if q.question_type == 'SHORT' %}selected{% endif %}>Short Answer</option>
+                <option value="LONG" {% if q.question_type == 'LONG' %}selected{% endif %}>Long Answer</option>
+                <option value="FILL" {% if q.question_type == 'FILL' %}selected{% endif %}>Fill in the Blank</option>
+                <option value="TF" {% if q.question_type == 'TF' %}selected{% endif %}>True / False</option>
+                <option value="MATCH" {% if q.question_type == 'MATCH' %}selected{% endif %}>Match the Following</option>
+              </select>
+            </div>
+            <div class="nb-field">
+              <label class="nb-label">Difficulty</label>
+              <select class="nb-select" name="difficulty">
+                <option value="EASY" {% if q.difficulty == 'EASY' %}selected{% endif %}>Easy</option>
+                <option value="MEDIUM" {% if q.difficulty == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                <option value="HARD" {% if q.difficulty == 'HARD' %}selected{% endif %}>Hard</option>
+              </select>
+            </div>
+            <div class="nb-field">
+              <label class="nb-label">Marks</label>
+              <input type="number" class="nb-input" name="marks" value="{{ q.marks }}" min="1" max="100">
+            </div>
+            <div class="nb-field" style="margin-top:12px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text);">
+                <input type="checkbox" name="is_approved" {% if q.is_approved %}checked{% endif %}
+                  style="width:16px;height:16px;accent-color:var(--accent);">
+                Mark as Approved
+              </label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="pc-btn pc-btn-primary" style="width:100%;justify-content:center;padding:11px;">
+          <i class="ri-save-line"></i> Update Question
+        </button>
+        <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline"
+           style="width:100%;justify-content:center;padding:11px;margin-top:8px;">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+function showPanels(qtype) {
+  document.querySelectorAll('.qf-panel').forEach(p => p.classList.remove('active'));
+  if (qtype === 'MCQ') {
+    document.getElementById('panel-MCQ').classList.add('active');
+    document.getElementById('panel-ANSWER').classList.add('active');
+  } else if (qtype === 'TF') {
+    document.getElementById('panel-TF').classList.add('active');
+  } else if (qtype !== 'MATCH') {
+    document.getElementById('panel-ANSWER').classList.add('active');
+  }
+}
+document.getElementById('qtype_sel').addEventListener('change', function() { showPanels(this.value); });
+showPanels('{{ q.question_type }}');
+</script>
+
+{% endblock %}

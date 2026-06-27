@@ -1,0 +1,87 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'question_list' %}">Question Bank</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Blueprints</span>
+      </nav>
+      <h1 class="pc-page-title">Exam Blueprints</h1>
+      <p class="pc-page-sub">Templates that define sections and question distribution for exam papers.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'create_blueprint' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> Create Blueprint
+      </a>
+    </div>
+  </div>
+
+  {% if blueprints %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;">
+    {% for bp in blueprints %}
+    <div class="pc-card" style="animation:bpIn .4s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ forloop.counter0 }}0ms;">
+      <div class="pc-card-header">
+        <div>
+          <p class="pc-card-title">{{ bp.name }}</p>
+          <p class="pc-card-sub">{{ bp.cls.name }} &bull; {{ bp.subject.subject_name }}</p>
+        </div>
+        <span class="pc-badge pc-badge-primary pc-badge-no-dot">{{ bp.total_marks }} Marks</span>
+      </div>
+      <div class="pc-card-body" style="padding-top:0;">
+        {% for sec in bp.sections.all %}
+        <div style="display:flex;justify-content:space-between;align-items:center;
+             padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--text);font-weight:600;">{{ sec.section_name }}</span>
+          <div style="display:flex;gap:10px;align-items:center;color:var(--text-sm);">
+            <span>{{ sec.num_questions }}Q</span>
+            <span>&times;</span>
+            <span>{{ sec.marks_per_question }}M</span>
+            <span style="font-size:11px;font-weight:700;background:var(--surface2);
+              border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--text-sm);">
+              {{ sec.question_type }}
+            </span>
+          </div>
+        </div>
+        {% endfor %}
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <a href="{% url 'create_paper' %}?bp={{ bp.pk }}" class="pc-btn pc-btn-outline pc-btn-sm">
+            <i class="ri-file-add-line"></i> Use This
+          </a>
+          <a href="{% url 'delete_blueprint' bp.pk %}"
+             class="pc-btn pc-btn-outline pc-btn-sm"
+             style="color:#ef4444;border-color:#fca5a5;margin-left:auto;"
+             onclick="return confirm('Delete blueprint {{ bp.name }}?')">
+            <i class="ri-delete-bin-line"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div class="pc-empty" style="padding:60px 20px;">
+        <span class="pc-empty-icon"><i class="ri-layout-line"></i></span>
+        <p class="pc-empty-title">No blueprints yet</p>
+        <p class="pc-empty-sub">
+          <a href="{% url 'create_blueprint' %}">Create a blueprint</a> to define your exam structure.
+        </p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+@keyframes bpIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+</style>
+{% endblock %}

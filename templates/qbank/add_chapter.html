@@ -1,0 +1,73 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<div class="col-lg-6">
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'chapter_list' %}">Chapters</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Add Chapter</span>
+      </nav>
+      <h1 class="pc-page-title">Add Chapter</h1>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header"><p class="pc-card-title">Chapter Details</p></div>
+    <div class="pc-card-body">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="nb-field">
+          <label class="nb-label">Class</label>
+          <select class="nb-select" name="cls" id="cls_sel" required>
+            <option value="">— Select Class —</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="nb-field">
+          <label class="nb-label">Subject</label>
+          <select class="nb-select" name="subject" id="subj_sel" required>
+            <option value="">— Select Subject —</option>
+          </select>
+        </div>
+        <div class="nb-field">
+          <label class="nb-label">Chapter Name</label>
+          <input type="text" class="nb-input" name="name" required placeholder="e.g. Chapter 1: Polynomials">
+        </div>
+        <div class="nb-field">
+          <label class="nb-label">Display Order</label>
+          <input type="number" class="nb-input" name="order" value="1" min="1">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button type="submit" class="pc-btn pc-btn-primary" style="flex:1;justify-content:center;">
+            <i class="ri-save-line"></i> Save Chapter
+          </button>
+          <a href="{% url 'chapter_list' %}" class="pc-btn pc-btn-outline" style="flex:1;justify-content:center;">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('cls_sel').addEventListener('change', function() {
+  fetch(`{% url 'qbank_ajax_subjects' %}?class_id=${this.value}`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('subj_sel');
+      sel.innerHTML = '<option value="">— Select Subject —</option>';
+      data.subjects.forEach(s => {
+        sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
+      });
+    });
+});
+</script>
+
+{% endblock %}

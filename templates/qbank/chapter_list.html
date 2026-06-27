@@ -1,0 +1,71 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'question_list' %}">Question Bank</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Chapters</span>
+      </nav>
+      <h1 class="pc-page-title">Chapters</h1>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'add_chapter' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> Add Chapter
+      </a>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-body" style="padding:0;">
+      {% if chapters %}
+      <div class="pc-table-wrap" style="border-radius:0;border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="width:50px;text-align:center;">#</th>
+              <th>Chapter</th>
+              <th>Subject</th>
+              <th>Class</th>
+              <th style="text-align:center;">Order</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ch in chapters %}
+            <tr>
+              <td style="text-align:center;color:var(--muted);">{{ forloop.counter }}</td>
+              <td style="font-weight:600;color:var(--text);">{{ ch.name }}</td>
+              <td>{{ ch.subject.subject_name }}</td>
+              <td>{{ ch.cls.name }}</td>
+              <td style="text-align:center;">{{ ch.order }}</td>
+              <td style="text-align:center;">
+                <a href="{% url 'delete_chapter' ch.pk %}"
+                   class="pc-btn pc-btn-outline pc-btn-sm"
+                   style="color:#ef4444;border-color:#fca5a5;"
+                   onclick="return confirm('Delete chapter {{ ch.name }}?')">
+                  <i class="ri-delete-bin-line"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="pc-empty" style="padding:60px 20px;">
+        <span class="pc-empty-icon"><i class="ri-book-open-line"></i></span>
+        <p class="pc-empty-title">No chapters added yet</p>
+        <p class="pc-empty-sub"><a href="{% url 'add_chapter' %}">Add your first chapter</a></p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

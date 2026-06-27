@@ -1,0 +1,78 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<div class="col-lg-7">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'question_list' %}">Question Bank</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Bulk Import</span>
+      </nav>
+      <h1 class="pc-page-title">Bulk Import Questions</h1>
+      <p class="pc-page-sub">Upload an Excel file to import multiple questions at once.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'download_import_template' %}" class="pc-btn pc-btn-outline">
+        <i class="ri-file-excel-line"></i> Download Template
+      </a>
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:16px;">
+    <div class="pc-card-header"><p class="pc-card-title">Expected Columns</p></div>
+    <div class="pc-card-body" style="padding:0;">
+      <div class="pc-table-wrap" style="border:none;border-radius:0;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th>Column</th>
+              <th>Required</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in "class,subject,chapter,question_type,question_text,difficulty,marks,tags,option_a,option_b,option_c,option_d,correct_option,answer,explanation"|split:"," %}
+            <tr>
+              <td><code>{{ row }}</code></td>
+              <td>{% if row in "class,subject,question_type,question_text" %}<span style="color:#059669;font-weight:700;">Yes</span>{% else %}No{% endif %}</td>
+              <td style="font-size:11px;color:var(--text-sm);">
+                {% if row == "question_type" %}MCQ / SHORT / LONG / FILL / TF / MATCH
+                {% elif row == "difficulty" %}EASY / MEDIUM / HARD
+                {% elif row == "correct_option" %}a / b / c / d
+                {% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header"><p class="pc-card-title">Upload File</p></div>
+    <div class="pc-card-body">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="nb-field">
+          <label class="nb-label">Excel File (.xlsx)</label>
+          <input type="file" class="nb-input" name="excel_file" accept=".xlsx,.xls" required>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button type="submit" class="pc-btn pc-btn-primary" style="flex:1;justify-content:center;">
+            <i class="ri-upload-line"></i> Import Questions
+          </button>
+          <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline" style="flex:1;justify-content:center;">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -50,8 +50,8 @@ urlpatterns = [
     path('tally/',include('tally.urls')),
     path('assets/',include('assets.urls')),
     path('grievance/',include('grievance.urls')),
-
-    
+    path('jacobreports/',include('jacobreports.urls')),
+    path('qbank/',include('qbank.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

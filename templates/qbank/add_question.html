@@ -1,0 +1,272 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.qf-option-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+.qf-option-row input[type=text] { flex:1; }
+.qf-panel { display:none; }
+.qf-panel.active { display:block; }
+</style>
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'question_list' %}">Question Bank</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Add Question</span>
+      </nav>
+      <h1 class="pc-page-title">Add Question</h1>
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="qform">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
+
+      <!-- Left: Main Content -->
+      <div>
+        <div class="pc-card" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">Question Details</p></div>
+          <div class="pc-card-body">
+
+            <div class="nb-form-grid" style="--cols:2;">
+              <div class="nb-field">
+                <label class="nb-label">Class <span style="color:var(--danger)">*</span></label>
+                <select class="nb-select" name="cls" id="cls_sel" required>
+                  <option value="">— Select Class —</option>
+                  {% for c in classes %}
+                  <option value="{{ c.id }}">{{ c.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="nb-field">
+                <label class="nb-label">Subject <span style="color:var(--danger)">*</span></label>
+                <select class="nb-select" name="subject" id="subj_sel" required>
+                  <option value="">— Select Subject —</option>
+                </select>
+              </div>
+              <div class="nb-field">
+                <label class="nb-label">Chapter</label>
+                <select class="nb-select" name="chapter" id="chapter_sel">
+                  <option value="">— No Chapter —</option>
+                </select>
+              </div>
+              <div class="nb-field">
+                <label class="nb-label">Tags</label>
+                <input type="text" class="nb-input" name="tags" placeholder="e.g. algebra, chapter1">
+              </div>
+            </div>
+
+            <div class="nb-field" style="margin-top:4px;">
+              <label class="nb-label">Question Text <span style="color:var(--danger)">*</span></label>
+              <textarea class="nb-textarea" name="question_text" rows="4" required
+                placeholder="Type your question here…"></textarea>
+            </div>
+
+            <div class="nb-field" style="margin-top:8px;">
+              <label class="nb-label">Image (optional)</label>
+              <input type="file" class="nb-input" name="image" accept="image/*">
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Type-specific Panels -->
+
+        <!-- MCQ -->
+        <div class="pc-card qf-panel" id="panel-MCQ" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">MCQ Options</p></div>
+          <div class="pc-card-body">
+            <p style="font-size:12px;color:var(--text-sm);margin-bottom:14px;">
+              Enter up to 4 options. Select the correct one with the radio button.
+            </p>
+            {% for i in "0123" %}
+            <div class="qf-option-row">
+              <input type="radio" name="correct_option" value="{{ forloop.counter0 }}"
+                {% if forloop.first %}checked{% endif %}
+                style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;">
+              <input type="text" class="nb-input" name="option_text[]"
+                placeholder="Option {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- True/False -->
+        <div class="pc-card qf-panel" id="panel-TF" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">True / False</p></div>
+          <div class="pc-card-body">
+            <label class="nb-label">Correct Answer</label>
+            <div style="display:flex;gap:20px;margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="correct_tf" value="True" checked style="accent-color:var(--accent);">
+                True
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="correct_tf" value="False" style="accent-color:var(--accent);">
+                False
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Match the Following -->
+        <div class="pc-card qf-panel" id="panel-MATCH" style="margin-bottom:16px;">
+          <div class="pc-card-header">
+            <p class="pc-card-title">Match the Following</p>
+            <button type="button" onclick="addMatchRow()" class="pc-btn pc-btn-outline pc-btn-sm">
+              <i class="ri-add-line"></i> Add Pair
+            </button>
+          </div>
+          <div class="pc-card-body">
+            <div id="match-rows">
+              {% for i in "123" %}
+              <div class="qf-option-row match-pair">
+                <input type="text" class="nb-input" name="match_left[]" placeholder="Column A">
+                <span style="color:var(--text-sm);font-size:18px;">↔</span>
+                <input type="text" class="nb-input" name="match_right[]" placeholder="Column B">
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Answer (SHORT/LONG/FILL and fallback) -->
+        <div class="pc-card qf-panel" id="panel-ANSWER" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">Answer &amp; Explanation</p></div>
+          <div class="pc-card-body">
+            <div class="nb-field">
+              <label class="nb-label">Answer</label>
+              <textarea class="nb-textarea" name="answer_text" rows="3" placeholder="Model answer…"></textarea>
+            </div>
+            <div class="nb-field">
+              <label class="nb-label">Explanation (optional)</label>
+              <textarea class="nb-textarea" name="explanation" rows="2" placeholder="Explain why this is correct…"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Meta -->
+      <div>
+        <div class="pc-card" style="margin-bottom:16px;">
+          <div class="pc-card-header"><p class="pc-card-title">Settings</p></div>
+          <div class="pc-card-body">
+
+            <div class="nb-field">
+              <label class="nb-label">Question Type <span style="color:var(--danger)">*</span></label>
+              <select class="nb-select" name="question_type" id="qtype_sel" required>
+                <option value="MCQ">Multiple Choice (MCQ)</option>
+                <option value="SHORT">Short Answer</option>
+                <option value="LONG">Long Answer</option>
+                <option value="FILL">Fill in the Blank</option>
+                <option value="TF">True / False</option>
+                <option value="MATCH">Match the Following</option>
+              </select>
+            </div>
+
+            <div class="nb-field">
+              <label class="nb-label">Difficulty</label>
+              <select class="nb-select" name="difficulty">
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM" selected>Medium</option>
+                <option value="HARD">Hard</option>
+              </select>
+            </div>
+
+            <div class="nb-field">
+              <label class="nb-label">Marks</label>
+              <input type="number" class="nb-input" name="marks" value="1" min="1" max="100">
+            </div>
+
+            <div class="nb-field" style="margin-top:12px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text);">
+                <input type="checkbox" name="is_approved" style="width:16px;height:16px;accent-color:var(--accent);">
+                Mark as Approved
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <button type="submit" class="pc-btn pc-btn-primary" style="width:100%;justify-content:center;padding:11px;">
+          <i class="ri-save-line"></i> Save Question
+        </button>
+        <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline"
+           style="width:100%;justify-content:center;padding:11px;margin-top:8px;">
+          Cancel
+        </a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<script>
+const CHAPTERS = {{ chapters_json|safe }};
+
+function showPanels(qtype) {
+  document.querySelectorAll('.qf-panel').forEach(p => p.classList.remove('active'));
+  if (qtype === 'MCQ') {
+    document.getElementById('panel-MCQ').classList.add('active');
+    document.getElementById('panel-ANSWER').classList.add('active');
+  } else if (qtype === 'TF') {
+    document.getElementById('panel-TF').classList.add('active');
+  } else if (qtype === 'MATCH') {
+    document.getElementById('panel-MATCH').classList.add('active');
+  } else {
+    document.getElementById('panel-ANSWER').classList.add('active');
+  }
+}
+
+document.getElementById('qtype_sel').addEventListener('change', function() {
+  showPanels(this.value);
+});
+showPanels('MCQ');
+
+document.getElementById('cls_sel').addEventListener('change', function() {
+  const cls_id = this.value;
+  fetch(`{% url 'qbank_ajax_subjects' %}?class_id=${cls_id}`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('subj_sel');
+      sel.innerHTML = '<option value="">— Select Subject —</option>';
+      data.subjects.forEach(s => {
+        sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
+      });
+      document.getElementById('chapter_sel').innerHTML = '<option value="">— No Chapter —</option>';
+    });
+});
+
+document.getElementById('subj_sel').addEventListener('change', function() {
+  const subj_id = this.value;
+  fetch(`{% url 'qbank_ajax_chapters' %}?subject_id=${subj_id}`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('chapter_sel');
+      sel.innerHTML = '<option value="">— No Chapter —</option>';
+      data.chapters.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    });
+});
+
+function addMatchRow() {
+  const container = document.getElementById('match-rows');
+  const div = document.createElement('div');
+  div.className = 'qf-option-row match-pair';
+  div.innerHTML = `
+    <input type="text" class="nb-input" name="match_left[]" placeholder="Column A">
+    <span style="color:var(--text-sm);font-size:18px;">↔</span>
+    <input type="text" class="nb-input" name="match_right[]" placeholder="Column B">
+  `;
+  container.appendChild(div);
+}
+</script>
+
+{% endblock %}

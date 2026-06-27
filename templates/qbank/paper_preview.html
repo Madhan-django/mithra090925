@@ -1,0 +1,182 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.pv-paper {
+  max-width: 860px; margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+}
+.pv-paper-header {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 28px 36px;
+  text-align: center;
+}
+.pv-school-name { font-size: 20px; font-weight: 800; letter-spacing: .5px; margin-bottom: 4px; }
+.pv-exam-name { font-size: 14px; color: #94a3b8; margin-bottom: 16px; }
+.pv-paper-meta {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  border-top: 1px solid rgba(255,255,255,.1); padding-top: 16px; margin-top: 16px;
+}
+.pv-meta-item { font-size: 13px; }
+.pv-meta-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: #64748b; display: block; }
+.pv-meta-val { color: #f1f5f9; font-weight: 700; }
+
+.pv-body { padding: 28px 36px; }
+
+.pv-instructions {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--r);
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 13px; color: #78350f; line-height: 1.7;
+}
+
+.pv-section-label {
+  display: flex; align-items: center; gap: 10px; margin: 24px 0 16px;
+}
+.pv-section-title {
+  font-size: 14px; font-weight: 800; color: var(--text);
+  text-transform: uppercase; letter-spacing: .7px;
+}
+.pv-section-line { flex: 1; height: 1px; background: var(--border); }
+.pv-section-badge {
+  font-size: 11px; font-weight: 700; background: var(--accent-lt); color: var(--accent);
+  border: 1px solid var(--accent-mid); border-radius: 20px; padding: 2px 12px; white-space: nowrap;
+}
+
+.pv-question { margin-bottom: 18px; }
+.pv-q-num { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 6px; display: flex; gap: 10px; }
+.pv-q-text { font-size: 13.5px; color: var(--text); line-height: 1.7; }
+.pv-q-options { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+.pv-q-option { font-size: 13px; color: var(--text); display: flex; gap: 8px; align-items: flex-start; }
+.pv-q-option-letter { font-weight: 700; color: var(--text-sm); flex-shrink: 0; min-width: 18px; }
+.pv-answer-line {
+  border-bottom: 1px dashed var(--border-dark);
+  margin-top: 8px; height: 28px;
+}
+</style>
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3" style="max-width:860px;margin:0 auto 20px;">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'paper_list' %}">Papers</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Preview</span>
+      </nav>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'paper_builder' paper.pk %}" class="pc-btn pc-btn-outline">
+        <i class="ri-edit-line"></i> Edit
+      </a>
+      <a href="{% url 'export_paper_pdf' paper.pk %}" target="_blank" class="pc-btn pc-btn-primary">
+        <i class="ri-file-pdf-line"></i> Export PDF
+      </a>
+      <a href="{% url 'export_answer_key_pdf' paper.pk %}" target="_blank" class="pc-btn pc-btn-outline">
+        <i class="ri-key-line"></i> Answer Key
+      </a>
+    </div>
+  </div>
+
+  <div class="pv-paper">
+
+    <div class="pv-paper-header">
+      <div class="pv-school-name">{{ school.name }}</div>
+      <div class="pv-exam-name">{{ paper.exam_name }}</div>
+      <h2 style="font-size:18px;font-weight:800;margin-bottom:4px;">{{ paper.title }}</h2>
+      <div style="font-size:13px;color:#94a3b8;">Set {{ paper.set_label }}</div>
+      <div class="pv-paper-meta">
+        <div class="pv-meta-item">
+          <span class="pv-meta-label">Class</span>
+          <span class="pv-meta-val">{{ paper.cls.name }}</span>
+        </div>
+        <div class="pv-meta-item">
+          <span class="pv-meta-label">Subject</span>
+          <span class="pv-meta-val">{{ paper.subject.subject_name }}</span>
+        </div>
+        <div class="pv-meta-item">
+          <span class="pv-meta-label">Total Marks</span>
+          <span class="pv-meta-val">{{ paper.total_marks }}</span>
+        </div>
+        <div class="pv-meta-item">
+          <span class="pv-meta-label">Time Allowed</span>
+          <span class="pv-meta-val">{{ paper.duration_mins }} Minutes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pv-body">
+
+      {% if paper.instructions %}
+      <div class="pv-instructions">
+        <strong>General Instructions:</strong><br>
+        {{ paper.instructions|linebreaksbr }}
+      </div>
+      {% endif %}
+
+      {% for sec in sections %}
+      <div class="pv-section-label">
+        <span class="pv-section-line"></span>
+        <span class="pv-section-title">{{ sec.section_name }}</span>
+        <span class="pv-section-badge">
+          {{ sec.questions.count }}Q &times; {{ sec.marks_per_question }}M
+          {% if sec.num_to_attempt %}(Attempt {{ sec.num_to_attempt }}){% endif %}
+        </span>
+        <span class="pv-section-line"></span>
+      </div>
+
+      {% if sec.section_instructions %}
+      <p style="font-size:12px;color:var(--text-sm);font-style:italic;margin-bottom:12px;">
+        {{ sec.section_instructions }}
+      </p>
+      {% endif %}
+
+      {% for pq in sec.questions.all %}
+      <div class="pv-question">
+        <div class="pv-q-num">
+          <span>{{ forloop.counter }}.</span>
+          <span style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-weight:600;color:var(--text-sm);">
+            {{ pq.question.marks }} Mark{{ pq.question.marks|pluralize }}
+          </span>
+        </div>
+        <div class="pv-q-text">{{ pq.question.question_text }}</div>
+
+        {% if pq.question.question_type == 'MCQ' or pq.question.question_type == 'TF' %}
+        <div class="pv-q-options">
+          {% for opt in pq.question.options.all %}
+          <div class="pv-q-option">
+            <span class="pv-q-option-letter">{{ forloop.counter|stringformat:'s' }}.</span>
+            <span>{{ opt.option_text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% elif pq.question.question_type == 'FILL' %}
+        <div class="pv-answer-line"></div>
+        {% elif pq.question.question_type == 'SHORT' %}
+        <div class="pv-answer-line"></div>
+        <div class="pv-answer-line"></div>
+        <div class="pv-answer-line"></div>
+        {% elif pq.question.question_type == 'LONG' %}
+        {% for i in "123456" %}
+        <div class="pv-answer-line"></div>
+        {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      {% endfor %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

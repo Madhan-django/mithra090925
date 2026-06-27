@@ -1,0 +1,116 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'question_list' %}">Question Bank</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Papers</span>
+      </nav>
+      <h1 class="pc-page-title">Question Papers</h1>
+      <p class="pc-page-sub">All generated exam papers for this academic year.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'create_paper' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> New Paper
+      </a>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-body" style="padding:0;">
+      {% if papers %}
+      <div class="pc-table-wrap" style="border-radius:0;border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="width:50px;text-align:center;">#</th>
+              <th>Title</th>
+              <th>Class &amp; Subject</th>
+              <th style="text-align:center;">Set</th>
+              <th style="text-align:center;">Marks</th>
+              <th style="text-align:center;">Duration</th>
+              <th style="text-align:center;">Status</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for paper in papers %}
+            <tr>
+              <td style="text-align:center;color:var(--muted);font-size:12px;">{{ forloop.counter }}</td>
+              <td>
+                <div style="font-weight:600;color:var(--text);">{{ paper.title }}</div>
+                <div style="font-size:11px;color:var(--text-sm);">{{ paper.exam_name }}</div>
+              </td>
+              <td>
+                <div style="font-size:13px;color:var(--text);">{{ paper.cls.name }}</div>
+                <div style="font-size:11px;color:var(--text-sm);">{{ paper.subject.subject_name }}</div>
+              </td>
+              <td style="text-align:center;">
+                <span style="font-size:13px;font-weight:700;background:var(--accent-lt);color:var(--accent);
+                  border:1px solid var(--accent-mid);border-radius:6px;padding:3px 10px;display:inline-block;">
+                  Set {{ paper.set_label }}
+                </span>
+              </td>
+              <td style="text-align:center;font-weight:700;color:var(--text);">{{ paper.total_marks }}</td>
+              <td style="text-align:center;color:var(--text-sm);font-size:12px;">{{ paper.duration_mins }} min</td>
+              <td style="text-align:center;">
+                {% if paper.is_published %}
+                <span style="color:#059669;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;justify-content:center;">
+                  <i class="ri-checkbox-circle-fill"></i> Published
+                </span>
+                {% else %}
+                <span style="color:#d97706;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;justify-content:center;">
+                  <i class="ri-draft-line"></i> Draft
+                </span>
+                {% endif %}
+              </td>
+              <td style="text-align:center;">
+                <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;">
+                  <a href="{% url 'paper_builder' paper.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="Builder">
+                    <i class="ri-tools-line"></i>
+                  </a>
+                  <a href="{% url 'paper_preview' paper.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="Preview">
+                    <i class="ri-eye-line"></i>
+                  </a>
+                  <a href="{% url 'export_paper_pdf' paper.pk %}" target="_blank" class="pc-btn pc-btn-outline pc-btn-sm" title="PDF">
+                    <i class="ri-file-pdf-line"></i>
+                  </a>
+                  <a href="{% url 'export_answer_key_pdf' paper.pk %}" target="_blank" class="pc-btn pc-btn-outline pc-btn-sm" title="Answer Key">
+                    <i class="ri-key-line"></i>
+                  </a>
+                  <a href="{% url 'publish_paper' paper.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="Toggle Publish">
+                    <i class="ri-send-plane-line"></i>
+                  </a>
+                  <a href="{% url 'delete_paper' paper.pk %}"
+                     class="pc-btn pc-btn-outline pc-btn-sm"
+                     style="color:#ef4444;border-color:#fca5a5;"
+                     onclick="return confirm('Delete this paper?')" title="Delete">
+                    <i class="ri-delete-bin-line"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="pc-empty" style="padding:60px 20px;">
+        <span class="pc-empty-icon"><i class="ri-file-paper-2-line"></i></span>
+        <p class="pc-empty-title">No papers created yet</p>
+        <p class="pc-empty-sub">
+          <a href="{% url 'create_paper' %}">Create your first paper</a> to get started.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

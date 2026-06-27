@@ -1,0 +1,237 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.qb-type-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  border-radius: 20px;
+  padding: 2px 9px;
+  border: 1px solid;
+}
+.qb-mcq    { color:#6d28d9; background:#ede9fe; border-color:#c4b5fd; }
+.qb-short  { color:#0369a1; background:#e0f2fe; border-color:#7dd3fc; }
+.qb-long   { color:#0f766e; background:#ccfbf1; border-color:#5eead4; }
+.qb-fill   { color:#b45309; background:#fef3c7; border-color:#fcd34d; }
+.qb-tf     { color:#15803d; background:#dcfce7; border-color:#86efac; }
+.qb-match  { color:#be123c; background:#ffe4e6; border-color:#fca5a5; }
+.qb-diff-easy   { color:#15803d; background:#dcfce7; border-color:#86efac; }
+.qb-diff-medium { color:#b45309; background:#fef3c7; border-color:#fcd34d; }
+.qb-diff-hard   { color:#b91c1c; background:#fee2e2; border-color:#fca5a5; }
+.qb-approved    { color:#059669; }
+.qb-pending     { color:#d97706; }
+.qb-filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 14px 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  box-shadow: var(--sh-sm);
+}
+.qb-filter-bar select, .qb-filter-bar input[type=text] {
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  min-width: 130px;
+}
+.qb-filter-bar select:focus, .qb-filter-bar input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+</style>
+
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Question Bank</span>
+      </nav>
+      <h1 class="pc-page-title">Question Bank</h1>
+      <p class="pc-page-sub">{{ total }} question{{ total|pluralize }} in the bank.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'export_bank_excel' %}" class="pc-btn pc-btn-outline">
+        <i class="ri-file-excel-line"></i> Export
+      </a>
+      <a href="{% url 'bulk_import_questions' %}" class="pc-btn pc-btn-outline">
+        <i class="ri-upload-line"></i> Import
+      </a>
+      <a href="{% url 'add_question' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> Add Question
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="GET">
+    <div class="qb-filter-bar">
+      <div>
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Class</label>
+        <select name="cls" onchange="this.form.submit()">
+          <option value="">All Classes</option>
+          {% for c in classes %}
+          <option value="{{ c.id }}" {% if filter_cls == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Type</label>
+        <select name="qtype" onchange="this.form.submit()">
+          <option value="">All Types</option>
+          <option value="MCQ" {% if filter_qtype == 'MCQ' %}selected{% endif %}>MCQ</option>
+          <option value="SHORT" {% if filter_qtype == 'SHORT' %}selected{% endif %}>Short Answer</option>
+          <option value="LONG" {% if filter_qtype == 'LONG' %}selected{% endif %}>Long Answer</option>
+          <option value="FILL" {% if filter_qtype == 'FILL' %}selected{% endif %}>Fill in Blank</option>
+          <option value="TF" {% if filter_qtype == 'TF' %}selected{% endif %}>True/False</option>
+          <option value="MATCH" {% if filter_qtype == 'MATCH' %}selected{% endif %}>Match</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Difficulty</label>
+        <select name="difficulty" onchange="this.form.submit()">
+          <option value="">All Levels</option>
+          <option value="EASY" {% if filter_difficulty == 'EASY' %}selected{% endif %}>Easy</option>
+          <option value="MEDIUM" {% if filter_difficulty == 'MEDIUM' %}selected{% endif %}>Medium</option>
+          <option value="HARD" {% if filter_difficulty == 'HARD' %}selected{% endif %}>Hard</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Status</label>
+        <select name="approved" onchange="this.form.submit()">
+          <option value="">All</option>
+          <option value="1" {% if filter_approved == '1' %}selected{% endif %}>Approved</option>
+          <option value="0" {% if filter_approved == '0' %}selected{% endif %}>Pending</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:180px;">
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Search</label>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search question text…">
+      </div>
+      <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 16px;">
+        <i class="ri-search-line"></i>
+      </button>
+      {% if search or filter_cls or filter_qtype or filter_difficulty or filter_approved %}
+      <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline" style="padding:8px 14px;" title="Clear filters">
+        <i class="ri-close-line"></i>
+      </a>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Table -->
+  <div class="pc-card">
+    <div class="pc-card-body" style="padding:0;">
+      {% if questions %}
+      <div class="pc-table-wrap" style="border-radius:0;border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="width:50px;text-align:center;">#</th>
+              <th>Question</th>
+              <th style="text-align:center;">Type</th>
+              <th style="text-align:center;">Difficulty</th>
+              <th style="text-align:center;">Marks</th>
+              <th style="text-align:center;">Status</th>
+              <th style="text-align:center;">Used</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in questions %}
+            <tr>
+              <td style="text-align:center;color:var(--muted);font-size:12px;">{{ forloop.counter }}</td>
+              <td>
+                <div style="max-width:500px;">
+                  <div style="font-size:13.5px;color:var(--text);line-height:1.5;">
+                    {{ q.question_text|truncatechars:120 }}
+                  </div>
+                  <div style="margin-top:4px;font-size:11px;color:var(--text-sm);">
+                    {{ q.cls.name }} &bull; {{ q.subject.subject_name }}
+                    {% if q.chapter %}&bull; {{ q.chapter.name }}{% endif %}
+                    {% if q.tags %}&bull; <span style="color:var(--accent);">{{ q.tags }}</span>{% endif %}
+                  </div>
+                </div>
+              </td>
+              <td style="text-align:center;">
+                <span class="qb-type-badge
+                  {% if q.question_type == 'MCQ' %}qb-mcq
+                  {% elif q.question_type == 'SHORT' %}qb-short
+                  {% elif q.question_type == 'LONG' %}qb-long
+                  {% elif q.question_type == 'FILL' %}qb-fill
+                  {% elif q.question_type == 'TF' %}qb-tf
+                  {% elif q.question_type == 'MATCH' %}qb-match{% endif %}">
+                  {{ q.question_type }}
+                </span>
+              </td>
+              <td style="text-align:center;">
+                <span class="qb-type-badge
+                  {% if q.difficulty == 'EASY' %}qb-diff-easy
+                  {% elif q.difficulty == 'MEDIUM' %}qb-diff-medium
+                  {% else %}qb-diff-hard{% endif %}">
+                  {{ q.difficulty }}
+                </span>
+              </td>
+              <td style="text-align:center;font-weight:700;color:var(--text);">{{ q.marks }}</td>
+              <td style="text-align:center;">
+                {% if q.is_approved %}
+                <span class="qb-approved" title="Approved"><i class="ri-checkbox-circle-fill" style="font-size:18px;"></i></span>
+                {% else %}
+                <span class="qb-pending" title="Pending"><i class="ri-time-line" style="font-size:18px;"></i></span>
+                {% endif %}
+              </td>
+              <td style="text-align:center;font-size:12px;color:var(--text-sm);">{{ q.usage_count }}</td>
+              <td style="text-align:center;">
+                <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
+                  <a href="{% url 'view_question' q.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="View">
+                    <i class="ri-eye-line"></i>
+                  </a>
+                  <a href="{% url 'edit_question' q.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="Edit">
+                    <i class="ri-edit-line"></i>
+                  </a>
+                  <a href="{% url 'approve_question' q.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="Toggle Approval">
+                    <i class="ri-shield-check-line"></i>
+                  </a>
+                  <a href="{% url 'delete_question' q.pk %}"
+                     class="pc-btn pc-btn-outline pc-btn-sm"
+                     style="color:#ef4444;border-color:#fca5a5;"
+                     onclick="return confirm('Delete this question?')" title="Delete">
+                    <i class="ri-delete-bin-line"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="pc-empty" style="padding:60px 20px;">
+        <span class="pc-empty-icon"><i class="ri-question-line"></i></span>
+        <p class="pc-empty-title">No questions found</p>
+        <p class="pc-empty-sub">
+          {% if search or filter_cls or filter_qtype %}
+            Try adjusting your filters or
+          {% endif %}
+          <a href="{% url 'add_question' %}">add your first question</a>.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,613 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ── Layout ── */
+.pb-layout { display:grid; grid-template-columns:3fr 2fr; gap:20px; align-items:start; }
+@media (max-width:900px) { .pb-layout { grid-template-columns:1fr; } }
+
+/* ── Left panel ── */
+.pb-section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: var(--sh-sm);
+}
+.pb-section-header {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.pb-section-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.pb-section-mpq {
+  font-size: 11px; color: var(--text-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2px 10px;
+}
+.pb-q-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  transition: background 150ms;
+}
+.pb-q-row:last-child { border-bottom: none; }
+.pb-q-row:hover { background: #f8faff; }
+.pb-q-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent-lt); color: var(--accent);
+  border: 1px solid var(--accent-mid);
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.pb-q-text { flex:1; font-size:13px; color:var(--text); line-height:1.5; }
+.pb-q-meta { font-size:11px; color:var(--text-sm); margin-top:3px; }
+.pb-remove-btn {
+  background: none; border: none; cursor: pointer;
+  color: #ef4444; font-size: 16px; flex-shrink: 0;
+  padding: 2px 4px; border-radius: 4px;
+  transition: background 150ms;
+}
+.pb-remove-btn:hover { background: #fee2e2; }
+
+/* ── Add Section form ── */
+.pb-add-sec {
+  background: var(--surface);
+  border: 1px dashed var(--border-dark);
+  border-radius: var(--r-xl);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.pb-add-sec-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;
+}
+.pb-add-sec-grid input, .pb-add-sec-grid select {
+  border: 1.5px solid var(--border-dark); border-radius: var(--r);
+  padding: 7px 10px; font-size:13px; color:var(--text); background:var(--surface);
+  outline: none; width: 100%;
+}
+.pb-add-sec-grid input:focus, .pb-add-sec-grid select:focus {
+  border-color: var(--accent);
+}
+
+/* ── Right panel: Question Bank ── */
+.pb-bank-wrap {
+  position: sticky;
+  top: 80px;
+}
+.pb-bank-header {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 13px 16px;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pb-bank-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.pb-bank-filters {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 6px; flex-wrap: wrap; background: var(--surface2);
+}
+.pb-bank-filters select, .pb-bank-filters input[type=text] {
+  border: 1.5px solid var(--border-dark); border-radius: var(--r);
+  padding: 6px 10px; font-size: 12px; color: var(--text); background: var(--surface);
+  outline: none; flex: 1; min-width: 80px;
+}
+.pb-bank-filters select:focus, .pb-bank-filters input:focus {
+  border-color: var(--accent);
+}
+
+/* ── Target section selector ── */
+.pb-target {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--accent-lt);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.pb-target label { font-size: 11px; font-weight:700; color: var(--accent); white-space: nowrap; }
+.pb-target select {
+  flex: 1; border: 1.5px solid var(--accent-mid); border-radius: var(--r);
+  padding: 6px 10px; font-size: 12px; color: var(--text); background: var(--surface); outline: none;
+}
+
+/* ── Bank question row ── */
+.pb-bq-row {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 8px;
+  transition: background 150ms;
+}
+.pb-bq-row:last-child { border-bottom: none; }
+.pb-bq-row:hover { background: #f8faff; }
+.pb-bq-row.used { opacity: .45; }
+.pb-bq-text { flex:1; font-size:12.5px; color:var(--text); line-height:1.5; }
+.pb-bq-meta { font-size:10px; color:var(--text-sm); margin-top:2px; display:flex; gap:5px; flex-wrap:wrap; }
+.pb-add-btn {
+  background: var(--accent); color: #fff; border: none; cursor: pointer;
+  border-radius: var(--r); padding: 5px 10px; font-size: 12px; font-weight: 700;
+  flex-shrink: 0; margin-top: 2px; transition: opacity 150ms;
+}
+.pb-add-btn:hover { opacity: .85; }
+.pb-add-btn:disabled { opacity: .35; cursor: not-allowed; }
+.pb-add-btn.used {
+  background: var(--surface2); color: var(--text-sm); border: 1px solid var(--border);
+}
+
+/* ── Stats bar ── */
+.pb-stats {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--sh-sm);
+}
+.pb-stat { text-align: center; }
+.pb-stat-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+.pb-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-sm); }
+
+/* ── Auto-generate modal ── */
+.nb-modal { display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; }
+.nb-modal.active { display:flex; }
+.nb-modal-bg { position:absolute; inset:0; background:rgba(0,0,0,.45); }
+.nb-modal-box {
+  position:relative; z-index:1; background:var(--surface);
+  border-radius:var(--r-xl); box-shadow:0 20px 60px rgba(0,0,0,.2);
+  width:min(600px,95vw); max-height:80vh; overflow-y:auto; padding:24px;
+}
+</style>
+
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'paper_list' %}">Papers</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Builder</span>
+      </nav>
+      <h1 class="pc-page-title">{{ paper.title }}</h1>
+      <p class="pc-page-sub">{{ paper.cls.name }} &bull; {{ paper.subject.subject_name }} &bull; Set {{ paper.set_label }}</p>
+    </div>
+    <div class="pc-page-header-right">
+      <button type="button" onclick="openAutoModal()" class="pc-btn pc-btn-outline">
+        <i class="ri-magic-line"></i> Auto-Generate
+      </button>
+      <a href="{% url 'paper_preview' paper.pk %}" class="pc-btn pc-btn-outline" target="_blank">
+        <i class="ri-eye-line"></i> Preview
+      </a>
+      <a href="{% url 'export_paper_pdf' paper.pk %}" class="pc-btn pc-btn-primary" target="_blank">
+        <i class="ri-file-pdf-line"></i> Export PDF
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="pb-stats">
+    <div class="pb-stat">
+      <div class="pb-stat-val">{{ used_count }}</div>
+      <div class="pb-stat-lbl">Questions Added</div>
+    </div>
+    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
+      <div class="pb-stat-val">{{ total_added_marks }}</div>
+      <div class="pb-stat-lbl">Marks Assigned</div>
+    </div>
+    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
+      <div class="pb-stat-val">{{ paper.total_marks }}</div>
+      <div class="pb-stat-lbl">Target Marks</div>
+    </div>
+    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
+      <div class="pb-stat-val">{{ paper.duration_mins }}</div>
+      <div class="pb-stat-lbl">Minutes</div>
+    </div>
+    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
+      <div class="pb-stat-val">{{ sections|length }}</div>
+      <div class="pb-stat-lbl">Sections</div>
+    </div>
+  </div>
+
+  <div class="pb-layout">
+
+    <!-- LEFT: Paper -->
+    <div>
+
+      <!-- Add Section -->
+      <div class="pb-add-sec">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-sm);margin-bottom:10px;">
+          <i class="ri-add-circle-line"></i> Add New Section
+        </p>
+        <form method="POST" action="{% url 'add_section' paper.pk %}">
+          {% csrf_token %}
+          <div class="pb-add-sec-grid">
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Section Name</label>
+              <input type="text" name="section_name" required placeholder="e.g. Section A – MCQ">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Marks/Q</label>
+              <input type="number" name="marks_per_question" value="1" min="1">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Attempt (opt)</label>
+              <input type="number" name="num_to_attempt" placeholder="All">
+            </div>
+            <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 14px;">
+              <i class="ri-add-line"></i> Add
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sections -->
+      {% if sections %}
+      {% for sec in sections %}
+      <div class="pb-section-card" id="sec-{{ sec.pk }}">
+        <div class="pb-section-header">
+          <div class="pb-section-title">
+            <i class="ri-layout-row-line" style="color:var(--accent);"></i>
+            {{ sec.section_name }}
+            <span class="pb-section-mpq">{{ sec.marks_per_question }} mark{{ sec.marks_per_question|pluralize }}/Q</span>
+            {% if sec.num_to_attempt %}
+            <span class="pb-section-mpq">Attempt {{ sec.num_to_attempt }}</span>
+            {% endif %}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:11px;" id="sec-count-{{ sec.pk }}">
+              {{ sec.questions.count }} Q
+            </span>
+            <a href="{% url 'delete_section' paper.pk sec.pk %}"
+               class="pb-remove-btn" style="font-size:14px;"
+               onclick="return confirm('Delete section {{ sec.section_name }}?')" title="Delete section">
+              <i class="ri-delete-bin-line"></i>
+            </a>
+          </div>
+        </div>
+        <div id="sec-qlist-{{ sec.pk }}">
+          {% for pq in sec.questions.all %}
+          <div class="pb-q-row" id="pq-{{ pq.pk }}">
+            <div class="pb-q-num">{{ forloop.counter }}</div>
+            <div style="flex:1;">
+              <div class="pb-q-text">{{ pq.question.question_text|truncatechars:160 }}</div>
+              <div class="pb-q-meta">
+                {{ pq.question.get_question_type_display }} &bull;
+                {{ pq.question.get_difficulty_display }} &bull;
+                {{ pq.question.marks }}M
+                {% if pq.question.chapter %}&bull; {{ pq.question.chapter.name }}{% endif %}
+              </div>
+            </div>
+            <button class="pb-remove-btn" title="Remove from paper"
+              onclick="removeQuestion({{ pq.pk }}, this)">
+              <i class="ri-close-circle-line"></i>
+            </button>
+          </div>
+          {% empty %}
+          <div style="padding:20px 16px;color:var(--text-sm);font-size:13px;text-align:center;" id="sec-empty-{{ sec.pk }}">
+            No questions added yet. Pick from the bank on the right.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+
+      {% else %}
+      <div class="pc-card">
+        <div class="pc-card-body">
+          <div class="pc-empty" style="padding:40px 20px;">
+            <span class="pc-empty-icon"><i class="ri-layout-row-line"></i></span>
+            <p class="pc-empty-title">No sections yet</p>
+            <p class="pc-empty-sub">Add a section above to start building the paper.</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- RIGHT: Question Bank -->
+    <div class="pb-bank-wrap">
+      <div class="pb-bank-header">
+        <span style="font-weight:700;font-size:13px;"><i class="ri-database-2-line"></i> Question Bank</span>
+        <span style="font-size:11px;color:#94a3b8;">{{ bank_questions|length }} matching</span>
+      </div>
+      <div class="pb-bank-body">
+
+        <!-- Target Section -->
+        <div class="pb-target">
+          <label><i class="ri-target-line"></i> Add to:</label>
+          <select id="target-section">
+            {% if sections %}
+            {% for sec in sections %}
+            <option value="{{ sec.pk }}">{{ sec.section_name }}</option>
+            {% endfor %}
+            {% else %}
+            <option value="">— No sections —</option>
+            {% endif %}
+          </select>
+        </div>
+
+        <!-- Filters -->
+        <form method="GET" class="pb-bank-filters">
+          <input type="text" name="bq" value="{{ search }}" placeholder="Search…">
+          <select name="ch" onchange="this.form.submit()">
+            <option value="">All Chapters</option>
+            {% for ch in chapters %}
+            <option value="{{ ch.pk }}" {% if ch_filter == ch.pk|stringformat:'s' %}selected{% endif %}>{{ ch.name }}</option>
+            {% endfor %}
+          </select>
+          <select name="qt" onchange="this.form.submit()">
+            <option value="">All Types</option>
+            <option value="MCQ" {% if type_filter == 'MCQ' %}selected{% endif %}>MCQ</option>
+            <option value="SHORT" {% if type_filter == 'SHORT' %}selected{% endif %}>Short</option>
+            <option value="LONG" {% if type_filter == 'LONG' %}selected{% endif %}>Long</option>
+            <option value="FILL" {% if type_filter == 'FILL' %}selected{% endif %}>Fill</option>
+            <option value="TF" {% if type_filter == 'TF' %}selected{% endif %}>T/F</option>
+            <option value="MATCH" {% if type_filter == 'MATCH' %}selected{% endif %}>Match</option>
+          </select>
+          <select name="df" onchange="this.form.submit()">
+            <option value="">All Levels</option>
+            <option value="EASY" {% if diff_filter == 'EASY' %}selected{% endif %}>Easy</option>
+            <option value="MEDIUM" {% if diff_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+            <option value="HARD" {% if diff_filter == 'HARD' %}selected{% endif %}>Hard</option>
+          </select>
+          <button type="submit" class="pc-btn pc-btn-primary" style="padding:6px 10px;font-size:12px;">
+            <i class="ri-search-line"></i>
+          </button>
+        </form>
+
+        <!-- Question rows -->
+        {% if bank_questions %}
+        {% for q in bank_questions %}
+        <div class="pb-bq-row {% if q.pk in used_ids %}used{% endif %}" id="bq-{{ q.pk }}">
+          <div style="flex:1;">
+            <div class="pb-bq-text">{{ q.question_text|truncatechars:120 }}</div>
+            <div class="pb-bq-meta">
+              <span>{{ q.get_question_type_display }}</span>
+              <span>&bull;</span>
+              <span>{{ q.get_difficulty_display }}</span>
+              <span>&bull;</span>
+              <span>{{ q.marks }}M</span>
+              {% if q.chapter %}<span>&bull;</span><span>{{ q.chapter.name }}</span>{% endif %}
+            </div>
+          </div>
+          {% if q.pk in used_ids %}
+          <button class="pb-add-btn used" disabled><i class="ri-check-line"></i></button>
+          {% else %}
+          <button class="pb-add-btn" id="add-btn-{{ q.pk }}"
+            onclick="addQuestion({{ q.pk }}, this)">
+            <i class="ri-add-line"></i>
+          </button>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="padding:30px;text-align:center;color:var(--text-sm);font-size:13px;">
+          No approved questions found for this class &amp; subject.
+          <br><br>
+          <a href="{% url 'add_question' %}" class="pc-btn pc-btn-outline pc-btn-sm">
+            <i class="ri-add-line"></i> Add Questions
+          </a>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Auto-Generate Modal -->
+<div class="nb-modal" id="auto-modal">
+  <div class="nb-modal-bg" onclick="closeAutoModal()"></div>
+  <div class="nb-modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="font-size:16px;font-weight:700;color:var(--text);">
+        <i class="ri-magic-line" style="color:var(--accent);"></i> Auto-Generate Questions
+      </h2>
+      <button onclick="closeAutoModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted);">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <p style="font-size:13px;color:var(--text-sm);margin-bottom:18px;">
+      Set parameters for each section. The system will randomly pick approved questions from the bank.
+    </p>
+
+    <div id="auto-sections">
+      {% for sec in sections %}
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;">
+        <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">
+          <i class="ri-layout-row-line" style="color:var(--accent);"></i> {{ sec.section_name }}
+        </p>
+        <input type="hidden" class="as-sec-id" value="{{ sec.pk }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Questions to Add</label>
+            <input type="number" class="as-num nb-input" style="padding:6px 10px;font-size:12px;" value="5" min="0">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Type</label>
+            <select class="as-type" style="border:1.5px solid var(--border-dark);border-radius:var(--r);padding:6px 10px;font-size:12px;color:var(--text);background:var(--surface);outline:none;width:100%;">
+              <option value="">Any</option>
+              <option value="MCQ">MCQ</option>
+              <option value="SHORT">Short</option>
+              <option value="LONG">Long</option>
+              <option value="FILL">Fill</option>
+              <option value="TF">T/F</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Difficulty</label>
+            <select class="as-diff" style="border:1.5px solid var(--border-dark);border-radius:var(--r);padding:6px 10px;font-size:12px;color:var(--text);background:var(--surface);outline:none;width:100%;">
+              <option value="">Any</option>
+              <option value="EASY">Easy</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HARD">Hard</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Chapter</label>
+            <select class="as-chapter" style="border:1.5px solid var(--border-dark);border-radius:var(--r);padding:6px 10px;font-size:12px;color:var(--text);background:var(--surface);outline:none;width:100%;">
+              <option value="">Any</option>
+              {% for ch in chapters %}
+              <option value="{{ ch.pk }}">{{ ch.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:var(--text-sm);font-size:13px;text-align:center;padding:20px 0;">
+        No sections found. Add sections first.
+      </p>
+      {% endfor %}
+    </div>
+
+    <div id="auto-msg" style="margin:12px 0;font-size:13px;display:none;"></div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button onclick="runAutoGenerate()" class="pc-btn pc-btn-primary" style="flex:1;justify-content:center;" id="auto-run-btn">
+        <i class="ri-magic-line"></i> Generate
+      </button>
+      <button onclick="closeAutoModal()" class="pc-btn pc-btn-outline" style="flex:1;justify-content:center;">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAPER_PK = {{ paper.pk }};
+const CSRF = '{{ csrf_token }}';
+
+function addQuestion(qid, btn) {
+  const secId = document.getElementById('target-section').value;
+  if (!secId) { alert('Please add a section first.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ri-loader-4-line"></i>';
+
+  fetch(`{% url 'add_question_to_paper' paper.pk %}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ question_id: qid, section_id: secId }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      btn.innerHTML = '<i class="ri-check-line"></i>';
+      btn.classList.add('used');
+      document.getElementById(`bq-${qid}`)?.classList.add('used');
+
+      // Remove "no questions" placeholder
+      const empty = document.getElementById(`sec-empty-${secId}`);
+      if (empty) empty.remove();
+
+      // Count existing questions in section
+      const qlist = document.getElementById(`sec-qlist-${secId}`);
+      const cnt = qlist.querySelectorAll('.pb-q-row').length + 1;
+
+      const div = document.createElement('div');
+      div.className = 'pb-q-row';
+      div.id = `pq-${data.pq_id}`;
+      div.innerHTML = `
+        <div class="pb-q-num">${cnt}</div>
+        <div style="flex:1;">
+          <div class="pb-q-text">${data.question_text.substring(0,160)}${data.question_text.length>160?'…':''}</div>
+          <div class="pb-q-meta">${data.qtype} &bull; ${data.difficulty} &bull; ${data.marks}M</div>
+        </div>
+        <button class="pb-remove-btn" title="Remove from paper"
+          onclick="removeQuestion(${data.pq_id}, this)">
+          <i class="ri-close-circle-line"></i>
+        </button>`;
+      qlist.appendChild(div);
+
+      // Update badge
+      const badge = document.getElementById(`sec-count-${secId}`);
+      if (badge) badge.textContent = `${cnt} Q`;
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ri-add-line"></i>';
+      alert(data.error || 'Could not add question.');
+    }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ri-add-line"></i>';
+  });
+}
+
+function removeQuestion(pqId, btn) {
+  if (!confirm('Remove this question from the paper?')) return;
+  fetch(`{% url 'remove_question_from_paper' paper.pk %}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ pq_id: pqId }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const row = document.getElementById(`pq-${pqId}`);
+      if (row) row.remove();
+    }
+  });
+}
+
+function openAutoModal() { document.getElementById('auto-modal').classList.add('active'); }
+function closeAutoModal() { document.getElementById('auto-modal').classList.remove('active'); }
+
+function runAutoGenerate() {
+  const btn = document.getElementById('auto-run-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ri-loader-4-line"></i> Generating…';
+
+  const sections = [];
+  document.querySelectorAll('#auto-sections > div').forEach(row => {
+    sections.push({
+      section_id: row.querySelector('.as-sec-id').value,
+      num_questions: parseInt(row.querySelector('.as-num').value) || 0,
+      question_type: row.querySelector('.as-type').value,
+      difficulty: row.querySelector('.as-diff').value,
+      chapter_id: row.querySelector('.as-chapter').value || null,
+    });
+  });
+
+  fetch(`{% url 'auto_generate_paper' paper.pk %}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ sections }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    const msg = document.getElementById('auto-msg');
+    msg.style.display = 'block';
+    if (data.success) {
+      let html = `<span style="color:#059669;"><i class="ri-checkbox-circle-fill"></i> ${data.added} question(s) added.</span>`;
+      if (data.errors && data.errors.length) {
+        html += '<br><span style="color:#d97706;">' + data.errors.join('<br>') + '</span>';
+      }
+      msg.innerHTML = html;
+      setTimeout(() => { window.location.reload(); }, 1200);
+    } else {
+      msg.innerHTML = `<span style="color:#ef4444;">${data.error || 'Failed.'}</span>`;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ri-magic-line"></i> Generate';
+    }
+  });
+}
+</script>
+
+{% endblock %}

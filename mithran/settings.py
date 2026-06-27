@@ -89,9 +89,9 @@ INSTALLED_APPS = [
     'automate',
     'tally',
     'assets',
-    'grievance'
-    
-     
+    'grievance',
+    'jacobreports',
+    'qbank',
 ]
 
 Q_CLUSTER = {
@@ -106,6 +106,19 @@ Q_CLUSTER = {
     'orm': 'default',
     'scheduler': True,  # Important
 }
+
+# Q_CLUSTER = {
+#     'name': 'DjangoQ',
+#     'workers': 4,
+#     'recycle': 500,
+#     'timeout': 300,
+#     'retry': 0 ,
+#     'ack_failures': False,
+#     'queue_limit': 50,
+#     'bulk': 10,
+#     'orm': 'default',
+#     'scheduler': True,  # Important
+# }
 
 
 REST_FRAMEWORK = {
@@ -269,6 +282,16 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER ='AKIAQK5TKPH6YNWWO3OK'
 EMAIL_HOST_PASSWORD = 'BJJ9AIPeCGzYvgzG+5JqyQS7ozy+V3A9NlCkt8d8DE0i'
 DEFAULT_FROM_EMAIL = 'noreply@mithran.co.in'
+
+
+#Payment Gateway
+
+# settings.py
+PAYU_MERCHANT_KEY  = 'gtKFFx'
+PAYU_MERCHANT_SALT = '4R38IvwiV57FwVpsgOvTXBdLE4tHUXFW'  # ← correct salt
+PAYU_BASE_URL      = 'https://test.payu.in/_payment'
+PAYU_TEST_MODE = True   # ← set False in production
+
 
 LOGGING = {
     'version': 1,
