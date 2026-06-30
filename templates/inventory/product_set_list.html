@@ -1,172 +1,204 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
-<style>
-/* === Typography === */
-body, h1, h3, h5, th, td, label, input, button {
-    font-family: 'Roboto', sans-serif;
-}
 
-/* === Card Styling === */
-.card {
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: none;
-    overflow: hidden;
-}
-
-/* === Card Header === */
-.card-title {
-    background: linear-gradient(90deg, #007bff, #00c6ff);
-    color: white;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px 15px 0 0;
-    padding: 0 15px;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-/* === Table Styling === */
-/* === Table Styling === */
-.table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 6px;
-}
-
-/* Table header */
-.table thead,
-.table thead th {
-    background-color: #212529 !important;  /* dark background */
-    color: #ffffff !important;             /* white text */
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 13px !important;            /* slightly smaller font */
-    padding: 6px 8px !important;           /* reduce padding */
-    height: 35px !important;               /* set slim header height */
-    text-align: center;
-    vertical-align: middle !important;
-}
-
-/* Table body rows */
-.table tbody td {
-    background-color: #ffffff;
-    vertical-align: middle;
-    font-size: 15px;
-    padding: 10px !important;
-    text-align: center;
-    border-radius: 6px;
-}
-
-/* Hover effect */
-tr:hover td {
-    background-color: #f6f8ff;
-}
-
-/* === Buttons === */
-.text-end {
-    padding-right: 20px;
-    text-align: end;
-}
-
-.btn {
-    padding: 6px 14px;
-    font-size: 14px;
-    border-radius: 10px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-info {
-    background: linear-gradient(90deg, #17a2b8, #20c997);
-    border: none;
-    color: #fff;
-}
-
-.btn-info:hover {
-    background: linear-gradient(90deg, #138496, #17a2b8);
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #dc3545, #ff4b5c);
-    border: none;
-    color: #fff;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(90deg, #c82333, #e55353);
-}
-</style>
-
-<div class="col-lg-12 grid-margin stretch-card mt-4">
-    <div class="card">
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Products List</span></h5>
-        </div>
-
-        <div class="text-end mt-2 mb-2">
-            <form action="{% url 'product_set_create' %}" method="">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-info">New Product Set</button>
-            </form>
-        </div>
-
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Group Name</th>
-                            <th>Class Name</th>
-                            <th>Product Name</th>
-                            <th>Quantity</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if data %}
-                            {% for set in data %}
-                                <tr>
-                                    <td>{{ set.name }}</td>
-                                    <td>{{ set.pclass.name }}</td>
-                                    <td>{{ set.prod_set }}</td>
-                                    <td>{{ set.qty }}</td>
-                                    <td>
-                                        <form action="{% url 'product_set_update' set.id %}" method="" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-info btn-sm">Update</button>
-                                        </form>
-                                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                                        <form action="{% url 'product_set_delete' set.id %}" method="" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="5">
-                                    <div class="alert alert-danger text-center mb-0" role="alert">
-                                        No Records Available to Show
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Product Group Items</span>
 
     </div>
+    <div class="pc-page-title">Product Sets</div>
+    <div class="pc-page-sub">Manage product groups, classes and stock quantities</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'product_set_create' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> New Product Set
+    </a>
+  </div>
 </div>
+
+<!-- KPI ROW -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data|length }}</div>
+    <div class="pc-kpi-label">Total Sets</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ unique_classes }}</div>
+    <div class="pc-kpi-label">Classes</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ total_qty }}</div>
+    <div class="pc-kpi-label">Total Qty</div>
+  </div>
+</div>
+
+<!-- MAIN CARD -->
+<div class="pc-card">
+
+  <!-- Card Header -->
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-archive-line me-2" style="color:var(--accent);"></i>All Product Sets
+      </div>
+      <div class="pc-card-sub">{{ skool }} — {{ year }}</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:12px; padding:5px 14px;">
+      {{ data|length }} set{{ data|length|pluralize }}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+
+    <!-- Search Bar -->
+    <div class="pc-filter-row" style="margin-bottom:1.25rem;">
+      <div class="pc-form-group" style="flex:1; max-width:300px;">
+        <label class="pc-label">Search</label>
+        <div class="pc-input-group">
+          <i class="ri-search-line pc-input-icon"></i>
+          <input type="text" id="searchInput" class="pc-input" placeholder="Search by name, class or product…">
+        </div>
+      </div>
+      <div class="pc-form-group" style="min-width:90px; align-self:flex-end;">
+        <button class="pc-btn pc-btn-outline" onclick="document.getElementById('searchInput').value=''; filterRows('');" style="width:100%;">
+          <i class="ri-refresh-line"></i> Reset
+        </button>
+      </div>
+      <div class="pc-form-group" style="margin-left:auto; align-self:flex-end;">
+        <span class="pc-badge pc-badge-primary pc-badge-no-dot" id="recordCount" style="font-size:12px; padding:5px 14px;">
+          {{ data|length }} records
+        </span>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <div class="pc-table-wrap">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px;">#</th>
+              <th style="text-align:left;">Group Name</th>
+              <th>Class</th>
+              <th>Product Name</th>
+              <th>Qty</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% if data %}
+              {% for set in data %}
+              <tr class="data-row">
+                <td class="td-num">{{ forloop.counter }}</td>
+                <td>
+                  <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                    {{ set.name }}
+                  </span>
+                </td>
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#ecfdf5; color:#059669;">
+                    {{ set.pclass.name }}
+                  </span>
+                </td>
+                <td class="td-name">
+                  <div style="font-weight:600; color:var(--text);">{{ set.prod_set }}</div>
+                  <div style="font-size:11px; color:var(--text-md);">ID #{{ set.id }}</div>
+                </td>
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fffbeb; color:#d97706; font-size:13px; font-weight:600; padding:5px 14px;">
+                    {{ set.qty }}
+                  </span>
+                </td>
+                <td>
+                  <div class="td-actions">
+                    <a href="{% url 'product_set_update' set.id %}"
+                       class="pc-btn pc-btn-secondary pc-btn-sm"
+                       title="Edit">
+                      <i class="ri-pencil-line"></i> Edit
+                    </a>
+                    {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                    <a href="{% url 'product_set_delete' set.id %}"
+                       class="pc-btn pc-btn-danger pc-btn-sm"
+                       title="Delete"
+                       onclick="return confirm('Delete this product set?')">
+                      <i class="ri-delete-bin-6-line"></i>
+                    </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="pc-table-empty">
+                <td colspan="6">
+                  <div class="pc-empty">
+                    <i class="ri-archive-line pc-empty-icon"></i>
+                    <div class="pc-empty-title">No product sets found</div>
+                    <div class="pc-empty-sub">Add a new product set to get started</div>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /pc-card-body -->
+
+  <!-- Card Footer -->
+  <div class="pc-card-footer">
+    <div class="pc-pagination-info">
+      Total: <strong>{{ data|length }}</strong> set{{ data|length|pluralize }}
+    </div>
+  </div>
+
+</div><!-- /pc-card -->
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const rows = document.querySelectorAll('.data-row');
+  const recordCount = document.getElementById('recordCount');
+  const tableBody = document.getElementById('tableBody');
+
+  function filterRows(q) {
+    let visible = 0;
+    rows.forEach(row => {
+      const match = row.innerText.toLowerCase().includes(q.toLowerCase().trim());
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    recordCount.textContent = visible + ' records';
+
+    let noResult = document.getElementById('noResultRow');
+    if (visible === 0 && q !== '') {
+      if (!noResult) {
+        noResult = document.createElement('tr');
+        noResult.id = 'noResultRow';
+        noResult.className = 'pc-table-empty';
+        noResult.innerHTML = `<td colspan="6">
+          <div class="pc-empty">
+            <i class="ri-search-line pc-empty-icon"></i>
+            <div class="pc-empty-title">No results found</div>
+            <div class="pc-empty-sub">Try a different keyword</div>
+          </div>
+        </td>`;
+        tableBody.appendChild(noResult);
+      }
+    } else {
+      if (noResult) noResult.remove();
+    }
+  }
+
+  searchInput.addEventListener('input', function () {
+    filterRows(this.value);
+  });
+</script>
+
 {% endblock %}

@@ -1,195 +1,232 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
-    font-family: 'Roboto', sans-serif;
-}
+  .exam-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 24px;
+  }
+  .ef-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .ef-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .ef-field label .req { color: var(--rose); margin-left: 2px; }
+  .ef-field input,
+  .ef-field select,
+  .ef-field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .ef-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  .ef-field textarea { resize: vertical; min-height: 78px; }
+  .ef-field input:focus,
+  .ef-field select:focus,
+  .ef-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
-/* ===== CARD TITLE (REDUCED HEIGHT) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px 0 !important;            /* reduced height */
-    border-radius: 20px 20px 0 0;
-    margin-bottom: 0;
-}
+  /* Section label */
+  .form-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 14px;
+  }
+  .form-section-label:first-child { margin-top: 0; }
+  .form-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .form-section-label i { font-size:13px; color:var(--accent); opacity:.7; }
 
-.card-title h5 {
-    margin: 0;
-}
+  .ef-hidden { display: none; }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 14px;                  /* reduced badge font */
-    padding: 4px 10px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
-}
-
-/* ===== FORM SPACING (SPACE BETWEEN EVERY ROW) ===== */
-.row {
-    margin-bottom: 18px !important;
-}
-
-/* ===== INPUT, SELECT, TEXTAREA ===== */
-.form-control {
-    border-radius: 10px !important;
-    padding: 8px 10px !important;
-}
-
-/* ===== BUTTONS ===== */
-.btn {
-    border-radius: 10px !important;
-}
-
-/* Cancel button red gradient */
-.btn-danger {
-    background: linear-gradient(90deg, #ff4d4d, #b30000);
-    border: none;
-}
-
-/* ===== ALIGN SUBMIT BUTTON ===== */
-.text-end {
-    padding-right: 20px;
-}
+  @media (max-width: 640px) {
+    .exam-form-grid { grid-template-columns: 1fr; }
+  }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge">Copy Exam</span>
-            </h5>
-        </div>
-
-        <div class="card-body">
-
-            <form action="" id="updateexamform" data-uclass-url="{% url 'ajax_load_uclass' %}" method="POST">
-                {% csrf_token %}
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_title }}
-                            <label for="id_exam_title">Exam</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_code }}
-                            <label for="id_exam_code">Exam Code</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_centre }}
-                            <label for="id_exam_centre">Exam Centre</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select name="exam_class" class="form-control" required id="id_exam_class">
-                                <option value="{{ ex_cls.id }}">{{ ex_cls }}</option>
-                                {% for cl in cls %}
-                                    {% if cl.id != ex_cls.id %}
-                                        <option value="{{ cl.id }}">{{ cl.name }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                            <label for="id_exam_class">Class</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_Sub_count }}
-                            <label for="id_exam_Sub_count">Subject Count</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select name="exm_grp" class="form-control" id="id_exm_grp">
-                                <option value="{{ ex_grp.id }}">{{ ex_grp }}</option>
-                                {% for exg in exgrp %}
-                                    {% if exg.id != ex_grp.id %}
-                                        <option value="{{ exg.id }}">{{ exg }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                            <label for="id_exm_grp">Exam Group</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_start_date }}
-                            <label for="id_exam_start_date">Exam Start Date</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_end_date }}
-                            <label for="id_exam_end_date">Exam End Date</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.exam_year }}
-                            <label for="id_exam_year">Academic Year</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.remark }}
-                            <label for="id_remark">Remark</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.published }}
-                            <label for="id_published">Published</label>
-                        </div>
-                    </div>
-                </div>
-
-                {{ form.exam_school }}
-
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-danger">Clear</button>
-                </div>
-
-            </form>
-
-        </div>
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'examlist' %}">Exams</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Copy Exam</span>
+      </nav>
+      <h1 class="pc-page-title">Copy Exam</h1>
+      <p class="pc-page-sub">Copy this exam with updated details — a new exam record will be created.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'examlist' %}" class="pc-btn pc-btn-outline">
+        <i class="ti ti-arrow-left" style="font-size:14px;"></i> Back
+      </a>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Exam Details</p>
+        <p class="pc-card-sub">Modify the copied exam details below</p>
+      </div>
+      <span class="pc-badge pc-badge-info pc-badge-no-dot">
+        <i class="ti ti-copy" style="font-size:12px;"></i> Copying
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form action="" id="updateexamform"
+            data-uclass-url="{% url 'ajax_load_uclass' %}"
+            method="POST">
+        {% csrf_token %}
+
+        <!-- ── Basic Info ── -->
+        <p class="form-section-label"><i class="ti ti-file-certificate"></i> Basic Info</p>
+        <div class="exam-form-grid">
+
+          <div class="ef-field">
+            <label>Exam Title <span class="req">*</span></label>
+            {{ form.exam_title }}
+          </div>
+
+          <div class="ef-field">
+            <label>Exam Code</label>
+            {{ form.exam_code }}
+          </div>
+
+          <div class="ef-field">
+            <label>Exam Centre</label>
+            {{ form.exam_centre }}
+          </div>
+
+          <div class="ef-field">
+            <label>Subject Count</label>
+            {{ form.exam_Sub_count }}
+          </div>
+
+        </div>
+
+        <!-- ── Class & Group ── -->
+        <p class="form-section-label"><i class="ti ti-layers"></i> Class &amp; Group</p>
+        <div class="exam-form-grid">
+
+          <div class="ef-field">
+            <label>Class <span class="req">*</span></label>
+            <select name="exam_class" required id="id_exam_class">
+              <option value="{{ ex_cls.id }}">{{ ex_cls }}</option>
+              {% for cl in cls %}
+                {% if cl.id != ex_cls.id %}
+                <option value="{{ cl.id }}">{{ cl.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="ef-field">
+            <label>Exam Group</label>
+            <select name="exm_grp" id="id_exm_grp">
+              <option value="{{ ex_grp.id }}">{{ ex_grp }}</option>
+              {% for exg in exgrp %}
+                {% if exg.id != ex_grp.id %}
+                <option value="{{ exg.id }}">{{ exg }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+
+        <!-- ── Schedule ── -->
+        <p class="form-section-label"><i class="ti ti-calendar"></i> Schedule</p>
+        <div class="exam-form-grid">
+
+          <div class="ef-field">
+            <label>Start Date <span class="req">*</span></label>
+            {{ form.exam_start_date }}
+          </div>
+
+          <div class="ef-field">
+            <label>End Date <span class="req">*</span></label>
+            {{ form.exam_end_date }}
+          </div>
+
+          <div class="ef-field">
+            <label>Academic Year</label>
+            {{ form.exam_year }}
+          </div>
+
+          <div class="ef-field">
+            <label>Published</label>
+            {{ form.published }}
+          </div>
+
+        </div>
+
+        <!-- ── Remarks ── -->
+        <p class="form-section-label"><i class="ti ti-notes"></i> Remarks</p>
+        <div class="exam-form-grid">
+          <div class="ef-field" style="grid-column:1/-1;">
+            <label>Remark</label>
+            {{ form.remark }}
+          </div>
+        </div>
+
+        <!-- Hidden system fields -->
+        <div class="ef-hidden">{{ form.exam_school }}</div>
+
+      </form>
+    </div>
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ti ti-shield-check" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <button type="reset" form="updateexamform" class="pc-btn pc-btn-outline">
+          <i class="ti ti-eraser" style="font-size:14px;"></i> Clear
+        </button>
+        <button type="submit" form="updateexamform" class="pc-btn pc-btn-primary">
+          <i class="ti ti-copy" style="font-size:14px;"></i> Save Copy
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>

@@ -1,0 +1,345 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+  /* Filter bar */
+  .day-filter-grid {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .day-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .day-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .day-field input[type="date"] {
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    min-width: 180px;
+  }
+  .day-field input[type="date"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
+
+  /* Status badges */
+  .st-present  { background: var(--green-lt);  color: var(--green);  padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700; display: inline-block; }
+  .st-half     { background: var(--amber-lt);  color: var(--amber);  padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700; display: inline-block; }
+  .st-mispunch { background: var(--rose-lt);   color: var(--rose);   padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700; display: inline-block; }
+
+  /* Late / Mispunch inline badges */
+  .flag-yes { background: var(--amber-lt); color: var(--amber); padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+  .flag-no  { background: var(--green-lt); color: var(--green); padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+  .flag-mis { background: var(--rose-lt);  color: var(--rose);  padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+
+  /* Staff name cell */
+  .staff-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-align: left;
+  }
+  .staff-avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent-lt);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .staff-name-sm { font-weight: 600; font-size: 13.5px; color: var(--text); }
+
+  /* KPI strip */
+  .day-kpi-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .day-kpi-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+    min-width: 120px;
+  }
+  .day-kpi-chip .kpi-num { font-size: 22px; font-weight: 800; line-height: 1; }
+  .kpi-total   { background: var(--accent-lt); color: var(--accent);  border-color: var(--accent-mid); }
+  .kpi-present { background: var(--green-lt);  color: var(--green);   border-color: #a7f3d0; }
+  .kpi-half    { background: var(--amber-lt);  color: var(--amber);   border-color: #fde68a; }
+  .kpi-mis     { background: var(--rose-lt);   color: var(--rose);    border-color: #fecdd3; }
+
+  /* Pagination */
+  .pc-pag-list {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .pc-pag-list a,
+  .pc-pag-list span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    color: var(--text-md);
+    text-decoration: none;
+    background: var(--surface);
+    transition: background 120ms, color 120ms;
+  }
+  .pc-pag-list a:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .pc-pag-list span.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+
+  /* Time mono */
+  .time-cell { font-family: var(--f-mono); font-size: 12.5px; color: var(--text-md); }
+  .time-dash  { color: var(--muted); }
+</style>
+
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'stafflist' %}">staffs</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Day Attendance</span>
+      </nav>
+      <h1 class="pc-page-title">Day Attendance</h1>
+      <p class="pc-page-sub">View and export daily staff attendance records by date.</p>
+    </div>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Select Date</p>
+        <p class="pc-card-sub">Filter attendance records for a specific day</p>
+      </div>
+      <i class="ti ti-calendar-event" style="font-size:20px; color:var(--muted);"></i>
+    </div>
+    <div class="pc-card-body">
+      <form method="get">
+        <div class="day-filter-grid">
+
+          <div class="day-field">
+            <label>Date</label>
+            <input type="date" name="date" value="{{ selected_date }}">
+          </div>
+
+          <button type="submit" class="pc-btn pc-btn-primary" style="align-self:flex-end;">
+            <i class="ti ti-search" style="font-size:14px;"></i> Search
+          </button>
+
+          {% if selected_date %}
+          <a href="{% url 'daily_attendance_excel' %}?date={{ selected_date }}"
+             class="pc-btn pc-btn-success" style="align-self:flex-end;">
+            <i class="ti ti-file-spreadsheet" style="font-size:14px;"></i> Export Excel
+          </a>
+          {% endif %}
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if attendance %}
+
+  <!-- KPI Strip -->
+  <div class="day-kpi-strip">
+    <div class="day-kpi-chip kpi-total">
+      <i class="ti ti-users" style="font-size:20px;"></i>
+      <div>
+        <div class="kpi-num">{{ attendance|length }}</div>
+        <div style="font-size:11px; opacity:.75; text-transform:uppercase; letter-spacing:.5px;">Total</div>
+      </div>
+    </div>
+    <div class="day-kpi-chip kpi-present">
+      <i class="ti ti-circle-check" style="font-size:20px;"></i>
+      <div>
+        <div class="kpi-num">{{ attendance|length }}</div>
+        <div style="font-size:11px; opacity:.75; text-transform:uppercase; letter-spacing:.5px;">Present</div>
+      </div>
+    </div>
+    <div class="day-kpi-chip kpi-half">
+      <i class="ti ti-clock-half-2" style="font-size:20px;"></i>
+      <div style="font-size:11px; opacity:.75; text-transform:uppercase; letter-spacing:.5px; margin-top:2px;">Half Day</div>
+    </div>
+    <div class="day-kpi-chip kpi-mis">
+      <i class="ti ti-alert-circle" style="font-size:20px;"></i>
+      <div style="font-size:11px; opacity:.75; text-transform:uppercase; letter-spacing:.5px; margin-top:2px;">Mis Punch</div>
+    </div>
+  </div>
+
+  <!-- Results Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Attendance Records
+          {% if selected_date %}
+            <span style="font-weight:400; color:var(--text-sm); font-size:13px; margin-left:6px;">— {{ selected_date }}</span>
+          {% endif %}
+        </p>
+        <p class="pc-card-sub">In/Out times, work hours and status for each staff member</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-list" style="font-size:12px;"></i>
+        {{ attendance|length }} record{{ attendance|length|pluralize }}
+      </span>
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Staff</th>
+            <th>User ID</th>
+            <th>Designation</th>
+            <th>Department</th>
+            <th>In Time</th>
+            <th>Out Time</th>
+            <th>Work Hours</th>
+            <th>Late</th>
+            <th>Mis Punch</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in attendance %}
+          <tr>
+            <td class="td-num">{{ forloop.counter }}</td>
+            <td>
+              <div class="staff-cell">
+                <div class="staff-avatar-sm">{{ row.staff|first|upper }}</div>
+                <span class="staff-name-sm">{{ row.staff }}</span>
+              </div>
+            </td>
+            <td style="font-family:var(--f-mono); font-size:12px; color:var(--text-sm);">{{ row.user_id }}</td>
+            <td>
+              <span class="pc-badge pc-badge-info pc-badge-no-dot">{{ row.Designation }}</span>
+            </td>
+            <td style="color:var(--text-md);">{{ row.Department }}</td>
+            <td class="time-cell">
+              {% if row.in_time %}{{ row.in_time|time:"H:i" }}{% else %}<span class="time-dash">—</span>{% endif %}
+            </td>
+            <td class="time-cell">
+              {% if row.out_time %}{{ row.out_time|time:"H:i" }}{% else %}<span class="time-dash">—</span>{% endif %}
+            </td>
+            <td style="font-family:var(--f-mono); font-size:12.5px; font-weight:600; color:var(--text);">
+              {{ row.work_hours|default:"—" }}
+            </td>
+            <td>
+              {% if row.late %}
+                <span class="flag-yes">Yes</span>
+              {% else %}
+                <span class="flag-no">No</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if row.mispunch %}
+                <span class="flag-mis">Yes</span>
+              {% else %}
+                <span class="flag-no">No</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if row.status == "PRESENT" %}
+                <span class="st-present">Present</span>
+              {% elif row.status == "HALF DAY" %}
+                <span class="st-half">Half Day</span>
+              {% else %}
+                <span class="st-mispunch">Mis Punch</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr class="pc-table-empty">
+            <td colspan="11">No records found for this date.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if data %}
+    <div class="pc-card-footer">
+      <p class="pc-pagination-info">
+        Page <strong>{{ data.number }}</strong> of <strong>{{ data.paginator.num_pages }}</strong>
+      </p>
+      <div class="pc-pag-list">
+        {% if data.has_previous %}
+          <a href="?date={{ selected_date }}&page={{ data.previous_page_number }}">
+            <i class="ti ti-chevron-left" style="font-size:13px;"></i>
+          </a>
+        {% endif %}
+        {% for num in data.paginator.page_range %}
+          {% if data.number == num %}
+            <span class="active">{{ num }}</span>
+          {% else %}
+            <a href="?date={{ selected_date }}&page={{ num }}">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if data.has_next %}
+          <a href="?date={{ selected_date }}&page={{ data.next_page_number }}">
+            <i class="ti ti-chevron-right" style="font-size:13px;"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  {% elif selected_date %}
+
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-calendar-off"></i></span>
+        <p class="pc-empty-title">No records found</p>
+        <p class="pc-empty-sub">No attendance data available for {{ selected_date }}.</p>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% endblock %}

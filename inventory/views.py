@@ -59,6 +59,9 @@ def category_update(request, pk):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     category = get_object_or_404(Category, pk=pk)
+    initial_data = {
+        'Cat_school':category.Cat_school
+    }
     if request.method == 'POST':
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
@@ -249,7 +252,17 @@ def product_set_list(request):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = product_set.objects.filter(prod_set__sch=sdata)
-    return render(request, 'inventory/product_set_list.html',context={'data':data,'skool':sdata,'year':year})
+
+    total_qty = sum(item.qty for item in data)
+    unique_classes = data.values('pclass').distinct().count()
+
+    return render(request, 'inventory/product_set_list.html', context={
+        'data': data,
+        'skool': sdata,
+        'year': year,
+        'total_qty': total_qty,
+        'unique_classes': unique_classes,
+    })
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def product_set_update(request, pk):
@@ -362,7 +375,7 @@ def purchase_list(request):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = Purchase.objects.filter(Prod_school=sdata)
-    print("ssssssssssssssssssssssssssssssssssssss",data)
+
     return render(request, 'inventory/purchase.html', context={'data': data, 'skool': sdata, 'year': year})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
@@ -389,7 +402,7 @@ def purchase_update(request, pur_id):
         else:
             # If form is invalid → fall through to render again
             messages.error(request, 'Please correct the errors below.')
-            print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",form.errors)
+
     else:
         form = UpdatePurchaseForm(instance=data)
 
@@ -641,12 +654,7 @@ def bootset_issued(request):
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def bookset_delete(request,set_id):
-    print("ddddddddddddddddddddddddddd",set_id)
     data = book_set_issue.objects.all()
-    for dt in data:
-        print("sssssssssssssssssssssss",dt,dt.id)
-
-
     messages.success(request,"Book Set Deleted Successfully")
     return redirect('bootset_issued')
 

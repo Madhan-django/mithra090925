@@ -1,214 +1,271 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Form enhancements ── */
+.pc-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+.pc-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+/* ── Help text styling ── */
+.pc-help-text {
+  font-size: 12px;
+  color: var(--text-sm);
+  margin-top: 6px;
+  display: block;
+  line-height: 1.5;
 }
 
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+/* ── Required field indicator ── */
+.pc-required {
+  color: var(--rose);
+  margin-left: 3px;
+  font-weight: 700;
 }
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
-    td{
-     text-align:center;
-    }
-    .btn {
-     padding:10px;
-    }
-    label{
-     padding-left:5px;
-    }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-           <h5><span class="badge bg-light text-dark">Homework Timing</span></h5>
-		</div>
-		<div>
-			<form method="POST">
-    {% csrf_token %}
-    <br><br>
-    <div class="form-group row align-items-center g-3">
-
-        <!-- Label -->
-        <label for="id_time" class="col-sm-2 col-form-label fw-semibold text-end">
-            Time
-        </label>
-
-        <!-- Time Field -->
-        <div class="col-sm-4">
-            {{ form.time }}
-        </div>
-
-        <!-- Hidden / School Field -->
-        {{ form.homework_school }}
-
-        <!-- Buttons -->
-        <div class="col-sm-6">
-            <button type="submit" class="btn btn-primary me-2">
-                <i class="ri-check-line me-1"></i> Submit
-            </button>
-            <a href="{% url 'homeworktime' %}" class="btn btn-danger">
-                <i class="ri-refresh-line me-1"></i> Clear
-            </a>
-        </div>
-
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'homeworktime' %}">Homework Timing</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Timing</span>
     </div>
-                <br>
-</form>
-
-            </div>
-
-
-
-		</div>
-{{data }}
-
+    <div class="pc-page-title">Add Homework Timing</div>
+    <div class="pc-page-sub">Set homework submission timing schedule</div>
   </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'homeworktime' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to Timings
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     MAIN FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-timer-line me-2" style="color:var(--accent);"></i>Timing Details
+      </div>
+      <div class="pc-card-sub">Enter the homework timing schedule</div>
+    </div>
+    <span class="pc-badge pc-badge-success pc-badge-no-dot">
+      <i class="ri-add-line"></i> New Entry
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Hidden school field if present -->
+      <div style="display:none;">
+        {{ form.homework_school }}
+      </div>
+
+      <!-- ═══ Time Field ═══ -->
+      {% for field in form %}
+        {% if field.name == 'time' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            Homework Time<span class="pc-required">*</span>
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-timer-line"></i>
+            {{ field }}
+          </div>
+          <span class="pc-help-text">
+            <i class="ri-information-line" style="font-size:11px;"></i>
+            Select the time for homework submission (e.g., 5:00 PM, 6:30 PM)
+          </span>
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══ Other fields (if any, except homework_school) ═══ -->
+        {% if field.name != 'time' and field.name != 'homework_school' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            {{ field.label }}{% if field.field.required %}<span class="pc-required">*</span>{% endif %}
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-file-text-line"></i>
+            {{ field }}
+          </div>
+          {% if field.help_text %}
+            <span class="pc-help-text">{{ field.help_text }}</span>
+          {% endif %}
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      <!-- ═══ Form Actions ═══ -->
+      <div class="pc-form-actions">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Create Timing
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Clear Form
+        </button>
+        <a href="{% url 'homeworktime' %}" class="pc-btn pc-btn-outline" style="margin-left:auto;">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     HELPFUL TIPS CARD
+     ═══════════════════════════════ -->
+<div class="pc-card-flat" style="margin-top:20px;">
+  <div style="display:flex;gap:16px;align-items:start;">
+    <div style="flex-shrink:0;">
+      <div style="width:40px;height:40px;background:var(--accent-lt);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--accent);">
+        <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+        Quick Tips
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-md);line-height:1.8;">
+        <li>Set a clear homework submission deadline time</li>
+        <li>Ensure timing allows students enough time to complete assignments</li>
+        <li>Consider time zones if you have students in different regions</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Style Django form fields to match pc-input ── */
+#id_time,
+input[type="text"],
+input[type="time"] {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px 9px 38px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+#id_time:focus,
+input[type="text"]:focus,
+input[type="time"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+/* ── Error messages styling ── */
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.errorlist li {
+  background: var(--rose-lt);
+  color: var(--rose);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border-left: 3px solid var(--rose);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.errorlist li::before {
+  content: '\eb98'; /* RemixIcon error warning line */
+  font-family: 'remixicon';
+  font-size: 14px;
+}
+
+/* ── Style other possible input types ── */
+input[type="email"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+textarea {
+  resize: vertical;
+  min-height: auto;
+  height: auto;
+  padding: 9px 13px 9px 38px;
+}
+
+select {
+  padding-right: 36px;
+  padding-left: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  appearance: none;
+}
+
+input[type="email"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+</style>
 
 {% endblock %}

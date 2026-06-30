@@ -1,212 +1,282 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Modal overlay ── */
+.pc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  backdrop-filter: blur(4px);
+  z-index: 1040;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.pc-modal-backdrop.show { display: flex; }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+.pc-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%;
+  max-width: 420px;
+  margin: 16px;
+  animation: modalIn .22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.93) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
+.pc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.pc-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pc-modal-title i { color: var(--rose); font-size: 18px; }
+.pc-modal-close {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: background .15s, color .15s;
+}
+.pc-modal-close:hover { background: var(--rose-lt); color: var(--rose); }
 
+.pc-modal-body {
+  padding: 20px 22px;
+}
+.pc-modal-body p {
+  font-size: 13.5px;
+  color: var(--text-md);
+  line-height: 1.6;
+  margin: 0;
+}
+.pc-modal-body .del-name {
+  font-weight: 700;
+  color: var(--text);
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+.pc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
 }
 
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+/* ── Time badge styling ── */
+.time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-family: var(--f-mono);
+  letter-spacing: .2px;
 }
+.time-badge i { font-size: 13px; }
 
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
+/* ── School name styling ── */
+.school-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-md);
 }
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
-    td{
-     text-align:center;
-    }
 </style>
 
-   <div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Homework Timing</span></h5>
-        </div>
-            <div class="text-end">
-             <a href="{% url 'add_homeworktime' %}" type="button" class="btn btn-primary">
-                  <i class="mdi mdi-plus-circle"></i>New Timing</a>
-             </div>
-                  <div class="card-body">
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Homework Timing</span>
+    </div>
+    <div class="pc-page-title">Homework Timing</div>
+    <div class="pc-page-sub">Manage homework submission timing schedules</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'add_homeworktime' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-circle-line"></i> New Timing
+    </a>
+  </div>
+</div>
 
-                         <div class="table-responsive">
-                               <table class="table table-hover table-striped table-bordered">
-                                     <thead class="table-dark">
-                                     <tr>
-                                 <th>Timing </th>
-                                 <th>School</th>
-                                 <th>Actions </th>
-                          </tr>
-                        </thead>
-                          <tbody>
-                          {% if data %}
-                          {% for dt in data %}
-                          <tr>
-                              <td>{{dt.time}}</td>
-                              <td>{{dt.homework_school}}</td>
-                              <td>
-                                   {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                                 <form action="{% url 'add_homeworktime' %}" method="" class="d-inline">
-                                     {% csrf_token %}
-                                     <button type="submit" class="btn btn-primary"><i class="fas fa-edit"></i>Update</button>
-                                  </form>
-                                    {% endif %}
+<!-- ═══════════════════════════════
+     MAIN CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
 
-                                  {% endfor %}
-                                  </td>
-                                  </tr>
-                                  {% else %}
-                                  <div class="alert alert-danger" role="alert">
-                                   No Record  are available to Show
-                                  {% endif %}
-                          </tbody>
-                               </table>
-                    </div>
-                  </div>
-        </div>
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-timer-line me-2" style="color:var(--accent);"></i>All Homework Timings
+      </div>
+      <div class="pc-card-sub">View and manage homework timing schedules</div>
+    </div>
+    {% if data %}
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:12px;padding:5px 14px;">
+      {{ data|length }} timing{{ data|length|pluralize }}
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="pc-card-body" style="padding:0;">
+    {% if data %}
+    <div class="table-responsive">
+      <div class="pc-table-wrap" style="border:none;border-radius:0;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:22px;width:50px;">#</th>
+              <th style="text-align:left;">Timing</th>
+              <th>School</th>
+              <th style="width:180px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dt in data %}
+            <tr>
+              <td class="td-num" style="padding-left:22px;">{{ forloop.counter }}</td>
+              <td style="text-align:left;padding-left:22px;">
+                <span class="time-badge">
+                  <i class="ri-timer-line"></i>{{ dt.time }}
+                </span>
+              </td>
+              <td>
+                <span class="school-name">{{ dt.homework_school }}</span>
+              </td>
+              <td>
+                <div class="td-actions">
+                  <!-- Update (only for admin/superadmin) -->
+                  {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <form action="{% url 'update_homeworktime' dt.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="pc-btn pc-btn-secondary pc-btn-sm">
+                      <i class="ri-pencil-line"></i> Update
+                    </button>
+                  </form>
+
+                  <!-- Delete button -->
+                  <button type="button"
+                          class="pc-btn pc-btn-danger pc-btn-sm"
+                          onclick="openDeleteModal('modal-{{ dt.id }}')">
+                    <i class="ri-delete-bin-6-line"></i>
+                  </button>
+                  {% else %}
+                  <span class="pc-badge pc-badge-neutral" style="font-size:11px;">
+                    <i class="ri-lock-line"></i> No Access
+                  </span>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="pc-empty">
+      <i class="ri-timer-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No homework timings found</div>
+      <div class="pc-empty-sub">Add a new timing schedule to get started</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div><!-- /pc-card -->
+
+<!-- ═══════════════════════════════
+     DELETE MODALS
+     ═══════════════════════════════ -->
+{% if data %}
+{% for dt in data %}
+<div class="pc-modal-backdrop" id="modal-{{ dt.id }}">
+  <div class="pc-modal">
+
+    <div class="pc-modal-header">
+      <div class="pc-modal-title">
+        <i class="ri-error-warning-line"></i> Delete Homework Timing
+      </div>
+      <button class="pc-modal-close" onclick="closeDeleteModal('modal-{{ dt.id }}')">
+        <i class="ri-close-line"></i>
+      </button>
     </div>
 
+    <div class="pc-modal-body">
+      <p>
+        Are you sure you want to delete the homework timing
+        <span class="del-name">"{{ dt.time }}"</span>?
+        This action <strong>cannot be undone</strong> and may affect homework schedules.
+      </p>
+    </div>
 
+    <div class="pc-modal-footer">
+      <button type="button"
+              class="pc-btn pc-btn-outline"
+              onclick="closeDeleteModal('modal-{{ dt.id }}')">
+        <i class="ri-close-line"></i> Cancel
+      </button>
+      <form action="{% url 'delete_homeworktime' dt.id %}" method="POST" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Delete
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<script>
+function openDeleteModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+}
+function closeDeleteModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+// Close on backdrop click
+document.querySelectorAll('.pc-modal-backdrop').forEach(function(backdrop) {
+  backdrop.addEventListener('click', function(e) {
+    if (e.target === backdrop) backdrop.classList.remove('show');
+  });
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.pc-modal-backdrop.show').forEach(function(el) {
+      el.classList.remove('show');
+    });
+  }
+});
+</script>
 
 {% endblock %}
-

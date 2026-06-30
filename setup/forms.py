@@ -57,14 +57,12 @@ class add_section(forms.ModelForm):
         model = section
         fields = '__all__'
 
-
-
         widgets = {
-                    'section_name':forms.TextInput(attrs={'class':'form-control'}),
-                    'class_sec_name':forms.HiddenInput(attrs={'class':'form-control'}),
-                    'school_name':forms.HiddenInput(attrs={'class':'form-control'}),
-                    'acad_year': forms.HiddenInput(attrs={'class': 'form-control'}),
-                }
+            'section_name': forms.TextInput(attrs={'class': 'pc-input'}),
+            'class_sec_name': forms.HiddenInput(),
+            'school_name': forms.HiddenInput(),
+            'acad_year': forms.HiddenInput(),
+        }
 
 
 class add_subjects(forms.ModelForm):

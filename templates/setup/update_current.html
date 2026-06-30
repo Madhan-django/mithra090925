@@ -1,110 +1,79 @@
 {% extends 'panel/index.html' %}
 {% block content %}
-
-<style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, select, button {
-    font-family: 'Roboto', sans-serif;
-}
-
-/* ===== CARD ===== */
-.card {
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    overflow: hidden;
-}
-
-/* ===== TITLE BAR (STYLE A) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 6px;
-    border-radius: 20px 20px 0 0;
-    text-align: center;
-}
-
-.card-title h5 {
-    margin: 0;
-}
-
-.card-title .badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;
-    padding: 6px 24px;
-    border-radius: 6px;
-}
-
-/* ===== FORM ===== */
-.form-label {
-    font-weight: 500;
-    margin-bottom: 6px;
-}
-
-.form-control {
-    border-radius: 10px;
-    font-size: 14px;
-    height: 42px;
-}
-
-/* ===== BUTTON ===== */
-.btn-primary {
-    background: linear-gradient(135deg, #009ffd, #2a2a72);
-    border: none;
-    padding: 8px 22px;
-    font-size: 14px;
-    border-radius: 8px;
-}
-
-/* ===== ALIGNMENTS ===== */
-.text-end {
-    text-align: right;
-}
-</style>
-
-<div class="col-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== TITLE ===== -->
-        <div class="card-title">
-            <h5>
-                <span class="badge bg-light text-dark">
-                    Update Current Session
-                </span>
-            </h5>
-        </div>
-
-        <!-- ===== BODY ===== -->
-        <div class="card-body">
-
-            <form action="" method="POST" class="row g-3">
-                {% csrf_token %}
-
-                <!-- School (Hidden/Readonly as per form) -->
-                {{ form.school_name }}
-
-                <!-- Academic Year -->
-                <div class="col-md-6">
-                    <label class="floating-label" for="id_current_year">Current Academic Year</label>
-                    <select name="current_year" required id="id_current_year" class="form-control">
-                        <option value="">---------</option>
-                        {% for yr in syear %}
-                            <option value="{{ yr.id }}" selected>{{ yr }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Submit -->
-                <div class="col-md-6 ">
-                    <br>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                    <a href="{% url 'set_current_yr' %}" class="btn btn-danger">Clear</a>
-                </div>
-
-            </form>
-
-        </div>
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'academicyr' %}">Academic Sessions</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Set Current Session</span>
     </div>
+    <div class="pc-page-title">Set Current Academic Session</div>
+    <div class="pc-page-sub">Choose the active academic year for the school</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'academicyr' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to Sessions
+    </a>
+  </div>
 </div>
-
+<!-- ═══════════════════════════════
+     FORM CARD
+     ═══════════════════════════════ -->
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-md-8">
+    <div class="pc-card">
+      <div class="pc-card-header">
+        <div>
+          <div class="pc-card-title">
+            <i class="ri-toggle-line me-2" style="color:var(--accent);"></i>Current Session
+          </div>
+          <div class="pc-card-sub">This year will be used as the active session across the system</div>
+        </div>
+        <span class="pc-badge pc-badge-success pc-badge-no-dot">
+          <i class="ri-checkbox-circle-line"></i> Active
+        </span>
+      </div>
+      <div class="pc-card-body">
+        <form action="" method="POST" id="current-yr-form">
+          {% csrf_token %}
+          <!-- Hidden school field -->
+          {{ form.school_name }}
+          <!-- Current Academic Year -->
+          <div class="pc-form-group">
+            <label class="pc-label" for="id_current_year">
+              Current Academic Year <span class="req">*</span>
+            </label>
+            <div class="pc-input-group">
+              <i class="ri-calendar-check-line pc-input-icon"></i>
+              <select name="current_year" required id="id_current_year" class="pc-select" style="padding-left:38px;">
+                <option value="">— Select a year —</option>
+                {% for yr in syear %}
+                  <option value="{{ yr.id }}">{{ yr }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <!-- Info note -->
+          <div class="pc-alert pc-alert-info" style="margin-bottom:0;">
+            <i class="ri-information-line"></i>
+            <div>Changing the current session will affect all records linked to the active academic year.</div>
+          </div>
+        </form>
+      </div>
+      <div class="pc-card-footer">
+        <a href="{% url 'set_current_yr' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Reset
+        </a>
+        <button type="submit" form="current-yr-form" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Update Session
+        </button>
+      </div>
+    </div><!-- /pc-card -->
+  </div>
+</div>
 {% endblock %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect,HttpResponse
+from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 from django.contrib import messages
 from .models import school
 from authenticate.decorators import allowed_users,unauthenticated_user
@@ -49,24 +49,40 @@ def delschool(request,school_id):
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
 def updateschool(request, sch_id):
-    sch = school.objects.get(pk=sch_id)
+    # Get school instance from session
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
 
-
+    print("=== BEFORE FORM INIT ===")
+    for field in sdata._meta.fields:
+        print(f"{field.name} = {getattr(sdata, field.name)}")
 
     if request.method == "POST":
-        form = add_school(request.POST, request.FILES, instance=sch)
+        form = add_school(request.POST, request.FILES, instance=sdata)
+        print("=== POST DATA RECEIVED ===")
+        for key, value in request.POST.items():
+            print(f"{key} = {value}")
+        print("FILES RECEIVED:")
+        for key, value in request.FILES.items():
+            print(f"{key} = {value}")
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Institution updated successfully')
             return redirect('institutions')
+        else:
+            print("=== FORM ERRORS ===")
+            for field, errors in form.errors.items():
+                print(f"{field} errors: {errors}")
 
-    form = add_school(instance=sch)
+    # Initialize form for GET or after invalid POST
+    form = add_school(instance=sdata)
 
-    return render(request, 'institutions/updateschool.html', {
-        'form': form,
-        'sch': sch
-    })
+    print("=== AFTER FORM INIT ===")
+    for field in form.fields:
+        print(f"{field} = {form[field].value()}")
 
+    return render(request, 'institutions/updateschool.html', {'form': form})
 
 
 

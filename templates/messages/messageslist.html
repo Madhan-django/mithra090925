@@ -1,377 +1,429 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
 
-<!-- ========================================================= -->
-<!-- 🌈 GLOBAL STYLING (Matches your saved template styles) -->
-<!-- ========================================================= -->
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+  /* Shared status badge */
+  .notif-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+  .notif-status::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .75;
+  }
+  .ns-sent      { background: var(--green-lt);  color: var(--green); }
+  .ns-scheduled { background: var(--sky-lt);    color: var(--sky); }
+  .ns-pending   { background: var(--amber-lt);  color: var(--amber); }
+  .ns-failed    { background: var(--rose-lt);   color: var(--rose); }
+  .ns-default   { background: #f1f5f9;          color: var(--text-sm); }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
+  /* Delivery ratio */
+  .delivery-ratio {
+    font-family: var(--f-mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .delivery-ratio span { color: var(--muted); font-weight: 400; }
 
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
+  /* Datetime cell */
+  .dt-cell {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    color: var(--text-sm);
+    line-height: 1.5;
+  }
 
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
+  /* Notification title cell */
+  .notif-title {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--text);
+    text-align: left;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
+  /* Action dropdown */
+  .action-dropdown { position: relative; display: inline-block; }
+  .action-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-md);
+    min-width: 140px;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .action-dropdown.open .action-dropdown-menu { display: block; }
+  .action-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
     font-weight: 500;
+    color: var(--text-md);
+    text-decoration: none;
+    transition: background 120ms;
+  }
+  .action-dropdown-menu a:hover { background: var(--surface2); }
+  .action-dropdown-menu a.delete-item { color: var(--rose); }
+  .action-dropdown-menu a.delete-item:hover { background: var(--rose-lt); }
+  .action-dropdown-menu .drop-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
+  /* Pagination */
+  .pc-pag-list {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .pc-pag-list a,
+  .pc-pag-list span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    color: var(--text-md);
+    text-decoration: none;
+    background: var(--surface);
+    transition: background 120ms, color 120ms;
+  }
+  .pc-pag-list a:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .pc-pag-list span.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 </style>
 
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Notifications</span>
+      </nav>
+      <h1 class="pc-page-title">Notifications</h1>
+      <p class="pc-page-sub">Manage individual, bulk and broadcast notifications.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'new_notify' %}" class="pc-btn pc-btn-primary">
+        <i class="ti ti-bell-plus" style="font-size:14px;"></i> New Notification
+      </a>
+    </div>
+  </div>
 
 
-<div class="col-lg-12 grid-margin stretch-card">
-
-<!-- ========================================================= -->
-<!-- 🔔 NOTIFICATIONS TABLE -->
-<!-- ========================================================= -->
-<div class="card">
-    <div class="card-title text-center">
-        <h5><span class="badge bg-light text-dark">Notifications</span></h5>
+  <!-- ═══════════════════════════════════ -->
+  <!-- 1. NOTIFICATIONS                   -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Notifications</p>
+        <p class="pc-card-sub">Individual Notifications sent to users</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-bell" style="font-size:12px;"></i> Direct
+      </span>
     </div>
 
-    <div class="text-end mt-2">
-        <a href="{% url 'new_notify' %}" class="btn btn-sm btn-primary">New Notification</a>
-    </div>
-
-    <div class="card-body">
     {% if data %}
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-                <thead class="table-dark" align="center">
-                    <tr>
-                        <th>S.No</th><th>Notification Title</th><th>Creation Date</th>
-                        <th>Schedule Date</th><th>Messenger</th><th>Sent</th>
-                        <th>Total</th><th>Status</th><th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for notification in data %}
-                    <tr align="center">
-                        <td>{{ forloop.counter0|add:data.start_index }}</td>
-                        <td>{{notification.title}}</td>
-                        <td>{{notification.create_date|date:"d-m-y - h:i A"}}</td>
-                        <td>{{notification.post_date|date:"d-m-y - h:i A"}}</td>
-                        <td>{{notification.created_by_id}}</td>
-                        <td>{{notification.success_count}}</td>
-                        <td>{{notification.total_count}}</td>
-                        <td>{{notification.status}}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                    <i class="ri-more-2-line"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#"><i class="ri-pencil-line me-1"></i> Edit</a>
-                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                        <a class="dropdown-item text-danger" href="#"><i class="ri-delete-bin-7-line me-1"></i> Delete</a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="d-flex justify-content-center mt-3">
-            <ul class="pagination">
-                {% if data.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page1={{ data.previous_page_number }}">Previous</a></li>
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Title</th>
+            <th>Created</th>
+            <th>Scheduled</th>
+            <th>Messenger</th>
+            <th>Delivered</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in data %}
+          <tr>
+            <td class="td-num">{{ forloop.counter0|add:data.start_index }}</td>
+            <td class="notif-title">{{ n.title }}</td>
+            <td><div class="dt-cell">{{ n.create_date|date:"d-m-y" }}<br>{{ n.create_date|date:"h:i A" }}</div></td>
+            <td><div class="dt-cell">{{ n.post_date|date:"d-m-y" }}<br>{{ n.post_date|date:"h:i A" }}</div></td>
+            <td style="color:var(--text-md);">{{ n.created_by_id }}</td>
+            <td>
+              <span class="delivery-ratio">{{ n.success_count }}<span> / {{ n.total_count }}</span></span>
+            </td>
+            <td>
+              {% with s=n.status %}
+                {% if s == "Sent" %}<span class="notif-status ns-sent">Sent</span>
+                {% elif s == "Scheduled" %}<span class="notif-status ns-scheduled">Scheduled</span>
+                {% elif s == "Pending" %}<span class="notif-status ns-pending">Pending</span>
+                {% elif s == "Failed" %}<span class="notif-status ns-failed">Failed</span>
+                {% else %}<span class="notif-status ns-default">{{ s }}</span>
                 {% endif %}
-
-                {% for num in data_page_range %}
-                    {% if data.number == num %}
-                        <li class="page-item active"><a class="page-link">{{ num }}</a></li>
-                    {% else %}
-                        <li class="page-item"><a class="page-link" href="?page1={{ num }}">{{ num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if data.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page1={{ data.next_page_number }}">Next</a></li>
-                {% endif %}
-            </ul>
-        </div>
-
+              {% endwith %}
+            </td>
+            <td>
+              <div class="action-dropdown" id="n-drop-{{ n.id }}">
+                <button class="pc-btn pc-btn-outline pc-btn-sm" onclick="toggleDrop('n-drop-{{ n.id }}', event)">
+                  <i class="ti ti-dots" style="font-size:14px;"></i>
+                </button>
+                <div class="action-dropdown-menu">
+                  <a href="#"><i class="ti ti-pencil"></i> Edit</a>
+                  {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <div class="drop-divider"></div>
+                  <a href="#" class="delete-item"><i class="ti ti-trash"></i> Delete</a>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="pc-card-footer">
+      <p class="pc-pagination-info">Page <strong>{{ data.number }}</strong> of <strong>{{ data.paginator.num_pages }}</strong></p>
+      <div class="pc-pag-list">
+        {% if data.has_previous %}<a href="?page1={{ data.previous_page_number }}"><i class="ti ti-chevron-left" style="font-size:13px;"></i></a>{% endif %}
+        {% for num in data_page_range %}
+          {% if data.number == num %}<span class="active">{{ num }}</span>
+          {% else %}<a href="?page1={{ num }}">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if data.has_next %}<a href="?page1={{ data.next_page_number }}"><i class="ti ti-chevron-right" style="font-size:13px;"></i></a>{% endif %}
+      </div>
+    </div>
     {% else %}
-        <div class="alert alert-danger text-center">No Records Available</div>
+    <div class="pc-card-body">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-bell-off"></i></span>
+        <p class="pc-empty-title">No notifications yet</p>
+        <p class="pc-empty-sub">Create your first notification using the button above.</p>
+      </div>
+    </div>
     {% endif %}
+  </div>
+
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- 2. BULK NOTIFICATIONS              -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Bulk Notifications</p>
+        <p class="pc-card-sub">Sent to an entire class and section</p>
+      </div>
+      <span class="pc-badge pc-badge-info pc-badge-no-dot">
+        <i class="ti ti-users" style="font-size:12px;"></i> Bulk
+      </span>
     </div>
-</div>
 
-
-
-<!-- ========================================================= -->
-<!-- 📢 BULK NOTIFICATIONS TABLE -->
-<!-- ========================================================= -->
-<div class="card mt-4">
-    <div class="card-title text-center">
-        <h5><span class="badge bg-light text-dark">Bulk Notifications</span></h5>
-    </div>
-
-    <div class="card-body">
     {% if bulk_notifications %}
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-                <thead class="table-dark" align="center">
-                    <tr>
-                        <th>S.No</th><th>Notification Title</th><th>Class</th><th>Section</th>
-                        <th>Creation Date</th><th>Schedule Date</th><th>Messenger</th>
-                        <th>Sent</th><th>Total</th><th>Status</th><th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for notification in bulk_notifications %}
-                    <tr align="center">
-                        <td>{{ forloop.counter0|add:bulk_notifications.start_index }}</td>
-                        <td>{{notification.title_msg}}</td>
-                        <td>{{notification.aclass}}</td>
-                        <td>{{notification.ssec}}</td>
-                        <td>{{notification.create_date|date:"d-m-y - h:i A"}}</td>
-                        <td>{{notification.post_date|date:"d-m-y - h:i A"}}</td>
-                        <td>{{notification.created_by}}</td>
-                        <td>{{notification.success_count}}</td>
-                        <td>{{notification.total_count}}</td>
-                        <td>{{notification.status}}</td>
-                        <td> ... actions ... </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Bulk Pagination -->
-        <div class="d-flex justify-content-center mt-3">
-            <ul class="pagination">
-                {% if bulk_notifications.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page2={{ bulk_notifications.previous_page_number }}">Previous</a></li>
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Title</th>
+            <th>Class</th>
+            <th>Section</th>
+            <th>Created</th>
+            <th>Scheduled</th>
+            <th>Messenger</th>
+            <th>Delivered</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in bulk_notifications %}
+          <tr>
+            <td class="td-num">{{ forloop.counter0|add:bulk_notifications.start_index }}</td>
+            <td class="notif-title">{{ n.title_msg }}</td>
+            <td><span class="pc-badge pc-badge-primary pc-badge-no-dot">{{ n.aclass }}</span></td>
+            <td style="color:var(--text-md);">{{ n.ssec }}</td>
+            <td><div class="dt-cell">{{ n.create_date|date:"d-m-y" }}<br>{{ n.create_date|date:"h:i A" }}</div></td>
+            <td><div class="dt-cell">{{ n.post_date|date:"d-m-y" }}<br>{{ n.post_date|date:"h:i A" }}</div></td>
+            <td style="color:var(--text-md);">{{ n.created_by }}</td>
+            <td>
+              <span class="delivery-ratio">{{ n.success_count }}<span> / {{ n.total_count }}</span></span>
+            </td>
+            <td>
+              {% with s=n.status %}
+                {% if s == "Sent" %}<span class="notif-status ns-sent">Sent</span>
+                {% elif s == "Scheduled" %}<span class="notif-status ns-scheduled">Scheduled</span>
+                {% elif s == "Pending" %}<span class="notif-status ns-pending">Pending</span>
+                {% elif s == "Failed" %}<span class="notif-status ns-failed">Failed</span>
+                {% else %}<span class="notif-status ns-default">{{ s }}</span>
                 {% endif %}
-
-                {% for num in bulk_page_range %}
-                    {% if bulk_notifications.number == num %}
-                        <li class="page-item active"><a class="page-link">{{ num }}</a></li>
-                    {% else %}
-                        <li class="page-item"><a class="page-link" href="?page2={{ num }}">{{ num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if bulk_notifications.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page2={{ bulk_notifications.next_page_number }}">Next</a></li>
-                {% endif %}
-            </ul>
-        </div>
-
+              {% endwith %}
+            </td>
+            <td>
+              <div class="action-dropdown" id="b-drop-{{ n.id }}">
+                <button class="pc-btn pc-btn-outline pc-btn-sm" onclick="toggleDrop('b-drop-{{ n.id }}', event)">
+                  <i class="ti ti-dots" style="font-size:14px;"></i>
+                </button>
+                <div class="action-dropdown-menu">
+                  <a href="#"><i class="ti ti-pencil"></i> Edit</a>
+                  <div class="drop-divider"></div>
+                  <a href="#" class="delete-item"><i class="ti ti-trash"></i> Delete</a>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="pc-card-footer">
+      <p class="pc-pagination-info">Page <strong>{{ bulk_notifications.number }}</strong> of <strong>{{ bulk_notifications.paginator.num_pages }}</strong></p>
+      <div class="pc-pag-list">
+        {% if bulk_notifications.has_previous %}<a href="?page2={{ bulk_notifications.previous_page_number }}"><i class="ti ti-chevron-left" style="font-size:13px;"></i></a>{% endif %}
+        {% for num in bulk_page_range %}
+          {% if bulk_notifications.number == num %}<span class="active">{{ num }}</span>
+          {% else %}<a href="?page2={{ num }}">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if bulk_notifications.has_next %}<a href="?page2={{ bulk_notifications.next_page_number }}"><i class="ti ti-chevron-right" style="font-size:13px;"></i></a>{% endif %}
+      </div>
+    </div>
     {% else %}
-        <div class="alert alert-danger text-center">No Records Available</div>
+    <div class="pc-card-body">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-bell-off"></i></span>
+        <p class="pc-empty-title">No bulk notifications</p>
+        <p class="pc-empty-sub">No class-level notifications have been sent yet.</p>
+      </div>
+    </div>
     {% endif %}
+  </div>
+
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- 3. BROADCASTS                      -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Broadcasts</p>
+        <p class="pc-card-sub">School-wide broadcast messages</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ti ti-speakerphone" style="font-size:12px;"></i> Broadcast
+      </span>
     </div>
-</div>
 
-
-
-<!-- ========================================================= -->
-<!-- 📡 BROADCAST TABLE -->
-<!-- ========================================================= -->
-<div class="card mt-4">
-    <div class="card-title text-center">
-        <h5><span class="badge bg-light text-dark">Broadcasts</span></h5>
-    </div>
-
-    <div class="card-body">
     {% if broadcast %}
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-                <thead class="table-dark" align="center">
-                    <tr>
-                        <th>S.No</th><th>Notification Title</th><th>Creation Date</th>
-                        <th>Schedule Date</th><th>Messenger</th><th>Sent</th>
-                        <th>Total</th><th>Status</th><th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for notification in broadcast %}
-                    <tr align="center">
-                        <td>{{ forloop.counter0|add:broadcast.start_index }}</td>
-                        <td>{{notification.title_msg}}</td>
-                        <td>{{notification.create_date|date:"d-m-y - h:i A"}}</td>
-                        <td>{{notification.post_date|date:"d-m-y - h:i A"}}</td>
-                        <td>{{notification.created_by}}</td>
-                        <td>{{notification.success_count}}</td>
-                        <td>{{notification.total_count}}</td>
-                        <td>{{notification.status}}</td>
-                        <td> ... actions ... </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Broadcast Pagination -->
-        <div class="d-flex justify-content-center mt-3">
-            <ul class="pagination">
-                {% if broadcast.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page3={{ broadcast.previous_page_number }}">Previous</a></li>
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Title</th>
+            <th>Created</th>
+            <th>Scheduled</th>
+            <th>Messenger</th>
+            <th>Delivered</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in broadcast %}
+          <tr>
+            <td class="td-num">{{ forloop.counter0|add:broadcast.start_index }}</td>
+            <td class="notif-title">{{ n.title_msg }}</td>
+            <td><div class="dt-cell">{{ n.create_date|date:"d-m-y" }}<br>{{ n.create_date|date:"h:i A" }}</div></td>
+            <td><div class="dt-cell">{{ n.post_date|date:"d-m-y" }}<br>{{ n.post_date|date:"h:i A" }}</div></td>
+            <td style="color:var(--text-md);">{{ n.created_by }}</td>
+            <td>
+              <span class="delivery-ratio">{{ n.success_count }}<span> / {{ n.total_count }}</span></span>
+            </td>
+            <td>
+              {% with s=n.status %}
+                {% if s == "Sent" %}<span class="notif-status ns-sent">Sent</span>
+                {% elif s == "Scheduled" %}<span class="notif-status ns-scheduled">Scheduled</span>
+                {% elif s == "Pending" %}<span class="notif-status ns-pending">Pending</span>
+                {% elif s == "Failed" %}<span class="notif-status ns-failed">Failed</span>
+                {% else %}<span class="notif-status ns-default">{{ s }}</span>
                 {% endif %}
-
-                {% for num in broadcast_page_range %}
-                    {% if broadcast.number == num %}
-                        <li class="page-item active"><a class="page-link">{{ num }}</a></li>
-                    {% else %}
-                        <li class="page-item"><a class="page-link" href="?page3={{ num }}">{{ num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if broadcast.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page3={{ broadcast.next_page_number }}">Next</a></li>
-                {% endif %}
-            </ul>
-        </div>
-
-    {% else %}
-        <div class="alert alert-danger text-center">No Records Available</div>
-    {% endif %}
+              {% endwith %}
+            </td>
+            <td>
+              <div class="action-dropdown" id="bc-drop-{{ n.id }}">
+                <button class="pc-btn pc-btn-outline pc-btn-sm" onclick="toggleDrop('bc-drop-{{ n.id }}', event)">
+                  <i class="ti ti-dots" style="font-size:14px;"></i>
+                </button>
+                <div class="action-dropdown-menu">
+                  <a href="#"><i class="ti ti-pencil"></i> Edit</a>
+                  <div class="drop-divider"></div>
+                  <a href="#" class="delete-item"><i class="ti ti-trash"></i> Delete</a>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+    <div class="pc-card-footer">
+      <p class="pc-pagination-info">Page <strong>{{ broadcast.number }}</strong> of <strong>{{ broadcast.paginator.num_pages }}</strong></p>
+      <div class="pc-pag-list">
+        {% if broadcast.has_previous %}<a href="?page3={{ broadcast.previous_page_number }}"><i class="ti ti-chevron-left" style="font-size:13px;"></i></a>{% endif %}
+        {% for num in broadcast_page_range %}
+          {% if broadcast.number == num %}<span class="active">{{ num }}</span>
+          {% else %}<a href="?page3={{ num }}">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if broadcast.has_next %}<a href="?page3={{ broadcast.next_page_number }}"><i class="ti ti-chevron-right" style="font-size:13px;"></i></a>{% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="pc-card-body">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-speakerphone"></i></span>
+        <p class="pc-empty-title">No broadcasts</p>
+        <p class="pc-empty-sub">No school-wide broadcasts have been sent yet.</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
 </div>
 
+<script>
+  function toggleDrop(id, e) {
+    e.stopPropagation();
+    const el = document.getElementById(id);
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+  }
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+  });
+</script>
 
-</div>
 {% endblock %}

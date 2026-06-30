@@ -1,130 +1,174 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
 
 <style>
-    /* === General Typography === */
-    body, h1, h3, h4, h5, th, td, label, input, button, select {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: logRowIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes logRowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 55ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 80ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:105ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:130ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:180ms; }
 
-    /* === Card Styling === */
-    .card {
-        border-radius: 20px;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-        border: none;
-        overflow: hidden;
-    }
+/* ── Period count chips ── */
+.td-period {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: inline-block;
+}
+.td-period-total {
+  background: var(--surface2);
+  color: var(--text-md);
+  border: 1px solid var(--border);
+}
+.td-period-alloc {
+  background: var(--accent-lt);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+}
 
-    /* === Title Bar (Reduced Height) === */
-    .card-header {
-        background: linear-gradient(to right, #1e5799, #207cca, #2989d8);
-        color: white;
-        font-weight: bold;
-        font-size: 17px;
-        padding: 10px 0;            /* Reduced */
-        border-radius: 20px 20px 0 0;
-        text-align: center;
-        letter-spacing: 0.3px;
-    }
-
-    /* === Table Header (Reduced Height) === */
-    table thead th {
-        background-color: #212529 !important;
-        color: white !important;
-        font-size: 15px;
-        text-align: center;
-        padding: 6px !important;      /* Reduced height */
-    }
-
-    /* === Table Body === */
-    table tbody td {
-        font-size: 15px;
-        padding: 6px 10px !important; /* Reduced */
-        vertical-align: middle;
-    }
-
-    .table-bordered td, .table-bordered th {
-        border: 1px solid #ccc !important;
-    }
-
-    /* === Button Styling === */
-    .btn-primary {
-        background: linear-gradient(to right, #1e5799, #207cca);
-        border: none;
-        padding: 8px 16px;            /* Slightly reduced */
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: bold;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(to right, #0f3f73, #1a5b99);
-    }
-
-    .text-end {
-        padding: 15px;
-        padding-bottom: 5px;
-    }
+/* ── Class cell icon ── */
+.td-cls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 </style>
 
+<div class="col-lg-12">
 
-<div class="card">
-
-    <!-- Export Button -->
-    <form method="POST" action="{% url 'timetable_check_pdf' %}" target="_blank">
-        {% csrf_token %}
-        <div class="text-end">
-            <button type="submit" class="btn btn-primary btn-sm">Export Logs</button>
-        </div>
-    </form>
-
-    <!-- Title Bar -->
-    <h5 class="card-header">Timetable Check Logs</h5>
-
-    <div class="card-body" style="padding:18px;">
-
-        <div class="table-responsive text-nowrap">
-            <table class="table table-bordered">
-
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Section</th>
-                        <th>Total Periods</th>
-                        <th>Allocated Periods</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% if sections_issue %}
-                        {% for dt in sections_issue %}
-                        <tr>
-                            <td>
-                                {% if dt.status == "No issue found" %}
-                                    <i class="ri-checkbox-circle-fill ri-22px text-success me-2"></i>
-                                {% else %}
-                                    <i class="ri-close-circle-fill ri-22px text-danger me-2"></i>
-                                {% endif %}
-                                <span class="fw-medium">{{ dt.cls }}</span>
-                            </td>
-
-                            <td>{{ dt.sect }}</td>
-                            <td>{{ dt.tot }}</td>
-                            <td>{{ dt.cnt }}</td>
-                            <td>{{ dt.status }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center">No data found</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-
-            </table>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Timetable Check Logs</span>
+      </nav>
+      <h1 class="pc-page-title">Timetable Check Logs</h1>
+      <p class="pc-page-sub">Review allocation status across all classes and sections.</p>
     </div>
+    <div class="pc-page-header-right">
+      <form method="POST" action="{% url 'timetable_check_pdf' %}" target="_blank" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-file-pdf-line"></i> Export Logs
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Check Results</p>
+        <p class="pc-card-sub">
+          {% if sections_issue %}
+            {{ sections_issue|length }} section{{ sections_issue|length|pluralize }} checked
+          {% else %}
+            No data found
+          {% endif %}
+        </p>
+      </div>
+      {% if sections_issue %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-file-list-3-line" style="font-size:12px;"></i>
+        {{ sections_issue|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if sections_issue %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th style="text-align:left;">Class</th>
+              <th>Section</th>
+              <th>Total Periods</th>
+              <th>Allocated Periods</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dt in sections_issue %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td>
+                <div class="td-cls">
+                  {% if dt.status == "No issue found" %}
+                    <i class="ri-checkbox-circle-fill" style="color:var(--green); font-size:18px; flex-shrink:0;"></i>
+                  {% else %}
+                    <i class="ri-close-circle-fill" style="color:var(--rose); font-size:18px; flex-shrink:0;"></i>
+                  {% endif %}
+                  <span style="font-weight:600; color:var(--text);">{{ dt.cls }}</span>
+                </div>
+              </td>
+
+              <td>{{ dt.sect }}</td>
+
+              <td>
+                <span class="td-period td-period-total">{{ dt.tot }}</span>
+              </td>
+
+              <td>
+                <span class="td-period td-period-alloc">{{ dt.cnt }}</span>
+              </td>
+
+              <td>
+                {% if dt.status == "No issue found" %}
+                  <span class="pc-badge pc-badge-success">{{ dt.status }}</span>
+                {% else %}
+                  <span class="pc-badge pc-badge-danger">{{ dt.status }}</span>
+                {% endif %}
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-file-search-line"></i></span>
+        <p class="pc-empty-title">No log data found</p>
+        <p class="pc-empty-sub">Run a timetable check to generate logs.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if sections_issue %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ sections_issue|length }}</strong> section{{ sections_issue|length|pluralize }}
+      </span>
+      <form method="POST" action="{% url 'timetable_check_pdf' %}" target="_blank" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-secondary pc-btn-sm">
+          <i class="ri-file-pdf-line"></i> Export PDF
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
 
 </div>
 

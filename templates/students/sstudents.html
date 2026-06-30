@@ -1,316 +1,397 @@
 {% extends 'panel/index.html' %}
 {% load static %}
-
 {% block content %}
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
+/* ── Page-specific tweaks only ── */
+.status-active   { background:#ecfdf5; color:#059669; }
+.status-inactive { background:#fff1f2; color:#e11d48; }
+.status-tc       { background:#fffbeb; color:#d97706; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Student List / Search</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <!-- === Top Action Buttons === -->
-            <div class="text-end mb-3">
-                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-                    <a href="{% url 'addstudents' %}" class="btn btn-sm btn-primary">New Admission</a>
-                {% endif %}
-                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-                    <a href="{% url 'print_students' %}" class="btn btn-sm btn-info">Export PDF</a>
-                    <a href="{% url 'student_csv' %}" class="btn btn-sm btn-warning">Export CSV</a>
-                {% endif %}
-            </div>
-
-            <!-- === Search Form === -->
-            <form method="GET" action="{% url 'students_search' %}" data-section-url="{% url 'ajax_load_section' %}" id="studentSearchForm" class="row g-3 mb-3">
-                <div class="col-md-3">
-                    <label for="searchby" class="form-label">Search By</label>
-                    <select name="searchby" id="searchby" class="form-select" required>
-                        <option value="">--Select--</option>
-                        <option value="studname" {% if searchby == 'studname' %}selected{% endif %}>Student Name</option>
-                        <option value="fathername" {% if searchby == 'fathername' %}selected{% endif %}>Father Name</option>
-                        <option value="studmob" {% if searchby == 'studmob' %}selected{% endif %}>Mobile No</option>
-                        <option value="studclass" {% if searchby == 'studclass' %}selected{% endif %}>Class</option>
-                        <option value="studsec" {% if searchby == 'studsec' %}selected{% endif %}>Class + Section</option>
-                        <option value="userid" {% if searchby == 'userid' %}selected{% endif %}>User ID</option>
-                        <option value="studstatus" {% if searchby == 'studstatus' %}selected{% endif %}>Status</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3 search-field" id="text-search-field">
-                    <label for="searched" class="form-label">Search Value</label>
-                    <input type="text" name="searched" id="searched" value="{{ searched }}" class="form-control" placeholder="Enter value...">
-                </div>
-
-                <div class="col-md-3 class-field d-none">
-                    <label for="class_name" class="form-label">Class</label>
-                    <select name="class_name" id="class_name" class="form-select">
-                        <option value="">--Select Class--</option>
-                        {% for c in cls %}
-                        <option value="{{ c.id }}">{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="col-md-3 section-field d-none">
-                    <label for="section_name" class="form-label">Section</label>
-                    <select name="section_name" id="section_name" class="form-select">
-                        <option value="">--Select Section--</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
-                </div>
-            </form>
-
-            <!-- === Student Table === -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
-                    <thead>
-                        <tr class="text-center">
-                            <th>#</th>
-                            <th>Student Name</th>
-                            <th>Father Name</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if data %}
-                            {% for st in data %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ st.first_name }} {{ st.middle_name }} {{ st.last_name }}</td>
-                                <td>{{ st.father_name }}</td>
-                                <td>{{ st.class_name.name }}</td>
-                                <td>{{ st.secs.section_name }}</td>
-                                <td>{{ st.phone }}</td>
-                                <td>{{ st.student_status }}</td>
-                                <td class="text-center">
-                                    <a href="{% url 'updatestud' st.id %}?next={{ request.get_full_path|urlencode }}"
-                                      class="btn btn-sm btn-outline-primary me-1">
-                                          <i class="mdi mdi-pencil"></i> Update</a>
-                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                    <a href="{% url 'delsstud' st.id %}" class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Are you sure you want to delete this student?');">
-                                        <i class="mdi mdi-delete"></i> Delete
-                                    </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="8" class="text-center">No records found</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- === Pagination === -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>Total Records: <strong>{{ cnt }}</strong></div>
-                <div>
-                    {% if data.has_previous %}
-                        <a href="?page={{ data.previous_page_number }}" class="btn btn-sm btn-outline-primary">Previous</a>
-                    {% endif %}
-                    <span class="mx-2">Page {{ data.number }} of {{ data.paginator.num_pages }}</span>
-                    {% if data.has_next %}
-                        <a href="?page={{ data.next_page_number }}" class="btn btn-sm btn-outline-primary">Next</a>
-                    {% endif %}
-                </div>
-            </div>
-
-        </div>
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{%  url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Students</span>
     </div>
+    <div class="pc-page-title">Student List</div>
+    <div class="pc-page-sub">Search, view and manage all enrolled students</div>
+  </div>
+
+  <div class="pc-page-header-right">
+    {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+    <a href="{% url 'addstudents' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-user-add-line"></i> New Admission
+    </a>
+    <a href="{% url 'print_students' %}" class="pc-btn pc-btn-info">
+      <i class="ri-file-pdf-line"></i> PDF
+    </a>
+    <a href="{% url 'student_csv' %}" class="pc-btn pc-btn-warning">
+      <i class="ri-file-excel-2-line"></i> CSV
+    </a>
+    {% endif %}
+  </div>
 </div>
+
+<!-- ═══════════════════════════════
+     KPI ROW
+     ═══════════════════════════════ -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ cnt }}</div>
+    <div class="pc-kpi-label">Total Records</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data.paginator.num_pages }}</div>
+    <div class="pc-kpi-label">Pages</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data.number }}</div>
+    <div class="pc-kpi-label">Current Page</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     MAIN CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+
+  <!-- Card header -->
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title"><i class="ri-group-line me-2" style="color:var(--accent);"></i>All Students</div>
+      <div class="pc-card-sub">Use filters below to narrow down results</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:12px;padding:5px 14px;">
+      {{ cnt }} student{{ cnt|pluralize }}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+
+    <!-- ═══════════════════════════════
+         SEARCH / FILTER FORM
+         ═══════════════════════════════ -->
+    <form method="GET" action="{% url 'students_search' %}"
+          data-section-url="{% url 'ajax_load_section' %}"
+          id="studentSearchForm">
+      <div class="pc-filter-row">
+
+        <!-- Search by -->
+        <div class="pc-form-group">
+          <label class="pc-label">Search By</label>
+          <select name="searchby" id="searchby" class="pc-select" required>
+            <option value="">— Select —</option>
+            <option value="studname"   {% if searchby == 'studname'   %}selected{% endif %}>Student Name</option>
+            <option value="fathername" {% if searchby == 'fathername' %}selected{% endif %}>Father Name</option>
+            <option value="studmob"    {% if searchby == 'studmob'    %}selected{% endif %}>Mobile No</option>
+            <option value="studclass"  {% if searchby == 'studclass'  %}selected{% endif %}>Class</option>
+            <option value="studsec"    {% if searchby == 'studsec'    %}selected{% endif %}>Class + Section</option>
+            <option value="userid"     {% if searchby == 'userid'     %}selected{% endif %}>User ID</option>
+            <option value="studstatus" {% if searchby == 'studstatus' %}selected{% endif %}>Status</option>
+          </select>
+        </div>
+
+        <!-- Text value -->
+        <div class="pc-form-group search-field" id="text-search-field">
+          <label class="pc-label">Search Value</label>
+          <div class="pc-input-group">
+            <i class="ri-search-line pc-input-icon"></i>
+            <input type="text" name="searched" id="searched"
+                   value="{{ searched }}"
+                   class="pc-input"
+                   placeholder="Type to search…">
+          </div>
+        </div>
+
+        <!-- Class dropdown (shown for class/section filter) -->
+        <div class="pc-form-group class-field d-none">
+          <label class="pc-label">Class</label>
+          <select name="class_name" id="class_name" class="pc-select">
+            <option value="">— Select Class —</option>
+            {% for c in cls %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Section dropdown -->
+        <div class="pc-form-group section-field d-none">
+          <label class="pc-label">Section</label>
+          <select name="section_name" id="section_name" class="pc-select">
+            <option value="">— Select Section —</option>
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="pc-form-group" style="min-width:110px;">
+          <label class="pc-label">&nbsp;</label>
+          <button type="submit" class="pc-btn pc-btn-primary" style="width:100%;">
+            <i class="ri-search-line"></i> Search
+          </button>
+        </div>
+
+        <!-- Reset -->
+        <div class="pc-form-group" style="min-width:90px;">
+          <label class="pc-label">&nbsp;</label>
+          <a href="{% url 'students_search' %}" class="pc-btn pc-btn-outline" style="width:100%;">
+            <i class="ri-refresh-line"></i> Reset
+          </a>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- ═══════════════════════════════
+         STUDENT TABLE
+         ═══════════════════════════════ -->
+    <div class="table-responsive">
+      <div class="pc-table-wrap">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:18px;">#</th>
+              <th style="text-align:left;">Student Name</th>
+              <th>Father Name</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if data %}
+              {% for st in data %}
+              <tr>
+                <td class="td-num">{{ forloop.counter }}</td>
+                <td class="td-name">
+                  <div style="font-weight:600;color:var(--text);">{{ st.first_name }} {% if st.middle_name %}{{ st.middle_name }} {% endif %}{{ st.last_name }}</div>
+                </td>
+                <td>{{ st.father_name }}</td>
+                <td>
+                  <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                    {{ st.class_name.name }}
+                  </span>
+                </td>
+                <td>{{ st.secs.section_name }}</td>
+                <td>
+                  <span style="font-family:var(--f-mono);font-size:12.5px;">{{ st.phone }}</span>
+                </td>
+                <td>
+                  {% with s=st.student_status|lower %}
+                  {% if 'active' in s %}
+                    <span class="pc-badge status-active pc-badge-no-dot">{{ st.student_status }}</span>
+                  {% elif 'tc' in s or 'left' in s or 'transfer' in s %}
+                    <span class="pc-badge status-tc pc-badge-no-dot">{{ st.student_status }}</span>
+                  {% else %}
+                    <span class="pc-badge status-inactive pc-badge-no-dot">{{ st.student_status }}</span>
+                  {% endif %}
+                  {% endwith %}
+                </td>
+                <td>
+                  <div class="td-actions">
+                    <a href="{% url 'updatestud' st.id %}?next={{ request.get_full_path|urlencode }}"
+                       class="pc-btn pc-btn-secondary pc-btn-sm"
+                       title="Edit student">
+                      <i class="ri-pencil-line"></i> Edit
+                    </a>
+                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                    <button type="button"
+                       class="pc-btn pc-btn-danger pc-btn-sm"
+                       title="Delete student"
+                       onclick="openDeleteModal('{{ st.id }}', '{{ st.first_name }} {{ st.last_name }}')">
+                      <i class="ri-delete-bin-6-line"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="pc-table-empty">
+                <td colspan="8">
+                  <div class="pc-empty">
+                    <i class="ri-search-line pc-empty-icon"></i>
+                    <div class="pc-empty-title">No students found</div>
+                    <div class="pc-empty-sub">Try adjusting your search filters</div>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /pc-card-body -->
+
+  <!-- ═══════════════════════════════
+       PAGINATION FOOTER
+       ═══════════════════════════════ -->
+  <div class="pc-card-footer">
+    <div class="pc-pagination-info">
+      Total: <strong>{{ cnt }}</strong> student{{ cnt|pluralize }}
+    </div>
+    <div class="pc-pagination-nav">
+      {% if data.has_previous %}
+      <a href="?page={{ data.previous_page_number }}" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-arrow-left-s-line"></i> Prev
+      </a>
+      {% endif %}
+      <span class="pc-pagination-page">
+        Page <strong>{{ data.number }}</strong> of <strong>{{ data.paginator.num_pages }}</strong>
+      </span>
+      {% if data.has_next %}
+      <a href="?page={{ data.next_page_number }}" class="pc-btn pc-btn-outline pc-btn-sm">
+        Next <i class="ri-arrow-right-s-line"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+</div><!-- /pc-card -->
+
+<!-- ═══════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+     ═══════════════════════════════════════ -->
+<div id="deleteModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
+
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--rose-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #fecdd3;
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:42px;height:42px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(225,29,72,.15);
+        flex-shrink:0;">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Delete Student</div>
+        <div style="font-size:12px;color:var(--rose);font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;line-height:1.7;">
+        Are you sure you want to delete
+        <strong id="deleteStudentName" style="color:var(--text);"></strong>?
+        All academic records, attendance, and data associated with this student will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <button
+        type="button"
+        class="pc-btn pc-btn-outline"
+        onclick="closeDeleteModal()">
+        Cancel
+      </button>
+
+      <!-- Hidden form submitted on confirm -->
+      <form id="deleteForm" method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Yes, Delete Student
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal animation -->
+<style>
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.92) translateY(10px); }
+    to   { opacity:1; transform:scale(1)   translateY(0); }
+  }
+</style>
 
 <script src="{% static 'js/jquery.min.js' %}"></script>
 <script>
-$(document).ready(function() {
-    // === Toggle search input type ===
-    $('#searchby').change(function() {
-        var selected = $(this).val();
-        if (selected === 'studclass' || selected === 'studsec') {
-            $('#text-search-field').addClass('d-none');
-            $('.class-field').removeClass('d-none');
-            if (selected === 'studsec') {
-                $('.section-field').removeClass('d-none');
-            } else {
-                $('.section-field').addClass('d-none');
-            }
-        } else {
-            $('#text-search-field').removeClass('d-none');
-            $('.class-field, .section-field').addClass('d-none');
-        }
-    });
+$(document).ready(function () {
+  $('#searchby').change(function () {
+    var v = $(this).val();
+    if (v === 'studclass' || v === 'studsec') {
+      $('#text-search-field').addClass('d-none');
+      $('.class-field').removeClass('d-none');
+      v === 'studsec'
+        ? $('.section-field').removeClass('d-none')
+        : $('.section-field').addClass('d-none');
+    } else {
+      $('#text-search-field').removeClass('d-none');
+      $('.class-field, .section-field').addClass('d-none');
+    }
+  });
 
-    // === AJAX Load Sections ===
-    $('#class_name').change(function() {
-        var url = $('#studentSearchForm').attr('data-section-url');
-        var classId = $(this).val();
-        $.ajax({
-            url: url,
-            data: { 'Class_Id': classId },
-            success: function(data) {
-                $('#section_name').html(data);
-            }
-        });
+  $('#class_name').change(function () {
+    var url = $('#studentSearchForm').attr('data-section-url');
+    $.ajax({
+      url: url,
+      data: { 'Class_Id': $(this).val() },
+      success: function (data) { $('#section_name').html(data); }
     });
+  });
+});
+
+// ═══════════════════════════════════════
+// DELETE MODAL FUNCTIONS
+// ═══════════════════════════════════════
+const deleteModal = document.getElementById('deleteModal');
+
+function openDeleteModal(id, studentName) {
+  document.getElementById('deleteStudentName').textContent = studentName;
+  document.getElementById('deleteForm').action = '{% url "delsstud" 0 %}'.replace('0', id);
+  deleteModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+  deleteModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+deleteModal.addEventListener('click', function(e) {
+  if (e.target === deleteModal) closeDeleteModal();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
 });
 </script>
+
 {% endblock %}

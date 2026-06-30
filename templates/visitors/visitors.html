@@ -2,281 +2,288 @@
 {% block content %}
 
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+  /* Search bar */
+  .vis-search-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr auto auto;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .vis-field { display:flex; flex-direction:column; gap:5px; }
+  .vis-field label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .7px; color: var(--text-sm);
+  }
+  .vis-field select,
+  .vis-field input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px; color: var(--text);
+    outline: none; appearance: none; -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .vis-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    background-size: 12px; padding-right: 36px;
+  }
+  .vis-field select:focus, .vis-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
+  /* Inline actions */
+  .action-btns { display:flex; align-items:center; justify-content:center; gap:5px; }
 
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
+  /* Delete modal */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(15,23,42,.45); z-index:9999;
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal-box {
+    background:var(--surface); border-radius:var(--r-xl);
+    border:1px solid var(--border);
+    box-shadow:0 20px 50px rgba(15,23,42,.2);
+    width:100%; max-width:400px; overflow:hidden;
+    animation:modalIn 180ms ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.96) translateY(8px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .modal-head {
+    padding:16px 20px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .modal-head-title { font-size:14px; font-weight:700; color:var(--text); margin:0; }
+  .modal-head-sub   { font-size:12px; color:var(--text-sm); margin:2px 0 0; }
+  .modal-close-btn {
+    width:28px; height:28px; border-radius:var(--r-sm);
+    border:1px solid var(--border); background:var(--surface2);
+    color:var(--text-sm); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; transition:background 120ms;
+  }
+  .modal-close-btn:hover { background:var(--rose-lt); color:var(--rose); border-color:#fecdd3; }
+  .modal-body-inner { padding:20px; }
+  .modal-foot {
+    padding:14px 20px; border-top:1px solid var(--border);
+    display:flex; justify-content:flex-end; gap:8px; background:var(--surface2);
+  }
+  .delete-warning {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:14px 16px; background:var(--rose-lt);
+    border:1px solid #fecdd3; border-radius:var(--r-lg);
+  }
+  .delete-warning i { font-size:22px; color:var(--rose); flex-shrink:0; margin-top:1px; }
+  .delete-warning p { margin:0; font-size:13.5px; color:var(--rose); font-weight:500; line-height:1.6; }
+  .delete-warning strong { font-weight:700; }
 
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
+  @media (max-width: 640px) {
+    .vis-search-grid { grid-template-columns: 1fr; }
+  }
 </style>
 
+<div class="col-lg-12">
 
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- Title -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Visitors</span></h5>
-        </div>
-        <div class="container text-end">
-            <a href="{% url 'add_visitor' %}" class="btn btn-primary btn-sm">New Visitor</a>
-            </div>
-        <!-- Search & Add Button -->
-        <div class="search-row d-flex justify-content-between align-items-center">
-
-
-
-            <form action="{% url 'visitors_search' %}" method="POST" class="d-flex gap-2">
-                {% csrf_token %}
-                <select name="searchby" id="searchby" class="form-control">
-                    <option value="compname">Company Name</option>
-                    <option value="vistname">Visitor Name</option>
-                </select>
-
-                <input type="search"
-                       placeholder="Search here"
-                       name="searched"
-                       required
-                       class="form-control">
-
-                <button type="submit" class="btn btn-success">Search</button>
-
-                <a href="{% url 'visitors_list' %}"
-                   class="btn btn-danger">Clear</a>
-            </form>
-        </div>
-
-        <!-- Table -->
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered text-center">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Id</th>
-                            <th>Name</th>
-                            <th>Company</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Meeting Person</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if data %}
-                            {% for visitor in data %}
-                            <tr>
-                                <td>{{visitor.id}}</td>
-                                <td>{{visitor.name}}</td>
-                                <td>{{visitor.company}}</td>
-                                <td>{{visitor.check_in_time}}</td>
-                                <td>{{visitor.check_out_time}}</td>
-                                <td>{{visitor.meeting_person}}</td>
-
-                                <td>
-                                    <div class="dropdown">
-                                       <button class="btn p-0" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-line"></i></button>
-
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{% url 'view_visitor' visitor.id %}">
-                                                <i class="ri-eye-line me-1">&nbsp;View</i>
-                                            </a>
-                                            <a class="dropdown-item" href="{% url 'update_visitor' visitor.id %}">
-                                                <i class="ri-pencil-line me-1">&nbsp;Edit</i>
-                                            </a>
-
-                                            {% if request.user.groups.all.0.name|lower in "admin superadmin" %}
-                                             <a class="dropdown-item" href="{% url 'delete_visitor' visitor.id %}">
-                                                <i class="ri-delete-bin-line">&nbsp;Delete</i>
-                                            </a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-
-                                    <!-- Delete Modal -->
-                                    <div class="modal fade" id="deleteModal{{visitor.id}}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Delete Visitor</h5>
-                                                    <button type="button" class="btn-close" data-dismiss="modal"></button>
-                                                </div>
-
-                                                <div class="modal-body text-center">
-                                                    <h5 class="text-danger">Are you sure you want to delete {{visitor.name}}?</h5>
-                                                </div>
-
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                                                    {% if request.user.groups.all.0.name|lower in "admin superadmin" %}
-                                                    <form action="{% url 'delete_visitor' visitor.id %}" method="POST">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                                    </form>
-                                                    {% endif %}
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                        <tr>
-                            <td colspan="7">
-                                <div class="alert alert-danger mb-0">No records available.</div>
-                            </td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Visitors</span>
+      </nav>
+      <h1 class="pc-page-title">Visitors</h1>
+      <p class="pc-page-sub">Manage visitor check-ins and meeting records.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'add_visitor' %}" class="pc-btn pc-btn-primary">
+        <i class="ti ti-plus" style="font-size:14px;"></i> New Visitor
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Card -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Search Visitors</p>
+        <p class="pc-card-sub">Filter by company or visitor name</p>
+      </div>
+      <i class="ti ti-search" style="font-size:20px; color:var(--muted);"></i>
+    </div>
+    <div class="pc-card-body">
+      <form action="{% url 'visitors_search' %}" method="POST">
+        {% csrf_token %}
+        <div class="vis-search-grid">
+          <div class="vis-field">
+            <label>Search by</label>
+            <select name="searchby" id="searchby">
+              <option value="compname">Company Name</option>
+              <option value="vistname">Visitor Name</option>
+            </select>
+          </div>
+          <div class="vis-field">
+            <label>Keyword</label>
+            <input type="search" name="searched" placeholder="Type to search…" required />
+          </div>
+          <button type="submit" class="pc-btn pc-btn-primary" style="align-self:flex-end;">
+            <i class="ti ti-search" style="font-size:14px;"></i> Search
+          </button>
+          <a href="{% url 'visitors_list' %}" class="pc-btn pc-btn-outline" style="align-self:flex-end;">
+            <i class="ti ti-x" style="font-size:14px;"></i> Clear
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Visitor Records</p>
+        <p class="pc-card-sub">All check-in and check-out entries</p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-users" style="font-size:12px;"></i>
+        {{ data|length }} visitor{{ data|length|pluralize }}
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Name</th>
+            <th>Company</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Meeting Person</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if data %}
+            {% for visitor in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td style="text-align:left; font-weight:600; color:var(--text); font-size:13.5px;">
+                {{ visitor.name }}
+              </td>
+              <td>
+                <span class="pc-badge pc-badge-neutral pc-badge-no-dot">
+                  {{ visitor.company }}
+                </span>
+              </td>
+              <td style="font-family:var(--f-mono); font-size:12.5px; color:var(--green);">
+                {{ visitor.check_in_time }}
+              </td>
+              <td style="font-family:var(--f-mono); font-size:12.5px; color:var(--text-sm);">
+                {{ visitor.check_out_time|default:"—" }}
+              </td>
+              <td style="color:var(--text-md);">{{ visitor.meeting_person }}</td>
+              <td>
+                <div class="action-btns">
+                  <!-- View -->
+                  <a href="{% url 'view_visitor' visitor.id %}"
+                     class="pc-btn pc-btn-info pc-btn-sm">
+                    <i class="ti ti-eye" style="font-size:12px;"></i>
+                  </a>
+                  <!-- Edit -->
+                  <a href="{% url 'update_visitor' visitor.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ti ti-pencil" style="font-size:12px;"></i>
+                  </a>
+                  <!-- Delete — admin/superadmin only -->
+                  {% if request.user.groups.all.0.name|lower in "admin superadmin" %}
+                  <button class="pc-btn pc-btn-danger pc-btn-sm"
+                          data-url="{% url 'delete_visitor' visitor.id %}"
+                          data-name="{{ visitor.name }}"
+                          onclick="confirmDelete(this)">
+                    <i class="ti ti-trash" style="font-size:12px;"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="pc-table-empty">
+              <td colspan="7">No visitor records found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not data %}
+    <div class="pc-card-body" style="padding-top:0;">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-door-enter"></i></span>
+        <p class="pc-empty-title">No visitors recorded</p>
+        <p class="pc-empty-sub">Add a new visitor using the button above.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <p class="modal-head-title">Delete Visitor</p>
+        <p class="modal-head-sub">This action cannot be undone</p>
+      </div>
+      <button class="modal-close-btn" onclick="closeDeleteModal()">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="modal-body-inner">
+      <div class="delete-warning">
+        <i class="ti ti-alert-triangle"></i>
+        <p>Are you sure you want to delete visitor
+           <strong id="deleteVisitorName"></strong>?</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <a id="deleteConfirmBtn" href="#" class="pc-btn pc-btn-danger">
+        <i class="ti ti-trash" style="font-size:14px;"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmDelete(btn) {
+    document.getElementById('deleteVisitorName').textContent = '"' + btn.dataset.name + '"';
+    document.getElementById('deleteConfirmBtn').href = btn.dataset.url;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('open');
+  }
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+</script>
 
 {% endblock %}

@@ -21,4 +21,5 @@ urlpatterns = [
     path('stocks_summmary',login_required(views.stocks_summmary),name='stocks_summmary'),
     path('cashsource_summary_pdf',login_required(views.cashsource_summary_pdf),name='cashsource_summary_pdf'),
     path('PettyCashExpense_summary_pdf',login_required(views.PettyCashExpense_summary_pdf),name='PettyCashExpense_summary_pdf'),
+    path('send_whatsapp',views.send_whatsapp,name='send_whatsapp'),
 ]

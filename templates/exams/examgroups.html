@@ -1,195 +1,203 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, th, td, label, button, select, textarea, a {
-    font-family: 'Roboto', sans-serif;
-}
+  /* Delete confirm modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,23,42,.45); z-index: 9999;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface); border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(15,23,42,.2);
+    width: 100%; max-width: 400px; overflow: hidden;
+    animation: modalIn 180ms ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform: scale(.96) translateY(8px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+  }
+  .modal-head {
+    padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-head-title { font-size:14px; font-weight:700; color:var(--text); margin:0; }
+  .modal-head-sub   { font-size:12px; color:var(--text-sm); margin:2px 0 0; }
+  .modal-close-btn {
+    width:28px; height:28px; border-radius:var(--r-sm);
+    border:1px solid var(--border); background:var(--surface2);
+    color:var(--text-sm); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; transition:background 120ms;
+  }
+  .modal-close-btn:hover { background:var(--rose-lt); color:var(--rose); border-color:#fecdd3; }
+  .modal-body-inner { padding:20px; }
+  .modal-foot {
+    padding:14px 20px; border-top:1px solid var(--border);
+    display:flex; justify-content:flex-end; gap:8px;
+    background:var(--surface2);
+  }
+  .delete-warning {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:14px 16px; background:var(--rose-lt);
+    border:1px solid #fecdd3; border-radius:var(--r-lg);
+  }
+  .delete-warning i  { font-size:22px; color:var(--rose); flex-shrink:0; margin-top:1px; }
+  .delete-warning p  { margin:0; font-size:13.5px; color:var(--rose); font-weight:500; line-height:1.6; }
+  .delete-warning strong { font-weight:700; }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 18px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    border: none;
-    overflow: hidden;
-}
-
-/* ===== SUPER SLIM TITLE BAR (AS PER YOUR LAST TEMPLATE) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    padding: 4px 0;
-    margin-bottom: 10px;
-}
-
-.card-title h5 {
-    margin: 0;
-    padding: 0;
-}
-
-.card-title h5 span {
-    font-size: 15px;
-    background: #ffffff;
-    color: #000;
-    padding: 3px 14px;
-    border-radius: 6px;
-}
-
-/* ===== TOP RIGHT BUTTON AREA ===== */
-.text-end {
-    padding-right: 20px;
-    margin-top: 8px;
-}
-
-/* ===== TABLE ===== */
-.table.table-striped.table-bordered {
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.table thead.table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-    font-size: 14px !important;
-    vertical-align: middle;
-}
-
-.table tbody td {
-    vertical-align: middle;
-    text-align: center;
-    padding-top: 8px;
-    padding-bottom: 8px;
-}
-
-/* Make action buttons compact */
-.btn-sm {
-    padding: 5px 10px;
-    border-radius: 6px;
-}
-
-/* Primary gradient */
-.btn-primary {
-    background: linear-gradient(90deg, #005C97, #363795);
-    border: none;
-    color: #fff;
-}
-
-/* Danger gradient */
-.btn-danger {
-    background: linear-gradient(90deg, #FF4D4D, #CC0000);
-    border: none;
-    color: #fff;
-}
-
-/* Modal */
-.modal-content {
-    border-radius: 10px;
-}
-.modal-header {
-    background: linear-gradient(90deg, #005C97, #363795);
-    color: #fff;
-}
+  /* Inline action buttons */
+  .action-btns {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-         <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Exam Group</span></h5>
-        </div>
+<div class="col-lg-12">
 
-        <div class="text-end">
-            <a href="{% url 'add_exam_group' %}" class="btn btn-sm btn-primary">New Exam Group</a>
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-striped table-bordered">
-              <thead class="table-dark" align="center" >
-                <tr>
-                  <th>Id</th>
-                  <th>Exam Group </th>
-                  <th>School</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-              {% if data %}
-               {% for examdet in data %}
-                <tr align="center">
-                  <td> {{forloop.counter}}</td>
-                  <td>{{examdet.exm_group}}</td>
-                   <td>{{examdet.exam_group_school}}</td>
-                   <td>
-                       <a href="{% url 'update_exam_group' examdet.id %}" class="btn btn-primary btn-sm" role="button" >Update</a>
-
-                       {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-
-                       <a href="{% url 'delete_exam_group' examdet.id %}" class="btn btn-danger btn-sm" role="button" >Delete</a>
-
-                        {% endif %}
-                  </td>
-                </tr>
-               {% endfor %}
-              {% else %}
-                  <tr>
-                    <td colspan="4">
-                      <div class="alert alert-danger m-0" role="alert">
-                          <p class="mb-0">No Record are available to Show</p>
-                      </div>
-                    </td>
-                  </tr>
-               {% endif %}
-              </tbody>
-            </table>
-
-            <!-- modal kept as-is -->
-            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-               <div class="modal-dialog">
-                 <div class="modal-content">
-                     <div class="modal-header">
-                         <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                     </div>
-                 <div class="modal-body">
-                    <form action="" method="POST">
-                       {% csrf_token %}
-
-                     <div class="form-group">
-                        <label>Exam Group:</label>
-                           {{ form.exm_group}}
-                     </div>
-
-                        {{ form.exam_group_school }}
-
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                  </div>
-                </form>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-        </div>
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Exam Groups</span>
+      </nav>
+      <h1 class="pc-page-title">Exam Groups</h1>
+      <p class="pc-page-sub">Manage exam groups for your school.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'add_exam_group' %}" class="pc-btn pc-btn-primary">
+        <i class="ti ti-plus" style="font-size:14px;"></i> New Exam Group
+      </a>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Exam Group List</p>
+        <p class="pc-card-sub">All registered exam groups</p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-layers" style="font-size:12px;"></i>
+        {{ data|length }} group{{ data|length|pluralize }}
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Exam Group</th>
+            <th>School</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if data %}
+            {% for examdet in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td style="text-align:left; font-weight:600; color:var(--text); font-size:13.5px;">
+                {{ examdet.exm_group }}
+              </td>
+              <td>
+                <span class="pc-badge pc-badge-neutral pc-badge-no-dot">
+                  {{ examdet.exam_group_school }}
+                </span>
+              </td>
+              <td>
+                <div class="action-btns">
+                  <!-- Update — always visible -->
+                  <a href="{% url 'update_exam_group' examdet.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ti ti-pencil" style="font-size:13px;"></i> Edit
+                  </a>
+                  <!-- Delete — always visible, confirms via modal -->
+                  <button class="pc-btn pc-btn-danger pc-btn-sm"
+                          data-url="{% url 'delete_exam_group' examdet.id %}"
+                          data-name="{{ examdet.exm_group }}"
+                          onclick="confirmDelete(this)">
+                    <i class="ti ti-trash" style="font-size:13px;"></i> Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="pc-table-empty">
+              <td colspan="4">No exam groups found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not data %}
+    <div class="pc-card-body" style="padding-top:0;">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-layers-off"></i></span>
+        <p class="pc-empty-title">No exam groups yet</p>
+        <p class="pc-empty-sub">Create your first exam group using the button above.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
 
-<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script type='text/javascript'>
-document.addEventListener("DOMContentLoaded", function() {
-    const serialNumberElements = document.getElementsByClassName("serial-number");
-    let startSerial = ({{ data.number }} - 1) * {{ data.paginator.per_page }};
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <p class="modal-head-title">Delete Exam Group</p>
+        <p class="modal-head-sub">This action cannot be undone</p>
+      </div>
+      <button class="modal-close-btn" onclick="closeDeleteModal()">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="modal-body-inner">
+      <div class="delete-warning">
+        <i class="ti ti-alert-triangle"></i>
+        <p>Are you sure you want to delete
+           <strong id="deleteGroupName"></strong>?
+           All associated exam data may be affected.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <a id="deleteConfirmBtn" href="#" class="pc-btn pc-btn-danger">
+        <i class="ti ti-trash" style="font-size:14px;"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
 
-    for (let i = 0; i < serialNumberElements.length; i++) {
-        serialNumberElements[i].textContent = startSerial + i + 1;
-    }
-});
+<script>
+  function confirmDelete(btn) {
+    document.getElementById('deleteGroupName').textContent = '"' + btn.dataset.name + '"';
+    document.getElementById('deleteConfirmBtn').href = btn.dataset.url;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('open');
+  }
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
 </script>
 
 {% endblock %}

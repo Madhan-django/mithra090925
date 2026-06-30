@@ -3,185 +3,308 @@
 {% block content %}
 
 <style>
-    /* === General Typography === */
-    body, h1, h3, h4, h5, th, td, label, button {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Timetable grid table ── */
+.tt-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.tt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-sans);
+  font-size: 13px;
+  min-width: 600px;
+}
+.tt-table thead {
+  background: #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.tt-table thead th {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: #94a3b8;
+  text-align: center;
+  border: none;
+  white-space: nowrap;
+}
+.tt-table thead th:first-child {
+  text-align: left;
+  padding-left: 16px;
+  width: 110px;
+}
+.tt-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+}
+.tt-table tbody tr:last-child { border-bottom: none; }
+.tt-table tbody tr:hover { background: #f5f7ff; }
 
-    /* === Main Title Bar (Style A) === */
-    .timetable-title {
-        background: linear-gradient(to right, #1e5799, #207cca, #2989d8);
-        padding: 8px 0; /* REDUCED HEIGHT */
-        border-radius: 18px;
-        text-align: center;
-        margin-bottom: 18px;
-        box-shadow: 0px 3px 10px rgba(0,0,0,0.15);
-    }
-    .title-badge span {
-        background: #fff;
-        color: #000;
-        padding: 4px 18px; /* REDUCED SIZE */
-        border-radius: 30px;
-        font-size: 16px;
-        font-weight: bold;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.20);
-    }
+.tt-table tbody td {
+  padding: 10px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  color: var(--text-md);
+  font-size: 13px;
+  vertical-align: middle;
+}
+.tt-table tbody td:last-child { border-right: none; }
+.tt-table tbody td:first-child {
+  text-align: left;
+  padding-left: 16px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface2);
+  border-right: 2px solid var(--border-dark);
+  white-space: nowrap;
+}
 
-    /* === Buttons === */
-    .btn-primary {
-        background: linear-gradient(to right, #1e5799, #207cca);
-        border: none;
-        font-weight: 600;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(to right, #15416b, #1b5ea0);
-    }
-    .btn-danger {
-        background: linear-gradient(to right, #d9534f, #c9302c);
-        border: none;
-        font-weight: 600;
-    }
-    .btn-info {
-        background: linear-gradient(to right, #17a2b8, #138496);
-        border: none;
-        font-weight: 600;
-        color: #fff;
-    }
+/* ── Section group card ── */
+.tt-section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+  margin-bottom: 22px;
+  animation: ttCardIn .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes ttCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tt-section-header {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tt-section-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tt-section-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
 
-    /* === Table Styling === */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 30px;
-    }
-    th {
-        background-color: #212529;
-        color: white;
-        font-size: 13px;   /* REDUCED SIZE */
-        padding: 6px;      /* REDUCED */
-        text-align: center;
-    }
-    td {
-        background: #fff;
-        font-size: 14px;
-        padding: 7px;
-        border: 2px solid #ccc;
-        text-align: center;
-    }
-
-    h6.section-title {
-        font-size: 17px;
-        font-weight: bold;
-        margin-top: 30px;
-        margin-bottom: 10px;
-    }
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
+}
+.nb-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15,23,42,.5);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+}
+.nb-modal.active { display: flex; }
+.nb-modal-box {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%; max-width: 420px;
+  margin: 20px;
+  overflow: hidden;
+  animation: modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  background: var(--rose-lt);
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #fecdd3;
+  display: flex; align-items: center; gap: 12px;
+}
+.nb-modal-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(225,29,72,.15);
+  flex-shrink: 0;
+}
+.nb-modal-body { padding: 22px; }
+.nb-modal-body p { font-size: 13.5px; color: var(--text-md); margin: 0; line-height: 1.7; }
+.nb-modal-footer {
+  padding: 14px 22px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
 </style>
 
+<div class="col-lg-12">
 
-
-<!-- Main Page Title -->
-<div class="timetable-title">
-    <div class="title-badge"><span>Timetable</span></div>
-</div>
-{% if not section_timetables %}
-    <form method="POST" action="{% url 'generate_timetable' %}">
-        {% csrf_token %}
-        <div class="text-end mb-3">
-            <button type="submit" class="btn btn-primary btn-sm">Generate Timetable</button>
-        </div>
-    </form>
-
-{% else %}
-
-    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-        <div class="text-end">
-            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#basicModal">
-                Delete Timetable
-            </button>
-        </div>
-    {% endif %}
-
-    <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h6 class="modal-title text-danger"></h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <h5 class="text-danger text-center">
-                        Are you sure want to Delete the previous Timetable?
-                    </h5>
-                </div>
-
-                <div class="modal-footer">
-                    <form method="POST" action="{% url 'delete_timetable' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    </form>
-                </div>
-
-            </div>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Timetable</span>
+      </nav>
+      <h1 class="pc-page-title">Timetable</h1>
+      <p class="pc-page-sub">View, generate and export the school timetable.</p>
     </div>
 
-{% endif %}
-<!-- Buttons Row -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-
-    <div>
-        <a href="{% url 'view_section_timetable' %}">
-            <button type="button" class="btn btn-info btn-sm me-2">Classwise Timetable</button>
+    <div class="pc-page-header-right">
+      {% if not section_timetables %}
+        <form method="POST" action="{% url 'generate_timetable' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="pc-btn pc-btn-primary">
+            <i class="ri-calendar-2-line"></i> Generate Timetable
+          </button>
+        </form>
+      {% else %}
+        <!-- Export buttons -->
+        <a href="{% url 'school_export_pdf' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-file-pdf-line"></i> Export PDF
         </a>
-        <a href="{% url 'view_teacher_timetable' %}">
-            <button type="button" class="btn btn-info btn-sm">Teacherwise Timetable</button>
+        <a href="{% url 'school_export_excel' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-file-excel-line"></i> Export Excel
         </a>
+        <!-- View buttons -->
+        <a href="{% url 'view_section_timetable' %}" class="pc-btn pc-btn-secondary">
+          <i class="ri-layout-grid-line"></i> Classwise
+        </a>
+        <a href="{% url 'view_teacher_timetable' %}" class="pc-btn pc-btn-secondary">
+          <i class="ri-user-line"></i> Teacherwise
+        </a>
+        <!-- Delete (admin only) -->
+        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        <button type="button" class="pc-btn pc-btn-danger" onclick="openDeleteModal()">
+          <i class="ri-delete-bin-7-line"></i> Delete Timetable
+        </button>
+        {% endif %}
+      {% endif %}
     </div>
+  </div>
 
-    <div>
-        <a href="{% url 'school_export_pdf' %}">
-            <button type="button" class="btn btn-primary btn-sm me-2">Export to PDF</button>
-        </a>
-        <a href="{% url 'school_export_excel' %}">
-            <button type="button" class="btn btn-primary btn-sm">Export to Excel</button>
-        </a>
-    </div>
+  <!-- ② Timetable Sections -->
+  {% if section_timetables %}
 
-</div>
+    {% for group in section_timetables %}
+    <div class="tt-section-card" style="animation-delay: {{ forloop.counter0 }}0ms;">
 
-<!-- Section Timetables -->
-{% for group in section_timetables %}
-    <h6 class="section-title text-center">
-        {{ group.section.class_sec_name.name }} - {{ group.section.section_name }}
-    </h6>
+      <div class="tt-section-header">
+        <div class="tt-section-name">
+          <span class="tt-section-dot"></span>
+          {{ group.section.class_sec_name.name }} — {{ group.section.section_name }}
+        </div>
+        <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+          <i class="ri-time-line" style="font-size:11px;"></i>
+          {{ group.grid|length }} Period{{ group.grid|length|pluralize }}
+        </span>
+      </div>
 
-    <table>
-        <thead>
+      <div class="tt-table-wrap">
+        <table class="tt-table">
+          <thead>
             <tr>
-                <th>Day / Period</th>
-                {% for p in group.grid %}
-                    <th>Period {{ p.period }}</th>
-                {% endfor %}
+              <th>Day / Period</th>
+              {% for p in group.grid %}
+              <th>Period {{ p.period }}</th>
+              {% endfor %}
             </tr>
-        </thead>
-
-        <tbody>
+          </thead>
+          <tbody>
             {% for day_index in group.days|length|make_range %}
-                <tr>
-                    <td><b>{{ group.days|index:day_index }}</b></td>
-                    {% for period_row in group.grid %}
-                        <td>{{ period_row.cells|index:day_index|safe }}</td>
-                    {% endfor %}
-                </tr>
+            <tr>
+              <td>{{ group.days|index:day_index }}</td>
+              {% for period_row in group.grid %}
+              <td>{{ period_row.cells|index:day_index|safe }}</td>
+              {% endfor %}
+            </tr>
             {% endfor %}
-        </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
 
-{% empty %}
-    <p>No timetable data available.</p>
-{% endfor %}
+    </div>
+    {% endfor %}
+
+  {% else %}
+
+    <!-- Empty state -->
+    <div class="pc-card">
+      <div class="pc-card-body">
+        <div class="pc-empty" style="padding:60px 20px;">
+          <span class="pc-empty-icon"><i class="ri-calendar-2-line"></i></span>
+          <p class="pc-empty-title">No timetable generated yet</p>
+          <p class="pc-empty-sub">Click <strong>Generate Timetable</strong> above to create one.</p>
+        </div>
+      </div>
+    </div>
+
+  {% endif %}
+
+</div>
+
+<!-- ══════════════════════════════
+     DELETE TIMETABLE MODAL
+══════════════════════════════ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Timetable</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete the <strong>entire timetable</strong>?
+        All generated schedules will be <strong>permanently removed</strong>
+        and will need to be regenerated.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <form method="POST" action="{% url 'delete_timetable' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteModal() {
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
 
 {% endblock %}

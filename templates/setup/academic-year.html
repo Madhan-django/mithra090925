@@ -2,245 +2,267 @@
 {% block content %}
 
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Modal overlay ── */
+.pc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  backdrop-filter: blur(4px);
+  z-index: 1040;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.pc-modal-backdrop.show { display: flex; }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+.pc-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%;
+  max-width: 420px;
+  margin: 16px;
+  animation: modalIn .22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.93) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
+.pc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.pc-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pc-modal-title i { color: var(--rose); font-size: 18px; }
+.pc-modal-close {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: background .15s, color .15s;
+}
+.pc-modal-close:hover { background: var(--rose-lt); color: var(--rose); }
 
+.pc-modal-body {
+  padding: 20px 22px;
+}
+.pc-modal-body p {
+  font-size: 13.5px;
+  color: var(--text-md);
+  line-height: 1.6;
+  margin: 0;
+}
+.pc-modal-body .del-name {
+  font-weight: 700;
+  color: var(--text);
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+.pc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
 }
 
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+/* ── Year badge in table ── */
+.year-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-family: var(--f-mono);
+  letter-spacing: .3px;
 }
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
+.year-badge i { font-size: 13px; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== TITLE ===== -->
-         <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                    Sessions
-                </span>
-            </h5>
-        </div>
-
-
-            <div class="text-end">
-                <a href="{% url 'add_acad_yr' %}" type="button" class="btn btn-primary mt-2 btn-icon-text">
-                    <i class="mdi mdi-plus-circle"></i> New Session
-                </a>
-            </div>
-
-
-        <div class="card-body">
-            <div class="table-responsive">
-                 <table class="table table-bordered align-middle">
-                    <thead class="table-dark">
-                        <tr >
-                            <th >Academic Year</th>
-                            <th>School</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody >
-                        {% for acadyr in data %}
-                        <tr align="center">
-                            <td>{{ acadyr.acad_year }}</td>
-                            <td>{{ acadyr.school_name }}</td>
-                            <td>
-                                <form action="{% url 'edit_academic_yr' acadyr.id %}" method="POST" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-sm"> <i class="ri-check-line">&nbsp;Update</i></button>
-                                </form>
-
-                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ acadyr.id }}">
-                                  <i class="ri-delete-bin-line">&nbsp;Delete</i>
-                                </button>
-
-                                <!-- ===== DELETE MODAL ===== -->
-                                <div class="modal fade" id="deleteModal{{ acadyr.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ acadyr.id }}" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="deleteModalLabel{{ acadyr.id }}">Delete Session</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <h5 style="color:red;">Are you sure you want to delete <strong>{{ acadyr.acad_year }}</strong>?</h5>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                <form action="{% url 'del_acad_yr' acadyr.id %}" method="POST" class="d-inline">
-                                                    {% csrf_token %}
-                                                    <input type="submit" class="btn btn-danger" value="Delete">
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- ===== END MODAL ===== -->
-
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="text-center text-danger fw-bold">
-                                No sessions available.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Academic Sessions</span>
     </div>
+    <div class="pc-page-title">Academic Sessions</div>
+    <div class="pc-page-sub">Manage academic years and school sessions</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'add_acad_yr' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-circle-line"></i> New Session
+    </a>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════
+     MAIN CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-calendar-2-line me-2" style="color:var(--accent);"></i>All Sessions
+      </div>
+      <div class="pc-card-sub">Click Update to edit a session</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:12px;padding:5px 14px;">
+      {{ data|length }} session{{ data|length|pluralize }}
+    </span>
+  </div>
+
+  <div class="pc-card-body" style="padding:0;">
+    <div class="table-responsive">
+      <div class="pc-table-wrap" style="border:none;border-radius:0;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:22px;width:50px;">#</th>
+              <th style="text-align:left;">Academic Year</th>
+              <th>School</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for acadyr in data %}
+            <tr>
+              <td class="td-num" style="padding-left:22px;">{{ forloop.counter }}</td>
+              <td style="text-align:left;">
+                <span class="year-badge">
+                  <i class="ri-calendar-line"></i>{{ acadyr.acad_year }}
+                </span>
+              </td>
+              <td>
+                <span style="font-size:13px;font-weight:500;color:var(--text-md);">
+                  {{ acadyr.school_name }}
+                </span>
+              </td>
+              <td>
+                <div class="td-actions">
+                  <!-- Update -->
+                  <form action="{% url 'edit_academic_yr' acadyr.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="pc-btn pc-btn-secondary pc-btn-sm">
+                      <i class="ri-pencil-line"></i> Update
+                    </button>
+                  </form>
+                  <!-- Delete trigger -->
+                  <button type="button"
+                          class="pc-btn pc-btn-danger pc-btn-sm"
+                          onclick="openDeleteModal('modal-{{ acadyr.id }}')">
+                    <i class="ri-delete-bin-6-line"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr class="pc-table-empty">
+              <td colspan="4">
+                <div class="pc-empty">
+                  <i class="ri-calendar-close-line pc-empty-icon"></i>
+                  <div class="pc-empty-title">No sessions found</div>
+                  <div class="pc-empty-sub">Add a new academic session to get started</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pc-card -->
+
+<!-- ═══════════════════════════════
+     DELETE MODALS
+     ═══════════════════════════════ -->
+{% for acadyr in data %}
+<div class="pc-modal-backdrop" id="modal-{{ acadyr.id }}">
+  <div class="pc-modal">
+
+    <div class="pc-modal-header">
+      <div class="pc-modal-title">
+        <i class="ri-error-warning-line"></i> Delete Session
+      </div>
+      <button class="pc-modal-close" onclick="closeDeleteModal('modal-{{ acadyr.id }}')">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <div class="pc-modal-body">
+      <p>
+        Are you sure you want to delete the session
+        <span class="del-name">"{{ acadyr.acad_year }}"</span>?
+        This action <strong>cannot be undone</strong>.
+      </p>
+    </div>
+
+    <div class="pc-modal-footer">
+      <button type="button"
+              class="pc-btn pc-btn-outline"
+              onclick="closeDeleteModal('modal-{{ acadyr.id }}')">
+        <i class="ri-close-line"></i> Cancel
+      </button>
+      <form action="{% url 'del_acad_yr' acadyr.id %}" method="POST" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Delete
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+
+<script>
+function openDeleteModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+}
+function closeDeleteModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+// Close on backdrop click
+document.querySelectorAll('.pc-modal-backdrop').forEach(function(backdrop) {
+  backdrop.addEventListener('click', function(e) {
+    if (e.target === backdrop) backdrop.classList.remove('show');
+  });
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.pc-modal-backdrop.show').forEach(function(el) {
+      el.classList.remove('show');
+    });
+  }
+});
+</script>
 
 {% endblock %}

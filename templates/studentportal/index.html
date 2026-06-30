@@ -1,323 +1,642 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Students Portal</title>
-    <!-- plugins:css -->
-    <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'assets/vendors/ti-icons/css/themify-icons.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'assets/vendors/css/vendor.bundle.base.css' %} type="text/css"">
-    <link rel="stylesheet" href="{% static 'assets/vendors/font-awesome/css/font-awesome.min.css' %}" type="text/css">
-    <!-- endinject -->
-    <!-- Plugin css for this page -->
-    <link rel="stylesheet" href="{% static 'assets/vendors/font-awesome/css/font-awesome.min.css' %}" type="text/css" />
-    <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css' %}" type="text/css"/>
-    <!-- End plugin css for this page -->
-    <!-- inject:css -->
-    <!-- endinject -->
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" type="text/css"/>
-    <!-- End layout styles -->
-    <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}" />
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Students Portal</title>
 
-  </head>
-  <body>
+  <link rel="stylesheet" href="{% static 'assets/vendors/css/vendor.bundle.base.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+  <link rel="stylesheet" href="{% static 'dash/assets/mithran/panel_components.css' %}">
+  <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}">
+
   <style>
-    .schoolheader{
-      color:white;
-      font-family: Roboto;
-     }
-    h2{
-       font-family: Roboto;
-     }
-    .card{
-      font-family:Roboto;
-      width:30px;
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: var(--color-background-tertiary, #f5f6fa);
+      font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+      overflow-x: hidden;
     }
-   h5{
-      font-family:Roboto;
 
-      }
+    .sp-shell { display: flex; height: 100vh; overflow: hidden; }
 
+    /* ══ SIDEBAR ══ */
+    .sp-sidebar {
+      width: 260px; min-width: 260px; height: 100vh;
+      background: #0f172a; display: flex; flex-direction: column;
+      overflow-y: auto; overflow-x: hidden;
+      position: fixed; left: 0; top: 0; bottom: 0;
+      z-index: 200;
+      transition: width 0.25s ease, min-width 0.25s ease, transform 0.25s ease;
+    }
+    .sp-sidebar::-webkit-scrollbar { width: 0; }
+
+    .sp-brand {
+      padding: 20px 20px 16px; display: flex; align-items: center;
+      gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0; overflow: hidden;
+    }
+    .sp-brand-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sp-brand-icon i { color: #fff; font-size: 18px; }
+    .sp-brand-text { display: flex; flex-direction: column; overflow: hidden; }
+    .sp-brand-name {
+      font-size: 14px; font-weight: 700; color: #fff;
+      letter-spacing: -0.2px; white-space: nowrap;
+    }
+    .sp-brand-sub {
+      font-size: 10px; color: rgba(255,255,255,0.4);
+      margin-top: 1px; white-space: nowrap;
+    }
+
+    .sp-profile-block {
+      margin: 14px 12px; padding: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; display: flex; align-items: center;
+      gap: 10px; flex-shrink: 0; overflow: hidden;
+    }
+    .sp-profile-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #fff;
+      overflow: hidden; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+    .sp-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .sp-profile-info { overflow: hidden; flex: 1; min-width: 0; }
+    .sp-profile-name {
+      font-size: 13px; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sp-profile-meta {
+      font-size: 11px; color: rgba(255,255,255,0.45);
+      margin-top: 2px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .sp-online-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #22c55e; border: 1.5px solid #0f172a;
+      position: absolute; bottom: 1px; right: 1px;
+    }
+    .sp-profile-avatar-wrap { position: relative; flex-shrink: 0; }
+
+    .sp-section {
+      padding: 16px 16px 6px; font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: rgba(255,255,255,0.25); flex-shrink: 0;
+      white-space: nowrap; overflow: hidden;
+    }
+
+    .sp-nav { list-style: none; margin: 0; padding: 0 10px; }
+    .sp-nav-item { margin-bottom: 1px; position: relative; }
+
+    .sp-nav-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none; transition: all 0.15s;
+      cursor: pointer; border: none; background: transparent;
+      width: 100%; text-align: left; white-space: nowrap; overflow: hidden;
+    }
+    .sp-nav-link i {
+      font-size: 17px; width: 20px; text-align: center;
+      flex-shrink: 0; opacity: 0.8;
+    }
+    .sp-nav-link:hover { background: rgba(255,255,255,0.07); color: #fff; text-decoration: none; }
+    .sp-nav-link:hover i { opacity: 1; }
+    .sp-nav-link.active {
+      background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(99,102,241,0.25));
+      color: #fff; font-weight: 600; border: 1px solid rgba(99,102,241,0.3);
+    }
+    .sp-nav-link.active i { opacity: 1; color: #818cf8; }
+    .sp-nav-link.active::before {
+      content: ''; position: absolute; left: 0;
+      width: 3px; height: 24px; background: #6366f1;
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* ══ Submenu toggle arrow ══ */
+    .sp-arrow {
+      margin-left: auto; font-size: 14px;
+      transition: transform 0.25s ease;
+      opacity: 0.5; flex-shrink: 0;
+    }
+    .sp-nav-link.sp-open .sp-arrow { transform: rotate(180deg); opacity: 1; }
+
+    /* ══ Submenu ══ */
+    .sp-submenu {
+      list-style: none; margin: 0; padding: 0;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .sp-submenu.sp-open { max-height: 300px; }
+    .sp-submenu-inner {
+      margin: 4px 0 4px 16px; padding: 0;
+      border-left: 1px solid rgba(255,255,255,0.08);
+    }
+    .sp-submenu .sp-nav-link {
+      font-size: 12px; padding: 8px 12px;
+      color: rgba(255,255,255,0.45); border-radius: 6px;
+    }
+    .sp-submenu .sp-nav-link:hover {
+      color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.05);
+    }
+    .sp-submenu .sp-nav-link i { font-size: 14px; opacity: 0.6; }
+
+    .sp-divider {
+      height: 1px; background: rgba(255,255,255,0.06);
+      margin: 8px 12px; flex-shrink: 0;
+    }
+
+    .sp-sidebar-bottom {
+      margin-top: auto; padding: 12px 10px;
+      border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0;
+    }
+    .sp-signout-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      text-decoration: none; transition: all 0.15s;
+      width: 100%; white-space: nowrap; overflow: hidden;
+    }
+    .sp-signout-btn:hover { background: rgba(239,68,68,0.12); color: #f87171; text-decoration: none; }
+    .sp-signout-btn i { font-size: 16px; flex-shrink: 0; }
+
+    /* ══ COLLAPSED STATE ══ */
+    .sp-sidebar.is-collapsed .sp-collapsible { display: none !important; }
+    .sp-sidebar.is-collapsed .sp-nav-link    { justify-content: center !important; padding: 10px 0 !important; gap: 0 !important; }
+    .sp-sidebar.is-collapsed .sp-signout-btn { justify-content: center !important; gap: 0 !important; }
+    .sp-sidebar.is-collapsed .sp-brand       { justify-content: center !important; padding: 20px 0 16px !important; }
+    .sp-sidebar.is-collapsed .sp-profile-block { justify-content: center !important; padding: 10px 0 !important; }
+    .sp-sidebar.is-collapsed .sp-submenu     { max-height: 0 !important; }
+
+    /* ══ MAIN ══ */
+    .sp-main {
+      margin-left: 260px; flex: 1; display: flex;
+      flex-direction: column; height: 100vh; overflow: hidden;
+      transition: margin-left 0.25s ease;
+    }
+
+    /* ══ TOPBAR ══ */
+    .sp-topbar {
+      height: 60px; min-height: 60px;
+      background: var(--surface, #fff);
+      border-bottom: 1px solid var(--border, #e8e8e8);
+      display: flex; align-items: center;
+      padding: 0 20px; gap: 10px;
+      position: sticky; top: 0; z-index: 99; flex-shrink: 0;
+    }
+    .sp-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .sp-icon-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: none;
+      background: transparent; display: flex; align-items: center;
+      justify-content: center; color: var(--text-md, #888);
+      cursor: pointer; transition: background 0.15s, color 0.15s; position: relative;
+    }
+    .sp-icon-btn:hover { background: var(--color-background-secondary, #f5f6fa); color: var(--text, #111); }
+    .sp-icon-btn i { font-size: 18px; }
+    .sp-badge-dot {
+      position: absolute; top: 5px; right: 5px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #f59e0b; border: 2px solid var(--surface, #fff);
+    }
+    .sp-topbar-title { font-size: 14px; font-weight: 600; color: var(--text, #111); }
+
+    #mobileToggle  { display: none; }
+    #sidebarToggle { display: flex; }
+
+    @media (max-width: 991px) {
+      #mobileToggle  { display: flex; }
+      #sidebarToggle { display: none; }
+      .sp-sidebar    { transform: translateX(-100%); }
+      .sp-sidebar.open { transform: translateX(0); }
+      .sp-main       { margin-left: 0 !important; }
+      .sp-topbar-title { display: none; }
+    }
+
+    /* ══ DROPDOWN ══ */
+    .sp-dropdown { position: relative; }
+    .sp-dropdown-menu {
+      display: none; position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--surface, #fff); border: 1px solid var(--border, #e8e8e8);
+      border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+      min-width: 280px; z-index: 999; overflow: hidden;
+    }
+    .sp-dropdown-menu.open { display: block; }
+    .sp-dropdown-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border, #e8e8e8);
+      font-size: 13px; font-weight: 600; color: var(--text, #111);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sp-dropdown-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+      border-bottom: 1px solid var(--border, #e8e8e8);
+      text-decoration: none; transition: background 0.15s;
+    }
+    .sp-dropdown-item:last-child { border-bottom: none; }
+    .sp-dropdown-item:hover { background: var(--color-background-secondary, #f8f9fa); text-decoration: none; }
+    .sp-dropdown-empty { padding: 24px 16px; text-align: center; font-size: 13px; color: var(--text-md, #888); }
+
+    .sp-profile-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 10px 4px 4px; border-radius: 30px;
+      border: 1px solid var(--border, #e8e8e8);
+      cursor: pointer; transition: background 0.15s;
+      background: transparent; text-decoration: none;
+    }
+    .sp-profile-pill:hover { background: var(--color-background-secondary, #f5f6fa); text-decoration: none; }
+    .sp-profile-pill-name { font-size: 13px; font-weight: 500; color: var(--text, #111); }
+
+    .sp-mini-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .sp-mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .sp-profile-dropdown { min-width: 200px; }
+
+    .sp-content { flex: 1; overflow-y: auto; padding: 1.5rem; }
+
+    .sp-footer {
+      padding: 10px 20px; background: var(--surface, #fff);
+      border-top: 1px solid var(--border, #e8e8e8);
+      font-size: 12px; color: var(--text-md, #999); flex-shrink: 0;
+    }
+    .sp-footer a { color: #6366f1; text-decoration: none; font-weight: 500; }
+
+    .sp-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 199; backdrop-filter: blur(2px);
+    }
+    .sp-overlay.open { display: block; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border, #ddd); border-radius: 10px; }
   </style>
-     
-    
-      <!-- partial:partials/_navbar.html -->
-      <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-        <!--<div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-           <a class="navbar-brand brand-logo" href="index.html"><img src="{% static 'images/logo.png' %}" alt="logo" height="50" width="50" /></a>
-          <a class="navbar-brand brand-logo-mini" href="index.html"><img src="{% static 'assets/images/logo-mini.svg' %}" alt="logo" /></a>
-        </div> -->
-        <div class="navbar-menu-wrapper d-flex align-items-stretch">
-          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
-            <span class="mdi mdi-menu"></span>
-          </button>
-          <!-- <div class="search-field d-none d-md-block">
-            <form class="d-flex align-items-center h-100" action="#">
-              <div class="input-group">
-                <div class="input-group-prepend bg-transparent">
-                  <i class="input-group-text border-0 mdi mdi-magnify"></i>
-                </div>
-                <input type="text" class="form-control bg-transparent border-0" placeholder="Search projects">
-              </div>
-            </form>
-          </div> -->
-          <ul class="navbar-nav navbar-nav-right">
+</head>
 
-            <li class="nav-item d-none d-lg-block full-screen-link">
-              <a class="nav-link">
-                <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
-              </a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="mdi mdi-email-outline"></i>
-                <span class="count-symbol bg-warning"></span>
-              </a>
-             <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list" aria-labelledby="messageDropdown">
-                <h6 class="p-3 mb-0">Messages</h6>
-                <div class="dropdown-divider"></div>
-				
-         {% for note in notify %}
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="assets/images/faces/face4.jpg" alt="image" class="profile-pic">
-                  </div>
-                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-                    <h6 class="preview-subject ellipsis mb-1 font-weight-normal">{{note.title}}</h6>
+<body>
+<div class="sp-shell">
 
-                    <p class="text-gray mb-0"> {{note.post_date}} </p>
-                  </div>
-                </a>
-                <div class="dropdown-divider"></div>
+  <aside class="sp-sidebar" id="spSidebar">
 
-               {% endfor %}
-			   
-                </div>
-            </li>
-            <li class="nav-item nav-profile dropdown">
-              <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="nav-profile-img">
-                  <img src="\{{ MEDIA_URL }}media\{{student.student_photo}} "style="width: 40px; height: 40px; align : center;" >
-                  <span class="availability-status online"></span>
-                </div>
-                <div class="nav-profile-text">
-                  <p class="mb-1 text-black">{{student.first_name}}{{student.last_name}}</p>
-                </div>
-              </a>
-              <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
-
-
-                <a class="dropdown-item" href="{% url 'logout_view' %}">
-                  <i class="mdi mdi-logout me-2 text-primary"></i> Signout </a>
-              </div>
-            </li>
-
-           <!-- <li class="nav-item dropdown">
-              <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
-                <i class="mdi mdi-bell-outline"></i>
-                <span class="count-symbol bg-danger"></span>
-              </a>
-               <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
-                <h6 class="p-3 mb-0">Notifications</h6>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <div class="preview-icon bg-success">
-                      <i class="mdi mdi-calendar"></i>
-                    </div>
-                  </div>
-                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-                    <h6 class="preview-subject font-weight-normal mb-1">Event today</h6>
-                    <p class="text-gray ellipsis mb-0"> Just a reminder that you have an event today </p>
-                  </div>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <div class="preview-icon bg-warning">
-                      <i class="mdi mdi-cog"></i>
-                    </div>
-                  </div>
-                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-                    <h6 class="preview-subject font-weight-normal mb-1">Settings</h6>
-                    <p class="text-gray ellipsis mb-0"> Update dashboard </p>
-                  </div>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <div class="preview-icon bg-info">
-                      <i class="mdi mdi-link-variant"></i>
-                    </div>
-                  </div>
-                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-                    <h6 class="preview-subject font-weight-normal mb-1">Launch Admin</h6>
-                    <p class="text-gray ellipsis mb-0"> New admin wow! </p>
-                  </div>
-                </a>
-                <div class="dropdown-divider"></div>
-                <h6 class="p-3 mb-0 text-center">See all notifications</h6>
-              </div>
-            </li>
-            <li class="nav-item nav-logout d-none d-lg-block">
-              <a class="nav-link" href="#">
-                <i class="mdi mdi-power"></i>
-              </a>
-            </li>
-            <li class="nav-item nav-settings d-none d-lg-block">
-              <a class="nav-link" href="#">
-                <i class="mdi mdi-format-line-spacing"></i>
-              </a>
-            </li> -->
-          </ul>
-          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
-            <span class="mdi mdi-menu"></span>
-          </button>
-        </div>
-      </nav>
-      <!-- partial -->
-	  <div class="container-scroller">
-      
-      <div class="container-fluid page-body-wrapper">
-        <!-- partial:partials/_sidebar.html -->
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
-          <ul class="nav">
-            <li class="nav-item nav-profile">
-              <a href="#" class="nav-link">
-                <div class="nav-profile-image">
-                  <img src="\{{ MEDIA_URL }}media\{{student.student_photo}} "style="width: 40px; height: 40px; align : center;" >
-                  <span class="login-status online"></span>
-                  <!--change to offline or busy as needed-->
-                </div>
-                <div class="nav-profile-text d-flex flex-column">
-                  <span class="font-weight-bold mb-2">{{student.first_name}}{{student.last_name}}</span>
-                  <span class="text-secondary text-small">{{student.class_name}}</span>
-                </div>
-                <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'dashboard' %}">
-                <i class="fa fa-home" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                <span class="menu-title"><h5>Dashboard</h5></span>
-              </a>
-            </li>
-			<li class="nav-item">
-			   
-              <a class="nav-link" href="{% url 'student_exam_result' %}">
-                <i class="fa fa-bar-chart" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                  <span class="menu-title"><h5>Exam Results</h5></span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'student_homework' %}">
-                <i class="fa fa-book" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                  <span class="menu-title"><h5>Homework</h5></span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'student_notice' %}">
-                <i class="fa fa-sticky-note-o" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                <span class="menu-title"><h5>NoticeBoard</h5></span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'student_events' %}">
-                <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                <span class="menu-title"><h5>Events</h5></span>
-              </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                   <i class="fa fa-money" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                       <span class="menu-title"><h5>Fee</h5></span>
-                            <i class="mdi mdi-crosshairs-gps menu-icon"></i>
-                </a>
-                <div class="collapse" id="ui-basic">
-                    <ul class="nav flex-column sub-menu">
-                        <li class="nav-item">
-                           <a class="nav-link" href="{% url 'student_fee_invoice' %}"><h5>Fee Invoice</h5></a>
-                        </li>
-
-                        <li class="nav-item">
-                           <a class="nav-link" href="{% url 'student_fee_reciept' %}"><h5>Receipts</h5></a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link" href="{% url 'student_fee_structure' %}"><h5>Fee Structure</h5></a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-               <a class="nav-link" data-bs-toggle="collapse" href="#ui-exam" aria-expanded="false" aria-controls="ui-exam">
-                   <i class="fa fa-line-chart" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                   <span class="menu-title"><h5>Exam</h5></span>
-                   <i class="mdi mdi-crosshairs-gps menu-icon"></i>
-               </a>
-               <div class="collapse" id="ui-exam">
-                   <ul class="nav flex-column sub-menu">
-                       <li class="nav-item">
-                          <a class="nav-link" href="#"><h5>Exam TimeTable</h5></a>
-                      </li>
-                      <li class="nav-item">
-                          <a class="nav-link" href="#"><h5>Admit Card</h5></a>
-                      </li>
-                       <li class="nav-item">
-                          <a class="nav-link" href="{% url 'student_exam_result' %}"><h5>Exam Results</h5></a>
-                      </li>
-                   </ul>
-               </div>
-            </li>
-             <li class="nav-item">
-              <a class="nav-link" href="{% url 'student_book_issued' %}">
-                 <i class="fa fa-university" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                <span class="menu-title"><h5>Library</h5></span>
-              </a>
-             </li>
-          </ul>
-        </nav>
-        <!-- partial -->
-        <div class="main-panel">
-          <div class="content-wrapper">
-
-             {% block content %}
-            {% endblock %}
-          </div>
-          <!-- content-wrapper ends -->
-          <!-- partial:partials/_footer.html -->
-          <footer class="footer">
-            <div class="d-sm-flex justify-content-center justify-content-sm-between">
-              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2023 <a href="https://www.mithran.co.in/" target="_blank">Mithran Technologies</a>. All rights reserved.</span>
-
-            </div>
-          </footer>
-          <!-- partial -->
-        </div>
-        <!-- main-panel ends -->
+    <div class="sp-brand">
+      <div class="sp-brand-icon"><i class="ri-graduation-cap-line"></i></div>
+      <div class="sp-brand-text sp-collapsible">
+        <div class="sp-brand-name">Mithran</div>
+        <div class="sp-brand-sub">Student Portal</div>
       </div>
- <!-- page-body-wrapper ends -->
     </div>
-    <!-- container-scroller -->
-    <!-- plugins:js -->
-    <script src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
-    <!-- endinject -->
-    <!-- Plugin js for this page -->
-    <script src="assets/vendors/chart.js/chart.umd.js"></script>
-    <script src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
-    <!-- End plugin js for this page -->
-    <!-- inject:js -->
-    <script src="{% static 'assets/js/off-canvas.js' %}"></script>
-    <script src="{% static 'assets/js/misc.js' %}"></script>
-    <script src="{% static 'assets/js/settings.js' %}"></script>
-    <script src="{% static 'assets/js/todolist.js' %}"></script>
-    <script src="{% static 'assets/js/jquery.cookie.js' %}"></script>
-    <!-- endinject -->
-    <!-- Custom js for this page -->
-    <script src="{% static 'assets/js/dashboard.js' %}"></script>
-    <!-- End custom js for this page -->
-  </body>
+
+    <div class="sp-profile-block">
+      <div class="sp-profile-avatar-wrap">
+        <div class="sp-profile-avatar">
+          <img src="/{{ MEDIA_URL }}media/{{ student.student_photo }}" onerror="this.style.display='none'">
+        </div>
+        <span class="sp-online-dot"></span>
+      </div>
+      <div class="sp-profile-info sp-collapsible">
+        <div class="sp-profile-name">{{ student.first_name }} {{ student.last_name }}</div>
+        <div class="sp-profile-meta">{{ student.class_name }} · {{ student.secs }}</div>
+      </div>
+    </div>
+
+    <div class="sp-divider"></div>
+    <div class="sp-section sp-collapsible">Main Menu</div>
+
+    <ul class="sp-nav">
+      <li class="sp-nav-item">
+        <a class="sp-nav-link" href="{% url 'dashboard' %}">
+          <i class="ri-home-5-line"></i><span class="sp-collapsible">Dashboard</span>
+        </a>
+      </li>
+      <li class="sp-nav-item">
+        <a class="sp-nav-link" href="{% url 'student_exam_result' %}">
+          <i class="ri-bar-chart-line"></i><span class="sp-collapsible">Exam Results</span>
+        </a>
+      </li>
+      <div class="sp-divider"></div>
+    <div class="sp-section sp-collapsible">Academic</div>
+      <li class="sp-nav-item">
+        <a class="sp-nav-link" href="{% url 'student_homework' %}">
+          <i class="ri-book-2-line"></i><span class="sp-collapsible">Homework</span>
+        </a>
+      </li>
+      <li class="sp-nav-item">
+        <a class="sp-nav-link" href="{% url 'student_notice' %}">
+          <i class="ri-sticky-note-line"></i><span class="sp-collapsible">Notice Board</span>
+        </a>
+      </li>
+      <li class="sp-nav-item">
+        <a class="sp-nav-link" href="{% url 'student_events' %}">
+          <i class="ri-calendar-event-line"></i><span class="sp-collapsible">Events</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sp-divider"></div>
+    <div class="sp-section sp-collapsible">Finance</div>
+
+    <ul class="sp-nav">
+
+      <!-- Fee -->
+      <li class="sp-nav-item">
+        <a class="sp-nav-link sp-toggle" data-target="feeMenu">
+          <i class="ri-money-rupee-circle-line"></i>
+          <span class="sp-collapsible">Fee</span>
+          <i class="ri-arrow-down-s-line sp-arrow sp-collapsible"></i>
+        </a>
+        <ul class="sp-submenu" id="feeMenu">
+          <div class="sp-submenu-inner">
+            <li class="sp-nav-item">
+              <a class="sp-nav-link" href="{% url 'student_fee_invoice' %}">
+                <i class="ri-file-list-3-line"></i><span class="sp-collapsible">Fee Invoice</span>
+              </a>
+            </li>
+            <li class="sp-nav-item">
+              <a class="sp-nav-link" href="{% url 'student_fee_reciept' %}">
+                <i class="ri-receipt-line"></i><span class="sp-collapsible">Receipts</span>
+              </a>
+            </li>
+            <li class="sp-nav-item">
+              <a class="sp-nav-link" href="{% url 'student_fee_structure' %}">
+                <i class="ri-bill-line"></i><span class="sp-collapsible">Fee Structure</span>
+              </a>
+            </li>
+          </div>
+        </ul>
+      </li>
+
+      <!-- Exam -->
+        <div class="sp-divider"></div>
+    <div class="sp-section sp-collapsible">Examination</div>
+      <li class="sp-nav-item">
+        <a class="sp-nav-link sp-toggle" data-target="examMenu">
+          <i class="ri-medal-line"></i>
+          <span class="sp-collapsible">Exam</span>
+          <i class="ri-arrow-down-s-line sp-arrow sp-collapsible"></i>
+        </a>
+        <ul class="sp-submenu" id="examMenu">
+          <div class="sp-submenu-inner">
+            <li class="sp-nav-item">
+              <a class="sp-nav-link" href="{% url 'student_exam_timetable' %}">
+                <i class="ri-time-line"></i><span class="sp-collapsible">Timetable</span>
+              </a>
+            </li>
+            <li class="sp-nav-item">
+              <a class="sp-nav-link" href="{% url 'student_admit_card' %}">
+                <i class="ri-id-card-line"></i><span class="sp-collapsible">Admit Card</span>
+              </a>
+            </li>
+            <li class="sp-nav-item">
+              <a class="sp-nav-link" href="{% url 'student_exam_result' %}">
+                <i class="ri-bar-chart-line"></i><span class="sp-collapsible">Results</span>
+              </a>
+            </li>
+          </div>
+        </ul>
+      </li>
+
+    </ul>
+
+    <div class="sp-divider"></div>
+    <div class="sp-section sp-collapsible">Resources</div>
+
+    <ul class="sp-nav">
+      <li class="sp-nav-item">
+        <a class="sp-nav-link" href="{% url 'student_book_issued' %}">
+          <i class="ri-book-open-line"></i><span class="sp-collapsible">Library</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sp-sidebar-bottom">
+      <a class="sp-signout-btn" href="{% url 'logout_view' %}">
+        <i class="ri-logout-box-line"></i>
+        <span class="sp-collapsible">Sign Out</span>
+      </a>
+    </div>
+
+  </aside>
+
+  <div class="sp-overlay" id="spOverlay"></div>
+
+  <div class="sp-main" id="spMain">
+
+    <header class="sp-topbar">
+      <button class="sp-icon-btn" id="mobileToggle"><i class="ri-menu-line"></i></button>
+      <button class="sp-icon-btn" id="sidebarToggle"><i class="ri-menu-fold-line"></i></button>
+      <span class="sp-topbar-title">Student Portal</span>
+
+      <div class="sp-topbar-right">
+
+        <button class="sp-icon-btn" id="fullscreenBtn">
+          <i class="ri-fullscreen-line"></i>
+        </button>
+
+        <!-- Messages -->
+        <div class="sp-dropdown">
+          <button class="sp-icon-btn" onclick="toggleDropdown('msgDropdown')">
+            <i class="ri-mail-line"></i>
+            <span class="sp-badge-dot"></span>
+          </button>
+          <div class="sp-dropdown-menu" id="msgDropdown">
+            <div class="sp-dropdown-header">
+              <i class="ri-mail-line" style="color:#6366f1;"></i> Messages
+            </div>
+            {% for note in notify %}
+            <a class="sp-dropdown-item" href="#">
+              <div style="width:36px;height:36px;border-radius:50%;background:#eff6ff;
+                          flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <i class="ri-notification-line" style="color:#6366f1;font-size:15px;"></i>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text);">{{ note.title }}</div>
+                <div style="font-size:11px;color:var(--text-md);">{{ note.post_date }}</div>
+              </div>
+            </a>
+            {% empty %}
+            <div class="sp-dropdown-empty">
+              <i class="ri-mail-line" style="font-size:28px;display:block;margin-bottom:8px;opacity:0.3;"></i>
+              No messages
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="sp-dropdown">
+          <a class="sp-profile-pill" onclick="toggleDropdown('profileDropdown')">
+            <div class="sp-mini-avatar">
+              <img src="/{{ MEDIA_URL }}media/{{ student.student_photo }}" onerror="this.style.display='none'">
+            </div>
+            <span class="sp-profile-pill-name">{{ student.first_name }} {{ student.last_name }}</span>
+            <i class="ri-arrow-down-s-line" style="font-size:14px;color:var(--text-md);"></i>
+          </a>
+          <div class="sp-dropdown-menu sp-profile-dropdown" id="profileDropdown">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);
+                        display:flex;align-items:center;gap:10px;">
+              <div class="sp-mini-avatar" style="width:36px;height:36px;font-size:13px;">
+                <img src="/{{ MEDIA_URL }}media/{{ student.student_photo }}" onerror="this.style.display='none'">
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text);">
+                  {{ student.first_name }} {{ student.last_name }}
+                </div>
+                <div style="font-size:11px;color:var(--text-md);margin-top:1px;">{{ student.admn_no }}</div>
+              </div>
+            </div>
+            <a class="sp-dropdown-item" href="{% url 'logout_view' %}">
+              <i class="ri-logout-box-line" style="color:#e11d48;font-size:16px;"></i>
+              <span style="font-size:13px;color:var(--text);">Sign Out</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <main class="sp-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="sp-footer">
+      Copyright © 2024
+      <a href="https://www.mithran.co.in/" target="_blank">Mithran Technologies</a>.
+      All rights reserved.
+    </footer>
+
+  </div>
+</div>
+
+<script src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
+<script>
+  const sidebar   = document.getElementById('spSidebar');
+  const spMain    = document.getElementById('spMain');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  const mobileBtn = document.getElementById('mobileToggle');
+  const overlay   = document.getElementById('spOverlay');
+  let collapsed   = false;
+
+  /* ══ DESKTOP SIDEBAR TOGGLE ══ */
+  toggleBtn.addEventListener('click', function () {
+    collapsed = !collapsed;
+    if (collapsed) {
+      sidebar.style.width     = '64px';
+      sidebar.style.minWidth  = '64px';
+      spMain.style.marginLeft = '64px';
+      sidebar.classList.add('is-collapsed');
+      toggleBtn.querySelector('i').className = 'ri-menu-unfold-line';
+    } else {
+      sidebar.style.width     = '260px';
+      sidebar.style.minWidth  = '260px';
+      spMain.style.marginLeft = '260px';
+      sidebar.classList.remove('is-collapsed');
+      toggleBtn.querySelector('i').className = 'ri-menu-fold-line';
+    }
+  });
+
+  /* ══ SUBMENU TOGGLE (pure JS — no Bootstrap) ══ */
+  document.querySelectorAll('.sp-toggle').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (collapsed) return; // don't open submenus when sidebar is collapsed
+      const targetId = this.getAttribute('data-target');
+      const menu = document.getElementById(targetId);
+      const isOpen = menu.classList.contains('sp-open');
+
+      // Close all open submenus
+      document.querySelectorAll('.sp-submenu.sp-open').forEach(function(m) {
+        m.classList.remove('sp-open');
+      });
+      document.querySelectorAll('.sp-toggle.sp-open').forEach(function(l) {
+        l.classList.remove('sp-open');
+      });
+
+      // Open clicked one if it was closed
+      if (!isOpen) {
+        menu.classList.add('sp-open');
+        this.classList.add('sp-open');
+      }
+    });
+  });
+
+  /* ══ MOBILE TOGGLE ══ */
+  mobileBtn.addEventListener('click', function () {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+  });
+
+  overlay.addEventListener('click', function () {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  /* ══ DROPDOWN ══ */
+  function toggleDropdown(id) {
+    document.querySelectorAll('.sp-dropdown-menu').forEach(m => {
+      if (m.id !== id) m.classList.remove('open');
+    });
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.sp-dropdown')) {
+      document.querySelectorAll('.sp-dropdown-menu')
+              .forEach(m => m.classList.remove('open'));
+    }
+  });
+
+  /* ══ FULLSCREEN ══ */
+  document.getElementById('fullscreenBtn').addEventListener('click', function () {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      this.querySelector('i').className = 'ri-fullscreen-exit-line';
+    } else {
+      document.exitFullscreen();
+      this.querySelector('i').className = 'ri-fullscreen-line';
+    }
+  });
+
+  /* ══ ACTIVE NAV LINK ══ */
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.sp-nav-link').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href !== '#' && href !== '/' && currentPath.includes(href)) {
+      link.classList.add('active');
+    }
+  });
+
+  /* ══ AUTO-EXPAND ACTIVE SUBMENU ══ */
+  document.querySelectorAll('.sp-submenu .sp-nav-link').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href !== '#' && currentPath.includes(href)) {
+      link.classList.add('active');
+      const parentMenu = link.closest('.sp-submenu');
+      if (parentMenu) {
+        parentMenu.classList.add('sp-open');
+        const toggleLink = document.querySelector(
+          `[data-target="${parentMenu.id}"]`
+        );
+        if (toggleLink) toggleLink.classList.add('sp-open');
+      }
+    }
+  });
+</script>
+
+</body>
 </html>

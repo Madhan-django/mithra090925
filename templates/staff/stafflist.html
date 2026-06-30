@@ -2,218 +2,347 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
-}
-
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
-}
-
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
-
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
+  /* Search bar */
+  .staff-search-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .staff-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .staff-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .staff-field select,
+  .staff-field input {
     width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .staff-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  .staff-field select:focus,
+  .staff-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
+  /* Staff avatar */
+  .staff-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+  }
+  .staff-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-lt);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .staff-name { font-weight: 600; font-size: 13.5px; color: var(--text); }
+
+  /* Dropdown menu */
+  .action-dropdown { position: relative; display: inline-block; }
+  .action-dropdown-menu {
     display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-md);
+    min-width: 150px;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .action-dropdown:hover .action-dropdown-menu,
+  .action-dropdown.open .action-dropdown-menu { display: block; }
+  .action-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
     font-weight: 500;
-}
+    color: var(--text-md);
+    text-decoration: none;
+    transition: background 120ms ease;
+  }
+  .action-dropdown-menu a:hover { background: var(--surface2); color: var(--text); }
+  .action-dropdown-menu a.delete-item { color: var(--rose); }
+  .action-dropdown-menu a.delete-item:hover { background: var(--rose-lt); }
+  .action-dropdown-menu a i { font-size: 14px; width: 16px; }
 
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
+  /* Divider in dropdown */
+  .action-dropdown-menu .drop-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  /* Pagination */
+  .pc-pag-list {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .pc-pag-list a,
+  .pc-pag-list span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    color: var(--text-md);
+    text-decoration: none;
+    transition: background 120ms ease, color 120ms ease;
+    background: var(--surface);
+  }
+  .pc-pag-list a:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .pc-pag-list span.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  @media (max-width: 600px) {
+    .staff-search-grid { grid-template-columns: 1fr; }
+  }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- === Header === -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Staff List</span></h5>
-        </div>
-            <div class="text-end">
-                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-                    <a href="{% url 'add_staff' %}" class="btn btn-primary btn-sm">New Staff</a>
-                {% endif %}
-
-                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                    <a href="{% url 'print_staff' %}" class="btn btn-success btn-sm">Export PDF</a>
-                    <a href="{% url 'staff_csv' %}" class="btn btn-warning btn-sm">Export CSV</a>
-                {% endif %}
-            </div>
-
-
-        <!-- === Body === -->
-        <div class="card-body">
-
-            <div class="col-md">
-                <form action="{% url 'staff_search' %}" method="POST">
-                    {% csrf_token %}
-                    <table class="table">
-                        <tr>
-                            <td width="20%">
-                                <select name="searchby" id="searchby" class="form-control">
-                                    <option value="staffname">Staff Name</option>
-                                    <option value="mobile">Mobile No</option>
-                                </select>
-                            </td>
-
-                            <td width="60%">
-                                <input type="search" placeholder="search" name="searched" required class="form-control">
-                            </td>
-
-                            <td width="20%">
-                                <button type="submit" class="btn btn-primary w-100">Search</button>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-            </div>
-
-
-{% if data %}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped table-bordered">
-                    <thead class="text-center">
-                        <tr>
-                            <th>Staff Name</th>
-                            <th>Gender</th>
-                            <th>Mobile</th>
-                            <th>Designation</th>
-                            <th>Username</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for staff in data %}
-                        <tr align="center">
-                            <td>{{ staff.first_name }} {{ staff.last_name }}</td>
-                            <td>{{ staff.gender }}</td>
-                            <td>{{ staff.mobile }}</td>
-                            <td>{{ staff.desg }}</td>
-                            <td>{{ staff.staff_user }}</td>
-
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="ri-more-2-line"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{% url 'staff_update' staff.id %}">
-                                            <i class="ri-pencil-line me-1"></i> Edit
-                                        </a>
-
-                                        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                        <a class="dropdown-item" href="{% url 'staff_delete' staff.id %}">
-                                            <i class="ri-delete-bin-7-line me-1"></i> Delete
-                                        </a>
-                                        {% endif %}
-
-                                        <a class="dropdown-item" href="{% url 'reset_password' staff.staff_user %}">
-                                            <i class="ri-key-line me-1"></i> Reset
-                                        </a>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-
-                </table>
-            </div>
-
-        </div>
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Staff</span>
+      </nav>
+      <h1 class="pc-page-title">Staff List</h1>
+      <p class="pc-page-sub">Manage all staff members, roles and credentials.</p>
     </div>
-</div>
-
-<!-- Pagination -->
-<nav aria-label="Page navigation">
-  <ul class="pagination">
-    {% if data.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
-      </li>
-    {% endif %}
-
-    {% for num in data.paginator.page_range %}
-      {% if data.number == num %}
-        <li class="page-item active">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% else %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
+    <div class="pc-page-header-right">
+      {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+        <a href="{% url 'staff_csv' %}" class="pc-btn pc-btn-outline">
+          <i class="ti ti-file-type-csv" style="font-size:14px;"></i> CSV
+        </a>
+        <a href="{% url 'print_staff' %}" class="pc-btn pc-btn-outline">
+          <i class="ti ti-file-type-pdf" style="font-size:14px;"></i> PDF
+        </a>
       {% endif %}
-    {% endfor %}
+      {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        <a href="{% url 'add_staff' %}" class="pc-btn pc-btn-primary">
+          <i class="ti ti-user-plus" style="font-size:14px;"></i> New Staff
+        </a>
+      {% endif %}
+    </div>
+  </div>
 
-    {% if data.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
-      </li>
-    {% endif %}
-  </ul>
-</nav>
+  <!-- Search Card -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Search Staff</p>
+        <p class="pc-card-sub">Filter by name or mobile number</p>
+      </div>
+      <i class="ti ti-search" style="font-size:20px; color:var(--muted);"></i>
+    </div>
+    <div class="pc-card-body">
+      <form action="{% url 'staff_search' %}" method="POST">
+        {% csrf_token %}
+        <div class="staff-search-grid">
+          <div class="staff-field">
+            <label>Search by</label>
+            <select name="searchby" id="searchby">
+              <option value="staffname">Staff Name</option>
+              <option value="mobile">Mobile No</option>
+            </select>
+          </div>
+          <div class="staff-field">
+            <label>Keyword</label>
+            <input type="search" name="searched" placeholder="Type to search…" required />
+          </div>
+          <button type="submit" class="pc-btn pc-btn-primary" style="align-self:flex-end;">
+            <i class="ti ti-search" style="font-size:14px;"></i> Search
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-{% else %}
-<div class="alert alert-danger text-center" role="alert">
-    No Staff Records are available to Show
+  {% if data %}
+
+  <!-- Results Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Staff Members</p>
+        <p class="pc-card-sub">All registered staff records</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-users" style="font-size:12px;"></i>
+        {{ data.paginator.count }} member{{ data.paginator.count|pluralize }}
+      </span>
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Staff</th>
+            <th>Gender</th>
+            <th>Mobile</th>
+            <th>Designation</th>
+            <th>Username</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for staff in data %}
+          <tr>
+            <td class="td-num">{{ forloop.counter }}</td>
+            <td>
+              <div class="staff-cell">
+                <div class="staff-avatar">
+                  {{ staff.first_name|first|upper }}{{ staff.last_name|first|upper }}
+                </div>
+                <span class="staff-name">{{ staff.first_name }} {{ staff.last_name }}</span>
+              </div>
+            </td>
+            <td style="color:var(--text-md);">{{ staff.gender }}</td>
+            <td style="font-family:var(--f-mono); font-size:12.5px;">{{ staff.mobile }}</td>
+            <td>
+              <span class="pc-badge pc-badge-info pc-badge-no-dot">{{ staff.desg }}</span>
+            </td>
+            <td style="font-family:var(--f-mono); font-size:12.5px; color:var(--text-sm);">{{ staff.staff_user }}</td>
+            <td>
+              <div class="action-dropdown" id="drop-{{ staff.id }}">
+                <button class="pc-btn pc-btn-outline pc-btn-sm" onclick="toggleDrop('drop-{{ staff.id }}', event)">
+                  <i class="ti ti-dots" style="font-size:14px;"></i>
+                </button>
+                <div class="action-dropdown-menu">
+                  <a href="{% url 'staff_update' staff.id %}">
+                    <i class="ti ti-pencil"></i> Edit
+                  </a>
+                  <a href="{% url 'reset_password' staff.staff_user %}">
+                    <i class="ti ti-key"></i> Reset Password
+                  </a>
+                  {% if request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Admin" %}
+                  <div class="drop-divider"></div>
+                  <a href="{% url 'staff_delete' staff.id %}" class="delete-item">
+                    <i class="ti ti-trash"></i> Delete
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+      <br><br><br><br><br><br>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pc-card-footer">
+      <p class="pc-pagination-info">
+        Showing page <strong>{{ data.number }}</strong> of <strong>{{ data.paginator.num_pages }}</strong>
+      </p>
+      <div class="pc-pag-list">
+        {% if data.has_previous %}
+          <a href="?page={{ data.previous_page_number }}">
+            <i class="ti ti-chevron-left" style="font-size:13px;"></i>
+          </a>
+        {% endif %}
+
+        {% for num in data.paginator.page_range %}
+          {% if data.number == num %}
+            <span class="active">{{ num }}</span>
+          {% else %}
+            <a href="?page={{ num }}">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if data.has_next %}
+          <a href="?page={{ data.next_page_number }}">
+            <i class="ti ti-chevron-right" style="font-size:13px;"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  {% else %}
+
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-users-group"></i></span>
+        <p class="pc-empty-title">No staff records found</p>
+        <p class="pc-empty-sub">Try a different search term or add a new staff member.</p>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
 </div>
-{% endif %}
+
+<script>
+  function toggleDrop(id, e) {
+    e.stopPropagation();
+    const el = document.getElementById(id);
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+  }
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+  });
+</script>
 
 {% endblock %}

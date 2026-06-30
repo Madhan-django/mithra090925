@@ -1,14 +1,22 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render, HttpResponse,redirect
+from .models import SchoolProfile
+from .forms import SchoolProfileForm
+from authenticate.decorators import allowed_users
+from students.models import attendancegen
+from staff.models import temp_homework
 from rest_framework.views import APIView
-from .serializers import (studentserializer,homeworkserializer,attendanceserializer,MonthlyAttendanceSerializer,
-                          indfeeserializer,noticeboardserializer,eventsserializer,DeviceFcmSerializer,MessageSerializer,
-                          ExamSerializer,attendserialier,VideoSerializer,schoolserializer)
-
+from .serializers import (
+    studentserializer, homeworkserializer, attendanceserializer,
+    MonthlyAttendanceSerializer, indfeeserializer, noticeboardserializer,
+    eventsserializer, DeviceFcmSerializer, MessageSerializer,staffserializer,
+    ExamSerializer, attendserialier, VideoSerializer, schoolserializer,SchoolProfileSerializer,sclassserializer,
+    sectionserializer,subjectserializer,MessageSerializer
+)
 from admission.models import students
 from institutions.models import school
-from setup.models import currentacademicyr,academicyr,sclass,subjects
-from examination.models import exam_subjectmap,exams,admit_card,exam_result,exam_group
-from staff.models import homework
+from setup.models import currentacademicyr, academicyr, sclass, subjects,section
+from examination.models import exam_subjectmap, exams, admit_card, exam_result, exam_group
+from staff.models import homework,staff
 from mobiplayer.models import Video
 from .utils import render_to_pdf
 from global_login_required import login_not_required
@@ -18,13 +26,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from students.models import attendance
-from django.db.models import Avg,Sum
-from academic.models import noticeboard,events
-from examination.models import admit_card,exam_subjectmap
+from django.db.models import Avg, Sum
+from academic.models import noticeboard, events
 from .models import DeviceFCMToken
-from pushnotify.models import GeneralNotification,SectionwiseNotification
-from datetime import time
+from pushnotify.models import GeneralNotification, SectionwiseNotification
+from datetime import time, datetime, timedelta
 from django.utils.timezone import localtime
+from django_q.models import Schedule
+from django.utils import timezone
 import calendar
 import os
 
@@ -49,23 +58,55 @@ class schoolapi(APIView):
             except school.DoesNotExist:
                 return Response({"detail": "School not found"})
 
-class studentsapi(APIView):
 
+
+class studentsapi(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         username = request.query_params.get('username')
 
+        if not username:
+            return Response({"error": "username required"}, status=400)
 
-        if username:
-            try:
-                student = students.objects.get(usernm=username)
-                serializer = studentserializer(student)
+        try:
+            student = students.objects.get(usernm=username)
+            serializer = studentserializer(student)
 
-                return Response(serializer.data)
-            except students.DoesNotExist:
-                return Response({"detail": "Student not found"})
+            # Attendance calculation
+            records = attendance.objects.filter(student_name=student)
+            days = records.count()
+            absent = records.filter(status='Absent').count()
+            percentage = round(((days - absent) / days) * 100, 2) if days > 0 else 0
+
+            # Homework Count
+            today = localdate()
+            homewk = homework.objects.filter(
+                hclass=student.class_name,
+                secs=student.secs,
+                homework_date=today
+            ).count() if student.class_name and student.secs else 0
+
+            # ✅ Fees Status — fixed both bugs
+            fee_sts = addindfee.objects.filter(student_name=student)
+            if not fee_sts.exists():
+                fee_status = 'No Fees'        # ✅ handles empty case
+            elif fee_sts.filter(status='Unpaid').exists():
+                fee_status = 'Unpaid'         # ✅ if ANY record is Unpaid → Unpaid
+            else:
+                fee_status = 'Paid'           # ✅ only Paid if ALL are Paid
+
+            # Merge into student data
+            student_data = serializer.data
+            student_data['attendance_percentage'] = percentage
+            student_data['homewk'] = homewk
+            student_data['fee_status'] = fee_status
+
+            return Response(student_data)
+
+        except students.DoesNotExist:
+            return Response({"detail": "Student not found"}, status=404)
                 
 
 class attendanceapi(APIView):
@@ -102,7 +143,7 @@ class attendanceapi(APIView):
             return Response({"Attendance not found"})
             
             
-class homeworkapi(APIView):
+class homeworkapis(APIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -121,38 +162,34 @@ class homeworkapi(APIView):
 
             except homewk.DoesNotExist:
                 return Response({"detail": "Student/homework not found"})
-                
-                
-class homeworksapi(APIView):
-    print("yahoooooo")
+
+
+class homeworkapi(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         username = request.query_params.get('username')
 
-        if not username:
-            return Response({"detail": "Username not provided"}, status=400)
+        if username:
+            try:
+                student = students.objects.get(usernm=username)
 
-        try:
-            student = Student.objects.get(usernm=username)
-            now = localtime()
-            today = now.date()
-            cutoff_time = time(21, 40)
+                seven_days_ago = timezone.now() - timedelta(days=7)
 
-            homewk = Homework.objects.filter(hclass=student.class_name,secs=student.secs).order_by('-id')
+                homewk = homework.objects.filter(
+                    hclass=student.class_name,
+                    secs=student.secs,
+                    created_at__gte=seven_days_ago  # 👈 your date field here
+                ).order_by('-id')
 
-            if now.time() < cutoff_time:
-                homewk = homewk.exclude(homework_date=today)
+                serializer = homeworkserializer(homewk, many=True)
+                return Response(serializer.data)
 
-            homewk = homewk.order_by('-homework_date')
-            serializer = HomeworkSerializer(homewk, many=True)
-            return Response(serializer.data)
+            except students.DoesNotExist:
+                return Response({"detail": "Student not found"}, status=404)
 
-        except Student.DoesNotExist:
-            return Response({"detail": "Student not found"}, status=404)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=500)                
+        return Response({"detail": "Username required"}, status=400)
 
 
 
@@ -398,18 +435,389 @@ class VideoGallery(APIView):
         return Response(serializer.data)
 
 
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def schprofile_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = SchoolProfile.objects.filter(school_name=sdata).first()
+    return render(request, 'mobi/schprof_list.html', context={
+        'skool': sdata, 'year': year, 'data': data
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def add_schprofile(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    if request.method == 'POST':
+        form = SchoolProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.school_name = sdata
+            profile.save()
+            return redirect('schprofile_list')
+    else:
+        form = SchoolProfileForm(initial={'school_name': sdata})
+
+    return render(request, 'mobi/schprof_add.html', context={
+        'skool': sdata, 'year': year, 'form': form
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def edit_schprofile(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = SchoolProfile.objects.get(school_name=sdata)
+
+    if request.method == 'POST':
+        form = SchoolProfileForm(request.POST, request.FILES, instance=data)
+        if form.is_valid():
+            form.save()
+            return redirect('schprofile_list')
+    else:
+        form = SchoolProfileForm(instance=data)
+
+    return render(request, 'mobi/schprof_edit.html', context={
+        'skool': sdata, 'year': year, 'form': form, 'data': data
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def delete_schprofile(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = SchoolProfile.objects.get(school_name=sdata)
+    data.delete()
+    return redirect('schprofile_list')
+
+
+class SchoolProfileApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        stud = students.objects.get(usernm=username)
+        sdata = school.objects.get(name=stud.school_student)
+        yr = currentacademicyr.objects.get(school_name=sdata)
+        year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+        schprof = SchoolProfile.objects.get(school_name=sdata)
+        serializer = SchoolProfileSerializer(schprof, many=True)
+        return Response(serializer.data)
+
+
+class StaffAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            stf = staff.objects.get(staff_user=request.user.username)
+            serializer = staffserializer(stf)
+
+            return Response(serializer.data)
+
+        except staff.DoesNotExist:
+            return Response({"detail": "Staff not found"}, status=404)
 
 
 
 
+class ClassesAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            stf = staff.objects.get(staff_user=request.user)
+            classes = sclass.objects.filter(school_name=stf.staff_school)
+            serializer = sclassserializer(classes, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+class SectionsAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, class_id):
+        try:
+            secs = section.objects.filter(class_sec_name=class_id)
+            serializer = sectionserializer(secs, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+class SubjectsAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            class_id = request.query_params.get('class_id')
+            if not class_id:
+                return Response({'error': 'class_id is required'}, status=400)
+
+            stf = staff.objects.get(staff_user=request.user)
+            yr = currentacademicyr.objects.get(school_name=stf.staff_school)
+            print("llllllllllllllllllllllllllllllll",yr)
+            year = academicyr.objects.get(acad_year=yr, school_name=stf.staff_school)
+            print("sssssssssssssssssssssssssssssss",year)
+            subs = subjects.objects.filter(subject_class=class_id,subject_year=year)
+
+            serializer = subjectserializer(subs, many=True)
+
+            return Response(serializer.data)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
+
+
+class StudentsAttendanceAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, class_id, sec_id, date):
+        try:
+            studs = students.objects.filter(class_name=class_id, secs=sec_id)
+
+            # Check if attendance already exists for this class/sec/date
+            existing = attendance.objects.filter(
+                aclass_id=class_id,
+                sec_id=sec_id,
+                attndate=date
+            )
+
+            if not existing.exists():
+                # Auto-create attendance as Present for all students
+                attendance.objects.bulk_create([
+                    attendance(
+                        aclass_id=class_id,
+                        sec_id=sec_id,
+                        attndate=date,
+                        student_name=stud,
+                        status='Present'
+                    )
+                    for stud in studs
+                ])
+
+            # Now fetch the attendance map (guaranteed to exist)
+            attendance_map = {
+                a.student_name_id: a.status
+                for a in attendance.objects.filter(
+                    aclass_id=class_id,
+                    sec_id=sec_id,
+                    attndate=date
+                )
+            }
+
+            serializer = studentserializer(studs, many=True)
+            data = [dict(s) for s in serializer.data]
+
+            for student in data:
+                student['attendance_status'] = attendance_map.get(student['id'], 'Present')
+
+            return Response(data)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
+
+class SubmitAttendanceAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            class_id = request.data.get('class_id')
+            sec_id = request.data.get('sec_id')
+            date = request.data.get('date')
+            att_records = request.data.get('attendance', [])
+
+            aclass_obj = sclass.objects.get(id=class_id)
+            sec_obj = section.objects.get(id=sec_id)
+
+            attendancegen.objects.get_or_create(
+                aclass=aclass_obj,
+                sec=sec_obj,
+                attndate=date
+            )
+
+            for record in att_records:
+                student_obj = students.objects.get(id=record['student_id'])
+                attendance.objects.update_or_create(
+                    student_name=student_obj,
+                    attndate=date,
+                    aclass=aclass_obj,
+                    sec=sec_obj,
+                    defaults={'status': record['status']}  # ✅ was: 'Present' if record['is_present'] else 'Absent'
+                )
+
+            return Response({'message': 'Attendance saved successfully'})
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
+
+
+class TeacherHomeworkAddAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Get homework created by this teacher
+            teacher = staff.objects.get(staff_user=request.user)
+            homeworks = temp_homework.objects.filter(created_by=teacher)
+            serializer = homeworkserializer(homeworks, many=True)
+
+            return Response(serializer.data)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
+
+    def post(self, request):
+        try:
+            teacher = staff.objects.get(staff_user=request.user)
+
+            class_id    = request.data.get('class_id')
+            sec_id      = request.data.get('sec_id')
+            subject_id  = request.data.get('subject_id')
+            title       = request.data.get('title')
+            description = request.data.get('description')
+            hw_date     = request.data.get('homework_date')
+            sub_date    = request.data.get('submission_date')
+
+            # Validate required fields
+            if not all([class_id, sec_id, subject_id, title, description, hw_date, sub_date]):
+                return Response({'error': 'All fields are required'}, status=400)
+
+            # Get current academic year
+            current_ac = currentacademicyr.objects.first()
+            if not current_ac:
+                return Response({'error': 'No active academic year found'}, status=400)
+
+            # Get school from teacher
+            school_obj = teacher.staff_school
+
+            hw = temp_homework.objects.create(
+                title           = title,
+                hclass_id       = class_id,
+                secs_id         = sec_id,
+                subj_id         = subject_id,
+                description     = description,
+                homework_date   = hw_date,
+                submission_date = sub_date,
+                created_by      = teacher,
+                acad_yr         = current_ac,
+                school_homework = school_obj
+            )
+
+            return Response({
+                'message': 'Homework created successfully',
+                'homework_id': hw.id
+            }, status=201)
+
+        except staff.DoesNotExist:
+            return Response({'error': 'Teacher profile not found'}, status=404)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
 
 
 
 
+class GeneralNotificationAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        try:
+            teacher = staff.objects.get(staff_user=request.user)
+            school_obj = teacher.staff_school
 
+            notifications = GeneralNotification.objects.filter(
+                Notification_school=school_obj,
+                created_by_id=teacher
+            ).order_by('-post_date')
 
+            serializer = MessageSerializer(notifications, many=True)
+            return Response(serializer.data)
 
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
 
+    def post(self, request):
+        try:
+            teacher = staff.objects.get(staff_user=request.user)
+            school_obj = teacher.staff_school
 
+            title     = request.data.get('title')
+            message   = request.data.get('message')
+            post_to   = request.data.get('post_to')
+            status    = request.data.get('status', 'Active')
+            post_date = request.data.get('post_date')
 
+            if not all([title, message, post_to, post_date]):
+                return Response({'error': 'title, message, post_to and post_date are required'}, status=400)
+
+            if not isinstance(post_to, list) or len(post_to) == 0:
+                return Response({'error': 'post_to must be a non-empty list of student IDs'}, status=400)
+
+            student_qs = students.objects.filter(
+                id__in=post_to,
+                school_student=school_obj
+            )
+            if student_qs.count() == 0:
+                return Response({'error': 'No valid students found'}, status=400)
+
+            notif = GeneralNotification.objects.create(
+                title               = title,
+                message             = message,
+                status              = status,
+                post_date           = post_date,
+                create_date         = timezone.now(),
+                created_by_id       = teacher,
+                is_read             = False,
+                Notification_school = school_obj,
+            )
+            notif.post_to.set(student_qs)
+            notif.save()
+
+            Schedule.objects.create(
+                func          = 'pushnotify.tasks.send_notification',
+                schedule_type = Schedule.ONCE,
+                next_run      = post_date,
+                args          = [notif.id]
+            )
+
+            return Response({
+                'message'          : 'Notification scheduled successfully',
+                'notification_id'  : notif.id,
+                'recipient_count'  : student_qs.count()
+            }, status=201)
+
+        except staff.DoesNotExist:
+            return Response({'error': 'Teacher profile not found'}, status=404)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)

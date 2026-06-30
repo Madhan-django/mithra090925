@@ -1,220 +1,360 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'asset_list' %}">Assets</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Update Asset</span>
+    </div>
+    <div class="pc-page-title">Update Asset</div>
+    <div class="pc-page-sub">Edit asset details and save your changes</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'asset_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to Assets
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ASSET FORM
+     ═══════════════════════════════ -->
+<form method="post" id="assetForm">
+  {% csrf_token %}
+
+  <!-- ── Section 1: Basic Info ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title">
+          <i class="ri-information-line me-2" style="color:var(--accent);"></i>Basic Information
+        </div>
+        <div class="pc-card-sub">Asset name, type, brand and room</div>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-edit-line"></i>&nbsp; Editing
+      </span>
+    </div>
+    <div class="pc-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+
+        <!-- Asset Name -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Asset Name <span class="req">*</span></label>
+          {{ form.asset_name }}
+        </div>
+
+        <!-- Room -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Room</label>
+          {{ form.room }}
+        </div>
+
+        <!-- Asset Type -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Asset Type <span class="req">*</span></label>
+          {{ form.asset_type }}
+        </div>
+
+        <!-- Brand + Add Brand button -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Brand</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div style="flex:1;">{{ form.brand }}</div>
+            <button type="button"
+                    class="pc-btn pc-btn-secondary"
+                    style="white-space:nowrap;flex-shrink:0;"
+                    onclick="openBrandModal()"
+                    title="Add new brand">
+              <i class="ri-add-line"></i> New Brand
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 2: Identification ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title">
+          <i class="ri-barcode-line me-2" style="color:var(--accent);"></i>Identification
+        </div>
+        <div class="pc-card-sub">Serial number, asset tag and purchase details</div>
+      </div>
+      <span class="pc-badge pc-badge-info pc-badge-no-dot">Section 2</span>
+    </div>
+    <div class="pc-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+
+        <!-- Serial Number -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Serial Number</label>
+          {{ form.serial_number }}
+        </div>
+
+        <!-- Asset Tag -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Asset Tag</label>
+          {{ form.asset_tag }}
+        </div>
+
+        <!-- Purchase Date -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Purchase Date</label>
+          {{ form.purchase_date }}
+        </div>
+
+        <!-- Warranty End Date -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Warranty End Date</label>
+          {{ form.warranty_end_date }}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 3: Assignment ── -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title">
+          <i class="ri-user-settings-line me-2" style="color:var(--accent);"></i>Assignment &amp; Status
+        </div>
+        <div class="pc-card-sub">Vendor, assigned staff, condition and remarks</div>
+      </div>
+      <span class="pc-badge pc-badge-success pc-badge-no-dot">Section 3</span>
+    </div>
+    <div class="pc-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+
+        <!-- Vendor -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Vendor</label>
+          {{ form.vendor }}
+        </div>
+
+        <!-- School (fixed) -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label for="id_asset_school" class="pc-label">School</label>
+          <select name="asset_school" id="id_asset_school" class="pc-select">
+            <option value="{{ skool.id }}" selected>{{ skool }}</option>
+          </select>
+        </div>
+
+        <!-- Condition -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Condition</label>
+          {{ form.condition }}
+        </div>
+
+        <!-- Assigned To -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Assigned To</label>
+          {{ form.assign }}
+        </div>
+
+        <!-- Remark -->
+        <div class="pc-form-group" style="margin-bottom:0;">
+          <label class="pc-label">Remark</label>
+          {{ form.remark }}
+        </div>
+
+        <!-- Is Discarded -->
+        <div class="pc-form-group" style="margin-bottom:0;display:flex;align-items:center;gap:10px;padding-top:28px;">
+          <input type="checkbox" name="is_discarded" id="id_is_discarded"
+                 {% if form.is_discarded.value %}checked{% endif %}
+                 style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+          <label for="id_is_discarded" style="margin:0;font-size:13.5px;font-weight:600;color:var(--text-md);cursor:pointer;">
+            Mark as Discarded
+          </label>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Action Buttons ── -->
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="submit" class="pc-btn pc-btn-primary pc-btn-lg">
+          <i class="ri-save-line"></i> Update Asset
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline pc-btn-lg">
+          <i class="ri-refresh-line"></i> Reset
+        </button>
+        <a href="{% url 'asset_list' %}" class="pc-btn pc-btn-danger pc-btn-lg">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<!-- ═══════════════════════════════════════
+     ADD BRAND MODAL
+     ═══════════════════════════════════════ -->
+<div id="brandModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
+
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:400px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--accent-lt);
+      padding:18px 22px 14px;
+      border-bottom:1px solid var(--accent-mid);
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:38px;height:38px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(79,70,229,.15);
+        flex-shrink:0;">
+        <i class="ri-price-tag-3-line" style="color:var(--accent);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Add New Brand</div>
+        <div style="font-size:12px;color:var(--text-sm);font-weight:500;">Create a new brand instantly</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <form method="POST" action="{% url 'add_newbrand' %}" id="brandForm">
+        {% csrf_token %}
+        <div class="pc-form-group">
+          <label class="pc-label">Brand Name <span class="req">*</span></label>
+          {{ form2.as_p }}
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+          <button type="button" class="pc-btn pc-btn-outline" onclick="closeBrandModal()">
+            Cancel
+          </button>
+          <button type="submit" class="pc-btn pc-btn-primary">
+            <i class="ri-save-line"></i> Save Brand
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
 <style>
-/* ===================== GLOBAL FONT ===================== */
-body, h1, h3, h4, h5, label, input, select, button {
-    font-family: 'Roboto', sans-serif;
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
 }
 
-/* ===================== CARD ===================== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
-    background: #fff;
+#assetForm input[type="text"],
+#assetForm input[type="email"],
+#assetForm input[type="number"],
+#assetForm input[type="date"],
+#assetForm input[type="tel"],
+#assetForm input[type="url"],
+#assetForm select,
+#assetForm textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+  appearance: none;
 }
-
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+#assetForm select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+  cursor: pointer;
 }
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+#assetForm textarea {
+  resize: vertical;
+  min-height: 72px;
+  height: 72px;
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+#assetForm input:focus,
+#assetForm select:focus,
+#assetForm textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
+#assetForm input::placeholder,
+#assetForm textarea::placeholder { color: var(--muted); }
 
-
-/* ===================== FLOATING LABEL ===================== */
-.form-floating-outline {
-    position: relative;
-    margin-bottom: 15px;
+#brandForm p { margin-bottom: 0; }
+#brandForm input[type="text"] {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
 }
-
-.form-floating-outline > label {
-    position: absolute;
-    top: -8px;
-    left: 14px;
-    background: white;
-    padding: 0 6px;
-    font-size: 13px;
-    color: #555;
+#brandForm input[type="text"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
-
-.form-floating-outline > input,
-.form-floating-outline > select {
-    width: 100%;
-    height: 52px;
-    border-radius: 10px;
-    padding: 14px 12px 6px 12px;
-    border: 1px solid #ccc;
-    font-size: 15px;
-}
-
-/* ===================== BUTTON ===================== */
-.btn-primary {
-    background: linear-gradient(135deg, #009ffd, #2a2a72);
-    border: none;
-
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 500;
-}
-.btn-danger {
-   background: linear-gradient(135deg, #ff4e50, #8b0000);
-    border: none;
-
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 500;
-}
-.text-end {
-    padding-top: 10px;
-}
+#brandForm label { display:none; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <!-- Compact Title Bar -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Update Asset</span></h5>
-        </div>
+<script>
+const brandModal = document.getElementById('brandModal');
 
-        <div class="card-body">
-            <div class="container mt-4">
-                <!-- Brand Modal -->
-                <div class="modal fade" id="new_brand" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            <div class="modal-body">
-                                <div class="text-center mb-3">
-                                    <h4>Brand Name</h4>
-                                </div>
-                                <form method="POST" action="{% url 'add_newbrand' %}" class="row g-3">
-                                    {% csrf_token %}
-                                    <div class="col-12">
-                                        {{ form2.as_p }}
-                                    </div>
-                                    <div class="col-12 text-center mt-3">
-                                        <button type="submit" class="btn btn-primary">Submit</button>
-                                        <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- /Brand Modal -->
+function openBrandModal() {
+  brandModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
 
-                <!-- Asset Form -->
-                <form method="post">
-                    {% csrf_token %}
+function closeBrandModal() {
+  brandModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.asset_name.label_tag }}
-                            {{ form.asset_name }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.room.label_tag }}
-                            {{form.room}}
-                        </div>
-                    </div>
+brandModal.addEventListener('click', function(e) {
+  if (e.target === brandModal) closeBrandModal();
+});
 
-                    <div class="row mb-3 align-items-end">
-                        <div class="col-md-6">
-                            {{ form.asset_type.label_tag }}
-                            {{form.asset_type}}
-                        </div>
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeBrandModal();
+});
+</script>
 
-                        <div class="col-md-5">
-                            {{ form.brand.label_tag }}
-                            {{ form.brand }}
-                        </div>
-
-                        <div class="col-md-1 text-center">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new_brand">+</button>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.serial_number.label_tag }}
-                            {{ form.serial_number }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.asset_tag.label_tag }}
-                            {{ form.asset_tag }}
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.purchase_date.label_tag }}
-                            {{ form.purchase_date }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.warranty_end_date.label_tag }}
-                            {{ form.warranty_end_date }}
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.vendor.label_tag }}
-                            {{ form.vendor }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.asset_school.label_tag }}
-                            <select name="asset_school" class="form-control" id="id_asset_school">
-                                <option value="{{skool.id}}" selected>{{skool}}</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.condition.label_tag }}
-                            {{ form.condition }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.assign.label_tag }}
-                            {{form.assign}}
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.remark.label_tag }}
-                            {{ form.remark }}
-                        </div>
-                        <div class="col-md-6 d-flex align-items-center mt-3">
-                            <input type="checkbox" name="is_discarded" class="form-check-input me-2" id="id_is_discarded">
-                            {{ form.is_discarded.label_tag }}
-                        </div>
-                    </div>
-
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <button type="reset" class="btn btn-danger">Clear</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

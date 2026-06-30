@@ -1,125 +1,138 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<style>
-    /* Typography & Layout */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    /* Card Styling */
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-    /* Blue Gradient Header */
-    .card-title {
-        background: linear-gradient(90deg, #007bff, #6610f2);
-        color: white;
-        padding: 15px 0;
-        border-radius: 12px 12px 0 0;
-        margin-bottom: 0;
-    }
-
-    .card-title h5 {
-        margin: 0;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    /* Form Styling */
-    .form-label {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .form-control {
-        border-radius: 0.4rem;
-        box-shadow: none !important;
-        font-size: 0.95rem;
-    }
-
-    .btn-primary {
-        border-radius: 0.4rem;
-        padding: 8px 35px;
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-</style>
-
-<div class="col-lg-12 grid-margin stretch-card mt-4">
-    <div class="card">
-
-        <!-- Matching Header -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Purchase Entry</span></h5>
-        </div>
-
-        <div class="card-body">
-            <form method="POST" enctype="multipart/form-data" autocomplete="off">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.name.label }}</label>
-                        {{ form.name }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.category.label }}</label>
-                        {{ form.category }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.supplier.label }}</label>
-                        {{ form.supplier }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.price.label }}</label>
-                        {{ form.price }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.quantity.label }}</label>
-                        {{ form.quantity }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.invoice_no.label }}</label>
-                        {{ form.invoice_no }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.order_dt.label }}</label>
-                        {{ form.order_dt }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.rec_dt.label }}</label>
-                        {{ form.rec_dt }}
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">{{ form.description.label }}</label>
-                        {{ form.description }}
-                    </div>
-                </div>
-
-                {{ form.Prod_school }}
-
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary">Save Purchase</button>
-                </div>
-            </form>
-        </div>
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'purchase_list' %}">Purchases</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Entry</span>
     </div>
+    <div class="pc-page-title">Purchase Entry</div>
+    <div class="pc-page-sub">Fill in the details below to record a new purchase</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'purchase_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to List
+    </a>
+  </div>
 </div>
+
+<!-- FORM CARD -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-shopping-cart-line me-2" style="color:var(--accent);"></i>Purchase Details
+      </div>
+      <div class="pc-card-sub">All fields are required unless stated otherwise</div>
+    </div>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST" enctype="multipart/form-data" autocomplete="off">
+      {% csrf_token %}
+
+      <!-- Section: Product Info -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                    letter-spacing:0.8px; color:var(--text-md);
+                    border-bottom:1px solid var(--border);
+                    padding-bottom:8px; margin-bottom:1rem;">
+          <i class="ri-archive-line me-1"></i> Product Information
+        </div>
+        <div class="pc-filter-row" style="align-items:flex-start;">
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.name.label }}</label>
+            {{ form.name }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.category.label }}</label>
+            {{ form.category }}
+          </div>
+        </div>
+        <div class="pc-filter-row" style="align-items:flex-start;">
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.supplier.label }}</label>
+            {{ form.supplier }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.description.label }}</label>
+            {{ form.description }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Pricing & Stock -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                    letter-spacing:0.8px; color:var(--text-md);
+                    border-bottom:1px solid var(--border);
+                    padding-bottom:8px; margin-bottom:1rem;">
+          <i class="ri-money-rupee-circle-line me-1"></i> Pricing & Stock
+        </div>
+        <div class="pc-filter-row" style="align-items:flex-start;">
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.price.label }}</label>
+            {{ form.price }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.quantity.label }}</label>
+            {{ form.quantity }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Invoice & Dates -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                    letter-spacing:0.8px; color:var(--text-md);
+                    border-bottom:1px solid var(--border);
+                    padding-bottom:8px; margin-bottom:1rem;">
+          <i class="ri-file-text-line me-1"></i> Invoice & Dates
+        </div>
+        <div class="pc-filter-row" style="align-items:flex-start;">
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.invoice_no.label }}</label>
+            {{ form.invoice_no }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.order_dt.label }}</label>
+            {{ form.order_dt }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">{{ form.rec_dt.label }}</label>
+            {{ form.rec_dt }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden Field -->
+      {{ form.Prod_school }}
+
+      <!-- Divider -->
+      <hr style="border-color:var(--border); margin:1.5rem 0;">
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <a href="{% url 'purchase_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+        <button type="reset" class="pc-btn pc-btn-secondary">
+          <i class="ri-refresh-line"></i> Clear
+        </button>
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Purchase
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div><!-- /pc-card -->
 
 {% endblock %}

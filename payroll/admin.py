@@ -1,11 +1,11 @@
 from django.contrib import admin
 from .models import (
-    Department, Designation, PayrollEmployee, PayrollBank,
-    Allowance, Deduction,
-    Employee_allowance_Details, Employee_deduction_Details,
+    Department, PayrollEmployee, PayrollBank,
+    Allowance,
+    Employee_allowance_Details,
     Loan, PayrollPeriod, Payslip,
     Attendance, Holiday, LeaveBalance,
-    PayrollSettings
+    PayrollSettings,PayrollMonthly,StatutorySettings
 )
 
 
@@ -15,14 +15,6 @@ class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'sch')
     search_fields = ('name',)
     list_filter = ('sch',)
-
-
-# ===================== Designation =====================
-@admin.register(Designation)
-class DesignationAdmin(admin.ModelAdmin):
-    list_display = ('title', 'department')
-    search_fields = ('title',)
-    list_filter = ('department',)
 
 
 # ===================== Payroll Employee =====================
@@ -43,13 +35,6 @@ class AllowanceAdmin(admin.ModelAdmin):
     list_filter = ('sch',)
 
 
-# ===================== Deduction =====================
-@admin.register(Deduction)
-class DeductionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'method', 'value', 'start_date', 'end_date', 'sch')
-    list_filter = ('method', 'sch')
-    search_fields = ('name',)
-
 
 # ===================== Employee Allowance =====================
 @admin.register(Employee_allowance_Details)
@@ -57,12 +42,6 @@ class EmployeeAllowanceAdmin(admin.ModelAdmin):
     list_display = ('employee_name', 'allowance_name', 'amount')
     list_filter = ('allowance_name',)
 
-
-# ===================== Employee Deduction =====================
-@admin.register(Employee_deduction_Details)
-class EmployeeDeductionAdmin(admin.ModelAdmin):
-    list_display = ('employee_name', 'deduction_name', 'amount', 'emi_amount', 'balance', 'active')
-    list_filter = ('deduction_name', 'active')
 
 
 # ===================== Loan =====================
@@ -167,3 +146,5 @@ class PayrollSettingsAdmin(admin.ModelAdmin):
             'fields': ('created_at',)
         }),
     )
+admin.site.register(PayrollMonthly)
+admin.site.register(StatutorySettings)

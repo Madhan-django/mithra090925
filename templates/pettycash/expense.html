@@ -1,153 +1,204 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
 
 <style>
-    /* ===== GLOBAL FONT ===== */
-    body, h1, h3, h4, h5, th, td, label, button, a {
-        font-family: 'Roboto', sans-serif;
-    }
+  /* Amount cells */
+  .amount-cell {
+    font-family: var(--f-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    padding-right: 18px !important;
+  }
+  .balance-cell {
+    font-family: var(--f-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    text-align: right;
+    padding-right: 18px !important;
+  }
+  .balance-negative { color: var(--rose); }
 
-    /* ===== CARD ===== */
-    .card {
-        border-radius: 22px;
-        box-shadow: 0px 4px 14px rgba(0,0,0,0.18);
-        border: none;
-        overflow: hidden;
-    }
+  /* Expense no */
+  .exp-no {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
 
-    /* ===== TITLE BAR — REDUCED HEIGHT ===== */
-    .card-title {
-        background: linear-gradient(90deg, #1E3C72, #2A5298);
-        padding: 6px 0;
-        border-top-left-radius: 22px;
-        border-top-right-radius: 22px;
-        margin-bottom: 0;
-        text-align: center;
-    }
+  /* Date cell */
+  .date-cell {
+    font-family: var(--f-mono);
+    font-size: 12.5px;
+    color: var(--text-sm);
+  }
 
-    .card-title h5 {
-        margin: 0;
-        font-size: 18px;
-    }
+  /* Description */
+  .desc-cell {
+    text-align: left;
+    font-size: 13.5px;
+    color: var(--text);
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    .card-title .badge {
-        background: #fff;
-        color: #000;
-        padding: 4px 14px;
-        border-radius: 18px;
-        font-size: 14px;   /* updated size */
-        font-weight: normal !important; /* removed bold */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.22);
-    }
-
-    /* ===== BUTTON SECTION ===== */
-    .text-end {
-        padding: 15px;
-        padding-bottom: 0;
-    }
-
-    .btn-primary {
-        background: linear-gradient(to right, #1e5799, #207cca);
-        border: none;
-        font-weight: 600;
-        border-radius: 8px;
-    }
-
-    .btn-info {
-        background: linear-gradient(to right, #17a2b8, #138496);
-        border: none;
-        font-weight: 600;
-        border-radius: 8px;
-    }
-
-    .btn-danger {
-        background: linear-gradient(to right, #e63946, #d62839);
-        border: none;
-        font-weight: 600;
-        border-radius: 8px;
-    }
-
-    /* ===== TABLE HEADER — REDUCED SIZE ===== */
-    thead.table-dark th {
-        background-color: #212529 !important;
-        color: #fff !important;
-        font-size: 13px;
-        padding: 6px 8px !important;
-    }
-
-    tbody td {
-        vertical-align: middle;
-        font-size: 14px;
-        padding: 8px;
-    }
-
-    .alert {
-        font-size: 15px;
-        font-weight: 500;
-    }
+  /* Summary strip */
+  .cash-kpi-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .cash-kpi-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    flex: 1;
+    min-width: 140px;
+  }
+  .ckpi-num { font-size: 20px; font-weight: 800; line-height: 1; font-family: var(--f-mono); }
+  .ckpi-lbl { font-size: 11px; opacity: .75; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+  .kpi-records  { background: var(--accent-lt); color: var(--accent);  border-color: var(--accent-mid); }
+  .kpi-expenses { background: var(--rose-lt);   color: var(--rose);    border-color: #fecdd3; }
+  .kpi-balance  { background: var(--green-lt);  color: var(--green);   border-color: #a7f3d0; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- Title -->
-        <div class="card-title text-center">
-            <h5><span class="badge">Cash Register</span></h5>
-        </div>
-
-        <!-- Add Button -->
-        <div class="text-end">
-            <a href="{% url 'addexpense' %}" class="btn btn-sm btn-primary">New Expense</a>
-        </div>
-
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Expense No</th>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Balance</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% if data %}
-                        {% for exp in data %}
-                        <tr class="text-center">
-                            <td>{{ exp.expense_no }}</td>
-                            <td>{{ exp.date_spent }}</td>
-                            <td>{{ exp.description }}</td>
-                            <td>{{ exp.category }}</td>
-                            <td>{{ exp.amount }}</td>
-                            <td>{{ exp.balance }}</td>
-                            <td>
-                                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-                                    <form action="{% url 'pettycashvoucher' exp.id %}" method="" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-info btn-sm">Print</button>
-                                    </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                <div class="alert alert-danger">No Records available to show</div>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{%  url 'pettycashExp' %}">Petty Cash</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Cash Register</span>
+      </nav>
+      <h1 class="pc-page-title">Cash Register</h1>
+      <p class="pc-page-sub">Track petty cash expenses, categories and running balance.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'addexpense' %}" class="pc-btn pc-btn-primary">
+        <i class="ti ti-plus" style="font-size:14px;"></i> New Expense
+      </a>
+    </div>
+  </div>
+
+  {% if data %}
+
+  <!-- KPI Strip -->
+  <div class="cash-kpi-strip">
+    <div class="cash-kpi-chip kpi-records">
+      <i class="ti ti-receipt" style="font-size:22px;"></i>
+      <div>
+        <div class="ckpi-num">{{ data|length }}</div>
+        <div class="ckpi-lbl">Records</div>
+      </div>
+    </div>
+    <div class="cash-kpi-chip kpi-expenses">
+      <i class="ti ti-arrow-up-right" style="font-size:22px;"></i>
+      <div>
+        <div class="ckpi-num">{{ data|length }}</div>
+        <div class="ckpi-lbl">Expenses</div>
+      </div>
+    </div>
+    <div class="cash-kpi-chip kpi-balance">
+      <i class="ti ti-wallet" style="font-size:22px;"></i>
+      <div>
+        <div class="ckpi-num">{{ data.0.balance }}</div>
+        <div class="ckpi-lbl">Latest Balance</div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+  <!-- Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Expense Records</p>
+        <p class="pc-card-sub">All petty cash transactions</p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-list" style="font-size:12px;"></i>
+        {{ data|length }} record{{ data|length|pluralize }}
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Expense No</th>
+            <th>Date</th>
+            <th style="text-align:left;">Description</th>
+            <th>Category</th>
+            <th style="text-align:right; padding-right:18px;">Amount</th>
+            <th style="text-align:right; padding-right:18px;">Balance</th>
+            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+            <th>Action</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% if data %}
+            {% for exp in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td class="exp-no">{{ exp.expense_no }}</td>
+              <td class="date-cell">{{ exp.date_spent }}</td>
+              <td class="desc-cell">{{ exp.description }}</td>
+              <td>
+                <span class="pc-badge pc-badge-neutral pc-badge-no-dot">{{ exp.category }}</span>
+              </td>
+              <td class="amount-cell">{{ exp.amount }}</td>
+              <td class="balance-cell {% if exp.balance < 0 %}balance-negative{% endif %}">
+                {{ exp.balance }}
+              </td>
+              {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+              <td>
+                <form action="{% url 'pettycashvoucher' exp.id %}" method="post" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="pc-btn pc-btn-info pc-btn-sm">
+                    <i class="ti ti-printer" style="font-size:13px;"></i> Print
+                  </button>
+                </form>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="pc-table-empty">
+              <td colspan="8">No expense records found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not data %}
+    <div class="pc-card-body" style="padding-top:0;">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-receipt-off"></i></span>
+        <p class="pc-empty-title">No records yet</p>
+        <p class="pc-empty-sub">Add your first expense using the button above.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
 
 {% endblock %}

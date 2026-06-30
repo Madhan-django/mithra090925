@@ -130,77 +130,10 @@
         <div class="card-body">
             <div class="container">
                 <form action="" method="POST">
-    {% csrf_token %}
-
-<!--    <p>-->
-<!--        <label for="id_emp_code">Emp code:</label>-->
-<!--        {{ form.emp_code }}-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_name">Name:</label>-->
-<!--        {{ form.name }}-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_department">Department:</label>-->
-<!--        <select name="department" required="" id="id_department">-->
-<!--            <option value="" selected="">-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
-<!--            {% for dep in dept %}-->
-<!--            <option value="{{dep.id}}">{{dep.name}}</option>-->
-<!--            {% endfor %}-->
-<!--        </select>-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_designation">Designation:</label>-->
-<!--         <select name="designation" required="" id="id_designation">-->
-<!--            <option value="" selected="">-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
-<!--            {% for des in desg %}-->
-<!--            <option value="{{des.id}}">{{des.title}}</option>-->
-<!--            {% endfor %}-->
-<!--        </select>-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_date_of_joining">Date of Joining:</label>-->
-<!--        <input type="date" name="date_of_joining" required="" id="id_date_of_joining">-->
-
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_basic_salary">Basic Salary:</label>-->
-<!--        {{ form.basic_salary }}-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_contact">Contact:</label>-->
-<!--        {{ form.contact }}-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_email">Email:</label>-->
-<!--        {{ form.email }}-->
-<!--    </p>-->
-
-<!--    <p>-->
-<!--        <label for="id_status">Status:</label>-->
-<!--        {{ form.status }}-->
-<!--    </p>-->
+                       {% csrf_token %}
+                    {{ form.as_p }}
 
 
-
-<!--        {{ form.emp_sch }}-->
-
-                     {{ emp_form.as_p }}
-
-             {{formset.management_form}}
-                    {% for form in formset %}
-                    {{form.as_p}}
-                    {% endfor %}
-
-
-            </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary">Submit</button>
                         <button type="reset" class="btn btn-warning">Reset</button>
@@ -209,6 +142,7 @@
             </div>
         </div>
     </div>
+</div>
 
 
 

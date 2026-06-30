@@ -1,275 +1,377 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+  .attn-filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 180px auto;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .attn-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .attn-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .attn-field select,
+  .attn-field input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .attn-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  .attn-field select:focus,
+  .attn-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
+  /* Status badges */
+  .attn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .attn-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .75;
+  }
+  .attn-present { background: var(--green-lt);  color: var(--green); }
+  .attn-absent  { background: var(--rose-lt);   color: var(--rose); }
+  .attn-holiday { background: var(--amber-lt);  color: var(--amber); }
+  .attn-unknown { background: #f1f5f9; color: var(--text-sm); }
 
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
+  /* Student cell */
+  .stud-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-align: left;
+  }
+  .stud-avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent-lt);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .stud-name-sm {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--text);
+  }
 
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
+  /* Bulk bar */
+  .bulk-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 12px 18px;
+    margin-bottom: 16px;
+  }
+  .bulk-bar-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-sm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .bulk-bar-label i { color: var(--accent); font-size: 15px; }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
+  /* KPI chips */
+  .attn-kpi-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .attn-kpi-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+    min-width: 120px;
+  }
+  .kpi-total   { background: var(--accent-lt); color: var(--accent);  border-color: var(--accent-mid); }
+  .kpi-present { background: var(--green-lt);  color: var(--green);   border-color: #a7f3d0; }
+  .kpi-absent  { background: var(--rose-lt);   color: var(--rose);    border-color: #fecdd3; }
+  .kpi-holiday { background: var(--amber-lt);  color: var(--amber);   border-color: #fde68a; }
+  .attn-kpi-chip .kpi-num { font-size: 20px; font-weight: 800; line-height: 1; }
 
-}
+  .attn-actions { display: flex; gap: 6px; justify-content: center; }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
+  @media (max-width: 700px) {
+    .attn-filter-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .attn-filter-grid { grid-template-columns: 1fr; }
+  }
 </style>
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <br>
-            <h5><span class="badge bg-light text-dark">Show Attendances</span></h5>
+
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+
+        <span>Show Attendance</span>
+      </nav>
+      <h1 class="pc-page-title">Show Attendance</h1>
+      <p class="pc-page-sub">View and update attendance records by class, section and date.</p>
+    </div>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="pc-card mb-4">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Filter Records</p>
+        <p class="pc-card-sub">Select class, section and date to load attendance</p>
+      </div>
+      <i class="ti ti-calendar-search" style="font-size:20px; color:var(--muted);"></i>
+    </div>
+    <div class="pc-card-body">
+      <form id="addattendform" data-section-url="{% url 'ajax_load_section' %}" method="POST">
+        {% csrf_token %}
+        <div class="attn-filter-grid">
+
+          <div class="attn-field">
+            <label>Class <span style="color:var(--rose);">*</span></label>
+            <select name="aclass" required id="id_aclass">
+              <option value="">— Select Class —</option>
+              {% for cl in cls %}
+              <option value="{{ cl.id }}">{{ cl }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="attn-field">
+            <label>Section <span style="color:var(--rose);">*</span></label>
+            <select name="sec" required id="id_sec">
+              <option value="">— Select Section —</option>
+            </select>
+          </div>
+
+          <div class="attn-field">
+            <label>Date <span style="color:var(--rose);">*</span></label>
+            {{ form.attndate }}
+          </div>
+
+          <button type="submit" class="pc-btn pc-btn-primary" style="align-self:flex-end;">
+            <i class="ti ti-search" style="font-size:14px;"></i> Show
+          </button>
+
         </div>
-
+      </form>
     </div>
-</div>
-<br><br>
-<div class="row">
-    <div class="col-sm">
-        <table class="table">
-            <tr>
-                <form id="addattendform" data-section-url="{% url 'ajax_load_section' %}" method="POST">
-                    {% csrf_token %}
-                    <div class="container">
-                        <td>
-                             <div class="form-floating form-floating-outline">
-                                  <select name="aclass" class="form-control" required=""  id="id_aclass" >
-                                    <option value="" selected="">---------</option>
-                                                {% for cl in cls %}
-                                                <option value="{{ cl.id }}">{{ cl }}</option>
-                                               {% endfor %}
-                                  </select>
-                                  <label for="id_aclass">Class</label>
-                              </div>
-                        </td>
-                        <td>
-                           <div class="form-floating form-floating-outline">
-                                <select name="sec" required="" id="id_sec" class="form-control">
-                                </select>
-                                <label for="id_sec">Section:</label>
-                           </div>
-                        </td>
-                        <td>
-                            <div class="form-floating form-floating-outline">
-                               {{ form.attndate }}
-                               <label for="id_attndate">Date</label>
-                            </div>
-                        </td>
-                        <td>
+  </div>
 
-                            <button type="submit" class="btn btn-primary">Show Attendance</button>
-                        </td>
-                    </div>
-                </form>
-            </tr>
-        </table>
+  {% if data %}
+
+  <!-- KPI Strip -->
+  <div class="attn-kpi-strip">
+    <div class="attn-kpi-chip kpi-total">
+      <span class="kpi-num">{{ data|length }}</span>
+      <span>Total</span>
     </div>
-</div>
-{% if data %}
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <br>
-            <div class="custom-right">
-            <form action="{% url 'markholiday' %}" method="POST" class="d-inline float-right">
-                {% csrf_token %}
-                <input type="submit" class="btn btn-md btn-danger" value="Mark as Holiday">
-            </form>
-            <form action="{% url 'markallpresent' %}" method="POST" class="d-inline float-right">
-                {% csrf_token %}
-                <input type="submit" class="btn btn-md btn-primary" value="Mark all Present">
-            </form>
-             </div>
-                  <div class="card-body">
-<br><br>
-<table class="table">
-    <thead class="table-dark" align="center">
-        <tr>
-            <th>First Name</th>
+    <div class="attn-kpi-chip kpi-present">
+      <i class="ti ti-circle-check" style="font-size:18px;"></i>
+      <span>Present</span>
+    </div>
+    <div class="attn-kpi-chip kpi-absent">
+      <i class="ti ti-circle-x" style="font-size:18px;"></i>
+      <span>Absent</span>
+    </div>
+    <div class="attn-kpi-chip kpi-holiday">
+      <i class="ti ti-calendar-off" style="font-size:18px;"></i>
+      <span>Holiday</span>
+    </div>
+  </div>
+
+  <!-- Results Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Attendance Records</p>
+        <p class="pc-card-sub">Update individual or bulk status below</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-users" style="font-size:12px;"></i>
+        {{ data|length }} student{{ data|length|pluralize }}
+      </span>
+    </div>
+
+    <div class="pc-card-body" style="padding-bottom:12px;">
+      <div class="bulk-bar">
+        <span class="bulk-bar-label">
+          <i class="ti ti-bolt"></i> Bulk Actions
+        </span>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <form action="{% url 'markallpresent' %}" method="POST" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="pc-btn pc-btn-success pc-btn-sm">
+              <i class="ti ti-checks" style="font-size:13px;"></i> All Present
+            </button>
+          </form>
+          <form action="{% url 'markholiday' %}" method="POST" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="pc-btn pc-btn-warning pc-btn-sm">
+              <i class="ti ti-calendar-off" style="font-size:13px;"></i> Mark Holiday
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0; border-top:1px solid var(--border);">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Student</th>
             <th>Class</th>
             <th>Section</th>
             <th>Date</th>
             <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for stud in data %}
-        <tr align="center">
-            <td>{{ stud.student_name }}</td>
-            <td>{{ stud.aclass }}</td>
-            <td>{{ stud.sec }}</td>
-            <td>{{ stud.attndate }}</td>
-            <td>{{ stud.status }}</td>
+            <th>Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stud in data %}
+          <tr>
+            <td class="td-num">{{ forloop.counter }}</td>
             <td>
-                <form id="addattendform" action="{% url 'markabsent' stud.id %}" method="POST" class="d-inline">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-danger btn-sm" value="A">
-                </form>
-                <form action="{% url 'markpresent' stud.id %}" method="POST" class="d-inline">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-success btn-sm" value="P">
-                </form>
+              <div class="stud-cell">
+                <div class="stud-avatar-sm">{{ stud.student_name|first|upper }}</div>
+                <span class="stud-name-sm">{{ stud.student_name }}</span>
+              </div>
             </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<div class="alert alert-danger" role="alert">
-    No Students Record are available to Show
+            <td>
+              <span class="pc-badge pc-badge-primary pc-badge-no-dot">{{ stud.aclass }}</span>
+            </td>
+            <td style="color:var(--text-md);">{{ stud.sec }}</td>
+            <td style="font-family:var(--f-mono); font-size:12.5px; color:var(--text-sm);">{{ stud.attndate }}</td>
+            <td>
+              {% with status=stud.status %}
+                {% if status == "Present" %}
+                  <span class="attn-badge attn-present">Present</span>
+                {% elif status == "Absent" %}
+                  <span class="attn-badge attn-absent">Absent</span>
+                {% elif status == "Holiday" %}
+                  <span class="attn-badge attn-holiday">Holiday</span>
+                {% else %}
+                  <span class="attn-badge attn-unknown">—</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+            <td>
+              <div class="attn-actions">
+                <form action="{% url 'markabsent' stud.id %}" method="POST">
+                  {% csrf_token %}
+                  <button type="submit" class="pc-btn pc-btn-danger pc-btn-sm" title="Mark Absent">
+                    <i class="ti ti-circle-x" style="font-size:13px;"></i> A
+                  </button>
+                </form>
+                <form action="{% url 'markpresent' stud.id %}" method="POST">
+                  {% csrf_token %}
+                  <button type="submit" class="pc-btn pc-btn-success pc-btn-sm" title="Mark Present">
+                    <i class="ti ti-circle-check" style="font-size:13px;"></i> P
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ti ti-info-circle" style="color:var(--accent); margin-right:4px;"></i>
+        Use <strong>P</strong> / <strong>A</strong> per row, or bulk actions above for the full list.
+      </p>
+    </div>
+  </div>
+
+  {% elif request.method == "POST" %}
+
+  <div class="pc-card">
+    <div class="pc-card-body">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-calendar-stats"></i></span>
+        <p class="pc-empty-title">No records found</p>
+        <p class="pc-empty-sub">No attendance data matches the selected filters.</p>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
 </div>
-                  </div></div></div>
-{% endif %}
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
-    $(document).ready(function(){
-        $("#id_aclass").change(function(){
-            var url = $("#addattendform").attr("data-section-url");
-            var classId = $(this).val();
-            $.ajax({
-                url: url,
-                data: {
-                    'Class_Id': classId
-                },
-                success: function (data) {
-                    $("#id_sec").html(data);
-                }
-            });
-        });
+$(document).ready(function () {
+  $("#id_aclass").change(function () {
+    var url = $("#addattendform").attr("data-section-url");
+    var classId = $(this).val();
+    $.ajax({
+      url: url,
+      data: { 'Class_Id': classId },
+      success: function (data) { $("#id_sec").html(data); }
     });
+  });
+});
 </script>
+
 {% endblock %}

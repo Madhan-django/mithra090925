@@ -2,250 +2,290 @@
 {% block content %}
 
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Search row ── */
+.nb-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.nb-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 160px;
+}
+.nb-search-field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+}
+.nb-search-field select,
+.nb-search-field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.nb-search-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.nb-search-field input:focus,
+.nb-search-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.nb-search-field input::placeholder { color: var(--muted); }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Date chips ── */
+.ev-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.ev-date-end {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Location chip ── */
+.ev-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-md);
 }
+.ev-location i { color: var(--muted); font-size: 13px; }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+/* ── Dropdown ── */
+.nb-dropdown-menu {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+  padding: 6px;
+  min-width: 130px;
 }
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+.nb-dropdown-menu .dropdown-item {
+  font-family: var(--f-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-md);
+  border-radius: var(--r-sm);
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 150ms ease, color 150ms ease;
 }
+.nb-dropdown-menu .dropdown-item:hover { background: var(--accent-lt); color: var(--accent); }
+.nb-dropdown-menu .dropdown-item.item-danger:hover { background: var(--rose-lt); color: var(--rose); }
 
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: evRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
+@keyframes evRowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 40ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 70ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay:100ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:130ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:160ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:190ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:220ms; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Events</span></h5>
-        </div>
-
-        <!-- TOP BUTTON -->
-        <div class="text-end">
-            <a href="{% url 'add_event' %}" class="btn btn-sm btn-primary">New Event</a>
-        </div>
-
-        <div class="card-body">
-
-            <!-- SEARCH FORM -->
-            <form action="{% url 'event_search' %}" method="POST">
-                {% csrf_token %}
-                <table class="table table-search">
-                    <tr>
-                        <td style="width: 30%;">
-                            <select name="searchby" id="searchby" class="form-control">
-                                <option value="event_title">Event Title</option>
-                                <option value="start_date">Event Date (yyyy-mm-dd)</option>
-                                <option value="event_location">Location</option>
-                            </select>
-                        </td>
-                        <td style="width: 50%;">
-                            <input type="search" placeholder="Search" name="searched" required class="form-control">
-                        </td>
-                        <td>
-                            <button type="submit" class="btn btn-success">Search</button>
-                        </td>
-                    </tr>
-                </table>
-            </form>
-
-           <div class="table-responsive">
-                <table class="table table-bordered text-center">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Title</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Location</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    {% if data %}
-                    <tbody align="center">
-                        {% for eve in data %}
-                        <tr>
-                            <td>{{ eve.event_title }}</td>
-                            <td>{{ eve.start_date }}</td>
-                            <td>{{ eve.end_date }}</td>
-                            <td>{{ eve.event_location }}</td>
-
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="ri-more-2-line"></i>
-                                    </button>
-
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{% url 'update_event' eve.id %}">
-                                            <i class="ri-pencil-line me-1"></i> Edit
-                                        </a>
-
-                                        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                        <a class="dropdown-item" href="#">
-                                            <i class="ri-delete-bin-7-line me-1"></i> Delete
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-
-                    {% else %}
-                    <tr>
-                        <td colspan="5">
-                            <div class="alert alert-danger mb-0">No events available to show.</div>
-                        </td>
-                    </tr>
-                    {% endif %}
-
-                </table>
-
-            </div>
-        </div>
-
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Events</span>
+      </nav>
+      <h1 class="pc-page-title">Events</h1>
+      <p class="pc-page-sub">Manage and track all school events and activities.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'add_event' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> New Event
+      </a>
+    </div>
+  </div>
+
+  <!-- ② Search Card -->
+  <div class="pc-card" style="margin-bottom:18px;">
+    <div class="pc-card-header">
+      <p class="pc-card-title">Search Events</p>
+    </div>
+    <div class="pc-card-body">
+      <form action="{% url 'event_search' %}" method="POST">
+        {% csrf_token %}
+        <div class="nb-search-row">
+          <div class="nb-search-field" style="max-width:240px;">
+            <label>Search By</label>
+            <select name="searchby">
+              <option value="event_title">Event Title</option>
+              <option value="start_date">Event Date (yyyy-mm-dd)</option>
+              <option value="event_location">Location</option>
+            </select>
+          </div>
+          <div class="nb-search-field">
+            <label>Keyword</label>
+            <input type="search" name="searched" placeholder="Type to search…" required>
+          </div>
+          <div style="padding-bottom:1px;">
+            <button type="submit" class="pc-btn pc-btn-primary">
+              <i class="ri-search-line"></i> Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ③ Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Events</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} event{{ data|length|pluralize }} found{% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-calendar-event-line" style="font-size:12px;"></i>
+        {{ data|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th style="text-align:left;">Title</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Location</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eve in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td class="td-name">{{ eve.event_title }}</td>
+
+              <td>
+                <span class="ev-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ eve.start_date }}
+                </span>
+              </td>
+
+              <td>
+                <span class="ev-date ev-date-end">
+                  <i class="ri-calendar-check-line" style="font-size:11px; opacity:.7;"></i>
+                  {{ eve.end_date }}
+                </span>
+              </td>
+
+              <td>
+                <span class="ev-location">
+                  <i class="ri-map-pin-2-line"></i>
+                  {{ eve.event_location }}
+                </span>
+              </td>
+
+              <td>
+                <div class="dropdown">
+                  <button type="button"
+                    class="pc-btn pc-btn-outline pc-btn-icon pc-btn-sm"
+                    style="border-color:var(--border); background:var(--surface2);"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ri-more-2-line"></i>
+                  </button>
+                  <ul class="dropdown-menu nb-dropdown-menu">
+                    <li>
+                      <a class="dropdown-item" href="{% url 'update_event' eve.id %}">
+                        <i class="ri-pencil-line" style="color:var(--accent);"></i> Edit
+                      </a>
+                    </li>
+                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                    <li><hr class="dropdown-divider" style="margin:4px 0;"></li>
+                    <li>
+                      <a class="dropdown-item item-danger" href="#">
+                        <i class="ri-delete-bin-7-line"></i> Delete
+                      </a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-calendar-close-line"></i></span>
+        <p class="pc-empty-title">No events found</p>
+        <p class="pc-empty-sub">Click <strong>New Event</strong> to create the first one.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> event{{ data|length|pluralize }}
+      </span>
+      <a href="{% url 'add_event' %}" class="pc-btn pc-btn-secondary pc-btn-sm">
+        <i class="ri-add-line"></i> Add Another
+      </a>
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

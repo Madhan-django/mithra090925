@@ -1,10 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="pc-card">
+    <h2>Send Staff Notification</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="pc-form-group">
+            <label>Title</label>
+            <input type="text" name="title" class="pc-input" required maxlength="255">
+        </div>
+        <div class="pc-form-group">
+            <label>Message</label>
+            <textarea name="message" class="pc-input" rows="4" required maxlength="255"></textarea>
+        </div>
+        <div class="pc-form-group">
+            <label>Recipients</label>
+            <div style="display:flex; gap:12px; margin-bottom:8px;">
+                <button type="button" class="pc-btn pc-btn-sm" onclick="toggleAll(true)">Select All</button>
+                <button type="button" class="pc-btn pc-btn-sm" onclick="toggleAll(false)">Clear</button>
+            </div>
+            <div class="pc-checkbox-list" style="max-height:300px; overflow-y:auto;">
+                {% for s in staff_list %}
+                <label class="pc-checkbox-item">
+                    <input type="checkbox" name="staff_ids" value="{{ s.id }}" class="staff-checkbox">
+                    {{ s }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="pc-btn pc-btn-primary">
+            <i class="ri-send-plane-line"></i> Send
+        </button>
+    </form>
+</div>
+<script>
+function toggleAll(state) {
+    document.querySelectorAll('.staff-checkbox').forEach(cb => cb.checked = state);
+}
+</script>
+{% endblock %}

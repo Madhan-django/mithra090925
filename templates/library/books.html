@@ -1,150 +1,209 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h5, th, td, label, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Price chip ── */
+.td-price {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-lt);
+  border: 1px solid var(--accent-mid);
+  border-radius: 6px;
+  padding: 3px 9px;
+  display: inline-block;
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.10);
-    padding-bottom: 15px;
+/* ── Qty / Issued progress chip ── */
+.td-qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+.td-qty-available {
+  color: var(--green);
+  background: var(--green-lt);
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+.td-qty-issued {
+  color: var(--amber);
+  background: var(--amber-lt);
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 2px 8px;
 }
 
-/* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── ISBN / Book No chip ── */
+.td-code {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--text-sm);
+  letter-spacing: .3px;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: bookRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+@keyframes bookRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
 }
-
-
-/* ===== NEW EXAM BUTTON AREA ===== */
-.text-end {
-    padding-right: 20px;
-}
-
-/* ===== TABLE ===== */
-.table {
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 2px;
-}
-
-/* ===== TABLE HEADER (Compact & Clean) ===== */
-.table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-/* ===== TABLE DATA ===== */
-td {
-    font-size: 14px !important;    /* reduced to match timetable style */
-    padding: 10px 8px !important;  /* compact row height */
-    vertical-align: middle;
-    font-family: 'Roboto', sans-serif;
-}
-
-/* Align dropdown icon properly */
-.dropdown-toggle {
-    border: none;
-}
-
-
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 55ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 80ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:105ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:130ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:180ms; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- MAIN TITLE WITH BADGE -->
-        <div class="card-title text-center">
-            <span class="badge bg-light text-dark">Book List</span>
-        </div>
-
-        <!-- ACTION BUTTONS -->
-        <div class="text-end">
-            <a href="{% url 'add_book' %}" class="btn btn-sm btn-primary">New Book</a>
-            <a href="#" class="btn btn-sm btn-success">Export PDF</a>
-            <a href="#" class="btn btn-sm btn-warning">Export CSV</a>
-        </div>
-
-        <br>
-
-        {% if data %}
-        <table class="table table-striped table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Subject</th>
-                    <th>Rack Number</th>
-                    <th>Book Number</th>
-                    <th>ISBN Number</th>
-                    <th>Price</th>
-                    <th>Qty / Issued</th>
-                    <th>Issue Book</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for libbook in data %}
-                <tr>
-                    <td>{{ libbook.title }}</td>
-                    <td>{{ libbook.author }}</td>
-                    <td>{{ libbook.subject }}</td>
-                    <td>{{ libbook.rack }}</td>
-                    <td>{{ libbook.book_no }}</td>
-                    <td>{{ libbook.isbn }}</td>
-                    <td>{{ libbook.price }}</td>
-                    <td>Qty: {{ libbook.quantity }} | Issued: {{ libbook.issued }}</td>
-
-                    <td>
-                        {% if libbook.quantity > libbook.issued %}
-                        <form action="{% url 'add_book_issued' libbook.id %}" method="post" >
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-info btn-sm">
-                                        Issue Book
-                                    </button>
-
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        {% else %}
-            <div class="alert alert-danger m-4" role="alert">
-                No Records Available to Show
-            </div>
-        {% endif %}
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+       <span class="pc-breadcrumb-sep">Books</span>
+      </nav>
+      <h1 class="pc-page-title">Book List</h1>
+      <p class="pc-page-sub">Manage library books, stock and issue records.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="#" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-file-pdf-line"></i> Export PDF
+      </a>
+      <a href="#" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-file-excel-line"></i> Export CSV
+      </a>
+      <a href="{% url 'add_book' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> New Book
+      </a>
+    </div>
+  </div>
+
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Books</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} book{{ data|length|pluralize }} in catalogue{% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-book-2-line" style="font-size:12px;"></i>
+        {{ data|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th style="text-align:left;">Title</th>
+              <th style="text-align:left;">Author</th>
+              <th>Subject</th>
+              <th>Rack</th>
+              <th>Book No</th>
+              <th>ISBN</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Issue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for libbook in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td class="td-name">{{ libbook.title }}</td>
+
+              <td style="text-align:left; color:var(--text-md); font-size:13px;">
+                {{ libbook.author }}
+              </td>
+
+              <td>
+                <span class="pc-badge pc-badge-info pc-badge-no-dot"
+                      style="font-size:11.5px;">
+                  {{ libbook.subject }}
+                </span>
+              </td>
+
+              <td><span class="td-code">{{ libbook.rack }}</span></td>
+              <td><span class="td-code">{{ libbook.book_no }}</span></td>
+              <td><span class="td-code">{{ libbook.isbn }}</span></td>
+
+              <td>
+                <span class="td-price">&#8377;{{ libbook.price }}</span>
+              </td>
+
+              <td>
+                <div class="td-qty">
+                  <span class="td-qty-available" title="Available">
+                    {{ libbook.quantity }}
+                  </span>
+                  <span style="color:var(--muted); font-size:11px;">/</span>
+                  <span class="td-qty-issued" title="Issued">
+                    {{ libbook.issued }}
+                  </span>
+                </div>
+              </td>
+
+              <td>
+                {% if libbook.quantity > libbook.issued %}
+                <form action="{% url 'add_book_issued' libbook.id %}" method="post" style="margin:0;">
+                  {% csrf_token %}
+                  <button type="submit" class="pc-btn pc-btn-success pc-btn-sm">
+                    <i class="ri-book-open-line"></i> Issue
+                  </button>
+                </form>
+                {% else %}
+                <span class="pc-badge pc-badge-danger pc-badge-no-dot"
+                      style="font-size:11px;">Out of Stock</span>
+                {% endif %}
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-book-2-line"></i></span>
+        <p class="pc-empty-title">No books found</p>
+        <p class="pc-empty-sub">Click <strong>New Book</strong> to add the first entry.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> book{{ data|length|pluralize }}
+      </span>
+
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

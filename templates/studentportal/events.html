@@ -1,55 +1,204 @@
 {% extends 'studentportal/index.html' %}
 {% block content %}
-<div class="content-wrapper">
-            <div class="page-header">
-              <h3 class="page-title">
-                <span class="page-title-icon bg-gradient-primary text-white me-2">
-                  <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
-                </span> Events
-              </h3>
-              <nav aria-label="breadcrumb">
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item active" aria-current="page">
-                    <span></span>Overview <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Events</span>
+    </div>
+    <div class="pc-page-title">Events</div>
+    <div class="pc-page-sub">View all upcoming and past school events</div>
+  </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data|length }}</div>
+    <div class="pc-kpi-label">Total Events</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{% now "d M Y" %}</div>
+    <div class="pc-kpi-label">Today</div>
+  </div>
+</div>
+
+<!-- MAIN CARD -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-calendar-event-line me-2" style="color:var(--accent);"></i>All Events
+      </div>
+      <div class="pc-card-sub">School events and activities</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot"
+          id="recordCount"
+          style="font-size:12px; padding:5px 14px;">
+      {{ data|length }} event{{ data|length|pluralize }}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+
+    {% if data %}
+
+      <!-- Search -->
+      <div class="pc-filter-row" style="margin-bottom:1.25rem;">
+        <div class="pc-form-group" style="flex:1; max-width:320px;">
+          <label class="pc-label">Search</label>
+          <div class="pc-input-group">
+            <i class="ri-search-line pc-input-icon"></i>
+            <input type="text" id="searchInput" class="pc-input"
+                   placeholder="Search by title, venue…">
+          </div>
+        </div>
+        <div class="pc-form-group" style="min-width:90px; align-self:flex-end;">
+          <button class="pc-btn pc-btn-outline"
+                  onclick="filterRows(''); document.getElementById('searchInput').value='';"
+                  style="width:100%;">
+            <i class="ri-refresh-line"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive">
+        <div class="pc-table-wrap">
+          <table class="pc-table">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding-left:18px;">#</th>
+                <th style="text-align:left;">Title</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Venue</th>
+                <th style="text-align:left;">Description</th>
+                <th>Attachment</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              {% for eve in data %}
+              <tr class="data-row">
+
+                <td class="td-num">{{ forloop.counter }}</td>
+
+                <td class="td-name">
+                  <div style="font-weight:600; color:var(--text);">
+                    {{ eve.event_title }}
+                  </div>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#ecfdf5; color:#059669;
+                               font-size:12px; padding:4px 10px;">
+                    <i class="ri-calendar-check-line me-1"></i>{{ eve.start_date }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fff1f2; color:#e11d48;
+                               font-size:12px; padding:4px 10px;">
+                    <i class="ri-calendar-close-line me-1"></i>{{ eve.end_date }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fffbeb; color:#d97706;">
+                    <i class="ri-map-pin-line me-1"></i>{{ eve.event_location }}
+                  </span>
+                </td>
+
+                <td style="font-size:13px; color:var(--text-md);
+                           max-width:220px; white-space:normal; line-height:1.5;">
+                  {{ eve.event_desc|truncatechars:80 }}
+                </td>
+
+                <td>
+                  {% if eve.event_image %}
+                  <a href="/{{ MEDIA_URL }}media/{{ eve.event_image }}"
+                     target="_blank"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ri-image-line"></i> View
+                  </a>
+                  {% else %}
+                  <span style="font-size:13px; color:var(--text-md);">—</span>
+                  {% endif %}
+                </td>
+
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {% else %}
+
+      <div class="pc-empty" style="padding:4rem 2rem;">
+        <i class="ri-calendar-event-line pc-empty-icon"></i>
+        <div class="pc-empty-title">No events found</div>
+        <div class="pc-empty-sub">No events scheduled for this academic year</div>
+      </div>
+
+    {% endif %}
+
+  </div>
+
+  {% if data %}
+  <div class="pc-card-footer">
+    <div class="pc-pagination-info">
+      Total: <strong>{{ data|length }}</strong> event{{ data|length|pluralize }}
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /pc-card -->
+
 {% if data %}
-	<br>
-	<div class="table-responsive">
-  <table class="table table-bordered">
-  <thead class="table-dark" align ="center">
-			<tr>
-				<th>Title</th>
-				<th>Start Date</th>
-				<th>End Date</th>
-				<th>Attachment</th>
-				<th>Description</th>
-				<th>Venue</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for eve in data %}
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const rows        = document.querySelectorAll('.data-row');
+  const recordCount = document.getElementById('recordCount');
+  const tableBody   = document.getElementById('tableBody');
 
-            <tr align="center">
-                <td>{{ eve.event_title }}</td>
-                <td>{{ eve.start_date }}</td>
-				<td>{{ eve.end_date }}</td>
-                 {% if eve.event_image %}
-                <td><a href="\{{ MEDIA_URL }}media\{{eve.event_image}}">Attachment</a></td>
-				{% else %}
-				<td>-</td>
-                {% endif %}
-				<td>{{ eve.event_desc }}</td>
-                <td>{{ eve.event_location }}</td>
+  function filterRows(q) {
+    let visible = 0;
+    rows.forEach(row => {
+      const match = row.innerText.toLowerCase().includes(q.toLowerCase().trim());
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    recordCount.textContent = visible + ' event' + (visible !== 1 ? 's' : '');
+    let noResult = document.getElementById('noResultRow');
+    if (visible === 0 && q !== '') {
+      if (!noResult) {
+        noResult = document.createElement('tr');
+        noResult.id = 'noResultRow';
+        noResult.className = 'pc-table-empty';
+        noResult.innerHTML = `<td colspan="7">
+          <div class="pc-empty">
+            <i class="ri-search-line pc-empty-icon"></i>
+            <div class="pc-empty-title">No results found</div>
+            <div class="pc-empty-sub">Try a different keyword</div>
+          </div>
+        </td>`;
+        tableBody.appendChild(noResult);
+      }
+    } else {
+      if (noResult) noResult.remove();
+    }
+  }
 
-            </tr>
-
-    {% endfor %}
-		</tbody>
-	</table>
-{% else %}
-<h3> No data</h3>
+  searchInput.addEventListener('input', function () { filterRows(this.value); });
+</script>
 {% endif %}
+
 {% endblock %}

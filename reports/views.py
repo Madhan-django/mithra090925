@@ -708,3 +708,18 @@ def PettyCashExpense_summary_pdf(request):
             return pdf
         else:
             return HttpResponse("Error generating PDF", status=500)
+
+
+from django.http import JsonResponse
+import requests
+
+def send_whatsapp(request):
+    response = requests.post(
+        "http://172.29.97.4:3000/send",
+        json={
+            "phone": "919047621499",
+            "message": "This ddddddl test"
+        }
+    )
+
+    return JsonResponse(response.json())

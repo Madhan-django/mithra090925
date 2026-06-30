@@ -1,42 +1,212 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<title>{{ paper.title }} — Set {{ paper.set_label }}</title>
 <style>
-  @page { size: A4 portrait; margin: 2cm 1.8cm; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 12pt; color: #1e293b; }
-  .header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 12px; }
-  .school-name { font-size: 18pt; font-weight: bold; margin-bottom: 2px; }
-  .exam-name { font-size: 11pt; color: #475569; margin-bottom: 6px; }
-  .paper-title { font-size: 14pt; font-weight: bold; margin-bottom: 4px; }
-  .meta-row { display: flex; justify-content: space-between; font-size: 10pt; color: #334155; margin-top: 8px; border-top: 1px solid #cbd5e1; padding-top: 8px; }
-  .instructions { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 4px; padding: 10px 14px; margin-bottom: 14px; font-size: 10pt; color: #78350f; }
-  .section-header { text-align: center; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; padding: 6px 0; margin: 16px 0 12px; font-weight: bold; font-size: 11pt; text-transform: uppercase; letter-spacing: 1px; }
-  .section-meta { font-size: 9pt; color: #64748b; font-weight: normal; }
-  .question { margin-bottom: 14px; }
-  .q-num { font-weight: bold; font-size: 11pt; }
-  .q-text { font-size: 11pt; line-height: 1.6; margin-top: 2px; }
-  .options { margin-top: 6px; }
-  .options table { width: 100%; }
-  .options td { font-size: 10pt; padding: 2px 0; width: 50%; vertical-align: top; }
-  .answer-line { border-bottom: 1px dashed #cbd5e1; height: 22px; margin-top: 4px; }
-  .marks-badge { float: right; font-size: 9pt; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 8px; margin-left: 8px; }
+  @page {
+    size: A4 portrait;
+    margin: 2cm 2.2cm 2.2cm 2.2cm;
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 8pt; color: #94a3b8;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Arial", "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 11pt;
+    color: #1e293b;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 3px solid #1e293b;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .school-logo { height: 54px; }
+  .school-text { text-align: left; }
+  .school-name { font-size: 18pt; font-weight: bold; color: #0f172a; letter-spacing: .3px; }
+  .school-addr { font-size: 9pt; color: #64748b; margin-top: 2px; }
+
+  .exam-label {
+    font-size: 9pt; color: #475569; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .paper-title { font-size: 14pt; font-weight: bold; margin-bottom: 3px; color: #1e293b; }
+  .paper-set {
+    display: inline-block; font-size: 8.5pt; color: #64748b;
+    border: 1px solid #94a3b8; border-radius: 3px;
+    padding: 1px 10px; margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+
+  .meta-bar {
+    display: flex; border: 1px solid #cbd5e1;
+    border-radius: 4px; overflow: hidden; margin-top: 10px;
+  }
+  .meta-item {
+    flex: 1; text-align: center; padding: 8px 0;
+    border-right: 1px solid #cbd5e1;
+  }
+  .meta-item:last-child { border-right: none; }
+  .meta-label { font-size: 7.5pt; color: #94a3b8; text-transform: uppercase; letter-spacing: .6px; display: block; }
+  .meta-val   { font-size: 11pt; font-weight: bold; color: #1e293b; display: block; margin-top: 3px; }
+
+  /* ── Student row ── */
+  .student-row {
+    display: flex; border: 1px solid #cbd5e1;
+    border-radius: 4px; margin: 14px 0; overflow: hidden;
+    font-size: 9pt; color: #475569;
+  }
+  .student-field { flex: 1; padding: 8px 12px; border-right: 1px solid #cbd5e1; }
+  .student-field:last-child { border-right: none; }
+  .student-field-label { font-size: 7.5pt; color: #94a3b8; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 2px; }
+  .student-line {
+    display: block; border-bottom: 1.5px dashed #94a3b8;
+    margin-top: 8px; height: 16px;
+  }
+
+  /* ── Instructions ── */
+  .instructions {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-left: 4px solid #f59e0b;
+    border-radius: 3px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 9.5pt; color: #78350f; line-height: 1.7;
+  }
+
+  /* ── Section ── */
+  .section-head {
+    display: flex; align-items: center;
+    margin: 22px 0 14px; gap: 10px;
+  }
+  .section-line { flex: 1; height: 1px; background: #94a3b8; }
+  .section-name-block {
+    text-align: center; white-space: nowrap;
+    font-weight: bold; font-size: 10pt;
+    text-transform: uppercase; letter-spacing: 1.2px; color: #1e293b;
+  }
+  .section-meta {
+    font-size: 8.5pt; color: #64748b;
+    font-weight: normal; letter-spacing: 0;
+    display: block; margin-top: 2px; text-transform: none;
+  }
+  .section-instr {
+    font-size: 9pt; color: #64748b; font-style: italic;
+    margin: -8px 0 12px 0;
+  }
+
+  /* ── Question ── */
+  .question { margin-bottom: 18px; page-break-inside: avoid; }
+  .q-header { display: flex; align-items: flex-start; gap: 10px; }
+  .q-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #1e293b; color: #fff;
+    font-size: 8.5pt; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .q-text { font-size: 11pt; line-height: 1.65; flex: 1; }
+  .marks-badge {
+    font-size: 8pt; color: #64748b;
+    border: 1px solid #e2e8f0; border-radius: 3px;
+    padding: 1px 8px; white-space: nowrap; flex-shrink: 0;
+    margin-top: 2px; background: #f8fafc;
+  }
+
+  /* ── MCQ Options ── */
+  .options { margin-top: 8px; padding-left: 32px; }
+  .options-grid { display: flex; flex-wrap: wrap; gap: 2px 0; }
+  .option-cell { width: 50%; font-size: 10pt; padding: 3px 0; display: flex; gap: 6px; align-items: flex-start; }
+  .opt-letter { font-weight: bold; color: #475569; min-width: 16px; }
+
+  /* ── Answer lines ── */
+  .alines { padding-left: 32px; }
+  .aline { border-bottom: 1px dashed #94a3b8; height: 24px; margin-top: 6px; }
+
+  /* ── Match ── */
+  .match-grid { display: flex; gap: 0; padding-left: 32px; margin-top: 8px; }
+  .match-col { flex: 1; }
+  .match-item {
+    font-size: 10pt; color: #334155;
+    padding: 4px 0; border-bottom: 1px dashed #cbd5e1;
+    margin-right: 20px;
+  }
+
+  /* ── Footer ── */
+  .paper-footer {
+    text-align: center; margin-top: 30px;
+    padding-top: 12px; border-top: 1.5px double #1e293b;
+    font-size: 9pt; color: #64748b; font-weight: bold;
+    letter-spacing: 1px;
+  }
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
-  {% if school.logo %}
-  <img src="{{ school.logo.url }}" style="height:50px;margin-bottom:6px;"><br>
-  {% endif %}
-  <div class="school-name">{{ school.name }}</div>
-  <div class="exam-name">{{ paper.exam_name }}</div>
-  <div class="paper-title">{{ paper.title }} &nbsp;&mdash;&nbsp; Set {{ paper.set_label }}</div>
-  <div class="meta-row">
-    <span><strong>Class:</strong> {{ paper.cls.name }}</span>
-    <span><strong>Subject:</strong> {{ paper.subject.subject_name }}</span>
-    <span><strong>Total Marks:</strong> {{ paper.total_marks }}</span>
-    <span><strong>Time:</strong> {{ paper.duration_mins }} Minutes</span>
+  <div class="header-top">
+    {% if school.logo %}
+    <img src="{{ school.logo.url }}" class="school-logo">
+    {% endif %}
+    <div class="school-text">
+      <div class="school-name">{{ school.name }}</div>
+    </div>
+  </div>
+  {% if paper.exam_name %}<div class="exam-label">{{ paper.exam_name }}</div>{% endif %}
+  <div class="paper-title">{{ paper.title }}</div>
+  <div class="paper-set">Set {{ paper.set_label }}</div>
+  <div class="meta-bar">
+    <div class="meta-item">
+      <span class="meta-label">Class</span>
+      <span class="meta-val">{{ paper.cls.name }}</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Subject</span>
+      <span class="meta-val">{{ paper.subject.subject_name }}</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Total Marks</span>
+      <span class="meta-val">{{ paper.total_marks }}</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Time Allowed</span>
+      <span class="meta-val">{{ paper.duration_mins }} Min</span>
+    </div>
+  </div>
+</div>
+
+<!-- Student Info -->
+<div class="student-row">
+  <div class="student-field">
+    <div class="student-field-label">Student Name</div>
+    <span class="student-line"></span>
+  </div>
+  <div class="student-field">
+    <div class="student-field-label">Roll No.</div>
+    <span class="student-line"></span>
+  </div>
+  <div class="student-field">
+    <div class="student-field-label">Section</div>
+    <span class="student-line"></span>
+  </div>
+  <div class="student-field">
+    <div class="student-field-label">Marks Obtained</div>
+    <span class="student-line"></span>
   </div>
 </div>
 
@@ -47,59 +217,86 @@
 {% endif %}
 
 {% for sec in sections %}
-<div class="section-header">
-  {{ sec.section_name }}
-  <span class="section-meta">
-    &nbsp;&mdash;&nbsp; {{ sec.questions.count }} Questions &times; {{ sec.marks_per_question }} Mark{{ sec.marks_per_question|pluralize }}
-    {% if sec.num_to_attempt %}(Attempt any {{ sec.num_to_attempt }}){% endif %}
-  </span>
+<div class="section-head">
+  <span class="section-line"></span>
+  <div class="section-name-block">
+    {{ sec.section_name }}
+    <span class="section-meta">
+      {{ sec.questions.count }} Question{{ sec.questions.count|pluralize }}
+      &times; {{ sec.marks_per_question }} Mark{{ sec.marks_per_question|pluralize }}
+      {% if sec.num_to_attempt %} &nbsp;(Attempt any {{ sec.num_to_attempt }}){% endif %}
+    </span>
+  </div>
+  <span class="section-line"></span>
 </div>
 
 {% if sec.section_instructions %}
-<p style="font-size:9.5pt;color:#475569;font-style:italic;margin-bottom:10px;">{{ sec.section_instructions }}</p>
+<p class="section-instr">{{ sec.section_instructions }}</p>
 {% endif %}
 
 {% for pq in sec.questions.all %}
 <div class="question">
-  <div class="q-num">
-    {{ forloop.counter }}.
-    <span class="marks-badge">[{{ pq.question.marks }} Mark{{ pq.question.marks|pluralize }}]</span>
+  <div class="q-header">
+    <div class="q-num">{{ forloop.counter }}</div>
+    <div class="q-text">{{ pq.question.question_text }}</div>
+    <span class="marks-badge">[{{ pq.question.marks }} M]</span>
   </div>
-  <div class="q-text">{{ pq.question.question_text }}</div>
 
-  {% if pq.question.question_type == 'MCQ' or pq.question.question_type == 'TF' %}
+  {% if pq.question.question_type == 'MCQ' %}
   <div class="options">
-    <table>
-      <tr>
+    <div class="options-grid">
       {% for opt in pq.question.options.all %}
-        <td>{{ forloop.counter|stringformat:'s' }}. {{ opt.option_text }}</td>
-        {% if forloop.counter == 2 %}</tr><tr>{% endif %}
+      <div class="option-cell">
+        <span class="opt-letter">{% if forloop.counter == 1 %}a{% elif forloop.counter == 2 %}b{% elif forloop.counter == 3 %}c{% else %}d{% endif %})</span>
+        <span>{{ opt.option_text }}</span>
+      </div>
       {% endfor %}
-      </tr>
-    </table>
+    </div>
   </div>
+
+  {% elif pq.question.question_type == 'TF' %}
+  <div class="options">
+    <div class="options-grid">
+      <div class="option-cell"><span class="opt-letter">a)</span> True</div>
+      <div class="option-cell"><span class="opt-letter">b)</span> False</div>
+    </div>
+  </div>
+
   {% elif pq.question.question_type == 'FILL' %}
-  <div class="answer-line"></div>
+  <div class="alines"><div class="aline"></div></div>
+
   {% elif pq.question.question_type == 'SHORT' %}
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
+  <div class="alines">
+    <div class="aline"></div><div class="aline"></div><div class="aline"></div>
+  </div>
+
   {% elif pq.question.question_type == 'LONG' %}
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
-  <div class="answer-line"></div>
+  <div class="alines">
+    <div class="aline"></div><div class="aline"></div>
+    <div class="aline"></div><div class="aline"></div>
+    <div class="aline"></div><div class="aline"></div>
+  </div>
+
+  {% elif pq.question.question_type == 'MATCH' %}
+  <div class="match-grid">
+    <div class="match-col">
+      {% for opt in pq.question.options.all %}
+      <div class="match-item">{{ forloop.counter }}. {{ opt.option_text }}</div>
+      {% endfor %}
+    </div>
+    <div class="match-col">
+      {% for opt in pq.question.options.all %}
+      <div class="match-item" style="color:#94a3b8;">{% if forloop.counter == 1 %}i{% elif forloop.counter == 2 %}ii{% elif forloop.counter == 3 %}iii{% elif forloop.counter == 4 %}iv{% else %}v{% endif %}. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+      {% endfor %}
+    </div>
+  </div>
   {% endif %}
+
 </div>
 {% endfor %}
-
 {% endfor %}
 
-<div style="margin-top:30px;text-align:center;font-size:9pt;color:#94a3b8;">
-  *** End of Paper ***
-</div>
+<div class="paper-footer">*** End of Question Paper ***</div>
 
 </body>
 </html>

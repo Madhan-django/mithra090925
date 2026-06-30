@@ -1,67 +1,230 @@
 {% extends 'studentportal/index.html' %}
 {% block content %}
-<style>
-    .card{
-       height:200px !important;
 
-    }
-    .content-wrapper{
-      margin-top:40px;
-    }
-</style>
-<div class="container">
-              <div class="page-header">
-              <h3 class="page-title">
-                <span class="page-title-icon bg-gradient-primary text-white me-2">
-                  <i class="mdi mdi-home"></i>
-                </span> Dashboard
-              </h3>
-              <nav aria-label="breadcrumb">
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item active" aria-current="page">
-                    <span></span>Overview <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-<div class="row">
-<div class="col-md-4 stretch-card grid-margin">
-    <div class="card bg-gradient-danger card-img-holder text-white">
-        <div class="card-body">
-            <span>
-                  <h3 class="font-weight-normal mb-3">{{student.admn_no}}<i class="fa fa-user float-end" aria-hidden="true"></i><br>
-                    </h3>
-                     <h2 >{{student.first_name}}{{student.last_name}}</h2>
-                    <p class="mb-5">{{student.class_name}}&nbsp;{{student.secs}}<br>
-                     {{year}}</p>
-            </span>
-
-        </div>
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Dashboard</span>
     </div>
+    <div class="pc-page-title">Dashboard</div>
+    <div class="pc-page-sub">Welcome back, {{ student.first_name }} {{ student.last_name }}</div>
+  </div>
 </div>
-<div class="col-md-4 stretch-card grid-margin">
-                <div class="card bg-gradient-info card-img-holder text-white">
-                  <div class="card-body">
-                     <h4 class="font-weight-normal mb-3">Family Details <i class="fa fa-users float-end" aria-hidden="true"></i>
-                    </h4>
-                    <span><h4 >{{student.father_name}}</h4>
-                          <h4 >{{student.mother_name}}</h4>
-                    <p class="mb-5">{{student.phone}}
-                     </p>
-                     </span>
-                  </div>
-                </div>
+
+<!-- KPI ROW -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ student.admn_no }}</div>
+    <div class="pc-kpi-label">Admission No</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ student.class_name }}</div>
+    <div class="pc-kpi-label">Class</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ student.secs }}</div>
+    <div class="pc-kpi-label">Section</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">0</div>
+    <div class="pc-kpi-label">Books Issued</div>
+  </div>
 </div>
- <div class="col-md-4 stretch-card grid-margin">
-   <div class="card bg-gradient-success card-img-holder text-white">
-     <div class="card-body">
-       <h4 class="font-weight-normal mb-3">Library <i class="fa fa-university float-end" aria-hidden="true"></i></h4>
-                    <span>
-                    <p class="mb-5">0</p>
-                     </span>
-     </div>
-   </div>
- </div>
-</div>
-</div>
+
+<!-- CARDS ROW -->
+<div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; margin-bottom:1.5rem;">
+
+  <!-- ── Student Info ── -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title">
+          <i class="ri-user-line me-2" style="color:var(--accent);"></i>Student Info
+        </div>
+        <div class="pc-card-sub">Personal details</div>
+      </div>
+      <span class="pc-badge pc-badge-no-dot"
+            style="background:#ecfdf5; color:#059669; font-size:11px; padding:4px 10px;">
+        <i class="ri-checkbox-circle-line me-1"></i>Active
+      </span>
+    </div>
+    <div class="pc-card-body">
+
+      <!-- Avatar + Name -->
+      <div style="display:flex; align-items:center; gap:14px;
+                  padding-bottom:1rem; margin-bottom:1rem;
+                  border-bottom:1px solid var(--border);">
+        <div style="
+          width:52px; height:52px; border-radius:50%;
+          background:var(--accent-lt, #eff6ff);
+          display:flex; align-items:center; justify-content:center;
+          font-size:18px; font-weight:700; color:var(--accent);
+          flex-shrink:0;">
+          {{ student.first_name|slice:":1" }}{{ student.last_name|slice:":1" }}
+        </div>
+        <div>
+          <div style="font-size:15px; font-weight:700; color:var(--text);">
+            {{ student.first_name }} {{ student.last_name }}
+          </div>
+          <div style="font-size:12px; color:var(--text-md); margin-top:2px;">
+            {{ student.admn_no }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Rows -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; color:var(--text-md);">
+            <i class="ri-school-line me-1"></i>Class
+          </span>
+          <span class="pc-badge pc-badge-primary pc-badge-no-dot" style="font-size:12px;">
+            {{ student.class_name }}
+          </span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; color:var(--text-md);">
+            <i class="ri-layout-grid-line me-1"></i>Section
+          </span>
+          <span class="pc-badge pc-badge-no-dot"
+                style="background:#ecfdf5; color:#059669; font-size:12px;">
+            {{ student.secs }}
+          </span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; color:var(--text-md);">
+            <i class="ri-calendar-line me-1"></i>Academic Year
+          </span>
+          <span style="font-size:12px; font-weight:500; color:var(--text);">
+            {{ year }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Family Details ── -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title">
+          <i class="ri-team-line me-2" style="color:var(--accent);"></i>Family Details
+        </div>
+        <div class="pc-card-sub">Parent information</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <!-- Father -->
+      <div style="display:flex; align-items:center; gap:12px;
+                  padding-bottom:1rem; margin-bottom:1rem;
+                  border-bottom:1px solid var(--border);">
+        <div style="
+          width:40px; height:40px; border-radius:50%;
+          background:#eff6ff; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;">
+          <i class="ri-user-4-line" style="color:#1d4ed8; font-size:16px;"></i>
+        </div>
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px;
+                      color:var(--text-md); margin-bottom:2px;">Father</div>
+          <div style="font-size:14px; font-weight:600; color:var(--text);">
+            {{ student.father_name }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Mother -->
+      <div style="display:flex; align-items:center; gap:12px;
+                  padding-bottom:1rem; margin-bottom:1rem;
+                  border-bottom:1px solid var(--border);">
+        <div style="
+          width:40px; height:40px; border-radius:50%;
+          background:#fdf2f8; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;">
+          <i class="ri-user-heart-line" style="color:#9d174d; font-size:16px;"></i>
+        </div>
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px;
+                      color:var(--text-md); margin-bottom:2px;">Mother</div>
+          <div style="font-size:14px; font-weight:600; color:var(--text);">
+            {{ student.mother_name }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="
+          width:40px; height:40px; border-radius:50%;
+          background:#ecfdf5; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;">
+          <i class="ri-phone-line" style="color:#059669; font-size:16px;"></i>
+        </div>
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px;
+                      color:var(--text-md); margin-bottom:2px;">Phone</div>
+          <div style="font-size:14px; font-weight:600; color:var(--text);">
+            {{ student.phone }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Library ── -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title">
+          <i class="ri-book-open-line me-2" style="color:var(--accent);"></i>Library
+        </div>
+        <div class="pc-card-sub">Book issue status</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <!-- Stats Grid -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:1.25rem;">
+        <div style="
+          background:var(--color-background-secondary, #f8f9fa);
+          border:1px solid var(--border);
+          border-radius:var(--r-lg); padding:1rem; text-align:center;">
+          <div style="font-size:28px; font-weight:700; color:var(--text);">0</div>
+          <div style="font-size:11px; color:var(--text-md); text-transform:uppercase;
+                      letter-spacing:0.5px; margin-top:4px;">Issued</div>
+        </div>
+        <div style="
+          background:var(--color-background-secondary, #f8f9fa);
+          border:1px solid var(--border);
+          border-radius:var(--r-lg); padding:1rem; text-align:center;">
+          <div style="font-size:28px; font-weight:700; color:var(--text);">0</div>
+          <div style="font-size:11px; color:var(--text-md); text-transform:uppercase;
+                      letter-spacing:0.5px; margin-top:4px;">Overdue</div>
+        </div>
+      </div>
+
+      <!-- Status Banner -->
+      <div style="
+        display:flex; align-items:center; gap:10px;
+        background:#ecfdf5; border:1px solid #bbf7d0;
+        border-radius:var(--r-lg); padding:12px 14px;">
+        <i class="ri-checkbox-circle-line"
+           style="color:#059669; font-size:20px; flex-shrink:0;"></i>
+        <div>
+          <div style="font-size:13px; font-weight:600; color:#059669;">All Clear</div>
+          <div style="font-size:11px; color:#065f46; margin-top:1px;">No pending returns</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
 {% endblock %}

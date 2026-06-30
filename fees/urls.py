@@ -12,6 +12,7 @@ urlpatterns = [
     path('delfee_cat/<int:fee_cat_id>/', login_required(views.delfee_cat), name='delfee_cat'),
     path('updateindfee/<int:feeind_id>/', login_required(views.updateindfee), name='updateindfee'),
     path('delindfee/<int:feeind_id>/', login_required(views.delindfee), name='delindfee'),
+    path('receipt_summary/<int:feeind_id>/',login_required(views.receipt_summary),name='receipt_summary'),
     path('addfeereciept/<int:feeind_id>/', login_required(views.addfeereciept), name='addfeereciept'),
     path('fee_reciepts/', login_required(views.fee_reciepts), name='fee_reciepts'),
     path('reciepts/<int:rec_id>/', login_required(views.reprint_reciept), name='reprint_reciept'),
@@ -25,6 +26,14 @@ urlpatterns = [
     path('daily_collection',login_required(views.daily_collection),name='daily_collection'),
     path('fee_invoices_del',views.fee_invoices_del,name='fee_invoices_del'),
     path('updateindfee_cat/<int:feeind_id>/', login_required(views.updateindfee_cat), name='updateindfee_cat'),
+    path('con_correct/',login_required(views.con_correct),name='con_correct'),
+    path('payu/initiate/<int:invoice_id>/', login_required(views.payu_initiate), name='onlinepay'),
+    path('payu/success/',views.payu_success,name='payu_success'),
+    path('payu/failure/',views.payu_failure,name='payu_failure'),
+    path('payu/result/<int:receipt_id>/',login_required(views.payu_result_success), name='payu_result_success'),
+
+    path('onlinereciepts/<int:rec_id>/', login_required(views.onlinereprint_reciept), name='online_reciept'),
+
 ]
 
 

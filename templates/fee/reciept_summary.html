@@ -1,10 +1,433 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ── Amount chip ── */
+.td-amount {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-lt);
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ── Date chip ── */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Receipt no chip ── */
+.td-receipt-no {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--accent-lt);
+  border: 1px solid var(--accent-mid);
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: inline-block;
+}
+
+/* ── Student name chip (screen) ── */
+.stud-name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  background: var(--accent-lt);
+  border: 1px solid var(--accent-mid);
+  border-radius: 8px;
+  padding: 5px 13px 5px 7px;
+}
+.stud-name-chip .stud-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stud-name-chip .stud-avatar i {
+  font-size: 13px;
+  color: #fff;
+}
+.stud-name-chip .stud-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -.1px;
+}
+
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: recRowIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes recRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+
+/* ── Print ── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #receipt-print-area,
+  #receipt-print-area * {
+    visibility: visible !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #receipt-print-area {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Print table */
+  #receipt-print-area table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 12px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    margin-top: 0 !important;
+  }
+  #receipt-print-area thead th {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    padding: 8px 10px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  #receipt-print-area tbody td {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 7px 10px !important;
+    color: #1e293b !important;
+    text-align: left !important;
+  }
+  #receipt-print-area tbody tr:nth-child(even) td {
+    background: #f8fafc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Flatten chips */
+  .td-amount, .td-date, .td-receipt-no {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font-size: 12px !important;
+    display: inline !important;
+  }
+  .td-amount     { color: #059669 !important; font-weight: 700 !important; }
+  .td-receipt-no { color: #4f46e5 !important; }
+  .td-date       { color: #475569 !important; }
+  .td-date i     { display: none !important; }
+
+  #receipt-print-area tbody tr { animation: none !important; }
+
+  /* Print document header */
+  .print-doc-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 12px !important;
+    border-bottom: 2px solid #4f46e5 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-doc-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin: 0 0 2px !important;
+    display: block !important;
+  }
+  .print-doc-sub {
+    font-size: 12px !important;
+    color: #64748b !important;
+    margin: 0 0 6px !important;
+    display: block !important;
+  }
+
+  /* Student name in print header */
+  .print-stud-name {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    background: #eef2ff !important;
+    border: 1px solid #c7d2fe !important;
+    border-radius: 6px !important;
+    padding: 3px 10px 3px 6px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-stud-name .p-avatar {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: #4f46e5 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-stud-name .p-avatar-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    display: block !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-stud-name .p-name {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #4f46e5 !important;
+    display: inline !important;
+  }
+
+  .print-brand {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #4f46e5 !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+    text-align: right !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-date-label {
+    font-size: 11px !important;
+    color: #64748b !important;
+    text-align: right !important;
+    display: block !important;
+  }
+
+  /* Print summary */
+  .print-summary {
+    display: flex !important;
+    margin-top: 12px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    font-size: 12px !important;
+    color: #475569 !important;
+  }
+}
+
+/* Hidden on screen */
+#receipt-print-area { display: none; }
+@media print {
+  #receipt-print-area { display: block !important; }
+}
+</style>
+
+
+<div class="col-lg-12">
+
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'invoices' %}">Fee Details</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Fee Receipts</span>
+      </nav>
+      <h1 class="pc-page-title">Fee Receipts</h1>
+      <p class="pc-page-sub">Payment history for this invoice.</p>
+      <!-- Student name chip -->
+      <div class="stud-name-chip">
+        <span class="stud-avatar"><i class="ri-user-line"></i></span>
+        <span class="stud-label">{{ stud_name }}</span>
+      </div>
+    </div>
+    {% if data %}
+    <div class="pc-page-header-right" style="display:flex; align-items:center; gap:10px;">
+      <span class="pc-badge pc-badge-success pc-badge-no-dot" style="font-size:12px; padding:6px 14px;">
+        <i class="ri-receipt-line"></i>
+        {{ data|length }} Receipt{{ data|length|pluralize }}
+      </span>
+      <button class="pc-btn pc-btn-outline pc-btn-sm" onclick="window.print()">
+        <i class="ri-printer-line"></i> Print A4
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Payment History</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} record{{ data|length|pluralize }} found{% else %}No records{% endif %}
+        </p>
+      </div>
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th>Receipt Date</th>
+              <th>Receipt No</th>
+              <th>Invoice</th>
+              <th>Paid Amount</th>
+              <th style="text-align:left;">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td><span class="td-date"><i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>{{ r.reciept_date }}</span></td>
+              <td><span class="td-receipt-no">{{ r.reciept_no }}</span></td>
+              <td>{{ r.reciept_inv }}</td>
+              <td><span class="td-amount">&#8377;{{ r.paid_amt }}</span></td>
+              <td style="text-align:left; color:var(--text-md); font-size:13px;">
+                {% if r.note %}{{ r.note }}{% else %}<span style="color:var(--muted);">—</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-receipt-line"></i></span>
+        <p class="pc-empty-title">No receipts found</p>
+        <p class="pc-empty-sub">No payments have been recorded for this invoice yet.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> receipt{{ data|length|pluralize }}
+      </span>
+      <a href="{% url 'invoices' %}" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-arrow-left-line"></i> Back to Fee Details
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+
+<!-- ③ Print-only DOM -->
+{% if data %}
+<div id="receipt-print-area">
+
+  <div class="print-doc-header">
+    <div>
+      <span class="print-doc-title">Fee Receipts</span>
+      <span class="print-doc-sub">Payment history for this invoice</span>
+      <!-- Student name in print -->
+      <span class="print-stud-name">
+        <span class="p-avatar"><span class="p-avatar-dot"></span></span>
+        <span class="p-name">{{ stud_name }}</span>
+      </span>
+    </div>
+    <div>
+      <span class="print-brand">{{ skool }}</span>
+      <span class="print-date-label" id="js-print-date"></span>
+    </div>
+  </div>
+
+  <table style="margin-top:14px;">
+    <thead>
+      <tr>
+        <th style="width:36px;">#</th>
+        <th>Receipt Date</th>
+        <th>Receipt No</th>
+        <th>Invoice</th>
+        <th>Paid Amount</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in data %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><span class="td-date">{{ r.reciept_date }}</span></td>
+        <td><span class="td-receipt-no">{{ r.reciept_no }}</span></td>
+        <td>{{ r.reciept_inv }}</td>
+        <td><span class="td-amount">&#8377;{{ r.paid_amt }}</span></td>
+        <td>{% if r.note %}{{ r.note }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="print-summary">
+    Total Receipts:&nbsp;<strong style="color:#1e293b;">{{ data|length }}</strong>
+  </div>
+
+</div>
+{% endif %}
+
+<script>
+  var el = document.getElementById('js-print-date');
+  if (el) {
+    el.textContent = 'Printed: ' + new Date().toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+</script>
+
+{% endblock %}

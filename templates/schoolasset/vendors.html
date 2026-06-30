@@ -1,189 +1,210 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+
+      <span>Vendors</span>
+    </div>
+    <div class="pc-page-title">Vendors</div>
+    <div class="pc-page-sub">Manage all vendor and supplier records</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'new_vendor' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> New Vendor
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     KPI ROW
+     ═══════════════════════════════ -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data|length }}</div>
+    <div class="pc-kpi-label">Total Vendors</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     MAIN CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-store-2-line me-2" style="color:var(--accent);"></i>All Vendors
+      </div>
+      <div class="pc-card-sub">View, edit and delete vendor records</div>
+    </div>
+    {% if data %}
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+      {{ data|length }} record{{ data|length|pluralize }}
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="pc-card-body">
+    {% if data %}
+    <div class="table-responsive">
+      <div class="pc-table-wrap">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:18px;">#</th>
+              <th style="text-align:left;">Vendor Name</th>
+              <th>Contact Person</th>
+              <th>Phone / Mobile</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vendor in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td class="td-name">{{ vendor.name }}</td>
+              <td>{{ vendor.contact_person }}</td>
+              <td>
+                <span style="font-family:var(--f-mono);font-size:12.5px;">{{ vendor.phone }}</span>
+              </td>
+              <td>
+                <div class="td-actions">
+                  <a href="{% url 'update_vendor' vendor.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm"
+                     title="Edit vendor">
+                    <i class="ri-pencil-line"></i> Edit
+                  </a>
+                  <button type="button"
+                     class="pc-btn pc-btn-danger pc-btn-sm"
+                     title="Delete vendor"
+                     onclick="openDeleteModal('{{ vendor.id }}', '{{ vendor.name }}')">
+                    <i class="ri-delete-bin-6-line"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="pc-empty">
+      <i class="ri-store-2-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No vendors found</div>
+      <div class="pc-empty-sub">Get started by adding your first vendor</div>
+      <a href="{% url 'new_vendor' %}" class="pc-btn pc-btn-primary" style="margin-top:16px;">
+        <i class="ri-add-line"></i> New Vendor
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+     ═══════════════════════════════════════ -->
+<div id="deleteModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
+
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--rose-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #fecdd3;
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:42px;height:42px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(225,29,72,.15);
+        flex-shrink:0;">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Delete Vendor</div>
+        <div style="font-size:12px;color:var(--rose);font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;line-height:1.7;">
+        Are you sure you want to delete
+        <strong id="deleteVendorName" style="color:var(--text);"></strong>?
+        All data associated with this vendor will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <a id="deleteConfirmBtn" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete Vendor
+      </a>
+    </div>
+
+  </div>
+</div>
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
 }
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<script>
+const deleteModal = document.getElementById('deleteModal');
 
-        <!-- Compact header with badge -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Vendors</span></h5>
-        </div>
+function openDeleteModal(id, vendorName) {
+  document.getElementById('deleteVendorName').textContent = vendorName;
+  document.getElementById('deleteConfirmBtn').href = "{% url 'delete_vendor' 0 %}".replace('0', id);
+  deleteModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
 
-        <!-- Button section with equal top & bottom spacing -->
-        <div class="container text-end">
-            <a href="{% url 'new_vendor' %}">
-                <button class="btn btn-primary">+ New Vendor</button>
-            </a>
-        </div>
+function closeDeleteModal() {
+  deleteModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
 
-        {% if data %}
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead class="table-dark">
-                <tr>
-                    <th>S.No</th>
-                    <th>Vendor Name</th>
-                    <th>Contact Person</th>
-                    <th>Phone/Mobile</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+deleteModal.addEventListener('click', function(e) {
+  if (e.target === deleteModal) closeDeleteModal();
+});
 
-            <tbody>
-                {% for vendor in data %}
-                <tr align="center">
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ vendor.name }}</td>
-                    <td>{{ vendor.contact_person }}</td>
-                    <td>{{ vendor.phone }}</td>
-                    <td>
-                        <a href="{% url 'update_vendor' vendor.id %}" class="btn btn-primary btn-sm">Edit</a>
-                        <a href="{% url 'delete_vendor' vendor.id %}" class="btn btn-danger btn-sm">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="alert alert-danger m-3 text-center" role="alert">
-            No records available to show.
-        </div>
-        {% endif %}
-    </div>
-</div>
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
+
 {% endblock %}

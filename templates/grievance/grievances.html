@@ -1,266 +1,416 @@
 {% extends 'panel/index.html' %}
 {% load static %}
 {% block content %}
+
 <style>
+/* ── Search grid ── */
+.nb-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px 20px;
+  align-items: flex-end;
+}
+.nb-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.nb-search-field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+}
+.nb-search-field select,
+.nb-search-field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.nb-search-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.nb-search-field input:focus,
+.nb-search-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.nb-search-field input::placeholder { color: var(--muted); }
+.nb-search-field.d-none { display: none !important; }
 
-/* ===== GLOBAL FONT ===== */
-   /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Date chip ── */
+.ev-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: grRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+@keyframes grRowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:185ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:215ms; }
 
-
-/* ===== NEW EXAM BUTTON AREA ===== */
-.text-end {
-    padding-right: 20px;
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
 }
-
-/* ===== TABLE ===== */
-.table {
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 2px;
+#deleteModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15,23,42,.5);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
 }
-
-/* ===== TABLE HEADER (Compact & Clean) ===== */
-.table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+#deleteModal.active {
+  display: flex;
 }
-
-/* ===== TABLE DATA ===== */
-td {
-    font-size: 14px !important;    /* reduced to match timetable style */
-    padding: 10px 8px !important;  /* compact row height */
-    vertical-align: middle;
-    font-family: 'Roboto', sans-serif;
-}
-
-/* Align dropdown icon properly */
-.dropdown-toggle {
-    border: none;
-}
-
-
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h5><span class="badge">Grievance</span></h5>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{%  url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Grievance</span>
+      </nav>
+      <h1 class="pc-page-title">Grievance</h1>
+      <p class="pc-page-sub">Track and manage student complaints and resolutions.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'new_grievance' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> New Grievance
+      </a>
+    </div>
+  </div>
 
-        <!-- NEW EXAM BUTTON -->
-        <div class="text-end">
-            <a href="{% url 'new_grievance' %}" class="btn btn-primary btn-sm">New Grievance</a>
-        </div>
+  <!-- ② Search Card -->
+  <div class="pc-card" style="margin-bottom:18px;">
+    <div class="pc-card-header">
+      <p class="pc-card-title">Search Grievances</p>
+    </div>
+    <div class="pc-card-body">
+      <form method="GET" action="{% url 'grievance_search' %}"
+            data-section-url="{% url 'ajax_load_section' %}"
+            id="grievanceSearchForm">
+        <div class="nb-search-grid">
 
+          <div class="nb-search-field">
+            <label>Search By</label>
+            <select name="searchby" id="searchby" required>
+              <option value="">— Select —</option>
+              <option value="studname"   {% if searchby == 'studname'   %}selected{% endif %}>Student Name</option>
+              <option value="cdate"      {% if searchby == 'cdate'      %}selected{% endif %}>Complaint Date</option>
+              <option value="mobno"      {% if searchby == 'mobno'      %}selected{% endif %}>Mobile No</option>
+              <option value="studclass"  {% if searchby == 'studclass'  %}selected{% endif %}>Class</option>
+              <option value="studsec"    {% if searchby == 'studsec'    %}selected{% endif %}>Class + Section</option>
+              <option value="comptype"   {% if searchby == 'comptype'   %}selected{% endif %}>Complaint Type</option>
+              <option value="compstatus" {% if searchby == 'compstatus' %}selected{% endif %}>Status</option>
+            </select>
+          </div>
 
-        <div class="card-body">
-            <!-- === Search Form === -->
-             <!-- === Search Form === -->
-            <form method="GET" action="{% url 'grievance_search' %}" data-section-url="{% url 'ajax_load_section' %}" id="studentSearchForm" class="row g-3 mb-3">
-                <div class="col-md-3">
-                    <label for="searchby" class="form-label">Search By</label>
-                    <select name="searchby" id="searchby" class="form-select" required>
-                        <option value="">--Select--</option>
-                        <option value="studname" {% if searchby == 'studname' %}selected{% endif %}>Student Name</option>
-                        <option value="cdate" {% if searchby == 'cdate' %}selected{% endif %}>Complaint Date</option>
-                        <option value="mobno" {% if searchby == 'mobno' %}selected{% endif %}>Mobile No</option>
-                        <option value="studclass" {% if searchby == 'studclass' %}selected{% endif %}>Class</option>
-                        <option value="studsec" {% if searchby == 'studsec' %}selected{% endif %}>Class + Section</option>
-                        <option value="comptype" {% if searchby == 'comptype' %}selected{% endif %}>Complaint Type</option>
-                        <option value="compstatus" {% if searchby == 'compstatus' %}selected{% endif %}>Status</option>
-                    </select>
-                </div>
+          <div class="nb-search-field" id="text-search-field">
+            <label>Search Value</label>
+            <input type="text" name="searched" id="searched"
+                   value="{{ searched }}" placeholder="Enter value…">
+          </div>
 
-                <div class="col-md-3 search-field" id="text-search-field">
-                    <label for="searched" class="form-label">Search Value</label>
-                    <input type="text" name="searched" id="searched" value="{{ searched }}" class="form-control" placeholder="Enter value...">
-                </div>
+          <div class="nb-search-field d-none" id="class-field">
+            <label>Class</label>
+            <select name="class_name" id="class_name">
+              <option value="">— Select Class —</option>
+              {% for c in cls %}
+              <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-                <div class="col-md-3 class-field d-none">
-                    <label for="class_name" class="form-label">Class</label>
-                    <select name="class_name" id="class_name" class="form-select">
-                        <option value="">--Select Class--</option>
-                        {% for c in cls %}
-                        <option value="{{ c.id }}">{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+          <div class="nb-search-field d-none" id="section-field">
+            <label>Section</label>
+            <select name="section_name" id="section_name">
+              <option value="">— Select Section —</option>
+            </select>
+          </div>
 
-                <div class="col-md-3 section-field d-none">
-                    <label for="section_name" class="form-label">Section</label>
-                    <select name="section_name" id="section_name" class="form-select">
-                        <option value="">--Select Section--</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>&nbsp;&nbsp;
-                    <a href="{% url 'grievance_list' %}" class="btn btn-danger w-100">Clear</a>
-
-                </div>
-            </form>
-            {% if grievances %}
-            <table class="table">
-                <thead class="table-dark" align="center">
-                    <tr>
-                        <th>S.No</th>
-                        <th>Complaint Date</th>
-                        <th>Complaint Type</th>
-                        <th>Student Name</th>
-                        <th>Complainant</th>
-                        <th>complaint_status</th>
-                        <th>Completion Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% for data in grievances %}
-                    <tr align="center">
-                        <td>{{forloop.counter}}</td>
-                        <td>{{data.complaint_date}}</td>
-                        <td>{{data.area_of_complaint}}</td>
-                        <td>{{data.stud_name}}</td>
-                        <td>{{data.concern_person_name}}</td>
-                        <td>{{data.complaint_status}}</td>
-                        <td>
-                               {% if data.complaint_status == 'Open' %}
-                                  <span class="badge" style="background:#007bff;">Open</span>
-                               {% elif data.complaint_status == 'Pending' %}
-                                  <span class="badge" style="background:#d00000;">Pending</span>
-                               {% elif data.complaint_status == 'In-progress' %}
-                                  <span class="badge" style="background:#d4a100; color:black;">In-progress</span>
-                               {% elif data.complaint_status == 'Resolved' %}
-                                  <span class="badge" style="background:#0f9d58;">Resolved</span>
-                               {% else %}
-                                  <span class="badge bg-secondary">{{ data.complaint_status }}</span>
-                            {% endif %}
-                         </td>
-
-                        <td>{{data.action_date}}</td>
-
-                    <td>
-    <div class="d-flex align-items-center gap-2">
-        <div class="dropdown">
-            <!-- Icon as Dropdown Toggle -->
-            <button class="btn p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ri-more-2-line" style="font-size: 20px;"></i>
+          <div class="nb-search-field" style="flex-direction:row; gap:8px; align-items:flex-end; max-width:220px;">
+            <button type="submit" class="pc-btn pc-btn-primary" style="flex:1;">
+              <i class="ri-search-line"></i> Search
             </button>
+            <a href="{% url 'grievance_list' %}" class="pc-btn pc-btn-outline" style="flex:1;">
+              <i class="ri-close-line"></i> Clear
+            </a>
+          </div>
 
-            <!-- Dropdown Menu -->
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item" href="{% url 'grievance_update' data.id %}">
-                        <i class="ri-pencil-line me-1"></i> Update
-                    </a>
-                </li>
-                {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                <li>
-                    <a class="dropdown-item" href="{% url 'grievance_delete' data.id %}">
-                        <i class="ri-delete-bin-7-line me-1"></i> Delete
-                    </a>
-                </li>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ③ Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Grievances</p>
+        <p class="pc-card-sub">
+          {% if grievances %}{{ grievances|length }} record{{ grievances|length|pluralize }} found{% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if grievances %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-file-list-3-line" style="font-size:12px;"></i>
+        {{ grievances|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if grievances %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th>Complaint Date</th>
+              <th>Complaint Type</th>
+              <th style="text-align:left;">Student Name</th>
+              <th>Complainant</th>
+              <th>Status</th>
+              <th>Completion Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in grievances %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td>
+                <span class="ev-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ data.complaint_date }}
+                </span>
+              </td>
+
+              <td>{{ data.area_of_complaint }}</td>
+
+              <td class="td-name">{{ data.stud_name }}</td>
+
+              <td>{{ data.concern_person_name }}</td>
+
+              <td>
+                {% if data.complaint_status == 'Open' %}
+                  <span class="pc-badge pc-badge-info">{{ data.complaint_status }}</span>
+                {% elif data.complaint_status == 'Pending' %}
+                  <span class="pc-badge pc-badge-danger">{{ data.complaint_status }}</span>
+                {% elif data.complaint_status == 'In-progress' %}
+                  <span class="pc-badge pc-badge-warning">{{ data.complaint_status }}</span>
+                {% elif data.complaint_status == 'Resolved' %}
+                  <span class="pc-badge pc-badge-success">{{ data.complaint_status }}</span>
+                {% else %}
+                  <span class="pc-badge pc-badge-neutral">{{ data.complaint_status }}</span>
                 {% endif %}
-            </ul>
-        </div>
+              </td>
+
+              <td>
+                {% if data.action_date %}
+                <span class="ev-date">
+                  <i class="ri-checkbox-circle-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ data.action_date }}
+                </span>
+                {% else %}
+                <span style="color:var(--muted); font-size:12px;">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <!-- Edit -->
+                  <a href="{% url 'grievance_update' data.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ri-pencil-line"></i> Update
+                  </a>
+                  <!-- Delete (Admin only) -->
+                  {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <button type="button"
+                    class="pc-btn pc-btn-danger pc-btn-sm"
+                    onclick="openDeleteModal('{% url 'grievance_delete' data.id %}', '{{ data.stud_name|escapejs }}')">
+                    <i class="ri-delete-bin-7-line"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-file-damage-line"></i></span>
+        <p class="pc-empty-title">No grievances found</p>
+        <p class="pc-empty-sub">Click <strong>New Grievance</strong> to log the first complaint.</p>
+      </div>
+      {% endif %}
     </div>
-</td>
 
-
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-
-            {% else %}
-            <div class="alert alert-danger" role="alert">
-                No Records are available to Show
-            </div>
-            {% endif %}
-        </div>
+    {% if grievances %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ grievances|length }}</strong> record{{ grievances|length|pluralize }}
+      </span>
 
     </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
+
+<!-- ══════════════════════════════
+     DELETE CONFIRMATION MODAL
+══════════════════════════════ -->
+<div id="deleteModal">
+  <div style="
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-lg);
+    width: 100%; max-width: 420px;
+    margin: 20px;
+    overflow: hidden;
+    animation: modalIn .25s var(--ease-spring);">
+
+    <!-- Header -->
+    <div style="
+      background: var(--rose-lt);
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid #fecdd3;
+      display: flex; align-items: center; gap: 12px;">
+      <span style="
+        width: 42px; height: 42px; border-radius: 50%;
+        background: #fff;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 8px rgba(225,29,72,.15);
+        flex-shrink: 0;">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Grievance</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div style="padding: 22px;">
+      <p style="font-size:13.5px; color:var(--text-md); margin:0; line-height:1.7;">
+        Are you sure you want to delete the grievance for
+        <strong id="deleteGrievanceName" style="color:var(--text);"></strong>?
+        This complaint record will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="
+      padding: 14px 22px;
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <form id="deleteForm" method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Yes, Delete
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
 <script src="{% static 'js/jquery.min.js' %}"></script>
 <script>
-$(document).ready(function() {
-    // === Toggle search input type ===
-    $('#searchby').change(function() {
-        var selected = $(this).val();
-        if (selected === 'studclass' || selected === 'studsec') {
-            $('#text-search-field').addClass('d-none');
-            $('.class-field').removeClass('d-none');
-            if (selected === 'studsec') {
-                $('.section-field').removeClass('d-none');
-            } else {
-                $('.section-field').addClass('d-none');
-            }
-        } else {
-            $('#text-search-field').removeClass('d-none');
-            $('.class-field, .section-field').addClass('d-none');
-        }
-    });
+/* ── Search toggle ── */
+$(document).ready(function () {
+  $('#searchby').change(function () {
+    var val = $(this).val();
+    var isClass   = (val === 'studclass' || val === 'studsec');
+    var isSection = (val === 'studsec');
+    $('#text-search-field').toggleClass('d-none', isClass);
+    $('#class-field').toggleClass('d-none', !isClass);
+    $('#section-field').toggleClass('d-none', !isSection);
+  });
 
-    // === AJAX Load Sections ===
-    $('#class_name').change(function() {
-        var url = $('#studentSearchForm').attr('data-section-url');
-        var classId = $(this).val();
-        $.ajax({
-            url: url,
-            data: { 'Class_Id': classId },
-            success: function(data) {
-                $('#section_name').html(data);
-            }
-        });
+  $('#class_name').change(function () {
+    $.ajax({
+      url: $('#grievanceSearchForm').attr('data-section-url'),
+      data: { 'Class_Id': $(this).val() },
+      success: function (data) { $('#section_name').html(data); }
     });
+  });
+});
+
+/* ── Delete modal ── */
+function openDeleteModal(deleteUrl, studentName) {
+  document.getElementById('deleteGrievanceName').textContent = studentName;
+  document.getElementById('deleteForm').action = deleteUrl;
+  document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+
+/* Close on backdrop click */
+document.getElementById('deleteModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+/* Close on Escape key */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeDeleteModal();
 });
 </script>
 

@@ -62,3 +62,30 @@ class SchoolNotification(models.Model):
     Notification_school = models.ForeignKey(school, on_delete=models.CASCADE)
     success_count = models.IntegerField(default=0, null=True, blank=True)
     total_count = models.IntegerField(default=0, null=True, blank=True)
+
+class StaffNotification(models.Model):
+    title = models.CharField(max_length=255)
+    message = models.CharField(max_length=255)
+    create_date = models.DateTimeField()
+    post_to = models.ManyToManyField(staff, through='StaffNotificationRecipient')
+    created_by_id = models.ForeignKey(staff, on_delete=models.CASCADE, related_name='created_staff_notifications')
+    status = models.CharField(max_length=12)
+    Notification_school = models.ForeignKey(school, on_delete=models.CASCADE, related_name='staff_notification_school')
+    success_count = models.IntegerField(default=0, null=True, blank=True)
+    total_count = models.IntegerField(default=0, null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+
+class StaffNotificationRecipient(models.Model):
+    notification = models.ForeignKey(StaffNotification, on_delete=models.CASCADE, related_name='recipients')
+    staff = models.ForeignKey(staff, on_delete=models.CASCADE, related_name='notification_receipts')
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('notification', 'staff')
+
+    def __str__(self):
+        return f"{self.notification.title} -> {self.staff}"

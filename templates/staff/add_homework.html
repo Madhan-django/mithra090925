@@ -2,254 +2,342 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
-}
+  .hw-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 24px;
+  }
+  .hw-field-full { grid-column: 1 / -1; }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
-}
+  .hw-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .hw-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .hw-field label .req { color: var(--rose); margin-left: 2px; }
 
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
+  .hw-field input,
+  .hw-field select,
+  .hw-field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .hw-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  /* Select2 theme overrides to match ERP design system */
+  .select2-container .select2-selection--multiple {
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark) !important;
+    border-radius: var(--r) !important;
+    min-height: 42px;
+    padding: 4px 8px;
+    font-family: var(--f-sans);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .select2-container--default.select2-container--focus .select2-selection--multiple,
+  .select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12) !important;
+    outline: none;
+  }
+  .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: var(--accent-lt);
+    border: 1px solid var(--accent-mid);
+    color: var(--accent);
     border-radius: 6px;
-}
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+  }
+  .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: var(--accent);
+    margin-right: 4px;
+  }
+  .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: var(--rose);
+    background: transparent;
+  }
+  .select2-dropdown {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--r-lg) !important;
+    box-shadow: 0 6px 20px rgba(15,23,42,.10) !important;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+  }
+  .select2-container--default .select2-results__option--highlighted {
+    background: var(--accent-lt) !important;
+    color: var(--accent) !important;
+  }
+  .select2-container--default .select2-results__option--selected {
+    background: var(--accent) !important;
+    color: #fff !important;
+  }
+  .select2-search--dropdown .select2-search__field {
+    border: 1.5px solid var(--border-dark) !important;
+    border-radius: var(--r-sm) !important;
+    padding: 6px 10px;
+    font-family: var(--f-sans);
+    font-size: 13px;
+    outline: none;
+  }
+  .select2-container { width: 100% !important; }
+  .hw-field textarea { resize: vertical; min-height: 90px; }
+  .hw-field input:focus,
+  .hw-field select:focus,
+  .hw-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
+  /* Char counter */
+  .char-counter {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 3px;
+    transition: color 150ms;
+  }
+  .char-counter.warn { color: var(--amber); }
+  .char-counter.limit { color: var(--rose); }
 
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
+  /* Section label */
+  .form-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 14px;
+  }
+  .form-section-label:first-child { margin-top: 0; }
+  .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
+  /* Hidden system fields */
+  .hw-hidden { display: none; }
 
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
-    display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
+  @media (max-width: 640px) {
+    .hw-form-grid { grid-template-columns: 1fr; }
+    .hw-field-full { grid-column: 1; }
+  }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE BAR -->
-        <div class="card-title text-center">
-            <h5 class="mb-0">
-                <span class="badge bg-light text-dark">New Homework</span>
-            </h5>
-        </div>
-
-        <div class="card-body">
-
-            <form id="addhomework" method="POST"
-                  data-section-url="{% url 'ajax_load_section' %}"
-                  data-subject-url="{% url 'ajax_load_subject' %}"
-                  enctype="multipart/form-data">
-
-                {% csrf_token %}
-
-                <!-- ROW 1 -->
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.title }}
-                            <label for="id_title">Homework Title</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select name="hclass" class="form-control" required id="id_hclass">
-                                <option value="">---------</option>
-                                {% for cls in hclass %}
-                                <option value="{{ cls.id }}">{{ cls }}</option>
-                                {% endfor %}
-                            </select>
-                            <label for="id_hclass">Class</label>
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-
-                <!-- ROW 2 -->
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select name="secs" class="form-control" required id="id_secs">
-                                <option value="">---------</option>
-                            </select>
-                            <label for="id_secs">Section</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select name="subj" class="form-control" required id="id_subj">
-                                <option value="">---------</option>
-                            </select>
-                            <label for="id_subj">Subject</label>
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-
-                <!-- ROW 3 -->
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.homework_date }}
-                            <label for="id_homework_date">Homework Date</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.description }}
-                            <label for="id_description">
-                                Description (Characters)
-                                <small id="charCount">0 / 135</small>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-
-                <!-- ROW 4 -->
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.submission_date }}
-                            <label for="id_submission_date">Submission Date</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select name="created_by" class="form-control" required id="id_created_by">
-                                <option value="{{ usr.id }}" selected>{{ usr }}</option>
-                            </select>
-                            <label for="id_created_by">User</label>
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-
-                <!-- ROW 5 -->
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.attachment }}
-                            <label for="id_attachment">Attachment</label>
-                        </div>
-                    </div>
-                </div>
-
-                <br><br>
-
-                {{ form.acad_yr }}
-                {{ form.school_homework }}
-
-                <!-- SUBMIT AREA -->
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-danger">Clear</button>
-                </div>
-
-            </form>
-
-        </div>
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'homework' %}">Homework</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>New Homework</span>
+      </nav>
+      <h1 class="pc-page-title">New Homework</h1>
+      <p class="pc-page-sub">Assign homework to a class and section with a submission deadline.</p>
     </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Homework Details</p>
+        <p class="pc-card-sub">Fill in the assignment information below</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-notebook" style="font-size:12px;"></i> Assignment
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+
+      <form id="addhomework" method="POST"
+            data-section-url="{% url 'ajax_load_section' %}"
+            data-subject-url="{% url 'ajax_load_subject' %}"
+            enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- ── Assignment Info ── -->
+        <p class="form-section-label"><i class="ti ti-text-caption"></i> Assignment Info</p>
+        <div class="hw-form-grid">
+
+          <div class="hw-field hw-field-full">
+            <label>Homework Title <span class="req">*</span></label>
+            {{ form.title }}
+          </div>
+
+          <div class="hw-field">
+            <label>Class <span class="req">*</span></label>
+            <select name="hclass" required id="id_hclass">
+              <option value="">— Select Class —</option>
+              {% for cls in hclass %}
+              <option value="{{ cls.id }}">{{ cls }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="hw-field">
+            <label>Section <span class="req">*</span></label>
+            <select name="secs" id="id_secs" class="select2" multiple required>
+              <option value="">Select class first…</option>
+            </select>
+          </div>
+
+          <div class="hw-field">
+            <label>Subject <span class="req">*</span></label>
+            <select name="subj" required id="id_subj">
+              <option value="">— Select Subject —</option>
+            </select>
+          </div>
+
+          <div class="hw-field">
+            <label>Created By</label>
+            <select name="created_by" required id="id_created_by">
+              <option value="{{ usr.id }}" selected>{{ usr }}</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- ── Schedule ── -->
+        <p class="form-section-label"><i class="ti ti-calendar"></i> Schedule</p>
+        <div class="hw-form-grid">
+
+          <div class="hw-field">
+            <label>Homework Date <span class="req">*</span></label>
+            {{ form.homework_date }}
+          </div>
+
+          <div class="hw-field">
+            <label>Submission Date <span class="req">*</span></label>
+            {{ form.submission_date }}
+          </div>
+
+        </div>
+
+        <!-- ── Description & Attachment ── -->
+        <p class="form-section-label"><i class="ti ti-file-description"></i> Description &amp; Attachment</p>
+        <div class="hw-form-grid">
+
+          <div class="hw-field">
+            <label>Description <span style="color:var(--muted); font-weight:500; text-transform:none; letter-spacing:0;">(max 135 chars)</span></label>
+            {{ form.description }}
+            <div class="char-counter" id="charCount">0 / 135</div>
+          </div>
+
+          <div class="hw-field">
+            <label>Attachment</label>
+            {{ form.attachment }}
+            <span style="font-size:11px; color:var(--muted); margin-top:3px;">PDF, DOC, image files accepted</span>
+          </div>
+
+        </div>
+
+        <!-- Hidden system fields -->
+        <div class="hw-hidden">
+          {{ form.acad_yr }}
+          {{ form.school_homework }}
+        </div>
+
+      </form>
+
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ti ti-shield-check" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="reset" form="addhomework" class="pc-btn pc-btn-outline">
+          <i class="ti ti-eraser" style="font-size:14px;"></i> Clear
+        </button>
+        <button type="submit" name="action" value="schedule" form="addhomework" class="pc-btn pc-btn-secondary">
+          <i class="ti ti-clock" style="font-size:14px;"></i> Save &amp; Schedule
+        </button>
+        <button type="submit" name="action" value="send_now" form="addhomework" class="pc-btn pc-btn-primary">
+          <i class="ti ti-send" style="font-size:14px;"></i> Send Now
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
-
-<!-- AJAX + Character Counter -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-$(document).ready(function(){
+$(document).ready(function () {
 
-    // Load Sections & Subjects
-    $("#id_hclass").change(function(){
-        var classId = $(this).val();
+  // Init Select2 on section field
+  $("#id_secs").select2({
+    placeholder: "Select class first…",
+    allowClear: true,
+    width: "100%"
+  });
 
-        // Load Sections
-        $.ajax({
-            url: $("#addhomework").attr("data-section-url"),
-            data: { 'Class_Id': classId },
-            success: function(data){ $("#id_secs").html(data); }
-        });
-
-        // Load Subjects
-        $.ajax({
-            url: $("#addhomework").attr("data-subject-url"),
-            data: { 'Class_Id': classId },
-            success: function(data){ $("#id_subj").html(data); }
-        });
+  // Load sections & subjects on class change
+  $("#id_hclass").change(function () {
+    var classId = $(this).val();
+    $.ajax({
+      url: $("#addhomework").attr("data-section-url"),
+      data: { 'Class_Id': classId },
+      success: function (data) {
+        $("#id_secs").html(data).trigger("change");
+      }
     });
-
-    // Character Counter
-    let maxLen = 135;
-    $("#id_description").on("input", function(){
-        let text = $(this).val();
-        if(text.length > maxLen){
-            $(this).val(text.substring(0, maxLen));
-            text = $(this).val();
-        }
-        $("#charCount").text(text.length + " / " + maxLen)
-                       .css("color", text.length >= maxLen ? "red" : "");
+    $.ajax({
+      url: $("#addhomework").attr("data-subject-url"),
+      data: { 'Class_Id': classId },
+      success: function (data) { $("#id_subj").html(data); }
     });
+  });
+
+  // Character counter
+  var maxLen = 135;
+  $("#id_description").on("input", function () {
+    var text = $(this).val();
+    if (text.length > maxLen) {
+      $(this).val(text.substring(0, maxLen));
+      text = $(this).val();
+    }
+    var pct = text.length / maxLen;
+    var $counter = $("#charCount");
+    $counter.text(text.length + " / " + maxLen);
+    $counter.removeClass("warn limit");
+    if (pct >= 1)        $counter.addClass("limit");
+    else if (pct >= 0.8) $counter.addClass("warn");
+  });
 
 });
 </script>

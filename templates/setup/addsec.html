@@ -1,126 +1,131 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
+<!-- Page Header -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+
+    <div class="pc-breadcrumb">
+      <a href="#">Dashboard</a>
+      <span class="pc-breadcrumb-sep">›</span>
+      <a href="{% url 'listsec' %}">Section Management</a>
+      <span class="pc-breadcrumb-sep">›</span>
+      <span>New Section</span>
+    </div>
+
+    <div class="pc-page-title">Add New Section</div>
+    <div class="pc-page-sub">Create a new section under a class</div>
+
+  </div>
+
+  <div class="pc-page-header-right">
+    <a href="{% url 'listsec' %}" class="pc-btn pc-btn-outline">
+      <i class="mdi mdi-arrow-left"></i> Back
+    </a>
+  </div>
+</div>
+
+
+<!-- Form Card -->
+<div class="pc-card" style="max-width:720px;">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="mdi mdi-google-classroom" style="color:var(--accent);margin-right:6px;"></i>
+        Section Details
+      </div>
+      <div class="pc-card-sub">
+        Fill the information to create a section
+      </div>
+    </div>
+  </div>
+
+
+  <div class="pc-card-body">
+
+    <form method="post" action="{% url 'addsec' %}">
+      {% csrf_token %}
+
+      <div class="row">
+
+        <!-- Section Name -->
+        <div class="col-md-6">
+          <div class="pc-form-group">
+            <label class="pc-label">
+              Section Name <span class="req">*</span>
+            </label>
+
+            <div class="pc-input-group">
+              <i class="mdi mdi-alphabetical pc-input-icon"></i>
+              {{ form.section_name }}
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- Class -->
+        <div class="col-md-6">
+          <div class="pc-form-group">
+            <label class="pc-label">
+              Class <span class="req">*</span>
+            </label>
+
+            <select name="class_sec_name"
+                    id="id_class_sec_name"
+                    class="pc-select"
+                    required>
+
+              <option value="">Select Class</option>
+
+              {% for opt in options %}
+                <option value="{{ opt.id }}">
+                  {{ opt.name }}
+                </option>
+              {% endfor %}
+
+            </select>
+
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- Hidden Fields -->
+      {{ form.school_name }}
+      {{ form.acad_year }}
+
+
+      <div class="pc-divider"></div>
+
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="mdi mdi-refresh"></i> Clear
+        </button>
+
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="mdi mdi-check-circle-outline"></i> Save Section
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- Small Fix for Django Widget -->
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h4, label, input, select, button {
-    font-family: 'Roboto', sans-serif;
-}
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM ===== */
-.form-label {
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: 12px;
-    color: #333;
-}
-
-.form-control,
-select {
-    border-radius: 8px;
-    height: 40px;
-    font-size: 14px;
-}
-
-/* ===== BUTTON ===== */
-.text-end {
-    text-align: right;
-    padding-top: 15px;
-}
-
-.btn-info {
-    background: linear-gradient(135deg, #17a2b8, #138496);
-    border: none;
-    font-size: 14px;
-    padding: 8px 26px;
-}
-
-.btn-info:hover {
-    opacity: 0.95;
+#id_section_name{
+  width:100%;
+  padding-left:38px;
 }
 </style>
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== TITLE ===== -->
-         <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                   New Section
-                </span>
-            </h5>
-        </div>
-
-        <!-- ===== FORM ===== -->
-        <div class="card-body p-4">
-            <form method="post" action="{% url 'addsec' %}">
-                {% csrf_token %}
-
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-                        <label class="form-label">Section Name</label>
-                        {{ form.section_name }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Class Name</label>
-                        <select name="class_sec_name" class="form-control" required id="id_class_sec_name">
-                            <option value="">---------</option>
-                            {% for opt in options %}
-                                <option value="{{ opt.id }}">{{ opt.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Hidden Fields -->
-                    {{ form.school_name }}
-                    {{ form.acad_year }}
-
-                </div>
-
-                <!-- ===== BUTTON ===== -->
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-danger">Clear</button>
-                </div>
-
-            </form>
-        </div>
-
-    </div>
-</div>
 
 {% endblock %}

@@ -10,6 +10,7 @@ class BioDevices(models.Model):
     BioName = models.CharField(max_length=60)
     BioLocation = models.CharField(max_length=50)
     BioSerial = models.CharField(max_length=50)
+    BioDeviceId = models.IntegerField()
     BioSchool = models.ForeignKey(school,on_delete=models.CASCADE)
 
     def __str__(self):

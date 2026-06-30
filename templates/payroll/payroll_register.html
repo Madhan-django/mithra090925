@@ -1,109 +1,284 @@
 {% extends 'panel/index.html' %}
 {% load static %}
-
 {% block content %}
 
-<div class="container mt-4">
+<style>
+/* ── Search fields ── */
+.nb-search-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 14px 20px;
+  align-items: flex-end;
+}
+.nb-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.nb-search-field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+}
+.nb-search-field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.nb-search-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.nb-search-field input::placeholder { color: var(--muted); }
 
-    <!-- Filter Section -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Payroll Register</h5>
+/* ── Payroll table ── */
+.pay-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+}
+.pay-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-sans);
+  font-size: 12.5px;
+  min-width: 1100px;
+}
+.pay-table thead {
+  background: #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.pay-table thead th {
+  padding: 10px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: #94a3b8;
+  text-align: center;
+  border: none;
+  white-space: nowrap;
+}
+.pay-table thead th:first-child  { text-align:left; padding-left:18px; width:44px; }
+.pay-table thead th:nth-child(2) { text-align:left; }
+
+.pay-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+}
+.pay-table tbody tr:nth-child(even) { background: var(--surface2); }
+.pay-table tbody tr:last-child { border-bottom: none; }
+.pay-table tbody tr:hover { background: #f0f4ff; }
+
+.pay-table tbody td {
+  padding: 9px 10px;
+  text-align: center;
+  color: var(--text-md);
+  font-size: 13px;
+  border: none;
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+}
+.pay-table tbody td:last-child { border-right: none; }
+.pay-table tbody td:first-child  { text-align:left; padding-left:18px; }
+.pay-table tbody td:nth-child(2) { text-align:left; }
+
+/* ── Money cells ── */
+.td-money { font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
+.td-gross  { color: var(--accent); }
+.td-net    { color: var(--green); background:var(--green-lt); border-radius:6px; padding:3px 9px; display:inline-block; }
+.td-ded    { color: var(--rose); }
+.td-lop    { color: var(--amber); font-weight: 800; }
+
+/* ── Footer totals ── */
+.pay-totals { display:flex; gap:24px; flex-wrap:wrap; align-items:center; }
+.pay-total-item { display:flex; flex-direction:column; gap:2px; }
+.pay-total-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); }
+.pay-total-val { font-family:var(--f-mono); font-size:15px; font-weight:800; color:var(--text); }
+.pay-total-val.green { color:var(--green); }
+.pay-total-val.red   { color:var(--rose); }
+
+/* ── Row stagger ── */
+.pay-table tbody tr { animation: payRowIn .3s cubic-bezier(.22,1,.36,1) both; }
+@keyframes payRowIn {
+  from { opacity:0; transform:translateY(5px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.pay-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pay-table tbody tr:nth-child(2) { animation-delay: 25ms; }
+.pay-table tbody tr:nth-child(3) { animation-delay: 50ms; }
+.pay-table tbody tr:nth-child(4) { animation-delay: 75ms; }
+.pay-table tbody tr:nth-child(5) { animation-delay:100ms; }
+
+@media (max-width:640px) { .nb-search-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="col-lg-12">
+
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Payroll Register</span>
+      </nav>
+      <h1 class="pc-page-title">Payroll Register</h1>
+      <p class="pc-page-sub">Review gross, deductions and net salary for each employee.</p>
+    </div>
+  </div>
+
+  <!-- ② Filter Card -->
+  <div class="pc-card" style="margin-bottom:18px;">
+    <div class="pc-card-header">
+      <p class="pc-card-title">Check Payroll</p>
+    </div>
+    <div class="pc-card-body">
+      <form method="get">
+        <div class="nb-search-grid">
+          <div class="nb-search-field">
+            <label>Month <span style="color:var(--rose);">*</span></label>
+            <input type="number" name="month" value="{{ month }}"
+                   min="1" max="12" placeholder="1–12" required>
+          </div>
+          <div class="nb-search-field">
+            <label>Year <span style="color:var(--rose);">*</span></label>
+            <input type="number" name="year" value="{{ year }}"
+                   placeholder="e.g. 2025" required>
+          </div>
+          <div class="nb-search-field" style="justify-content:flex-end;">
+            <label style="visibility:hidden;">Go</label>
+            <button type="submit" class="pc-btn pc-btn-primary">
+              <i class="ri-search-line"></i> Check
+            </button>
+          </div>
         </div>
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Month</label>
-                    <input type="number" name="month" class="form-control"
-                           value="{{ month }}" min="1" max="12" required>
-                </div>
+      </form>
+    </div>
+  </div>
 
-                <div class="col-md-4">
-                    <label class="form-label">Year</label>
-                    <input type="number" name="year" class="form-control"
-                           value="{{ year }}" required>
-                </div>
-
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success w-100">
-                        Check Payroll
-                    </button>
-                </div>
-            </form>
-        </div>
+  <!-- ③ Payroll Table Card -->
+  {% if payrolls %}
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Payroll — {{ month }}/{{ year }}</p>
+        <p class="pc-card-sub">{{ payrolls|length }} employee{{ payrolls|length|pluralize }}</p>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a href="{% url 'payroll_register_excel' %}?month={{ month }}&year={{ year }}"
+           class="pc-btn pc-btn-secondary pc-btn-sm">
+          <i class="ri-file-excel-line"></i> Export Excel
+        </a>
+        <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+          <i class="ri-team-line" style="font-size:12px;"></i>
+          {{ payrolls|length }} Staff
+        </span>
+      </div>
     </div>
 
-
-    {% if payrolls %}
-
-    <!-- Payroll Table -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <h6 class="mb-0">
-                Payroll for {{ month }}/{{ year }}
-            </h6>
-        </div>
-
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Employee</th>
-                        <th>Gross Salary</th>
-                        <th>LOP Days</th>
-                        <th>Basic</th>
-                        <th>HRA</th>
-                        <th>Net Salary</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in payrolls %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ p.payroll_employee.staff.name }}</td>
-                        <td>₹ {{ p.gross_salary }}</td>
-                        <td>{{ p.total_lop_days }}</td>
-                        <td>₹ {{ p.basic_da }}</td>
-                        <td>₹ {{ p.hra }}</td>
-                        <td><strong>₹ {{ p.net_salary }}</strong></td>
-                        <td>
-                            {% if p.is_finalized %}
-                                <span class="badge bg-success">Finalized</span>
-                            {% else %}
-                                <span class="badge bg-warning text-dark">Draft</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Totals Section -->
-        <div class="card-footer bg-light">
-            <div class="row text-end">
-                <div class="col-md-4">
-                    <strong>Total Gross:</strong> ₹ {{ total_gross }}
+    <div class="pc-card-body" style="padding:0;">
+      <div class="pay-table-wrap">
+        <table class="pay-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Employee</th>
+              <th>Gross</th>
+              <th>LOP Days</th>
+              <th>Total Days</th>
+              <th>Basic</th>
+              <th>HRA</th>
+              <th>PF</th>
+              <th>ESI</th>
+              <th>Loan</th>
+              <th>Other Ded</th>
+              <th>Net Salary</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in payrolls %}
+            <tr>
+              <td style="font-family:var(--f-mono); font-size:12px; color:var(--muted);">
+                {{ forloop.counter }}
+              </td>
+              <td style="font-weight:600; color:var(--text); white-space:nowrap;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="
+                    width:28px; height:28px; border-radius:50%;
+                    background:var(--accent-lt); border:1.5px solid var(--accent-mid);
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:11px; font-weight:700; color:var(--accent); flex-shrink:0;">
+                    {{ p.employee.first_name|first }}
+                  </span>
+                  {{ p.employee }}
                 </div>
-                <div class="col-md-4">
-                    <strong>Total LOP Days:</strong> {{ total_lop }}
-                </div>
-                <div class="col-md-4">
-                    <strong>Total Net:</strong> ₹ {{ total_net }}
-                </div>
-            </div>
-        </div>
+              </td>
+              <td><span class="td-money td-gross">&#8377;{{ p.gross_salary }}</span></td>
+              <td><span class="td-money td-lop">{{ p.total_lop_days }}</span></td>
+              <td><span class="td-money" style="color:var(--text-md);">{{ p.total_sal_month }}</span></td>
+              <td><span class="td-money" style="color:var(--text-md);">&#8377;{{ p.basic_da }}</span></td>
+              <td><span class="td-money" style="color:var(--text-md);">&#8377;{{ p.hra }}</span></td>
+              <td><span class="td-money td-ded">&#8377;{{ p.pf }}</span></td>
+              <td><span class="td-money td-ded">&#8377;{{ p.esi }}</span></td>
+              <td><span class="td-money td-ded">&#8377;{{ p.ded }}</span></td>
+              <td><span class="td-money td-ded">&#8377;{{ p.total_ded }}</span></td>
+              <td><span class="td-net td-money">&#8377;{{ p.net_salary }}</span></td>
+              <td>
+                {% if p.is_finalized %}
+                  <span class="pc-badge pc-badge-success">Finalized</span>
+                {% else %}
+                  <span class="pc-badge pc-badge-warning">Draft</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    {% elif month and year %}
-
-        <div class="alert alert-warning mt-3">
-            No payroll generated for this month.
+    <div class="pc-card-footer">
+      <div class="pay-totals">
+        <div class="pay-total-item">
+          <span class="pay-total-label">Total Gross</span>
+          <span class="pay-total-val">&#8377;{{ total_gross }}</span>
         </div>
+        <div style="width:1px; height:32px; background:var(--border);"></div>
+        <div class="pay-total-item">
+          <span class="pay-total-label">Total LOP Days</span>
+          <span class="pay-total-val red">{{ total_lop }}</span>
+        </div>
+        <div style="width:1px; height:32px; background:var(--border);"></div>
+        <div class="pay-total-item">
+          <span class="pay-total-label">Total Net</span>
+          <span class="pay-total-val green">&#8377;{{ total_net }}</span>
+        </div>
+      </div>
+    </div>
 
-    {% endif %}
+  </div><!-- /pc-card -->
+
+  {% elif month and year %}
+  <div class="pc-alert pc-alert-warning">
+    <i class="ri-information-line"></i>
+    No payroll generated for {{ month }}/{{ year }}.
+    Generate payroll from the Attendance Summary page first.
+  </div>
+  {% endif %}
 
 </div>
 

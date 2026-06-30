@@ -1,268 +1,477 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
 
 <style>
-/* GLOBAL FONT */
-body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
-    font-family: 'Roboto', sans-serif;
+/* ── Search row ── */
+.nb-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.nb-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 150px;
+}
+.nb-search-field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+}
+.nb-search-field select,
+.nb-search-field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.nb-search-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.nb-search-field input[type="date"] { cursor: pointer; }
+.nb-search-field input:focus,
+.nb-search-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.nb-search-field input::placeholder { color: var(--muted); }
+
+/* ── Amount chips ── */
+.td-amount {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 3px 9px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.td-amount-total {
+  background: var(--accent-lt);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+}
+.td-amount-paid {
+  background: var(--green-lt);
+  color: var(--green);
+  border: 1px solid #a7f3d0;
 }
 
-td {
-  font-family: 'Roboto', sans-serif;
-  font-size:13px;
+/* ── Date chip ── */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-/* CARD */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.18);
-    overflow: hidden;
-    background: #fff;
+/* ── Payment type badge ── */
+.td-paytype {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
-/* TITLE BAR - REDUCED HEIGHT */
-.card-title {
-    background: linear-gradient(135deg, #1a73e8, #0056d6);
-    padding: 6px 0;   /* reduced from 10px */
+/* ── Action buttons ── */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border-dark);
+  background: var(--surface);
+  color: var(--text-sm);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
+.btn-action:hover { transform: translateY(-1px); }
+.btn-action-sky:hover   { background:var(--sky-lt);  border-color:#bae6fd; color:var(--sky); }
+.btn-action-danger:hover{ background:var(--rose-lt); border-color:#fecdd3; color:var(--rose); }
 
-/* BADGE TITLE STYLE A */
-.card-title h5 span {
-    background: #ffffff;
-    color: #000;
-    padding: 4px 14px;
-    border-radius: 8px;
-    font-size: 18px;   /* reduced */
-    font-weight: 600;
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: recRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
+@keyframes recRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 55ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 80ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:105ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:130ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:180ms; }
 
-/* DATE INPUT */
-input[type="date"].form-control {
-    min-width: 250px;
-    width: 250px;
-    height: 45px;
-    font-size: 1rem;
-    border-radius: 10px;
+/* ── Pagination ── */
+.nb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
+.nb-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px; height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--f-sans);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-md);
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  transition: background 150ms, color 150ms, border-color 150ms;
+  white-space: nowrap;
+}
+.nb-page-btn:hover { background:var(--accent-lt); border-color:var(--accent-mid); color:var(--accent); }
+.nb-page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.25); }
+.nb-page-btn.disabled { opacity:.35; pointer-events:none; }
+.nb-page-ellipsis { font-size:13px; color:var(--muted); padding:0 4px; line-height:34px; }
 
-/* FORM FLOAT LABEL */
-.form-floating > label {
-    font-size: 14px;
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
 }
-
-/* SEARCH FORM TABLE */
-table.table td {
-    vertical-align: middle;
+.nb-modal {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(15,23,42,.5); backdrop-filter:blur(5px);
+  align-items:center; justify-content:center;
 }
-
-.form-control {
-    height: 45px;
-    border-radius: 10px !important;
-    font-size: 15px;
+.nb-modal.active { display:flex; }
+.nb-modal-box {
+  background:var(--surface); border-radius:var(--r-xl);
+  box-shadow:var(--sh-lg); width:100%; max-width:420px;
+  margin:20px; overflow:hidden;
+  animation:modalIn .25s var(--ease-spring);
 }
-
-/* SEARCH DROPDOWN */
-#searchby.form-control {
-    height: 45px;
-    border-radius: 10px;
+.nb-modal-header {
+  background:var(--rose-lt); padding:20px 22px 16px;
+  border-bottom:1px solid #fecdd3; display:flex; align-items:center; gap:12px;
 }
-
-/* BUTTONS */
-.btn-primary {
-    background: linear-gradient(135deg, #1a73e8, #0056d6);
-    border: none;
-    padding: 8px 20px;
-    border-radius: 10px;
+.nb-modal-icon {
+  width:42px; height:42px; border-radius:50%; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(225,29,72,.15); flex-shrink:0;
 }
-.btn-primary:hover {
-    background: linear-gradient(135deg, #0056d6, #1a73e8);
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #28a745, #218838);
-    border: none;
-    padding: 8px 20px;
-    border-radius: 10px;
-}
-.btn-success:hover {
-    background: linear-gradient(135deg, #218838, #28a745);
-}
-
-/* TABLE HEADER DARK — REDUCED HEIGHT */
-.table-dark th {
-    background: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;   /* reduced */
-    padding-bottom: 6px !important;
-    font-size: 14px !important;     /* smaller text */
-}
-
-/* PAGINATION */
-.pagination .page-link {
-    border-radius: 10px;
-    margin: 0 3px;
-}
-.page-item.active .page-link {
-    background: linear-gradient(135deg, #1a73e8, #0056d6);
-    border: none;
-}
-
-/* DROPDOWN MENU */
-.dropdown-menu a {
-    font-size: 14px;
+.nb-modal-body { padding:22px; }
+.nb-modal-body p { font-size:13.5px; color:var(--text-md); margin:0; line-height:1.7; }
+.nb-modal-footer {
+  padding:14px 22px; background:var(--surface2); border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:flex-end; gap:10px;
 }
 </style>
 
+<div class="col-lg-12">
 
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- Title -->
-        <div class="card-title text-center">
-           <h5 class="mb-0"><span>Fee Receipts</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <!-- Date Filter -->
-            <div class="d-flex justify-content-end align-items-center gap-2 mb-4">
-                <form method="POST" action="{% url 'daily_collection' %}" class="d-flex align-items-center gap-2">
-                    {% csrf_token %}
-                    <div class="form-floating">
-                        <input type="date" class="form-control" id="flatpickr-date" name="date_by" placeholder="YYYY-MM-DD">
-                        <label for="flatpickr-date">Select a date</label>
-                    </div>
-                    <button type="submit" class="btn btn-info">Export</button>
-                </form>
-            </div>
-
-            <!-- Search Row -->
-            <div class="col-md">
-                <form action="{% url 'reciept_search' %}" method="POST">
-                    {% csrf_token %}
-                    <table class="table border-0">
-                        <tr>
-                            <td style="width: 250px;">
-                                <select name="searchby" id="searchby" class="form-control">
-                                    <option value="student_name">Student Name</option>
-                                    <option value="reciept_date">Receipt Date ('yyyy-mm-dd')</option>
-                                    <option value="reciept_no">Receipt No</option>
-                                    <option value="payment_id">Payment Id</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input type="search" placeholder="Search" name="searched" required class="form-control">
-                            </td>
-                            <td style="width: 150px;">
-                                <button type="submit" class="btn btn-success w-100">Search</button>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-            </div>
-
-            <!-- Table -->
-            {% if data %}
-            <table class="table">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Receipt Date</th>
-                        <th>Invoice</th>
-                        <th>Payment Type</th>
-                        <th>Total</th>
-                        <th>Paid Amount</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% for frm in data %}
-                    <tr class="text-center">
-                        <td>{{ frm.reciept_inv.stud_name.first_name }} {{ frm.reciept_inv.stud_name.last_name }}</td>
-                        <td>{{ frm.reciept_date }}</td>
-                        <td>{{ frm.reciept_inv }}</td>
-                        <td>{{ frm.payment_type }}</td>
-                        <td>{{ frm.total }}</td>
-                        <td>{{ frm.paid_amt }}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                    <i class="ri-more-2-line"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{% url 'reprint_reciept' frm.id %}">
-                                        <i class="ri-receipt-line"></i> Reprint
-                                    </a>
-                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                    <a class="dropdown-item" href="{% url 'del_reciept' frm.id %}">
-                                        <i class="ri-delete-bin-2-line"></i> Delete
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Pagination -->
-            <nav aria-label="Page navigation" class="pagination-container">
-                <ul class="pagination justify-content-center">
-                    {% if data.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a></li>
-                    {% endif %}
-
-                    {% with total_pages=data.paginator.num_pages current=data.number %}
-                        {% if total_pages <= 7 %}
-                            {% for num in data.paginator.page_range %}
-                                <li class="page-item {% if current == num %}active{% endif %}">
-                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endfor %}
-                        {% else %}
-                            {% if current > 4 %}
-                                <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
-                                {% if current > 5 %}
-                                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                                {% endif %}
-                            {% endif %}
-
-                            {% for num in data.paginator.page_range %}
-                                {% if num >= current|add:'-3' and num <= current|add:'3' %}
-                                    <li class="page-item {% if current == num %}active{% endif %}">
-                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if current < total_pages|add:'-3' %}
-                                {% if current < total_pages|add:'-4' %}
-                                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                                {% endif %}
-                                <li class="page-item"><a class="page-link" href="?page={{ total_pages }}">{{ total_pages }}</a></li>
-                            {% endif %}
-                        {% endif %}
-                    {% endwith %}
-
-                    {% if data.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ data.next_page_number }}">Next</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-
-            {% else %}
-            <div class="alert alert-danger mt-3">
-                No Records are available to show.
-            </div>
-            {% endif %}
-
-        </div>
-
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Fee Receipts</span>
+      </nav>
+      <h1 class="pc-page-title">Fee Receipts</h1>
+      <p class="pc-page-sub">View, search and export all payment receipts.</p>
     </div>
+  </div>
+
+  <!-- ② Toolbar Card (Search + Export) -->
+  <div class="pc-card" style="margin-bottom:18px;">
+    <div class="pc-card-header">
+      <p class="pc-card-title">Search &amp; Export</p>
+    </div>
+    <div class="pc-card-body">
+      <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-end;">
+
+        <!-- Search Form -->
+        <form action="{% url 'reciept_search' %}" method="POST" style="flex:1; min-width:300px;">
+          {% csrf_token %}
+          <div class="nb-search-row">
+            <div class="nb-search-field" style="max-width:200px;">
+              <label>Search By</label>
+              <select name="searchby">
+                <option value="student_name">Student Name</option>
+                <option value="reciept_date">Receipt Date (yyyy-mm-dd)</option>
+                <option value="reciept_no">Receipt No</option>
+                <option value="payment_id">Payment ID</option>
+              </select>
+            </div>
+            <div class="nb-search-field">
+              <label>Keyword</label>
+              <input type="search" name="searched" placeholder="Type to search…" required>
+            </div>
+            <div style="padding-bottom:1px;">
+              <button type="submit" class="pc-btn pc-btn-primary">
+                <i class="ri-search-line"></i> Search
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Daily Collection Export -->
+        <form method="POST" action="{% url 'daily_collection' %}" style="flex-shrink:0;">
+          {% csrf_token %}
+          <div class="nb-search-row" style="flex-wrap:nowrap;">
+            <div class="nb-search-field" style="min-width:180px;">
+              <label>Export by Date</label>
+              <input type="date" name="date_by">
+            </div>
+            <div style="padding-bottom:1px;">
+              <button type="submit" class="pc-btn pc-btn-secondary">
+                <i class="ri-download-2-line"></i> Export
+              </button>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Receipts</p>
+        <p class="pc-card-sub">
+          {% if data %}
+            Page {{ data.number }} of {{ data.paginator.num_pages }}
+            &nbsp;·&nbsp; {{ data.paginator.count }} receipt{{ data.paginator.count|pluralize }} total
+          {% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-success pc-badge-no-dot">
+        <i class="ri-receipt-line" style="font-size:12px;"></i>
+        {{ data.paginator.count }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th style="text-align:left;">Student</th>
+              <th>Receipt Date</th>
+              <th style="text-align:left;">Invoice</th>
+              <th>Payment Type</th>
+              <th>Total</th>
+              <th>Paid</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for frm in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td class="td-name">
+                {{ frm.reciept_inv.stud_name.first_name }}
+                {{ frm.reciept_inv.stud_name.last_name }}
+              </td>
+
+              <td>
+                <span class="td-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ frm.reciept_date }}
+                </span>
+              </td>
+
+              <td style="text-align:left; font-size:13px; color:var(--text-md);">
+                {{ frm.reciept_inv }}
+              </td>
+
+              <td>
+                <span class="td-paytype pc-badge pc-badge-info pc-badge-no-dot">
+                  {{ frm.payment_type }}
+                </span>
+              </td>
+
+              <td>
+                <span class="td-amount td-amount-total">&#8377;{{ frm.total }}</span>
+              </td>
+
+              <td>
+                <span class="td-amount td-amount-paid">&#8377;{{ frm.paid_amt }}</span>
+              </td>
+
+              <td>
+                <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                  <!-- Reprint -->
+                  <a href="{% url 'reprint_reciept' frm.id %}"
+                     class="btn-action btn-action-sky" title="Reprint Receipt">
+                    <i class="ri-printer-line"></i>
+                  </a>
+                  <!-- Delete (admin only) -->
+                  {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <button type="button"
+                    class="btn-action btn-action-danger" title="Delete"
+                    onclick="openDeleteModal('{% url 'del_reciept' frm.id %}', '{{ frm.reciept_inv.stud_name.first_name|escapejs }} {{ frm.reciept_inv.stud_name.last_name|escapejs }}')">
+                    <i class="ri-delete-bin-7-line"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-receipt-line"></i></span>
+        <p class="pc-empty-title">No receipts found</p>
+        <p class="pc-empty-sub">No payment records are available to show.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data.start_index }}–{{ data.end_index }}</strong>
+        of <strong>{{ data.paginator.count }}</strong> receipts
+      </span>
+
+      <!-- Smart pagination -->
+      <nav class="nb-pagination">
+        <!-- Prev -->
+        {% if data.has_previous %}
+        <a href="?page={{ data.previous_page_number }}" class="nb-page-btn">
+          <i class="ri-arrow-left-s-line"></i> Prev
+        </a>
+        {% else %}
+        <span class="nb-page-btn disabled"><i class="ri-arrow-left-s-line"></i> Prev</span>
+        {% endif %}
+
+        <!-- First page -->
+        {% with current=data.number total=data.paginator.num_pages %}
+          {% if current > 4 %}
+          <a href="?page=1" class="nb-page-btn">1</a>
+          {% if current > 5 %}<span class="nb-page-ellipsis">…</span>{% endif %}
+          {% endif %}
+
+          <!-- Window ±3 -->
+          {% for num in data.paginator.page_range %}
+            {% if num >= current|add:"-3" and num <= current|add:"3" %}
+              {% if current == num %}
+              <span class="nb-page-btn active">{{ num }}</span>
+              {% else %}
+              <a href="?page={{ num }}" class="nb-page-btn">{{ num }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          <!-- Last page -->
+          {% if current < total|add:"-3" %}
+          {% if current < total|add:"-4" %}<span class="nb-page-ellipsis">…</span>{% endif %}
+          <a href="?page={{ total }}" class="nb-page-btn">{{ total }}</a>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Next -->
+        {% if data.has_next %}
+        <a href="?page={{ data.next_page_number }}" class="nb-page-btn">
+          Next <i class="ri-arrow-right-s-line"></i>
+        </a>
+        {% else %}
+        <span class="nb-page-btn disabled">Next <i class="ri-arrow-right-s-line"></i></span>
+        {% endif %}
+      </nav>
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
+
+<!-- ══ DELETE MODAL ══ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Receipt</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete the receipt for
+        <strong id="deleteRecLabel" style="color:var(--text);"></strong>?
+        This payment record will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <a id="deleteRecLink" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteModal(url, label) {
+  document.getElementById('deleteRecLabel').textContent = label;
+  document.getElementById('deleteRecLink').href = url;
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
 
 {% endblock %}

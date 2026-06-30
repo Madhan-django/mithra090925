@@ -1,10 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+body, h1, h3, h5, th, td, label, button {
+    font-family: 'Roboto', sans-serif;
+}
+
+.card {
+    border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+    border: none;
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Buttons */
+.btn-success {
+    background: linear-gradient(135deg, #198754, #157347);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+}
+
+.form-control {
+    border-radius: 10px;
+}
+</style>
+
+<div class="container mt-4">
+
+<div class="card">
+
+    <!-- Gradient Header with Badge Title -->
+    <div class="card-header">
+        <div class="card-title text-center">
+            <h5>
+                <span class="badge bg-light text-dark">
+                    Update Payroll - {{ employee.first_name }} {{ employee.last_name }}
+                </span>
+            </h5>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="mb-1">Gross Salary</label>
+                    {{ form.gross_salary }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="mb-1">Basic %</label>
+                    {{ form.basic_percentage }}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="mb-1">HRA %</label>
+                    {{ form.hra_percentage }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="mb-1">Wages Per Day</label>
+                    {{ form.wages_per_day }}
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-success">
+                    Update Payroll
+                </button>
+
+                <a href="{% url 'payroll_register' %}" class="btn btn-danger ms-2">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</div>
+
+{% endblock %}

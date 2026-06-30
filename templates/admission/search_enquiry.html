@@ -1,79 +1,341 @@
-{% extends 'adminpanel/index.html' %}
+{% extends 'panel/index.html' %}
 {% block content %}
 
-<div class="text-danger bg-primary bg-light"><h2 align="center" style="color:red"><i class="fa fa-graduation-cap" aria-hidden="true"></i>&nbsp;&nbsp;{{skool}}-({{year}})</h2></div><br>
-<center><p class="h3 text-dark" >Enquiry Search</p></center><br><br><br>
-            <div class="col-md  text-left">
-                <form action="{% url 'search_enquiry' %}" method="POST">
-                    {% csrf_token %}
-                <select name="searchby" id="searchby">
-                     <option value="enq_date" >Date YYYY-MM-DD</option>
-                     <option value="enq_student">Student Name</option>
-                     <option value="enq_name">Enquirer Name</option>
-                </select>
-                <input type="search" placeholder="search" name="searched">
-                <button type="submit" class="btn btn-success btn-sm" >Search</button>
-                </form>
+<div class="container-fluid" style="max-width: 1400px; padding: 24px;">
+
+    <!-- Page Header -->
+    <div class="pc-page-header">
+        <div class="pc-page-header-left">
+            <div class="pc-breadcrumb">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <a href="#">Admissions</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <span>Search Results</span>
             </div>
-<br>
-{% if data %}
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Name </th>
-      <th>Enquiry Date</th>
-      <th>Follow Up Date</th>
-      <th>Class</th>
-      <th>Mobile Number</th>
-      <th>Enquiry Status</th>
-      <th>Actions </th>
+            <h1 class="pc-page-title">Enquiry Search Results</h1>
+            <p class="pc-page-sub">{{ skool }} - Academic Year {{ year }}</p>
+        </div>
+        <div class="pc-page-header-right">
+            <a href="#" class="pc-btn pc-btn-outline">
+                <i class="fas fa-list"></i> All Enquiries
+            </a>
+        </div>
+    </div>
 
+    <!-- Search Card -->
+    <div class="pc-card">
+        <div class="pc-card-header">
+            <div>
+                <div class="pc-card-title">
+                    <i class="fas fa-search" style="color:var(--accent);margin-right:6px;"></i>
+                    Search Enquiries
+                </div>
+                <div class="pc-card-sub">Find enquiries by date, student name, or enquirer name</div>
+            </div>
+            <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                <i class="fas fa-filter"></i> Search
+            </span>
+        </div>
+        <div class="pc-card-body">
+            <form action="{% url 'search_enquiry' %}" method="POST">
+                {% csrf_token %}
+                <div class="pc-filter-row">
+                    <div class="pc-form-group">
+                        <label class="pc-label">Search By</label>
+                        <select name="searchby" id="searchby" class="pc-select">
+                            <option value="enq_date">Date (YYYY-MM-DD)</option>
+                            <option value="enq_student">Student Name</option>
+                            <option value="enq_name">Enquirer Name</option>
+                        </select>
+                    </div>
 
-    </tr>
-  </thead>
+                    <div class="pc-form-group" style="flex: 2;">
+                        <label class="pc-label">Search Term</label>
+                        <input type="search" placeholder="Enter search term..." name="searched" required class="pc-input">
+                    </div>
 
-  <tbody>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="pc-btn pc-btn-success">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <div style="height: 20px;"></div>
 
-   {% for enq in data %}
+    {% if data %}
 
-    <tr align="center">
+    <!-- Results KPI -->
+    <div class="pc-kpi-row">
+        <div class="pc-kpi">
+            <div class="pc-kpi-val">{{ data|length }}</div>
+            <div class="pc-kpi-label">Search Results Found</div>
+        </div>
+    </div>
 
-      <td>{{enq.enq_student}}</td>
-      <td>{{enq.enq_date}}</td>
-      <td>{{enq.enq_followup}}</td>
-      <td>{{enq.enq_class}}</td>
-      <td>{{enq.enq_mob}}</td>
-      <td>{{enq.enq_status}}</td>
-        <td>
-          <form action="{% url 'update_enquiry' enq.id %}" method="" class="d-inline">
-              {% csrf_token %}
+    <!-- Results Card -->
+    <div class="pc-card">
 
-               <input type="submit" class="btn btn-warning" value="Update">
-          </form>
+        <!-- Card Header -->
+        <div class="pc-card-header">
+            <div>
+                <div class="pc-card-title">
+                    <i class="fas fa-list-ul" style="color:var(--accent);margin-right:6px;"></i>
+                    Search Results
+                </div>
+                <div class="pc-card-sub">Matching enquiries from your search</div>
+            </div>
+            <span class="pc-badge pc-badge-success pc-badge-no-dot">
+                {{ data|length }} result{{ data|length|pluralize }}
+            </span>
+        </div>
 
+        <!-- Table -->
+        <div class="pc-card-body" style="padding:0;">
+            <div class="pc-table-wrap" style="border:none;border-radius:0;">
+                <table class="pc-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th style="text-align:left;">Student Name</th>
+                            <th>Enquiry Date</th>
+                            <th>Follow Up Date</th>
+                            <th>Class</th>
+                            <th>Mobile Number</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enq in data %}
+                        <tr>
+                            <!-- Serial -->
+                            <td class="td-num">{{ forloop.counter }}</td>
 
-          <form action="{% url 'del_enquiry' enq.id %}" method="" class="d-inline">
-              {% csrf_token %}
+                            <!-- Student Name with avatar -->
+                            <td class="td-name">
+                                <span style="display:inline-flex;align-items:center;gap:10px;">
+                                    <span style="
+                                        width:32px;height:32px;border-radius:8px;
+                                        background:var(--accent-lt);color:var(--accent);
+                                        display:inline-flex;align-items:center;justify-content:center;
+                                        font-weight:800;font-size:13px;flex-shrink:0;">
+                                        {{ enq.enq_student|slice:":1"|upper }}
+                                    </span>
+                                    {{ enq.enq_student }}
+                                </span>
+                            </td>
 
-               <input type="submit" class="btn btn-danger" value="Delete">
-          </form>
-      </td>
-    </tr>
+                            <!-- Enquiry Date -->
+                            <td>
+                                <span class="pc-badge pc-badge-info pc-badge-no-dot">
+                                    <i class="fas fa-calendar"></i> {{ enq.enq_date }}
+                                </span>
+                            </td>
 
-   {% endfor %}
+                            <!-- Follow Up Date -->
+                            <td>
+                                <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+                                    <i class="fas fa-calendar-check"></i> {{ enq.enq_followup }}
+                                </span>
+                            </td>
 
+                            <!-- Class -->
+                            <td>
+                                <span class="pc-badge pc-badge-neutral pc-badge-no-dot">
+                                    {{ enq.enq_class }}
+                                </span>
+                            </td>
 
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
+                            <!-- Mobile -->
+                            <td>
+                                <span class="font-mono" style="font-size:13px;">
+                                    <i class="fas fa-phone" style="color:var(--muted);font-size:11px;margin-right:4px;"></i>
+                                    {{ enq.enq_mob }}
+                                </span>
+                            </td>
+
+                            <!-- Enquiry Status -->
+                            <td>
+                                {% if enq.enq_status == "Pending" or enq.enq_status == "pending" %}
+                                    <span class="pc-badge pc-badge-warning">{{ enq.enq_status }}</span>
+                                {% elif enq.enq_status == "Completed" or enq.enq_status == "completed" %}
+                                    <span class="pc-badge pc-badge-success">{{ enq.enq_status }}</span>
+                                {% elif enq.enq_status == "Converted" or enq.enq_status == "converted" %}
+                                    <span class="pc-badge pc-badge-success">{{ enq.enq_status }}</span>
+                                {% elif enq.enq_status == "Cancelled" or enq.enq_status == "cancelled" %}
+                                    <span class="pc-badge pc-badge-danger">{{ enq.enq_status }}</span>
+                                {% else %}
+                                    <span class="pc-badge pc-badge-neutral">{{ enq.enq_status }}</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions -->
+                            <td>
+                                <div class="td-actions">
+                                    <form action="{% url 'update_enquiry' enq.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="pc-btn pc-btn-secondary pc-btn-sm">
+                                            <i class="fas fa-edit"></i> Update
+                                        </button>
+                                    </form>
+
+                                    <button type="button"
+                                            class="pc-btn pc-btn-danger pc-btn-sm"
+                                            onclick="openDeleteModal('{{ enq.id }}', '{{ enq.enq_student }}')">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="pc-card-footer">
+            <span class="pc-pagination-info">
+                Showing <strong>{{ data|length }}</strong> result{{ data|length|pluralize }}
+            </span>
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- No Results Card -->
+    <div class="pc-card">
+        <div class="pc-card-body">
+            <div class="pc-empty">
+                <i class="fas fa-search pc-empty-icon"></i>
+                <div class="pc-empty-title">No Results Found</div>
+                <div class="pc-empty-sub">We couldn't find any enquiries matching your search criteria. Try different search terms or filters.</div>
+                <div style="margin-top: 24px;">
+                    <a href="#" class="pc-btn pc-btn-primary">
+                        <i class="fas fa-redo"></i> Clear Search
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
 </div>
 
-{% endif %}
+<!-- ═══════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+     ═══════════════════════════════════════ -->
+<div id="deleteModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
 
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
 
+    <!-- Modal Header -->
+    <div style="
+      background:var(--rose-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #fecdd3;
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:42px;height:42px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(225,29,72,.15);
+        flex-shrink:0;">
+        <i class="fas fa-trash-alt" style="color:var(--rose);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Delete Enquiry</div>
+        <div style="font-size:12px;color:var(--rose);font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;line-height:1.7;">
+        Are you sure you want to delete the enquiry for
+        <strong id="deleteStudentName" style="color:var(--text);"></strong>?
+        All data associated with this enquiry will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <button
+        type="button"
+        class="pc-btn pc-btn-outline"
+        onclick="closeDeleteModal()">
+        Cancel
+      </button>
+
+      <!-- Hidden form submitted on confirm -->
+      <form id="deleteForm" method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="fas fa-trash-alt"></i> Yes, Delete
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal animation -->
+<style>
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.92) translateY(10px); }
+    to   { opacity:1; transform:scale(1)   translateY(0); }
+  }
+</style>
+
+<!-- Modal JS -->
+<script>
+  const deleteModal = document.getElementById('deleteModal');
+
+  function openDeleteModal(id, studentName) {
+    document.getElementById('deleteStudentName').textContent = studentName;
+    document.getElementById('deleteForm').action = '{% url "del_enquiry" 0 %}'.replace('0', id);
+    deleteModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDeleteModal() {
+    deleteModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Close on backdrop click
+  deleteModal.addEventListener('click', function(e) {
+    if (e.target === deleteModal) closeDeleteModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+</script>
 
 {% endblock %}
-

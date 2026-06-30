@@ -1,66 +1,248 @@
 {% extends 'studentportal/index.html' %}
 {% block content %}
-<div class="content-wrapper">
-            <div class="page-header">
-              <h3 class="page-title">
-                <span class="page-title-icon bg-gradient-primary text-white me-2">
-                  <i class="fa fa-money" aria-hidden="true"></i>&nbsp;&nbsp;
-                </span> Fee Invoice
-              </h3>
-              <nav aria-label="breadcrumb">
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item active" aria-current="page">
-                    <span></span>Overview <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-{% if data %}
-<div class="table-responsive">
-  <table class="table table-bordered">
-      <thead class="table-dark" align="center">
-    <tr>
-      <th>Invoice Title </th>
-      <th>Invoice Number </th>
-      <th>Student Name</th>
-      <th>Class</th>
-      <th>Invoice Date </th>
-      <th>Amount</th>
-      <th>Due Amount</th>
-      <th>Status</th>
-       <th>Action</th>
-    </tr>
-      </thead>
-    <tbody>
-  <br>
-   {% for frm in data %}
-    <tr align="center">
-      <td>{{frm.fee_cat.invoice_title}}</td>
-      <td>{{frm.id}}</td>
-      <td>{{frm.stud_name.first_name}}</td>
-      <td>{{frm.class_name.name}}</td>
-      <td>{{frm.fee_cat.issued_date}}</td>
-      <td>{{frm.fee_cat.fee_amount}}</td>
-      <td>{{frm.due_amt}}</td>
-       <td>{{frm.status}}</td>
-        <td>
 
-          <form action="{% url 'addfeereciept' frm.id %}"  class="d-inline">
-              {% csrf_token %}
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Fee</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Invoice</span>
+    </div>
+    <div class="pc-page-title">Fee Invoice</div>
+    <div class="pc-page-sub">View all fee invoices and payment status</div>
+  </div>
+</div>
 
-               <input type="submit" class="btn btn-success" value="Pay">
-          </form>
-      </td>
-    </tr>
+<!-- KPI ROW -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data|length }}</div>
+    <div class="pc-kpi-label">Total Invoices</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">
+      {% for frm in data %}
+        {% if frm.status|lower == 'paid' %}
+          {% with paid=forloop.counter %}{% endwith %}
+        {% endif %}
+      {% endfor %}
+      {{ data|length }}
+    </div>
+    <div class="pc-kpi-label">Total Records</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{% now "d M Y" %}</div>
+    <div class="pc-kpi-label">Today</div>
+  </div>
+</div>
 
-   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
+<!-- MAIN CARD -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-bill-line me-2" style="color:var(--accent);"></i>Fee Invoices
+      </div>
+      <div class="pc-card-sub">All fee invoices for current academic year</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot"
+          id="recordCount"
+          style="font-size:12px; padding:5px 14px;">
+      {{ data|length }} invoice{{ data|length|pluralize }}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+
+    {% if data %}
+
+      <!-- Search -->
+      <div class="pc-filter-row" style="margin-bottom:1.25rem;">
+        <div class="pc-form-group" style="flex:1; max-width:320px;">
+          <label class="pc-label">Search</label>
+          <div class="pc-input-group">
+            <i class="ri-search-line pc-input-icon"></i>
+            <input type="text" id="searchInput" class="pc-input"
+                   placeholder="Search by title, status…">
+          </div>
+        </div>
+        <div class="pc-form-group" style="min-width:90px; align-self:flex-end;">
+          <button class="pc-btn pc-btn-outline"
+                  onclick="filterRows(''); document.getElementById('searchInput').value='';"
+                  style="width:100%;">
+            <i class="ri-refresh-line"></i> Reset
+          </button>
+        </div>
       </div>
 
+      <!-- Table -->
+      <div class="table-responsive">
+        <div class="pc-table-wrap">
+          <table class="pc-table">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding-left:18px;">#</th>
+                <th style="text-align:left;">Invoice Title</th>
+                <th>Invoice No</th>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Invoice Date</th>
+                <th>Amount</th>
+                <th>Due Amount</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              {% for frm in data %}
+              <tr class="data-row">
+
+                <td class="td-num">{{ forloop.counter }}</td>
+
+                <td class="td-name">
+                  <div style="font-weight:600; color:var(--text);">
+                    {{ frm.fee_cat.invoice_title }}
+                  </div>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-primary pc-badge-no-dot"
+                        style="font-family:var(--f-mono, monospace); font-size:12px;">
+                    #{{ frm.id }}
+                  </span>
+                </td>
+
+                <td style="font-size:13px; color:var(--text);">
+                  {{ frm.stud_name.first_name }}
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#eff6ff; color:#1d4ed8;">
+                    {{ frm.class_name.name }}
+                  </span>
+                </td>
+
+                <td>
+                  <span style="font-size:13px; color:var(--text-md);">
+                    <i class="ri-calendar-line me-1"></i>{{ frm.fee_cat.issued_date }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#ecfdf5; color:#059669;
+                               font-weight:700; font-size:13px; padding:5px 12px;">
+                    ₹{{ frm.fee_cat.fee_amount }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fff1f2; color:#e11d48;
+                               font-weight:700; font-size:13px; padding:5px 12px;">
+                    ₹{{ frm.due_amt }}
+                  </span>
+                </td>
+
+                <td>
+                  {% if frm.status|lower == 'paid' %}
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#ecfdf5; color:#059669;">
+                    <i class="ri-checkbox-circle-line me-1"></i>{{ frm.status }}
+                  </span>
+                  {% elif frm.status|lower == 'partial' %}
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fffbeb; color:#d97706;">
+                    <i class="ri-error-warning-line me-1"></i>{{ frm.status }}
+                  </span>
+                  {% else %}
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fff1f2; color:#e11d48;">
+                    <i class="ri-close-circle-line me-1"></i>{{ frm.status }}
+                  </span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="td-actions">
+                    <a href="{% url 'onlinepay' frm.id %}"
+                       class="pc-btn pc-btn-primary pc-btn-sm">
+                      <i class="ri-secure-payment-line"></i> Pay
+                    </a>
+                  </div>
+                </td>
+
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {% else %}
+
+      <div class="pc-empty" style="padding:4rem 2rem;">
+        <i class="ri-bill-line pc-empty-icon"></i>
+        <div class="pc-empty-title">No invoices found</div>
+        <div class="pc-empty-sub">No fee invoices available for this academic year</div>
+      </div>
+
+    {% endif %}
+
+  </div>
+
+  {% if data %}
+  <div class="pc-card-footer">
+    <div class="pc-pagination-info">
+      Total: <strong>{{ data|length }}</strong> invoice{{ data|length|pluralize }}
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /pc-card -->
+
+{% if data %}
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const rows        = document.querySelectorAll('.data-row');
+  const recordCount = document.getElementById('recordCount');
+  const tableBody   = document.getElementById('tableBody');
+
+  function filterRows(q) {
+    let visible = 0;
+    rows.forEach(row => {
+      const match = row.innerText.toLowerCase().includes(q.toLowerCase().trim());
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    recordCount.textContent = visible + ' invoice' + (visible !== 1 ? 's' : '');
+    let noResult = document.getElementById('noResultRow');
+    if (visible === 0 && q !== '') {
+      if (!noResult) {
+        noResult = document.createElement('tr');
+        noResult.id = 'noResultRow';
+        noResult.className = 'pc-table-empty';
+        noResult.innerHTML = `<td colspan="10">
+          <div class="pc-empty">
+            <i class="ri-search-line pc-empty-icon"></i>
+            <div class="pc-empty-title">No results found</div>
+            <div class="pc-empty-sub">Try a different keyword</div>
+          </div>
+        </td>`;
+        tableBody.appendChild(noResult);
+      }
+    } else {
+      if (noResult) noResult.remove();
+    }
+  }
+
+  searchInput.addEventListener('input', function () { filterRows(this.value); });
+</script>
 {% endif %}
 
 {% endblock %}

@@ -10,7 +10,7 @@ from academic.models import noticeboard,events
 from examination.models import exam_subjectmap,exams
 from setup.models import subjects
 from pushnotify.models import GeneralNotification
-from .models import DeviceFCMToken
+from .models import DeviceFCMToken,SchoolProfile
 from mobiplayer.models import Video
 
 
@@ -147,3 +147,35 @@ class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = '__all__'
+
+class SchoolProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchoolProfile
+        fields = '__all__'
+
+
+class StudentAttendanceSerializer(serializers.ModelSerializer):
+    student_id   = serializers.IntegerField(source='id')
+    student_name = serializers.SerializerMethodField()
+    roll_no      = serializers.CharField()
+    is_present   = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = students
+        fields = ['student_id', 'student_name', 'roll_no', 'is_present']
+
+    def get_student_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"   # ✅ matches your model
+
+    def get_is_present(self, obj):
+        date   = self.context.get('date')
+        aclass = self.context.get('aclass')
+        sec    = self.context.get('sec')
+        record = attendance.objects.filter(
+            student_name=obj,
+            attndate=date,
+            aclass_id=aclass,
+            sec_id=sec
+        ).first()
+        return (record.status == 'Present') if record else False
+

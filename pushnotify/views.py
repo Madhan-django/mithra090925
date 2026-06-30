@@ -1,6 +1,6 @@
-from django.shortcuts import render, HttpResponse,redirect
+from django.shortcuts import render, HttpResponse,redirect,get_object_or_404
 from django.core.paginator import Paginator
-from .models import GeneralNotification,SectionwiseNotification,SchoolNotification,temp_GeneralNotification
+from .models import GeneralNotification,SectionwiseNotification,SchoolNotification,temp_GeneralNotification,StaffNotification, StaffNotificationRecipient
 from institutions.models import school
 from setup.models import academicyr, currentacademicyr,sclass,section
 from admission.models import students
@@ -99,12 +99,14 @@ def notificationlist_copy(request):
     
     
 def new_notify(request):
+
     if 'sch_id' in request.session:
         sch_id = request.session['sch_id']
         sdata = school.objects.get(pk=sch_id)
         year = currentacademicyr.objects.get(school_name=sch_id)
         ayear = academicyr.objects.get(acad_year=year, school_name=sdata)
-        data = students.objects.filter(school_student=sdata, ac_year=ayear, student_status='Active')
+        data = students.objects.filter(school_student=sdata)
+        
         staf = request.user.username
         logo = "https://mithran.co.in/media/" + str(sdata.logo)
         cls= sclass.objects.filter(school_name=sdata,acad_year=year)
@@ -123,6 +125,7 @@ def new_notify(request):
         }
 
         if request.method == 'POST':
+
             form = New_General_Notification(request.POST)
             if form.is_valid():
                 title_msg = form.cleaned_data['title']
@@ -135,6 +138,7 @@ def new_notify(request):
                 instance =form.save()
                 rec_id = instance.id
                 client_ids = list(clients.values_list('id', flat=True))
+                print("ffffffffffffffffffffffffffff",client_ids)
 
                 Schedule.objects.create(
                     func='pushnotify.tasks.send_notification',
@@ -423,3 +427,107 @@ def sectionwise_notify_manual(request):
             temp2 += 1
 
     return HttpResponse("Message Copied Successfully")
+
+
+
+def staff_notification_list(request):
+    is_admin = request.user.groups.filter(name__in=['Admin', 'superadmin']).exists()
+    current_staff, school_obj, is_superadmin = get_staff_and_school(request)
+
+    if is_superadmin and school_obj is None:
+        notifications = StaffNotification.objects.all().order_by('-create_date')
+    else:
+        notifications = StaffNotification.objects.filter(
+            Notification_school=school_obj
+        ).order_by('-create_date')
+
+    return render(request, 'messages/staffnotification_list.html', {
+        'notifications': notifications,
+        'is_admin': is_admin,
+    })
+
+
+
+def staff_notification_send(request):
+    is_admin = request.user.groups.filter(name__in=['Admin', 'superadmin']).exists()
+    current_staff, school_obj, is_superadmin = get_staff_and_school(request)
+
+    if is_superadmin and school_obj is None:
+        staff_list = staff.objects.filter(status="Active")  # adjust: all schools
+    else:
+        staff_list = staff.objects.filter(school=school_obj, is_active=True)  # adjust
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        message = request.POST.get('message')
+        staff_ids = request.POST.getlist('staff_ids')
+
+        if not staff_ids:
+            return render(request, 'messages/staffnotification_send.html', {
+                'staff_list': staff_list,
+                'is_admin': is_admin,
+                'error': 'Select at least one recipient.',
+            })
+
+        # Notification_school is required on the model; for superadmin sends
+        # spanning multiple schools, default to the first selected staff's school.
+        notification_school = school_obj or staff.objects.get(id=staff_ids[0]).staff_school  # adjust
+
+        notification = StaffNotification.objects.create(
+            title=title,
+            message=message,
+            create_date=timezone.now(),
+            created_by_id=current_staff,
+            status='sent',
+            Notification_school=notification_school,
+            total_count=len(staff_ids),
+        )
+
+        recipients = [
+            StaffNotificationRecipient(notification=notification, staff_id=sid)
+            for sid in staff_ids
+        ]
+        StaffNotificationRecipient.objects.bulk_create(recipients)
+
+        notification.success_count = len(staff_ids)
+        notification.save(update_fields=['success_count'])
+
+        # TODO: trigger FCM push here, same pattern as GeneralNotification
+
+        return redirect('staff_notification_list')
+
+    return render(request, 'messages/staffnotification_send.html', {
+        'staff_list': staff_list,
+        'is_admin': is_admin,
+    })
+
+
+def staff_notification_detail(request, pk):
+    is_admin = request.user.groups.filter(name__in=['Admin', 'superadmin']).exists()
+    notification = get_object_or_404(StaffNotification, pk=pk)
+    recipients = notification.recipients.select_related('staff').order_by('-is_read')
+
+    return render(request, 'messages/staffnotification_detail.html', {
+        'notification': notification,
+        'recipients': recipients,
+        'is_admin': is_admin,
+    })
+
+def get_staff_and_school(request):
+    """
+    Returns (current_staff, school_obj, is_superadmin).
+    Regular admin: current_staff = request.user.staff, school_obj = current_staff.school
+    Superadmin with no staff row: current_staff = first staff overall, school_obj = None (all schools)
+    """
+    is_superadmin = request.user.is_superuser
+    try:
+        current_staff = request.user.staff  # adjust if this lookup differs
+        school_obj = current_staff.school    # adjust if field name differs
+    except staff.DoesNotExist:
+        if is_superadmin:
+            current_staff = staff.objects.first()
+            school_obj = None
+        else:
+            current_staff = None
+            school_obj = None
+    return current_staff, school_obj, is_superadmin

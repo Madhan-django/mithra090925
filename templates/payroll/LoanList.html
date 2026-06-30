@@ -1,147 +1,328 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
-<style>
-    h1, h3 {
-        font-family: Roboto;
-    }
-    th {
-        font-family: 'Roboto', sans-serif;
-        font-weight: bold !important;
-        font-size: 18px !important;
-    }
-    .align-right {
-        display: block;
-        padding: 30px;
 
-        text-align: right;
-    }
-    #searchby {
-        height: 50px;
-        font-family: Roboto;
-        font-size: 16px;
-    }
-    .table{
-    padding:15px;
-    }
+<style>
+/* ── Money chips ── */
+.td-money {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 3px 9px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.td-money-loan {
+  background: var(--accent-lt);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+}
+.td-money-emi {
+  background: var(--sky-lt);
+  color: var(--sky);
+  border: 1px solid #bae6fd;
+}
+.td-money-balance {
+  background: var(--amber-lt);
+  color: var(--amber);
+  border: 1px solid #fde68a;
+}
+
+/* ── Date chip ── */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: loanRowIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes loanRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:185ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:215ms; }
+
+/* ── Pagination ── */
+.nb-pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px; flex-wrap: wrap;
+}
+.nb-page-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--f-sans); font-size: 13px; font-weight: 600;
+  text-decoration: none; color: var(--text-md);
+  background: var(--surface); border: 1.5px solid var(--border-dark);
+  transition: background 150ms, color 150ms, border-color 150ms;
+  white-space: nowrap;
+}
+.nb-page-btn:hover { background:var(--accent-lt); border-color:var(--accent-mid); color:var(--accent); }
+.nb-page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.25); }
+.nb-page-btn.disabled { opacity:.35; pointer-events:none; }
+
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.nb-modal {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(15,23,42,.5); backdrop-filter:blur(5px);
+  align-items:center; justify-content:center;
+}
+.nb-modal.active { display:flex; }
+.nb-modal-box {
+  background:var(--surface); border-radius:var(--r-xl);
+  box-shadow:var(--sh-lg); width:100%; max-width:420px;
+  margin:20px; overflow:hidden;
+  animation:modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  background:var(--rose-lt); padding:20px 22px 16px;
+  border-bottom:1px solid #fecdd3; display:flex; align-items:center; gap:12px;
+}
+.nb-modal-icon {
+  width:42px; height:42px; border-radius:50%; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(225,29,72,.15); flex-shrink:0;
+}
+.nb-modal-body { padding:22px; }
+.nb-modal-body p { font-size:13.5px; color:var(--text-md); margin:0; line-height:1.7; }
+.nb-modal-footer {
+  padding:14px 22px; background:var(--surface2); border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:flex-end; gap:10px;
+}
 </style>
 
-<div class="pb-0 text-center">
-    <div class="flex-wrap d-flex justify-content-center align-items-center">
-        <span>
-            <img src="https://mithran.co.in/media/{{ skool.logo }}" alt="School Logo" width="50" height="50" style="margin-right: 10px;">
-            <h1 style="display: inline-block; vertical-align: middle; margin-bottom: 0;">{{ skool }}</h1>
-        </span>
+<div class="col-lg-12">
+
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{%  url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Loans</span>
+      </nav>
+      <h1 class="pc-page-title">Loans</h1>
+      <p class="pc-page-sub">Manage employee loan records, EMIs and balances.</p>
     </div>
-</div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'new_loan' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> New Loan
+      </a>
+    </div>
+  </div>
 
-<br><br>
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <br>
-            <h3>Loans</h3>
-        </div>
-     <div class="align-right">
-					<a href="{% url 'new_loan' %}" class="btn btn-sm btn-primary">New Loan</a><br>
-
-
-     </div>
-
-
-{% if loans %}
-<div class="card-body">
-<table class="table">
-  <thead class="table-dark" align ="center">
-    <tr>
-      <th>Employee Name </th>
-       <th>Loan Type</th>
-      <th>Loan Amount</th>
-      <th>EMI</th>
-      <th>Balance</th>
-      <th>Start Date</th>
-      <th>End Date</th>
-       <th>Action</th>
-
-
-    </tr>
-  </thead>
-
-  <tbody>
-
-
-   {% for loan in loans %}
-
-    <tr align="center">
-
-      <td>{{loan.employee}}</td>
-      <td>{{loan.loan_name}}</td>
-      <td>{{loan.loan_amount}}</td>
-      <td>{{loan.monthly_installment}}</td>
-      <td>{{loan.remaining_amount}}</td>
-      <td>{{loan.start_date}}</td>
-      <td>{{loan.end_date}}</td>
-
-        <td>
-          <form action="#" method="" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-warning" value="Update">
-          </form>
-
-{% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-          <form action="{% url 'del_loan' loan.id %}" method="POST" class="d-inline">
-              {% csrf_token %}
-
-               <input type="submit" class="btn btn-danger" value="Delete">
-          </form>
- {% endif %}
-      </td>
-    </tr>
-
-   {% endfor %}
-  </tbody>
-</table>
-</div>
-<div class="container-fluid">
-<nav aria-label="Page navigation">
-  <ul class="pagination">
-    {% if data.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
-      </li>
-    {% endif %}
-
-    {% for num in data.paginator.page_range %}
-      {% if data.number == num %}
-        <li class="page-item active">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% else %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Loans</p>
+        <p class="pc-card-sub">
+          {% if loans %}
+            {{ loans|length }} loan record{{ loans|length|pluralize }}
+          {% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if loans %}
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-bank-line" style="font-size:12px;"></i>
+        {{ loans|length }} Total
+      </span>
       {% endif %}
-    {% endfor %}
-
-    {% if data.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
-      </li>
-    {% endif %}
-  </ul>
-</nav>
-</div>
-{% else %}
-      <div class="alert alert-danger" role="alert">
-No Record  are available to Show
-</div>
-
-{% endif %}
-
-
-</div>
     </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if loans %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th style="text-align:left;">Employee</th>
+              <th>Loan Type</th>
+              <th>Loan Amount</th>
+              <th>EMI</th>
+              <th>Balance</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loan in loans %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td class="td-name">{{ loan.employee }}</td>
+
+              <td>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                  {{ loan.loan_name }}
+                </span>
+              </td>
+
+              <td>
+                <span class="td-money td-money-loan">&#8377;{{ loan.loan_amount }}</span>
+              </td>
+
+              <td>
+                <span class="td-money td-money-emi">&#8377;{{ loan.monthly_installment }}</span>
+              </td>
+
+              <td>
+                <span class="td-money td-money-balance">&#8377;{{ loan.remaining_amount }}</span>
+              </td>
+
+              <td>
+                <span class="td-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ loan.start_date }}
+                </span>
+              </td>
+
+              <td>
+                <span class="td-date">
+                  <i class="ri-calendar-check-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ loan.end_date }}
+                </span>
+              </td>
+
+              <td>
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+
+                  {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <button type="button"
+                    class="pc-btn pc-btn-danger pc-btn-sm"
+                    onclick="openDeleteModal('{% url 'del_loan' loan.id %}', '{{ loan.employee|escapejs }} — {{ loan.loan_name|escapejs }}')">
+                    <i class="ri-delete-bin-7-line"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-bank-line"></i></span>
+        <p class="pc-empty-title">No loan records found</p>
+        <p class="pc-empty-sub">Click <strong>New Loan</strong> to add the first record.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if loans %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ loans|length }}</strong> loan{{ loans|length|pluralize }}
+      </span>
+
+      <!-- Pagination (uses data paginator if paginated, else static) -->
+      {% if loans.has_previous or loans.has_next %}
+      <nav class="nb-pagination">
+        {% if loans.has_previous %}
+        <a href="?page={{ loans.previous_page_number }}" class="nb-page-btn">
+          <i class="ri-arrow-left-s-line"></i> Prev
+        </a>
+        {% else %}
+        <span class="nb-page-btn disabled"><i class="ri-arrow-left-s-line"></i> Prev</span>
+        {% endif %}
+
+        {% for num in loans.paginator.page_range %}
+          {% if loans.number == num %}
+            <span class="nb-page-btn active">{{ num }}</span>
+          {% elif num >= loans.number|add:"-2" and num <= loans.number|add:"2" %}
+            <a href="?page={{ num }}" class="nb-page-btn">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if loans.has_next %}
+        <a href="?page={{ loans.next_page_number }}" class="nb-page-btn">
+          Next <i class="ri-arrow-right-s-line"></i>
+        </a>
+        {% else %}
+        <span class="nb-page-btn disabled">Next <i class="ri-arrow-right-s-line"></i></span>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
+</div>
+
+<!-- ══ DELETE MODAL ══ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Loan</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete the loan for
+        <strong id="deleteLoanLabel" style="color:var(--text);"></strong>?
+        This record will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <form id="deleteForm" method="POST" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteModal(url, label) {
+  document.getElementById('deleteLoanLabel').textContent = label;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
 
 {% endblock %}
-

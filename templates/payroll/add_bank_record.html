@@ -1,149 +1,188 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
+
+
 <style>
-    /* ===== GLOBAL FONT ===== */
-    body, h1, h3, h4, label, input, select, textarea, button {
-        font-family: 'Roboto', sans-serif;
-    }
+  .bank-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 24px;
+  }
+  .bf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .bf-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .bf-field input,
+  .bf-field select,
+  .bf-field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .bf-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+    /* Keep appearance: none for custom arrow but options will still show natively */
+  }
+  .bf-field textarea { resize: vertical; min-height: 80px; }
+  .bf-field input:focus,
+  .bf-field select:focus,
+  .bf-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
-    /* ===== CARD ===== */
-    .card {
-        border-radius: 20px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-        overflow: hidden;
-    }
+  /* Field errors */
+  .bf-field .errorlist {
+    list-style: none;
+    margin: 3px 0 0;
+    padding: 0;
+    font-size: 11.5px;
+    color: var(--rose);
+    font-weight: 600;
+  }
 
-    /* ===== TITLE BAR ===== */
-    .card-title {
-        background: linear-gradient(90deg, #005C97, #363795);
-        padding: 12px;
-        border-radius: 20px 20px 0 0;
-    }
+  /* Select2 theme */
+  .select2-container { width: 100% !important; }
+  .select2-container .select2-selection--single {
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark) !important;
+    border-radius: var(--r) !important;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .select2-container--default.select2-container--focus .select2-selection--single,
+  .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12) !important;
+    outline: none;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--text);
+    line-height: 40px;
+    padding: 0;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+    right: 10px;
+  }
+  .select2-dropdown {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--r-lg) !important;
+    box-shadow: 0 6px 20px rgba(15,23,42,.10) !important;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+  }
+  .select2-container--default .select2-results__option--highlighted {
+    background: var(--accent-lt) !important;
+    color: var(--accent) !important;
+  }
+  .select2-container--default .select2-results__option--selected {
+    background: var(--accent) !important;
+    color: #fff !important;
+  }
+  .select2-search--dropdown .select2-search__field {
+    border: 1.5px solid var(--border-dark) !important;
+    border-radius: var(--r-sm) !important;
+    padding: 6px 10px;
+    font-family: var(--f-sans);
+    font-size: 13px;
+    outline: none;
+  }
 
-    .card-title h4 {
-        margin: 0;
-        display: inline-block;
-        background: #f8f9fa;
-        padding: 6px 22px;
-        border-radius: 12px;
-        font-size: 18px;
-        font-weight: 600;
-        color: #000;
-    }
-
-    /* ===== CARD BODY ===== */
-    .card-body {
-        padding: 30px;
-    }
-
-    /* ===== FORM ELEMENTS ===== */
-    form p {
-        margin-bottom: 18px;
-    }
-
-    label {
-        font-weight: 600;
-        font-size: 15px;
-        margin-bottom: 6px;
-        display: block;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="number"],
-    input[type="date"],
-    select,
-    textarea {
-        width: 100%;
-        height: 48px;
-        border-radius: 10px;
-        border: 1px solid #ced4da;
-        padding: 10px 14px;
-        font-size: 15px;
-        transition: 0.2s ease-in-out;
-    }
-
-    textarea {
-        height: auto;
-        min-height: 90px;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #2a92ff;
-        box-shadow: 0 0 0 2px rgba(42,146,255,0.2);
-        outline: none;
-    }
-
-    option {
-        font-size: 15px;
-    }
-
-    /* ===== FORMSET BLOCKS ===== */
-    fieldset {
-        border: 1px solid #dee2e6;
-        padding: 15px;
-        border-radius: 12px;
-        margin-bottom: 15px;
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn {
-        border-radius: 10px;
-        font-size: 14px;
-        padding: 8px 22px;
-        margin: 5px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(90deg, #0053d6, #2a92ff);
-        border: none;
-    }
-
-    .btn-warning {
-        background: linear-gradient(90deg, #f0ad4e, #ffcc70);
-        border: none;
-        color: #000;
-    }
-
-    /* ===== ALIGNMENT ===== */
-    .text-center {
-        margin-top: 25px;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-        .card-body {
-            padding: 20px;
-        }
-    }
+  @media (max-width: 640px) {
+    .bank-form-grid { grid-template-columns: 1fr; }
+  }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <br>
-            <h4>New Employee</h4>
-        </div>
-        <div class="card-body">
-            <div class="container">
-                <form action="" method="POST">
-                       {% csrf_token %}
-                    {{ form.as_p }}
-
-
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <button type="reset" class="btn btn-warning">Reset</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{%  url 'bank_details' %}">Bank Details</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>New Bank Record</span>
+      </nav>
+      <h1 class="pc-page-title">New Bank Record</h1>
+      <p class="pc-page-sub">Enter the bank account details below to add a new record.</p>
     </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Bank Details</p>
+        <p class="pc-card-sub">All fields are required unless stated otherwise</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-building-bank" style="font-size:12px;"></i> Finance
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form action="" method="POST" id="bankform">
+        {% csrf_token %}
+        <div class="bank-form-grid">
+          {% for field in form %}
+          <div class="bf-field">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          </div>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ti ti-shield-check" style="color:var(--green); margin-right:4px;"></i>
+        Data is securely stored in your ERP system.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <button type="reset" form="bankform" class="pc-btn pc-btn-outline">
+          <i class="ti ti-eraser" style="font-size:14px;"></i> Reset
+        </button>
+        <button type="submit" form="bankform" class="pc-btn pc-btn-primary">
+          <i class="ti ti-device-floppy" style="font-size:14px;"></i> Save Record
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-
+<!-- No Select2 needed — native select shows all Django options reliably -->
 
 {% endblock %}

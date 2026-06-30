@@ -102,6 +102,7 @@ def addexpense(request):
     record = PettyCashExpense.objects.filter(petty_school=sdata).order_by('-date_spent').first()
     open_bal = PettyCashBalance.objects.filter(balance_school=sdata).order_by('-date').first()
     usr = request.user
+    next_expense_no = (record.expense_no + 1) if record else 1
     date = datetime.date.today()
     if staff.objects.filter(staff_user=usr).exists():
         stf = staff.objects.get(staff_user=usr)
@@ -112,7 +113,8 @@ def addexpense(request):
         'balance':0,
         'approved_by':stf,
         'date_spent':date,
-        'school_year':ayear
+        'school_year':ayear,
+        'expense_no':next_expense_no
 
 
     }

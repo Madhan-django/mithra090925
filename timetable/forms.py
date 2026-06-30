@@ -22,7 +22,7 @@ class EditTeachingAllocationForm(forms.ModelForm):
             'cls': forms.HiddenInput(),
             'not_first':forms.CheckboxInput(),
             'not_last':forms.CheckboxInput(),
-            'teacher_school': forms.HiddenInput()
+            'teacher_school':forms.HiddenInput()
 
         }
 

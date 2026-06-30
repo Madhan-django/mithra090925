@@ -346,45 +346,72 @@ def add_assettype(request):
         form = New_AssetTypeForm(initial=initial_data)
     return render(request, 'schoolasset/add_assettype.html', {'form': form,'skool':sdata,'year':year})
 
+# @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+# def update_assettype(request, asset_id):
+#     sch_id = request.session['sch_id']
+#     sdata = school.objects.get(pk=sch_id)
+#     yr = currentacademicyr.objects.get(school_name=sdata)
+#     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+#     rms = Room.objects.filter(floor__block__school=sdata)
+#     asstyp = AssetType.objects.filter(school=sdata)
+#     brd = Brand.objects.filter(school=sdata)
+#     stf = staff.objects.filter(staff_school=sdata)
+#     # Fetch existing record or show 404
+#     asset_type = get_object_or_404(AssetType, pk=asset_id, school=sdata)
+#
+#     if request.method == 'POST':
+#         form = New_AssetTypeForm(request.POST, instance=asset_type)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Asset Type updated successfully")
+#             return redirect('asset_type')
+#         else:
+#             messages.error(request, "Please correct the errors below.")
+#     else:
+#         form = New_AssetTypeForm(instance=asset_type)
+#         form.fields['room'].queryset = rms
+#         form.fields['asset_type'].queryset= asstype
+#         form.fields['brand'].queryset= brd
+#         form.fields['assign'].queryset =stf
+#
+#
+#     return render(
+#         request,
+#         'schoolasset/update_assettype.html',
+#         {
+#             'form': form,
+#             'skool': sdata,
+#             'year': year,
+#             'asset_type': asset_type,
+#         }
+#     )
+
+
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
 def update_assettype(request, asset_id):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-    rms = Room.objects.filter(floor__block__school=sdata)
-    asstyp = AssetType.objects.filter(school=sdata)
-    brd = Brand.objects.filter(school=sdata)
-    stf = staff.objects.filter(staff_school=sdata)
-    # Fetch existing record or show 404
-    asset_type = get_object_or_404(AssetType, pk=asset_id, school=sdata)
+    ass_typ = AssetType.objects.get(id=asset_id)  # adjust model name if different
 
     if request.method == 'POST':
-        form = New_AssetTypeForm(request.POST, instance=asset_type)
+        form = New_AssetTypeForm(request.POST, instance=ass_typ)
         if form.is_valid():
             form.save()
-            messages.success(request, "Asset Type updated successfully")
+            messages.success(request, "Asset Updated Successfully")
             return redirect('asset_type')
-        else:
-            messages.error(request, "Please correct the errors below.")
     else:
-        form = New_AssetTypeForm(instance=asset_type)
-        form.fields['room'].queryset = rms
-        form.fields['asset_type'].queryset= asstyp
-        form.fields['brand'].queryset= brd
-        form.fields['assign'].queryset =stf
+        form = New_AssetTypeForm(instance=ass_typ)
 
 
-    return render(
-        request,
-        'schoolasset/update_assettype.html',
-        {
-            'form': form,
-            'skool': sdata,
-            'year': year,
-            'asset_type': asset_type,
-        }
-    )
+    return render(request, 'schoolasset/update_assettype.html', {
+        'form': form,
+        'skool': sdata,
+        'year': year,
+
+    })
+
 
 def delete_assettype(request, asset_id):
     sch_id = request.session['sch_id']

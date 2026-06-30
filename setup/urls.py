@@ -32,6 +32,7 @@ urlpatterns = [
     path('homeworktime',login_required(views.homeworktime),name='homeworktime'),
     path('add_homeworktime',login_required(views.add_homeworktime),name='add_homeworktime'),
     path('test_delete',login_required(views.test_delete),name='test_delete'),
-    path('copysubjects',login_required(views.copysubjects),name='copysubjects')
+    path('copysubjects',login_required(views.copysubjects),name='copysubjects'),
+    path('payu/config/', login_required(views.payu_config_view), name='payu_config_view'),
     
 ]

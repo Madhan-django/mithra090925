@@ -1,148 +1,283 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
 <style>
-   #id_description{
-     height:100px;
-    }
+  .hw-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 24px;
+  }
+  .hw-field-full { grid-column: 1 / -1; }
+  .hw-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .hw-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .hw-field label .req { color: var(--rose); margin-left: 2px; }
+  .hw-field input,
+  .hw-field select,
+  .hw-field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .hw-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  .hw-field textarea { resize: vertical; min-height: 100px; }
+  .hw-field input:focus,
+  .hw-field select:focus,
+  .hw-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
+
+  /* Char counter */
+  .char-counter {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 3px;
+    transition: color 150ms;
+  }
+  .char-counter.warn  { color: var(--amber); }
+  .char-counter.limit { color: var(--rose); }
+
+  /* Section label */
+  .form-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 14px;
+  }
+  .form-section-label:first-child { margin-top: 0; }
+  .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
+
+  /* Locked info strip — shows current class/section/subject read-only */
+  .hw-locked-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    margin-bottom: 20px;
+  }
+  .hw-locked-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-md);
+  }
+  .hw-locked-item span.lk-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--muted);
+  }
+  .hw-locked-item span.lk-val {
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-lt);
+    border: 1px solid var(--accent-mid);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+  }
+
+  .hw-hidden { display: none; }
+
+  @media (max-width: 640px) {
+    .hw-form-grid { grid-template-columns: 1fr; }
+    .hw-field-full { grid-column: 1; }
+  }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <br>
-            <h5 class="mb-0">New Homework</h5>
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'homework' %}">Homework</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Update Homework</span>
+      </nav>
+      <h1 class="pc-page-title">Update Homework</h1>
+      <p class="pc-page-sub">Edit the title, dates, description or attachment for this assignment.</p>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Edit Assignment</p>
+        <p class="pc-card-sub">Class, section and subject are locked for this record</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ti ti-pencil" style="font-size:12px;"></i> Editing
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+
+      <!-- Locked context strip -->
+      <div class="hw-locked-strip">
+        <div class="hw-locked-item">
+          <span class="lk-label">Class</span>
+          <span class="lk-val">{{ form.hclass.value }}</span>
         </div>
-   <div class="card-body">
-    <form id="addhomework" method="POST" data-section-url = "{% url 'ajax_load_section' %}" data-subject-url = "{% url 'ajax_load_subject' %}"method="POST" enctype="multipart/form-data">
+        <div class="hw-locked-item" style="color:var(--border-dark);">›</div>
+        <div class="hw-locked-item">
+          <span class="lk-label">Section</span>
+          <span class="lk-val">{{ form.secs.value }}</span>
+        </div>
+        <div class="hw-locked-item" style="color:var(--border-dark);">›</div>
+        <div class="hw-locked-item">
+          <span class="lk-label">Subject</span>
+          <span class="lk-val">{{ form.subj.value }}</span>
+        </div>
+      </div>
+
+      <form id="addhomework" method="POST"
+            data-section-url="{% url 'ajax_load_section' %}"
+            data-subject-url="{% url 'ajax_load_subject' %}"
+            enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="row g-6">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{form.title}}
-                    <label for="id_title">Homework Title</label>
-                </div><br>
-                 <div class="form-floating form-floating-outline">
-                  {{form.homework_date}}
-                  <label for="id_homework_date">Homework Date</label>
-                </div>
-            </div>
-            <div class="col-md-6">
+        <!-- ── Assignment Info ── -->
+        <p class="form-section-label"><i class="ti ti-text-caption"></i> Assignment Info</p>
+        <div class="hw-form-grid">
 
-                     <div class="form-floating form-floating-outline">
-                   {{form.description}}
-                   <label for="id_description">Description (Characters)<small id="charCount">0 / 135</small></label>
-                </div>
-
-
-            </div>
-        </div>
-        <br>
-        <div class="row g-6">
-           <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                  {{form.submission_date}}
-                  <label for="id_submission_date">Submission Date</label>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-               <div class="form-floating form-floating-outline">
-                  {{form.attachment}}
-                  <label for="id_attachment">Submission Date</label>
-                </div>
-            </div>
-        </div>
-        <br>
-
-        <div class="row g-6">
-           <div class="col-md-6">
-
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-
-                </div>
-            </div>
-        </div>
-        <br>
-		 <div class="row g-6">
-           <div class="col-md-6">
-
-            </div>
+          <div class="hw-field hw-field-full">
+            <label>Homework Title <span class="req">*</span></label>
+            {{ form.title }}
+          </div>
 
         </div>
-        <br>
-            {{form.created_by}}
-            {{form.subj}}
-            {{form.secs}}
-            {{form.hclass}}
-            {{form.acad_yr}}
-            {{form.school_homework}}
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <button type="reset" class="btn btn-danger">Clear</button>
 
-            </div>
+        <!-- ── Schedule ── -->
+        <p class="form-section-label"><i class="ti ti-calendar"></i> Schedule</p>
+        <div class="hw-form-grid">
 
-        </form>
-   </div>
+          <div class="hw-field">
+            <label>Homework Date <span class="req">*</span></label>
+            {{ form.homework_date }}
+          </div>
+
+          <div class="hw-field">
+            <label>Submission Date <span class="req">*</span></label>
+            {{ form.submission_date }}
+          </div>
+
+        </div>
+
+        <!-- ── Description & Attachment ── -->
+        <p class="form-section-label"><i class="ti ti-file-description"></i> Description &amp; Attachment</p>
+        <div class="hw-form-grid">
+
+          <div class="hw-field">
+            <label>Description <span style="color:var(--muted); font-weight:500; text-transform:none; letter-spacing:0;">(max 135 chars)</span></label>
+            {{ form.description }}
+            <div class="char-counter" id="charCount">0 / 135</div>
+          </div>
+
+          <div class="hw-field">
+            <label>Attachment</label>
+            {{ form.attachment }}
+            <span style="font-size:11px; color:var(--muted); margin-top:3px;">Upload a new file to replace the existing one</span>
+          </div>
+
+        </div>
+
+        <!-- Hidden system fields (locked — not editable in update) -->
+        <div class="hw-hidden">
+          {{ form.created_by }}
+          {{ form.subj }}
+          {{ form.secs }}
+          {{ form.hclass }}
+          {{ form.acad_yr }}
+          {{ form.school_homework }}
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ti ti-shield-check" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <button type="reset" form="addhomework" class="pc-btn pc-btn-outline">
+          <i class="ti ti-eraser" style="font-size:14px;"></i> Clear
+        </button>
+        <button type="submit" form="addhomework" class="pc-btn pc-btn-primary">
+          <i class="ti ti-device-floppy" style="font-size:14px;"></i> Save Changes
+        </button>
+      </div>
     </div>
+
+  </div><!-- /pc-card -->
 </div>
 
-<script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script type='text/javascript'>
-    $(document).ready(function(){
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+$(document).ready(function () {
 
-        // Dropdown change AJAX
-        $("#id_hclass").change(function(){
-            // First AJAX request to data-section-url
-            var url1 = $("#addhomework").attr("data-section-url");
-            var classId = $(this).val();
-            $.ajax({
-                url: url1,
-                data: {
-                    'Class_Id': classId
-                },
-                success: function (data) {
-                    $("#id_secs").html(data);
-                }
-            });
+  // Sync char counter with any pre-filled value on load
+  var maxLen = 135;
+  var initial = $("#id_description").val() || "";
+  $("#charCount").text(initial.length + " / " + maxLen);
 
-            // Second AJAX request to data-subject-url
-            var url2 = $("#addhomework").attr("data-subject-url");
-            $.ajax({
-                url: url2,
-                data: {
-                    'Class_Id': classId
-                },
-                success: function (data) {
-                    $("#id_subj").html(data);
-                }
-            });
-        });
+  $("#id_description").on("input", function () {
+    var text = $(this).val();
+    if (text.length > maxLen) {
+      $(this).val(text.substring(0, maxLen));
+      text = $(this).val();
+    }
+    var pct = text.length / maxLen;
+    var $c = $("#charCount");
+    $c.text(text.length + " / " + maxLen).removeClass("warn limit");
+    if (pct >= 1)        $c.addClass("limit");
+    else if (pct >= 0.8) $c.addClass("warn");
+  });
 
-        // Character counter for description textarea
-        var maxLength = 135;
-        $("#id_description").on("input", function(){
-            var text = $(this).val();
-
-            // Prevent typing beyond max length
-            if (text.length > maxLength) {
-                $(this).val(text.substring(0, maxLength));
-                text = $(this).val();
-            }
-
-            // Update counter
-            $("#charCount").text(text.length + " / " + maxLength);
-
-            // Optional: turn red when limit reached
-            if(text.length >= maxLength){
-                $("#charCount").css("color", "red");
-            } else {
-                $("#charCount").css("color", "");
-            }
-        });
-    });
+});
 </script>
+
 {% endblock %}

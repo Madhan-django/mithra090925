@@ -1,195 +1,100 @@
 {% extends 'panel/index.html' %}
 {% block content %}
-<style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
+<!-- Page Header -->
+<div class="pc-page-header">
 
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Dashboard</a>
+      <span class="pc-breadcrumb-sep">›</span>
+      <a href="{% url 'listsec' %}">Sections</a>
+      <span class="pc-breadcrumb-sep">›</span>
+      <span>Edit Section</span>
+    </div>
 
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
+    <div class="pc-page-title">Edit Section</div>
+    <div class="pc-page-sub">Update section details</div>
+  </div>
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
+  <div class="pc-page-header-right">
+    <a href="{% url 'listsec' %}" class="pc-btn pc-btn-outline">
+      <i class="mdi mdi-arrow-left"></i> Back
+    </a>
+  </div>
 
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
-    td{
-     text-align:center;
-    }
-    .btn{
-      padding:10px;
-      margin-top:3px;
-    }
-</style>
-
-<div class="col-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                   Sections
-                </span>
-            </h5>
-        </div>
-                  <div class="card-body">
-
-					  <form action ="" method="POST">
-                        {% csrf_token %}
-                          <div class="row">
-                              <div class="col-md-6">
-                                  {{form.as_p}}
-                              </div>
-                              <div class="col-md-6">
-                                  <br>
-                                  <button type="submit" class="btn btn-primary">Update</button>
-
-                              </div>
-                          </div>
-
-
-					  </form>
-				  </div>
-				</div>
 </div>
+
+
+<!-- Form Card -->
+<div class="pc-card" style="max-width:720px;">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="mdi mdi-pencil-outline" style="color:var(--accent);margin-right:6px;"></i>
+        Section Details
+      </div>
+      <div class="pc-card-sub">
+        Modify the section information below
+      </div>
+    </div>
+  </div>
+
+  <div class="pc-card-body">
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="row">
+
+        <!-- Section Name -->
+        <div class="col-md-6">
+          <div class="pc-form-group">
+            <label class="pc-label">
+              Section Name <span class="req">*</span>
+            </label>
+
+            <div class="pc-input-group">
+              <i class="mdi mdi-alphabetical pc-input-icon"></i>
+              {{ form.section_name }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Hidden fields -->
+      {{ form.class_sec_name }}
+      {{ form.school_name }}
+      {{ form.acad_year }}
+
+      <div class="pc-divider"></div>
+
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+
+        <a href="{% url 'listsec' %}" class="pc-btn pc-btn-outline">
+          <i class="mdi mdi-close"></i> Cancel
+        </a>
+
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="mdi mdi-check-circle-outline"></i> Update Section
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<style>
+#id_section_name{
+  width:100%;
+  padding-left:38px;
+}
+</style>
 
 {% endblock %}

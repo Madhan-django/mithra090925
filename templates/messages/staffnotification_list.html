@@ -1,10 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="pc-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>Staff Notifications</h2>
+        <a href="{% url 'staff_notification_send' %}" class="pc-btn pc-btn-primary">
+            <i class="ri-send-plane-line"></i> Send Notification
+        </a>
+    </div>
+
+    <table class="pc-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Sent By</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Read / Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for n in notifications %}
+            <tr>
+                <td>{{ n.title }}</td>
+                <td>{{ n.created_by_id }}</td>
+                <td>{{ n.create_date|date:"d M Y, h:i A" }}</td>
+                <td>
+                    <span class="pc-badge pc-badge-{% if n.status == 'sent' %}success{% else %}warning{% endif %}">
+                        {{ n.status }}
+                    </span>
+                </td>
+                <td>{{ n.success_count }} / {{ n.total_count }}</td>
+                <td><a href="{% url 'staff_notification_detail' n.pk %}" class="pc-btn pc-btn-sm">View</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6"><div class="pc-empty">No notifications sent yet.</div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

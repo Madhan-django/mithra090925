@@ -1,10 +1,181 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+  .result-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+  }
+  .result-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-lg);
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    text-align: center;
+  }
+  .result-icon-wrap {
+    padding: 32px 24px 20px;
+  }
+  .result-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 16px;
+  }
+  .result-body { padding: 0 28px 28px; }
+  .result-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
+  .result-msg   { font-size:13.5px; color:var(--text-md); line-height:1.6; margin-bottom:20px; }
+  .result-meta  {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 16px;
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  .result-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .result-meta-row:last-child { border-bottom: none; }
+  .result-meta-label { color:var(--text-sm); font-weight:600; }
+  .result-meta-val   { color:var(--text); font-weight:700; font-family:var(--f-mono); font-size:12px; }
+</style>
+
+<div class="result-wrap">
+  <div class="result-card">
+
+    {% if status == 'success' %}
+    <!-- ══ SUCCESS ══ -->
+    <div class="result-icon-wrap" style="background:var(--green-lt);">
+      <div class="result-icon" style="background:#fff; box-shadow:0 4px 16px rgba(5,150,105,.2);">
+        <i class="ri-checkbox-circle-line" style="color:var(--green); font-size:36px;"></i>
+      </div>
+      <div class="result-title" style="color:var(--green);">Payment Successful</div>
+    </div>
+    <div class="result-body">
+      <p class="result-msg">{{ message }}</p>
+      <div class="result-meta">
+        {% if receipt %}
+        <div class="result-meta-row">
+          <span class="result-meta-label">Receipt No</span>
+          <span class="result-meta-val">{{ receipt.reciept_no }}</span>
+        </div>
+        <div class="result-meta-row">
+          <span class="result-meta-label">Date</span>
+          <span class="result-meta-val">{{ receipt.reciept_date }}</span>
+        </div>
+        <div class="result-meta-row">
+          <span class="result-meta-label">Amount Paid</span>
+          <span class="result-meta-val">₹ {{ receipt.paid_amt }}</span>
+        </div>
+        <div class="result-meta-row">
+          <span class="result-meta-label">Payment Mode</span>
+          <span class="result-meta-val">{{ receipt.payment_type }}</span>
+        </div>
+        {% endif %}
+        {% if txnid %}
+        <div class="result-meta-row">
+          <span class="result-meta-label">PayU Ref</span>
+          <span class="result-meta-val">{{ txnid }}</span>
+        </div>
+        {% endif %}
+        {% if invoice %}
+        <div class="result-meta-row">
+          <span class="result-meta-label">Invoice</span>
+          <span class="result-meta-val">{{ invoice.fee_cat.invoice_title }}</span>
+        </div>
+        {% endif %}
+      </div>
+      <a href="{% url 'student_fee_invoice' %}" class="pc-btn pc-btn-primary" style="width:100%;">
+        <i class="ri-arrow-left-line"></i> Back to Fee Details
+      </a>
+    </div>
+
+    {% elif status == 'failure' %}
+    <!-- ══ FAILURE ══ -->
+    <div class="result-icon-wrap" style="background:var(--rose-lt);">
+      <div class="result-icon" style="background:#fff; box-shadow:0 4px 16px rgba(225,29,72,.2);">
+        <i class="ri-close-circle-line" style="color:var(--rose); font-size:36px;"></i>
+      </div>
+      <div class="result-title" style="color:var(--rose);">Payment Failed</div>
+    </div>
+    <div class="result-body">
+      <p class="result-msg">{{ message }}</p>
+      {% if reason %}
+      <div class="result-meta">
+        <div class="result-meta-row">
+          <span class="result-meta-label">Reason</span>
+          <span class="result-meta-val">{{ reason }}</span>
+        </div>
+        {% if txnid %}
+        <div class="result-meta-row">
+          <span class="result-meta-label">Transaction ID</span>
+          <span class="result-meta-val">{{ txnid }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'student_fee_invoice' %}" class="pc-btn pc-btn-outline" style="flex:1;">
+          <i class="ri-arrow-left-line"></i> Back
+        </a>
+        <a href="javascript:history.back()" class="pc-btn pc-btn-primary" style="flex:1;">
+          <i class="ri-refresh-line"></i> Try Again
+        </a>
+      </div>
+    </div>
+
+    {% elif status == 'pending' %}
+    <!-- ══ PENDING ══ -->
+    <div class="result-icon-wrap" style="background:var(--amber-lt);">
+      <div class="result-icon" style="background:#fff; box-shadow:0 4px 16px rgba(217,119,6,.2);">
+        <i class="ri-time-line" style="color:var(--amber); font-size:36px;"></i>
+      </div>
+      <div class="result-title" style="color:var(--amber);">Payment Pending</div>
+    </div>
+    <div class="result-body">
+      <p class="result-msg">{{ message }}</p>
+      {% if txnid %}
+      <div class="result-meta">
+        <div class="result-meta-row">
+          <span class="result-meta-label">Transaction ID</span>
+          <span class="result-meta-val">{{ txnid }}</span>
+        </div>
+      </div>
+      {% endif %}
+      <a href="{% url 'student_fee_invoice' %}" class="pc-btn pc-btn-warning" style="width:100%;">
+        <i class="ri-arrow-left-line"></i> Back to Fee Details
+      </a>
+    </div>
+
+    {% else %}
+    <!-- ══ ERROR ══ -->
+    <div class="result-icon-wrap" style="background:var(--rose-lt);">
+      <div class="result-icon" style="background:#fff;">
+        <i class="ri-error-warning-line" style="color:var(--rose); font-size:36px;"></i>
+      </div>
+      <div class="result-title" style="color:var(--rose);">Verification Error</div>
+    </div>
+    <div class="result-body">
+      <p class="result-msg">{{ message }}</p>
+      <a href="{% url 'student_fee_invoice' %}" class="pc-btn pc-btn-outline" style="width:100%;">
+        <i class="ri-arrow-left-line"></i> Back
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

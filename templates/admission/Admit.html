@@ -1,284 +1,466 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
+<div class="container-fluid" style="max-width: 1200px; padding: 24px;">
+
+    <!-- Page Header -->
+    <div class="pc-page-header">
+        <div class="pc-page-header-left">
+            <div class="pc-breadcrumb">
+                <a href="{% url 'home_dashboard' %}">Dashboard</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <a href="{% url 'students_list' %}">Students</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <span>New Student</span>
+            </div>
+            <h1 class="pc-page-title">Add New Student</h1>
+            <p class="pc-page-sub">Register a new student to the school</p>
+        </div>
+        <div class="pc-page-header-right">
+            <a href="#" class="pc-btn pc-btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Students
+            </a>
+        </div>
+    </div>
+
+    <form id="addstudform"
+          data-section-url="{% url 'ajax_load_section' %}"
+          method="POST"
+          enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Personal Information Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-user" style="color:var(--accent);margin-right:6px;"></i>
+                        Personal Information
+                    </div>
+                    <div class="pc-card-sub">Student's personal and family details</div>
+                </div>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                    <i class="fas fa-id-card"></i> Section 1
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-user"></i> First Name
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.first_name }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-user"></i> Last Name
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-venus-mars"></i> Gender
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.gender }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-birthday-cake"></i> Date of Birth
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.dob_date }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-praying-hands"></i> Religion
+                            </label>
+                            {{ form.religion }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-users"></i> Caste
+                            </label>
+                            {{ form.caste }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-tint"></i> Blood Group
+                            </label>
+                            {{ form.blood_group }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Important for medical emergencies
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-map-marker-alt"></i> Address
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.address }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-phone"></i> Phone Number
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.phone }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Parent Information Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-user-friends" style="color:var(--accent);margin-right:6px;"></i>
+                        Parent / Guardian Information
+                    </div>
+                    <div class="pc-card-sub">Father and mother details</div>
+                </div>
+                <span class="pc-badge pc-badge-info pc-badge-no-dot">
+                    <i class="fas fa-users"></i> Section 2
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-male"></i> Father's Name
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.father_name }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-female"></i> Mother's Name
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.mother_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-briefcase"></i> Father's Occupation
+                            </label>
+                            {{ form.father_occupation }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-briefcase"></i> Mother's Occupation
+                            </label>
+                            {{ form.mother_occupation }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Academic Information Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-graduation-cap" style="color:var(--accent);margin-right:6px;"></i>
+                        Academic Information
+                    </div>
+                    <div class="pc-card-sub">Admission details, class, and section</div>
+                </div>
+                <span class="pc-badge pc-badge-success pc-badge-no-dot">
+                    <i class="fas fa-book"></i> Section 3
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-hashtag"></i> Admission Number
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.admn_no }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Unique admission number for the student
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-calendar"></i> Admission Date
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.admn_date }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-list-ol"></i> Roll Number
+                            </label>
+                            {{ form.roll_no }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-chalkboard"></i> Class
+                                <span class="req">*</span>
+                            </label>
+                            <select name="class_name" class="pc-select" required id="id_class_name">
+                                <option value="">Select Class</option>
+                                {% for ccls in cls %}
+                                <option value="{{ ccls.id }}">{{ ccls }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-users-class"></i> Section
+                                <span class="req">*</span>
+                            </label>
+                            <select name="secs" class="pc-select" id="id_secs">
+                                <option value="">Select Section</option>
+                            </select>
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Select class first to load sections
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-toggle-on"></i> Student Status
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.student_status }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Fields -->
+                <div style="display: none;">
+                    {{ form.ac_year }}
+                    {{ form.school_student }}
+                </div>
+
+                <div class="pc-alert pc-alert-info" style="margin-top: 20px; margin-bottom: 0;">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Note:</strong> Make sure the admission number is unique. Section dropdown will load after selecting the class.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Profile Photo Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">
+                        <i class="fas fa-camera" style="color:var(--accent);margin-right:6px;"></i>
+                        Profile Photo
+                    </div>
+                    <div class="pc-card-sub">Upload student's photograph</div>
+                </div>
+                <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+                    <i class="fas fa-image"></i> Section 4
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-6">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-upload"></i> Choose Photo
+                            </label>
+                            <input type="file"
+                                   class="pc-input"
+                                   id="id_student_photo"
+                                   name="student_photo"
+                                   accept="image/*" />
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Upload a passport-size photo (Max 120 KB, JPG/PNG)
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div id="photoPreviewContainer" style="display:none;">
+                            <img id="photoPreview"
+                                 src="#"
+                                 alt="Student Photo Preview"
+                                 style="max-width: 180px; max-height: 180px; border-radius: var(--r-lg); border: 3px solid var(--border); box-shadow: var(--sh-md);">
+                            <p style="margin-top: 8px; font-size: 12px; color: var(--text-sm);">
+                                <i class="fas fa-check-circle" style="color: var(--green);"></i> Photo ready to upload
+                            </p>
+                        </div>
+                        <div id="photoPlaceholder" style="
+                            width: 180px;
+                            height: 180px;
+                            margin: 0 auto;
+                            background: var(--surface2);
+                            border: 2px dashed var(--border-dark);
+                            border-radius: var(--r-lg);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-direction: column;
+                            color: var(--muted);">
+                            <i class="fas fa-user-circle" style="font-size: 48px; margin-bottom: 8px;"></i>
+                            <span style="font-size: 12px;">No photo selected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Action Buttons Card -->
+        <div class="pc-card">
+            <div class="pc-card-body" style="padding: 24px;">
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <button type="submit" class="pc-btn pc-btn-primary pc-btn-lg">
+                        <i class="fas fa-check"></i> Save Student
+                    </button>
+                    <button type="reset" class="pc-btn pc-btn-outline pc-btn-lg">
+                        <i class="fas fa-redo"></i> Reset Form
+                    </button>
+                    <a href="#" class="pc-btn pc-btn-danger pc-btn-lg">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
 <style>
-/* === General Typography === */
-body, h1, h3, h5, th, td, label, input, button, select {
-    font-family: 'Roboto', sans-serif;
+/* Ensure form fields use the panel component styling */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--t) ease, box-shadow var(--t) ease;
 }
 
-/* === Card Layout === */
-  /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+input::placeholder,
+textarea::placeholder {
+    color: var(--muted);
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
-
-h6 {
-    font-weight: 600;
-    color: #007bff;
+/* File input styling */
+input[type="file"] {
+    padding: 8px 13px;
+    font-size: 13px;
 }
 
-.form-floating > label {
-    color: #555;
+/* Photo preview animation */
+#photoPreviewContainer {
+    animation: fadeIn 0.3s ease;
 }
 
-.btn-primary {
-    background: linear-gradient(90deg, #007bff, #00c6ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(90deg, #0069d9, #00aaff);
-}
-
-.btn-outline-secondary:hover {
-    background-color: #6c757d;
-    color: #fff;
-}
-
-img {
-    border-radius: 10px;
-    border: 2px solid #e3e3e3;
-}
-
-/* === Spacing Enhancements === */
-.card-body {
-    padding: 1.5rem 2rem;
-}
-
-hr {
-    border-top: 2px solid #007bff33;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
-
-<div class="card">
-    <div class="card-title text-center">
-   <h5><span class="badge bg-light text-dark">New Student</span></h5>
-    </div>
-    <form class="card-body" id="addstudform"
-          data-section-url="{% url 'ajax_load_section' %}"
-          method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <br>
-
-        <!-- === Personal Information === -->
-        <h6>1. Personal Information</h6><br>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.first_name }}
-                    <label for="id_first_name">First Name</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.last_name }}
-                    <label for="id_last_name">Last Name</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.gender }}
-                    <label for="id_gender">Gender</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.dob_date }}
-                    <label for="id_dob_date">Date of Birth</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.religion }}
-                    <label for="id_religion">Religion</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.caste }}
-                    <label for="id_caste">Caste</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.blood_group }}
-                    <label for="id_blood_group">Blood Group</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.address }}
-                    <label for="id_address">Address</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.phone }}
-                    <label for="id_phone">Phone</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.email }}
-                    <label for="id_email">Email</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.father_name }}
-                    <label for="id_father_name">Father Name</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.mother_name }}
-                    <label for="id_mother_name">Mother Name</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.father_occupation }}
-                    <label for="id_father_occupation">Father Occupation</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.mother_occupation }}
-                    <label for="id_mother_occupation">Mother Occupation</label>
-                </div>
-            </div>
-        </div>
-
-        <hr class="my-4"/>
-        <br>
-        <!-- === School Info === -->
-        <h6>2. School Info</h6><br>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.admn_no }}
-                    <label for="id_admn_no">Admission No</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.admn_date }}
-                    <label for="id_admn_date">Admission Date</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.roll_no }}
-                    <label for="id_roll_no">Roll No</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    <select name="class_name" class="form-control" required id="id_class_name">
-                        <option value="">Select Class</option>
-                        {% for ccls in cls %}
-                        <option value="{{ ccls.id }}">{{ ccls }}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="id_class_name">Class Name</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    <select name="secs" class="form-control" id="id_secs">
-                        <option value="">Select Section</option>
-                    </select>
-                    <label for="id_secs">Section</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    {{ form.student_status }}
-                    <label for="id_student_status">Status</label>
-                </div>
-            </div>
-        </div><br>
-
-        <div class="row g-3 align-items-center">
-            <div class="col-md-6">
-                <div class="form-floating form-floating-outline">
-                    <input type="file" class="form-control" id="id_student_photo" name="student_photo" accept="image/*" />
-                    <label for="id_student_photo">Profile Photo</label>
-                </div>
-            </div>
-            <div class="col-md-6 text-center">
-                <img id="photoPreview" src="#" alt="Preview" width="150" height="150" style="display:none;">
-            </div>
-        </div>
-
-        {{ form.ac_year }}
-        {{ form.school_student }}
-
-        <div class="pt-4 text-center">
-            <button type="submit" class="btn btn-primary me-2">Save</button>
-            <button type="reset" class="btn btn-outline-secondary">Cancel</button>
-        </div>
-    </form>
-</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
@@ -288,11 +470,18 @@ $(document).ready(function () {
     $("#id_class_name").change(function () {
         var url = $("#addstudform").attr("data-section-url");
         var classId = $(this).val();
+
+        // Show loading state
+        $("#id_secs").html('<option value="">Loading sections...</option>');
+
         $.ajax({
             url: url,
             data: { 'Class_Id': classId },
             success: function (data) {
                 $("#id_secs").html(data);
+            },
+            error: function() {
+                $("#id_secs").html('<option value="">Error loading sections</option>');
             }
         });
     });
@@ -300,20 +489,45 @@ $(document).ready(function () {
     // === Image Preview & File Validation ===
     $("#id_student_photo").on("change", function () {
         const file = this.files[0];
+
         if (file) {
+            // Validate file size (120 KB = 120 * 1024 bytes)
             if (file.size > 120 * 1024) {
-                alert("File size must be less than 120 KB!");
+                alert("⚠️ File size must be less than 120 KB!\n\nPlease choose a smaller image or compress the current one.");
                 $(this).val("");
-                $("#photoPreview").hide();
+                $("#photoPreviewContainer").hide();
+                $("#photoPlaceholder").show();
                 return;
             }
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                alert("⚠️ Only JPG and PNG images are allowed!");
+                $(this).val("");
+                $("#photoPreviewContainer").hide();
+                $("#photoPlaceholder").show();
+                return;
+            }
+
+            // Show preview
             const reader = new FileReader();
             reader.onload = function (e) {
-                $("#photoPreview").attr("src", e.target.result).show();
+                $("#photoPreview").attr("src", e.target.result);
+                $("#photoPlaceholder").hide();
+                $("#photoPreviewContainer").show();
             };
             reader.readAsDataURL(file);
+        } else {
+            $("#photoPreviewContainer").hide();
+            $("#photoPlaceholder").show();
         }
     });
+
+    // Add pc-input class to all form inputs
+    const inputs = $('input[type="text"], input[type="email"], input[type="number"], input[type="date"], input[type="tel"], textarea');
+    inputs.addClass('pc-input');
 });
 </script>
+
 {% endblock %}

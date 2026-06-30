@@ -1,103 +1,136 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'category_list' %}">Categories</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Category</span>
+    </div>
+    <div class="pc-page-title">New Category</div>
+    <div class="pc-page-sub">Add a new inventory category</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'category_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to Categories
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card" style="max-width:560px;">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-folders-line me-2" style="color:var(--accent);"></i>Category Details
+      </div>
+      <div class="pc-card-sub">Fill in the details to create a new category</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+      <i class="ri-add-line"></i>&nbsp; New Entry
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="post" novalidate id="categoryForm">
+      {% csrf_token %}
+
+      {{ form.as_p }}
+
+      <div class="pc-divider"></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Create Category
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Reset
+        </button>
+        <a href="{% url 'category_list' %}" class="pc-btn pc-btn-danger">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
 <style>
-    /* General Typography */
-    h1, h3, h5, label {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-    /* Gradient Header */
-    .card-title {
-        background: linear-gradient(90deg, #007bff, #6610f2);
-        color: white;
-        height: 50px;
-        padding: 12px;
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .card-title h5 {
-        margin: 0;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        font-size: 18px;
-    }
-
-    .card-title h5 span {
-        display: inline-block;
-    }
-
-    /* Form Controls */
-    .form-control {
-        border-radius: 8px;
-        box-shadow: none;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    form {
-        padding-top: 10px;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .text-end {
-        text-align: right;
-        padding-right: 20px;
-        padding-top: 10px;
-    }
+#categoryForm p {
+  margin-bottom: 18px;
+}
+#categoryForm label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+  margin-bottom: 6px;
+  font-family: var(--f-sans);
+}
+#categoryForm input[type="text"],
+#categoryForm input[type="email"],
+#categoryForm input[type="number"],
+#categoryForm input[type="date"],
+#categoryForm input[type="tel"],
+#categoryForm input[type="url"],
+#categoryForm select,
+#categoryForm textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+  appearance: none;
+}
+#categoryForm select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+#categoryForm textarea {
+  resize: vertical;
+  min-height: 72px;
+  height: 72px;
+}
+#categoryForm input:focus,
+#categoryForm select:focus,
+#categoryForm textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+#categoryForm input::placeholder,
+#categoryForm textarea::placeholder { color: var(--muted); }
+#categoryForm ul.errorlist { list-style:none; padding:0; margin:0; }
+#categoryForm ul.errorlist li {
+  font-size:12px; color:var(--rose);
+  font-weight:600; font-family:var(--f-sans);
+}
+#categoryForm .helptext {
+  display:block; font-size:11px;
+  color:var(--muted); margin-top:4px;
+  font-family:var(--f-sans);
+}
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card mt-4">
-    <div class="card">
-        <!-- Gradient Header -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">New Category</span></h5>
-        </div>
-
-        <!-- Form Section -->
-        <div class="card-body">
-            <form method="post" novalidate>
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Create</button>
-                    <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 {% endblock %}

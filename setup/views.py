@@ -8,6 +8,7 @@ from django.contrib.auth.models import User,Group
 from django.contrib.auth.hashers import make_password
 from .models import academicyr,currentacademicyr,sclass,section,subjects,receipt_template,homework_time
 from .forms import add_Acad_Form,set_current_yr,add_class,add_section,add_subjects,receipt_template_form,add_homeworktime_form
+from fees.models import SchoolPayUConfig
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django_q.models import Schedule
@@ -480,3 +481,26 @@ def copysubjects(request):
         messages.success(request, f"Subjects copied to {copyyear.acad_year} successfully.")
     return redirect('listsubjects')  # 👈 redirect back to subject list
 
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def payu_config_view(request):
+    sch_id = request.session['sch_id']
+    sdata  = school.objects.get(pk=sch_id)
+
+    config, _ = SchoolPayUConfig.objects.get_or_create(
+        school=sdata,
+        defaults={'merchant_key': '', 'merchant_salt': '', 'is_active': False}
+    )
+
+    if request.method == 'POST':
+        config.merchant_key  = request.POST.get('merchant_key', '').strip()
+        config.merchant_salt = request.POST.get('merchant_salt', '').strip()
+        config.is_active     = request.POST.get('is_active') == 'on'
+        config.is_test       = request.POST.get('is_test') == 'on'
+        config.save()
+        messages.success(request, 'PayU configuration saved successfully.')
+        return redirect('payu_config_view')
+
+    return render(request, 'setup/payu_config.html', {
+        'config': config,
+        'skool':  sdata,
+    })

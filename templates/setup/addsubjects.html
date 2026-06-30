@@ -1,192 +1,217 @@
 {% extends 'panel/index.html' %}
+{% load static %}
+
 {% block content %}
-<style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
-    td{
-     text-align:center;
-    }
-</style>
- <div class="card">
-
-     <div class="card-title text-center">
-         <h5><span class="badge bg-light text-dark">New Subject</span></h5>
-     </div>
-
-     <form action="{% url 'addsubject' %}" method="POST">
-         {% csrf_token %}
-           <br>
-         <label for="id_subject_name">Subject name:</label>
-         <input type="text" name="subject_name" class="form-control" maxlength="50" required="" id="id_subject_name">
-         <label for="id_subject_code">Subject code:</label>
-         <input type="text" name="subject_code" class="form-control" maxlength="10" required="" id="id_subject_code">
-         <label for="id_subject_class">Subject class:</label>
-         <select name="subject_class" class="form-control" required="" id="id_subject_class">
-             <option value="" selected="">---------</option>
-             {% for cl in cls %}
-             <option value="{{cl.id}}">{{cl.name}}</option>
-             {% endfor %}
-         </select>
-			  {{form.subject_year}}
-			  {{form.subject_school}}
-         <br>
-         <div class="text-end">
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <button type="reset" class="btn btn-danger">Submit</button>
-         </div>
-         <br>
-     </form>
-
+<!-- Page Header -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep">/</span>
+      <a href="{% url 'listsubjects' %}">Subjects</a>
+      <span class="pc-breadcrumb-sep">/</span>
+      <span>New Subject</span>
+    </div>
+    <h1 class="pc-page-title">Add New Subject</h1>
+    <p class="pc-page-sub">Create a new subject for your academic system</p>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'listsubjects' %}" class="pc-btn pc-btn-outline pc-btn-sm">
+      <i class="ti ti-arrow-left"></i> Back to List
+    </a>
+  </div>
 </div>
-<br><br>
+
+<!-- Main Form Card -->
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <h3 class="pc-card-title">Subject Information</h3>
+      <p class="pc-card-sub">Fill in the details below to add a new subject</p>
+    </div>
+  </div>
+
+  <div class="pc-card-body">
+    <form action="{% url 'addsubject' %}" method="POST" id="subjectForm">
+      {% csrf_token %}
+
+      <!-- Hidden Fields -->
+      <div style="display: none;">
+        {{ form.subject_year }}
+        {{ form.subject_school }}
+      </div>
+
+      <!-- Form Grid -->
+      <div style="display: grid; gap: 20px;">
+
+        <!-- Subject Name -->
+        <div class="pc-form-group">
+          <label for="id_subject_name" class="pc-label">
+            Subject Name <span class="req">*</span>
+          </label>
+          <input
+            type="text"
+            name="subject_name"
+            class="pc-input"
+            maxlength="50"
+            required
+            id="id_subject_name"
+            placeholder="e.g., Mathematics, Physics, Chemistry"
+          >
+        </div>
+
+        <!-- Subject Code -->
+        <div class="pc-form-group">
+          <label for="id_subject_code" class="pc-label">
+            Subject Code <span class="req">*</span>
+          </label>
+          <input
+            type="text"
+            name="subject_code"
+            class="pc-input"
+            maxlength="10"
+            required
+            id="id_subject_code"
+            placeholder="e.g., MATH101, PHY202"
+            style="text-transform: uppercase;"
+          >
+          <small style="color: var(--muted); font-size: 11.5px; display: block; margin-top: 4px;">
+            <i class="ti ti-info-circle"></i> Use a unique code for this subject
+          </small>
+        </div>
+
+        <!-- Subject Class (Full Width) -->
+        <div class="pc-form-group">
+          <label for="id_subject_class" class="pc-label">
+            Class / Grade <span class="req">*</span>
+          </label>
+          <select name="subject_class" class="pc-select" required id="id_subject_class">
+            <option value="" selected disabled>Select a class</option>
+            {% for cl in cls %}
+            <option value="{{cl.id}}">{{cl.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Card Footer with Actions -->
+  <div class="pc-form-actions">
+    <div></div>
+    <div style="display: flex; gap: 10px;">
+      <button type="submit" form="subjectForm" class="pc-btn pc-btn-primary">
+        <i class="ti ti-check"></i> Create Subject
+      </button>
+      <button type="reset" form="subjectForm" class="pc-btn pc-btn-outline">
+        <i class="ti ti-refresh"></i> Reset
+      </button>
+    </div><br>
+  </div>
+</div>
+
+<!-- Help Card -->
+<div class="pc-card-flat" style="margin-top: 20px;">
+  <div style="display: flex; align-items: start; gap: 12px;">
+    <i class="ti ti-bulb" style="font-size: 22px; color: var(--amber); flex-shrink: 0;"></i>
+    <div>
+      <strong style="color: var(--text); font-size: 13px; display: block; margin-bottom: 4px;">
+        Quick Tip
+      </strong>
+      <p style="color: var(--text-sm); font-size: 12.5px; margin: 0; line-height: 1.5;">
+        Subject codes should be unique across your system. We recommend using a pattern like
+        <code style="background: var(--accent-lt); padding: 2px 6px; border-radius: 4px; font-family: var(--f-mono); font-size: 11px;">DEPT###</code>
+        where DEPT is the department abbreviation and ### is a number.
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Custom adjustments for form elements to match PC design */
+#subjectForm .pc-input,
+#subjectForm .pc-select {
+  transition: all var(--t) ease;
+}
+
+#subjectForm .pc-input:focus,
+#subjectForm .pc-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+/* Make year/school fields match PC styling if they're Django widgets */
+#subjectForm select:not(.pc-select),
+#subjectForm input:not(.pc-input) {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+#subjectForm select:not(.pc-select) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+
+#subjectForm select:not(.pc-select):focus,
+#subjectForm input:not(.pc-input):focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+/* Form validation feedback */
+.pc-input:invalid:not(:placeholder-shown),
+.pc-select:invalid {
+  border-color: var(--rose);
+}
+
+.pc-input:valid:not(:placeholder-shown) {
+  border-color: var(--green);
+}
+
+/* Code tag styling in help text */
+code {
+  background: var(--accent-lt);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+</style>
+
+<script>
+// Optional: Add form validation feedback
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('subjectForm');
+
+  form.addEventListener('submit', function(e) {
+    const subjectCode = document.getElementById('id_subject_code');
+    if (subjectCode.value) {
+      subjectCode.value = subjectCode.value.toUpperCase();
+    }
+  });
+
+  // Auto-uppercase subject code as user types
+  const codeInput = document.getElementById('id_subject_code');
+  codeInput.addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+  });
+});
+</script>
+
 {% endblock %}

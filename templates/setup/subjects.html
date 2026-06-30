@@ -1,246 +1,239 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+<!-- Page Header -->
+<div class="pc-page-header">
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
-    td{
-     text-align:center;
-    }
-</style>
-
-<div class="card">
-    <div class="card-title text-center">
-        <h5><span class="badge bg-light text-dark">Subjects</span></h5>
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Dashboard</a>
+      <span class="pc-breadcrumb-sep">›</span>
+      <span>Subjects</span>
     </div>
-        <div class="text-end">
-             <a href="{% url 'addsubject' %}" type="button" class="btn btn-primary mt-2 mt-sm-0 btn-icon-text" align="right">
-                  <i class="mdi mdi-plus-circle"></i> New Subject </a>
 
-             <!-- Copy Button triggers modal -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#copyModal">
-                <i class="mdi mdi-content-copy"></i> Copy
-            </button>
-        </div>
+    <div class="pc-page-title">Subjects</div>
+    <div class="pc-page-sub">Manage subjects for each class</div>
+  </div>
 
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-                <thead class="table-dark">
-                <tr class="text-center">
-                    <th>Id</th>
-                    <th>Subjects</th>
-                    <th>Class</th>
-                    <th>School</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% if data %}
-                {% for sublst in data %}
-                <tr align="center">
-                    <td>{{ sublst.id }}</td>
-                    <td>{{ sublst.subject_name }}</td>
-                    <td>{{ sublst.subject_class }}</td>
-                    <td>{{ sublst.subject_school }}</td>
-                    <td>
-                        <form action="{% url 'updatesubject' sublst.id %}" method="POST" class="d-inline">
-                          {% csrf_token %}
-                            <button type="submit" class="btn btn-info"><i class="fas fa-edit"></i>Update</button>
-                        </form>
-                     {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                        <form action="{% url 'delsub' sublst.id %}" method="POST" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i>Delete</button>
-                        </form>
-                     {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                   <div class="alert alert-danger" role="alert">
-                    <p>No records are available to show.</p>
-                   </div>
+  <div class="pc-page-header-right">
+
+    <a href="{% url 'addsubject' %}" class="pc-btn pc-btn-primary">
+      <i class="mdi mdi-plus-circle-outline"></i> New Subject
+    </a>
+
+    <button class="pc-btn pc-btn-secondary"
+            data-bs-toggle="modal"
+            data-bs-target="#copyModal">
+      <i class="mdi mdi-content-copy"></i> Copy
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- KPI -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data|length }}</div>
+    <div class="pc-kpi-label">Total Subjects</div>
+  </div>
+</div>
+
+
+<!-- Subjects Table -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+
+    <div>
+      <div class="pc-card-title">
+        <i class="mdi mdi-book-open-variant" style="color:var(--accent);margin-right:6px;"></i>
+        All Subjects
+      </div>
+
+      <div class="pc-card-sub">
+        List of subjects configured for classes
+      </div>
+    </div>
+
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+      {{ data|length }} record{{ data|length|pluralize }}
+    </span>
+
+  </div>
+
+
+  <div class="pc-card-body" style="padding:0;">
+
+    <div class="pc-table-wrap" style="border:none;border-radius:0;">
+
+      <table class="pc-table">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th style="text-align:left;">Subject</th>
+            <th>Class</th>
+            <th>School</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+        {% if data %}
+
+          {% for sublst in data %}
+
+          <tr>
+
+            <td class="td-num">{{ forloop.counter }}</td>
+
+            <td class="td-name">
+
+              <span style="display:flex;align-items:center;gap:10px;">
+
+                <span style="
+                width:32px;height:32px;border-radius:8px;
+                background:var(--accent-lt);
+                color:var(--accent);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-weight:700;
+                font-size:13px;
+                flex-shrink:0;">
+                {{ sublst.subject_name|slice:":1"|upper }}
+                </span>
+
+                {{ sublst.subject_name }}
+
+              </span>
+
+            </td>
+
+            <td>
+              <span class="pc-badge pc-badge-info pc-badge-no-dot">
+                {{ sublst.subject_class }}
+              </span>
+            </td>
+
+            <td>{{ sublst.subject_school }}</td>
+
+            <td>
+
+              <div class="td-actions">
+
+                <form action="{% url 'updatesubject' sublst.id %}" method="POST">
+                  {% csrf_token %}
+                  <button class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                </form>
+
+                {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+
+                <form action="{% url 'delsub' sublst.id %}" method="POST">
+                  {% csrf_token %}
+                  <button class="pc-btn pc-btn-danger pc-btn-sm">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </form>
+
                 {% endif %}
-                </tbody>
-            </table>
-        </div>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          {% endfor %}
+
+        {% else %}
+
+          <tr class="pc-table-empty">
+            <td colspan="5">
+
+              <div class="pc-empty">
+
+                <i class="mdi mdi-book-remove pc-empty-icon"></i>
+
+                <div class="pc-empty-title">
+                  No subjects available
+                </div>
+
+                <div class="pc-empty-sub">
+                  Add a subject using the button above
+                </div>
+
+              </div>
+
+            </td>
+          </tr>
+
+        {% endif %}
+
+        </tbody>
+
+      </table>
+
     </div>
+
+  </div>
+
 </div>
+
+
 <!-- Copy Modal -->
-<div class="modal fade" id="copyModal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" action="{% url 'copysubjects' %}">
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h5 class="modal-title" id="copyModalLabel">Copy Subjects</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <label for="cpyyear" class="form-label">Select Academic Year</label>
-                    <select name="cpyyear" id="cpyyear" class="form-select" required>
-                        {% for yr in cpyears %}
-                            <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Copy</button>
-                </div>
-            </form>
+<div class="modal fade" id="copyModal" tabindex="-1">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <form method="post" action="{% url 'copysubjects' %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Copy Subjects</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
+
+        <div class="modal-body">
+
+          <label class="pc-label">Select Academic Year</label>
+
+          <select name="cpyyear" class="pc-select" required>
+
+            {% for yr in cpyears %}
+              <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
+            {% endfor %}
+
+          </select>
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button type="button"
+                  class="pc-btn pc-btn-outline"
+                  data-bs-dismiss="modal">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="pc-btn pc-btn-primary">
+            Copy Subjects
+          </button>
+
+        </div>
+
+      </form>
+
     </div>
+
+  </div>
 </div>
+
 {% endblock %}

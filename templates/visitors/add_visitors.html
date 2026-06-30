@@ -1,204 +1,229 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
-}
-
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
-}
-
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
-
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
-
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
-    display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
-</style>
-
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">New Visitor</span></h5>
-        </div>
-
-        <div class="card-body">
-
-        <form action="{% url 'add_visitor' %}" method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="webcam_image" id="webcam_image">
-
-            <div class="row">
-
-                <!-- ================= LEFT: PHOTO SECTION ================= -->
-                <div class="col-md-4">
-                    <div id="camera-box">
-                        <video id="video-preview" autoplay></video>
-                        <img id="captured-photo" style="display:none;">
-
-                        <button type="button" id="start-camera" class="btn btn-primary mt-2">Start Camera</button>
-                        <button type="button" id="capture-btn" class="btn btn-success mt-2">Capture</button>
-                    </div>
-                </div>
-
-                <!-- ================= RIGHT: FORM FIELDS ================= -->
-                <div class="col-md-8">
-                    <div class="row">
-
-                        <div class="col-md-6 form-group">
-                            <label>Name</label>
-                            {{ form.name }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Email</label>
-                            {{ form.email }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Phone</label>
-                            {{ form.phone }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Company</label>
-                            {{ form.company }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Address</label>
-                            {{ form.address }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Purpose</label>
-                            {{ form.purpose }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Meeting Person</label>
-                            {{ form.meeting_person }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Check-In-Time</label>
-                            {{ form.check_in_time }}
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label>Check-Out-Time</label>
-                            {{ form.check_out_time }}
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            {{ form.visitors_school }}
-
-            <div class="mt-3 text-end">
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <a href="{% url 'visitors_list' %}" class="btn btn-danger">Cancel</a>
-            </div>
-
-        </form>
-
-        </div>
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{%  url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'visitors_list' %}">Visitors</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New</span>
     </div>
+    <div class="pc-page-title">New Visitor</div>
+    <div class="pc-page-sub">Capture photo and fill in visitor details below</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'visitors_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to List
+    </a>
+  </div>
 </div>
 
+<!-- FORM CARD -->
+<div class="pc-card">
 
-<!-- ===================== JAVASCRIPT ===================== -->
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-user-received-line me-2" style="color:var(--accent);"></i>Visitor Details
+      </div>
+      <div class="pc-card-sub">All fields are required unless stated otherwise</div>
+    </div>
+  </div>
+
+  <div class="pc-card-body">
+    <form action="{% url 'add_visitor' %}" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="webcam_image" id="webcam_image">
+
+      <div style="display:grid; grid-template-columns:260px 1fr; gap:2rem; align-items:start;">
+
+        <!-- LEFT: Camera -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+
+          <!-- Camera Box -->
+          <div style="
+            width:100%; border-radius:var(--r-xl);
+            border:1px solid var(--border);
+            overflow:hidden; background:var(--surface2);
+            aspect-ratio:4/3;
+            display:flex; align-items:center; justify-content:center;
+            position:relative;">
+
+            <!-- Placeholder icon when camera off -->
+            <div id="camera-placeholder" style="
+              display:flex; flex-direction:column; align-items:center;
+              gap:8px; color:var(--text-md);">
+              <i class="ri-camera-off-line" style="font-size:36px;"></i>
+              <span style="font-size:12px;">Camera not started</span>
+            </div>
+
+            <video id="video-preview" autoplay
+                   style="display:none; width:100%; height:100%; object-fit:cover;">
+            </video>
+
+            <img id="captured-photo"
+                 style="display:none; width:100%; height:100%; object-fit:cover;"
+                 alt="Captured">
+          </div>
+
+          <!-- Camera Buttons -->
+          <button type="button" id="start-camera" class="pc-btn pc-btn-secondary" style="width:100%;">
+            <i class="ri-camera-line"></i> Start Camera
+          </button>
+          <button type="button" id="capture-btn" class="pc-btn pc-btn-primary" style="width:100%;" disabled>
+            <i class="ri-screenshot-line"></i> Capture Photo
+          </button>
+
+          <!-- Status badge -->
+          <span id="camera-status" class="pc-badge pc-badge-no-dot"
+                style="background:#fff1f2; color:#e11d48; font-size:12px; width:100%; text-align:center; padding:6px;">
+            <i class="ri-camera-off-line me-1"></i> No photo captured
+          </span>
+
+        </div>
+
+        <!-- RIGHT: Form Fields -->
+        <div>
+
+          <!-- Section: Personal Info -->
+          <div style="margin-bottom:1.5rem;">
+            <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                        letter-spacing:0.8px; color:var(--text-md);
+                        border-bottom:1px solid var(--border);
+                        padding-bottom:8px; margin-bottom:1rem;">
+              <i class="ri-user-line me-1"></i> Personal Information
+            </div>
+            <div class="pc-filter-row" style="align-items:flex-start;">
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Name</label>
+                {{ form.name }}
+              </div>
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Email</label>
+                {{ form.email }}
+              </div>
+            </div>
+            <div class="pc-filter-row" style="align-items:flex-start;">
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Phone</label>
+                {{ form.phone }}
+              </div>
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Company</label>
+                {{ form.company }}
+              </div>
+            </div>
+            <div class="pc-form-group">
+              <label class="pc-label">Address</label>
+              {{ form.address }}
+            </div>
+          </div>
+
+          <!-- Section: Visit Info -->
+          <div style="margin-bottom:1.5rem;">
+            <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                        letter-spacing:0.8px; color:var(--text-md);
+                        border-bottom:1px solid var(--border);
+                        padding-bottom:8px; margin-bottom:1rem;">
+              <i class="ri-calendar-check-line me-1"></i> Visit Information
+            </div>
+            <div class="pc-filter-row" style="align-items:flex-start;">
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Purpose</label>
+                {{ form.purpose }}
+              </div>
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Meeting Person</label>
+                {{ form.meeting_person }}
+              </div>
+            </div>
+            <div class="pc-filter-row" style="align-items:flex-start;">
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Check-In Time</label>
+                {{ form.check_in_time }}
+              </div>
+              <div class="pc-form-group" style="flex:1;">
+                <label class="pc-label">Check-Out Time</label>
+                {{ form.check_out_time }}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Hidden -->
+      {{ form.visitors_school }}
+
+      <!-- Divider -->
+      <hr style="border-color:var(--border); margin:1.5rem 0;">
+
+      <!-- Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <a href="{% url 'visitors_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+        <button type="reset" class="pc-btn pc-btn-secondary">
+          <i class="ri-refresh-line"></i> Clear
+        </button>
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Submit
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div><!-- /pc-card -->
+
 <script>
-let video = document.getElementById("video-preview");
-let startBtn = document.getElementById("start-camera");
-let captureBtn = document.getElementById("capture-btn");
-let capturedPhoto = document.getElementById("captured-photo");
-let webcamImage = document.getElementById("webcam_image");
+  const video       = document.getElementById("video-preview");
+  const startBtn    = document.getElementById("start-camera");
+  const captureBtn  = document.getElementById("capture-btn");
+  const captured    = document.getElementById("captured-photo");
+  const webcamInput = document.getElementById("webcam_image");
+  const placeholder = document.getElementById("camera-placeholder");
+  const status      = document.getElementById("camera-status");
 
-startBtn.onclick = function() {
-    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+  startBtn.addEventListener("click", function () {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
         video.srcObject = stream;
         video.style.display = "block";
-    });
-};
+        placeholder.style.display = "none";
+        captureBtn.disabled = false;
+        startBtn.innerHTML = '<i class="ri-camera-line"></i> Camera On';
+        startBtn.disabled = true;
+        status.style.background = "#fffbeb";
+        status.style.color = "#d97706";
+        status.innerHTML = '<i class="ri-camera-line me-1"></i> Camera active';
+      })
+      .catch(err => {
+        console.log("Webcam error:", err);
+        status.innerHTML = '<i class="ri-error-warning-line me-1"></i> Camera access denied';
+      });
+  });
 
-captureBtn.onclick = function() {
-    let canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
+  captureBtn.addEventListener("click", function () {
+    const canvas = document.createElement("canvas");
+    canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg");
 
-    let ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    captured.src           = dataUrl;
+    captured.style.display = "block";
+    video.style.display    = "none";
+    webcamInput.value      = dataUrl;
 
-    let dataUrl = canvas.toDataURL("image/jpeg");
-    capturedPhoto.src = dataUrl;
-    capturedPhoto.style.display = "block";
-
-    webcamImage.value = dataUrl;
-};
+    captureBtn.innerHTML = '<i class="ri-screenshot-line"></i> Retake Photo';
+    status.style.background = "#ecfdf5";
+    status.style.color      = "#059669";
+    status.innerHTML = '<i class="ri-checkbox-circle-line me-1"></i> Photo captured';
+  });
 </script>
 
 {% endblock %}

@@ -1,10 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="pc-card">
+    <h2>{{ notification.title }}</h2>
+    <p>{{ notification.message }}</p>
+    <p>Sent {{ notification.create_date|date:"d M Y, h:i A" }} by {{ notification.created_by_id }}</p>
+
+    <table class="pc-table">
+        <thead><tr><th>Staff</th><th>Read</th><th>Read At</th></tr></thead>
+        <tbody>
+            {% for r in recipients %}
+            <tr>
+                <td>{{ r.staff }}</td>
+                <td>
+                    <span class="pc-badge pc-badge-{% if r.is_read %}success{% else %}neutral{% endif %}">
+                        {% if r.is_read %}Read{% else %}Unread{% endif %}
+                    </span>
+                </td>
+                <td>{{ r.read_at|date:"d M Y, h:i A"|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

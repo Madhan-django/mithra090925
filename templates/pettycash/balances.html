@@ -1,127 +1,153 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
 <style>
-
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, th, td, label, button {
-    font-family: 'Roboto', sans-serif;
-    font-size:14px;
-}
-
-/* ===== CARD STYLE ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border: none;
-}
-
-/* ===== SUPER SLIM TITLE BAR (AS PER YOUR LAST TEMPLATE) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    padding: 4px 0;
-    margin-bottom: 10px;
-}
-
-.card-title h5 {
-    margin: 0;
-    padding: 0;
-}
-
-.card-title h5 span {
-    font-size: 15px;
-    background: #ffffff;
-    color: #000;
-    padding: 3px 14px;
-    border-radius: 6px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #005C97, #363795);
-    border: none;
-    border-radius: 8px;
-    padding: 6px 18px;
-    font-size: 14px;
-}
-
-/* ===== TOP RIGHT BUTTON SPACING ===== */
-.top-btn-area {
-    padding: 15px;
+  .bal-cell {
+    font-family: var(--f-mono);
+    font-size: 13px;
+    font-weight: 600;
     text-align: right;
-}
+    padding-right: 18px !important;
+  }
+  .bal-open   { color: var(--sky); }
+  .bal-close  { color: var(--green); }
+  .bal-close-neg { color: var(--rose); }
+  .date-cell  {
+    font-family: var(--f-mono);
+    font-size: 12.5px;
+    color: var(--text-sm);
+  }
 
-/* ===== TABLE ===== */
-.table-dark th {
-    color: #fff !important;
-    background-color: #212529 !important;
-}
-
-/* Center table content */
-.table td, .table th {
-    vertical-align: middle;
-}
- /* ===== REDUCED TABLE HEADER HEIGHT ===== */
-.table thead th {
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-    font-size: 14px !important;
-    line-height: 14px;
-}
-
+  /* KPI strip */
+  .bal-kpi-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .bal-kpi-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: var(--r-lg);
+    border: 1px solid;
+    flex: 1;
+    min-width: 140px;
+  }
+  .bkpi-num { font-size: 18px; font-weight: 800; line-height: 1; font-family: var(--f-mono); }
+  .bkpi-lbl { font-size: 11px; opacity: .75; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+  .kpi-days    { background: var(--accent-lt); color: var(--accent);  border-color: var(--accent-mid); }
+  .kpi-opening { background: var(--sky-lt);    color: var(--sky);     border-color: #bae6fd; }
+  .kpi-closing { background: var(--green-lt);  color: var(--green);   border-color: #a7f3d0; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Balance Summary</span></h5>
-        </div>
-
-        <!-- BUTTON -->
-        <div class="top-btn-area">
-            <a href="{% url 'balancesheet_pdf' %}" class="btn btn-sm btn-primary">Last 30-days</a>
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-bordered">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>S.No</th>
-                        <th>Date</th>
-                        <th>Opening Balance</th>
-                        <th>Closing Balance</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% if data %}
-                    {% for bal in data %}
-                        <tr class="text-center">
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ bal.date }}</td>
-                            <td>{{ bal.opening_balance }}</td>
-                            <td>{{ bal.closing_balance }}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4">
-                            <div class="alert alert-danger m-0" role="alert">
-                                No Record are available to Show
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-                </tbody>
-            </table>
-
-        </div>
-
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'pettycashExp' %}">Cash Register</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Balance Summary</span>
+      </nav>
+      <h1 class="pc-page-title">Balance Summary</h1>
+      <p class="pc-page-sub">Daily opening and closing cash balance records.</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'balancesheet_pdf' %}" class="pc-btn pc-btn-outline">
+        <i class="ti ti-file-type-pdf" style="font-size:14px;"></i> Last 30 Days
+      </a>
+    </div>
+  </div>
+
+  {% if data %}
+  <!-- KPI Strip -->
+  <div class="bal-kpi-strip">
+    <div class="bal-kpi-chip kpi-days">
+      <i class="ti ti-calendar-stats" style="font-size:22px;"></i>
+      <div>
+        <div class="bkpi-num">{{ data|length }}</div>
+        <div class="bkpi-lbl">Days</div>
+      </div>
+    </div>
+    <div class="bal-kpi-chip kpi-opening">
+      <i class="ti ti-door-enter" style="font-size:22px;"></i>
+      <div>
+        <div class="bkpi-num">{{ data.0.opening_balance }}</div>
+        <div class="bkpi-lbl">Latest Opening</div>
+      </div>
+    </div>
+    <div class="bal-kpi-chip kpi-closing">
+      <i class="ti ti-door-exit" style="font-size:22px;"></i>
+      <div>
+        <div class="bkpi-num">{{ data.0.closing_balance }}</div>
+        <div class="bkpi-lbl">Latest Closing</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Daily Balance Records</p>
+        <p class="pc-card-sub">Opening and closing balances per day</p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-calendar" style="font-size:12px;"></i>
+        {{ data|length }} day{{ data|length|pluralize }}
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th>Date</th>
+            <th style="text-align:right; padding-right:18px;">Opening Balance</th>
+            <th style="text-align:right; padding-right:18px;">Closing Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if data %}
+            {% for bal in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td class="date-cell">{{ bal.date }}</td>
+              <td class="bal-cell bal-open">{{ bal.opening_balance }}</td>
+              <td class="bal-cell {% if bal.closing_balance >= 0 %}bal-close{% else %}bal-close-neg{% endif %}">
+                {{ bal.closing_balance }}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="pc-table-empty">
+              <td colspan="4">No balance records found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not data %}
+    <div class="pc-card-body" style="padding-top:0;">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-chart-bar-off"></i></span>
+        <p class="pc-empty-title">No balance records</p>
+        <p class="pc-empty-sub">Balance data will appear here once transactions are recorded.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
 
 {% endblock %}

@@ -1,168 +1,330 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
-<style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h5, th, td, label, button, input, select {
-    font-family: 'Roboto', sans-serif;
-}
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-}
+<div class="container-fluid" style="max-width: 1400px; padding: 24px;">
 
-/* ===== SLIM TITLE BAR — FIXED SPACING ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 20px 20px 0 0;
-    padding: 0 !important;
-    margin: 0 !important;   /* remove gap above & below title */
-}
-
-.card-title h5 {
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-}
-
-.card-title h5 span {
-    background: #f8f9fa;
-    color: #000;
-    padding: 3px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-/* ===== BODY PADDING FIX ===== */
-.card > .card-body {
-    padding-top: 18px !important;   /* reduced top space */
-}
-
-/* ===== SEARCH BAR ===== */
-.search-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.search-container select,
-.search-container input {
-    height: 46px !important;
-    border-radius: 10px;
-    font-size: 15px;
-}
-
-.btn-info {
-    height: 46px;
-    border-radius: 10px;
-    font-size: 15px;
-    padding: 0 20px;
-}
-
-/* ===== TABLE ===== */
-.table {
-    margin-top: 10px;
-}
-
-.table thead th {
-    font-size: 14px;
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
-    line-height: 14px !important;   /* further reduces visible height */
-}
-
-/* Action Button */
-.btn-warning {
-    padding: 5px 14px;
-    border-radius: 8px;
-}
-</style>
-
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- FIXED TITLE BAR -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Books Issued</span></h5>
+    <!-- Page Header -->
+    <div class="pc-page-header">
+        <div class="pc-page-header-left">
+            <div class="pc-breadcrumb">
+                <a href="{% url 'home_dashboard' %}">Dashboard</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <a href="{% url 'books_list' %}">Library</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <span>Books Issued</span>
+            </div>
+            <h1 class="pc-page-title">Books Issued</h1>
+            <p class="pc-page-sub">Track and manage issued library books</p>
         </div>
-
-        <div class="card-body">
-
-            <!-- SEARCH BAR -->
-            <form action="{% url 'search_issued' %}" method="POST" class="search-container">
-                {% csrf_token %}
-
-                <select name="searchby" id="searchby" class="form-control">
-                    <option value="studname">Student Name</option>
-                    <option value="status">Status</option>
-                    <option value="issued_date">Issued Date</option>
-                    <option value="book_title">Book Name</option>
-                </select>
-
-                <input type="search" name="searched" class="form-control" placeholder="Search..." required>
-
-                <button type="submit" class="btn btn-info">Search</button>
-            </form>
-
-
-            <!-- TABLE -->
-            <table class="table">
-                <thead class="table-dark" align="center">
-                    <tr>
-                        <th>Book Title</th>
-                        <th>Issued To</th>
-                        <th>Class</th>
-                        <th>Section</th>
-                        <th>Issued Date</th>
-                        <th>Return Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% if data %}
-                    {% for libbook in data %}
-                    <tr align="center">
-                        <td>{{ libbook.book_title }}</td>
-                        <td>{{ libbook.issued_to }}</td>
-                        <td>{{ libbook.sclass }}</td>
-                        <td>{{ libbook.section }}</td>
-                        <td>{{ libbook.issued_date }}</td>
-                        <td>{{ libbook.return_date }}</td>
-                        <td>{{ libbook.status }}</td>
-
-                        <td>
-                            <form action="{% url 'book_return' libbook.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-warning">Return</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-
-                {% else %}
-                    <tr>
-                        <td colspan="8">
-                            <div class="alert alert-danger text-center" role="alert">
-                                No Records Available
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-                </tbody>
-            </table>
-
+        <div class="pc-page-header-right">
+            <a href="{% url 'add_book' %}" class="pc-btn pc-btn-primary">
+                <i class="fas fa-book"></i> Issue New Book
+            </a>
         </div>
     </div>
+
+    <!-- Main Card -->
+    <div class="pc-card">
+
+        <!-- Card Header -->
+        <div class="pc-card-header">
+            <div>
+                <div class="pc-card-title">
+                    <i class="fas fa-book-reader" style="color:var(--accent);margin-right:6px;"></i>
+                    Issued Books
+                </div>
+                <div class="pc-card-sub">Search and view all currently issued books</div>
+            </div>
+            {% if data %}
+            <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                {{ data|length }} book{{ data|length|pluralize }} issued
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="pc-card-body">
+
+            <!-- Search Form -->
+            <form action="{% url 'search_issued' %}" method="POST">
+                {% csrf_token %}
+                <div class="pc-filter-row">
+                    <div class="pc-form-group">
+                        <label class="pc-label">Search By</label>
+                        <select name="searchby" id="searchby" class="pc-select">
+                            <option value="studname">Student Name</option>
+                            <option value="status">Status</option>
+                            <option value="issued_date">Issued Date</option>
+                            <option value="book_title">Book Name</option>
+                        </select>
+                    </div>
+
+                    <div class="pc-form-group" style="flex: 2;">
+                        <label class="pc-label">Search Term</label>
+                        <div class="pc-input-group">
+                            <i class="fas fa-search pc-input-icon"></i>
+                            <input type="search" name="searched" class="pc-input" placeholder="Type to search..." required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-end; gap: 8px;">
+                        <button type="submit" class="pc-btn pc-btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="{% url 'search_issued' %}" class="pc-btn pc-btn-outline">
+                            <i class="fas fa-redo"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+        <!-- Table -->
+        <div class="pc-card-body" style="padding:0;">
+            <div class="pc-table-wrap" style="border:none;border-radius:0;">
+                <table class="pc-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;padding-left:18px;">Book Title</th>
+                            <th style="text-align:left;">Issued To</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Issued Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data %}
+                            {% for libbook in data %}
+                            <tr>
+                                <!-- Book Title -->
+                                <td class="td-name">
+                                    <span style="display:inline-flex;align-items:center;gap:10px;">
+                                        <span style="
+                                            width:32px;height:32px;border-radius:8px;
+                                            background:var(--accent-lt);color:var(--accent);
+                                            display:inline-flex;align-items:center;justify-content:center;
+                                            font-weight:800;font-size:13px;flex-shrink:0;">
+                                            <i class="fas fa-book" style="font-size:14px;"></i>
+                                        </span>
+                                        <span style="font-weight:600;">{{ libbook.book_title }}</span>
+                                    </span>
+                                </td>
+
+                                <!-- Student Name -->
+                                <td class="td-name">
+                                    <span style="display:inline-flex;align-items:center;gap:8px;">
+                                        <span style="
+                                            width:28px;height:28px;border-radius:6px;
+                                            background:var(--sky-lt);color:var(--sky);
+                                            display:inline-flex;align-items:center;justify-content:center;
+                                            font-weight:800;font-size:12px;flex-shrink:0;">
+                                            {{ libbook.issued_to|slice:":1"|upper }}
+                                        </span>
+                                        {{ libbook.issued_to }}
+                                    </span>
+                                </td>
+
+                                <!-- Class -->
+                                <td>
+                                    <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                                        {{ libbook.sclass }}
+                                    </span>
+                                </td>
+
+                                <!-- Section -->
+                                <td>
+                                    <span class="pc-badge pc-badge-neutral pc-badge-no-dot">
+                                        {{ libbook.section }}
+                                    </span>
+                                </td>
+
+                                <!-- Issued Date -->
+                                <td>
+                                    <span style="font-family:var(--f-mono);font-size:12.5px;color:var(--text-md);">
+                                        {{ libbook.issued_date }}
+                                    </span>
+                                </td>
+
+                                <!-- Return Date -->
+                                <td>
+                                    <span style="font-family:var(--f-mono);font-size:12.5px;color:var(--text-md);">
+                                        {{ libbook.return_date }}
+                                    </span>
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    {% with status=libbook.status|lower %}
+                                        {% if 'issued' in status or 'active' in status %}
+                                            <span class="pc-badge pc-badge-warning">
+                                                <i class="fas fa-book-open"></i> {{ libbook.status }}
+                                            </span>
+                                        {% elif 'returned' in status %}
+                                            <span class="pc-badge pc-badge-success">
+                                                <i class="fas fa-check"></i> {{ libbook.status }}
+                                            </span>
+                                        {% elif 'overdue' in status %}
+                                            <span class="pc-badge pc-badge-danger">
+                                                <i class="fas fa-exclamation-triangle"></i> {{ libbook.status }}
+                                            </span>
+                                        {% else %}
+                                            <span class="pc-badge pc-badge-neutral">
+                                                {{ libbook.status }}
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+
+                                <!-- Action -->
+                                <td>
+                                    <div class="td-actions">
+                                        <button type="button"
+                                                class="pc-btn pc-btn-warning pc-btn-sm"
+                                                onclick="openReturnModal('{{ libbook.id }}', '{{ libbook.book_title }}', '{{ libbook.issued_to }}')">
+                                            <i class="fas fa-undo"></i> Return
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="pc-table-empty">
+                                <td colspan="8">
+                                    <div class="pc-empty">
+                                        <i class="fas fa-book-open pc-empty-icon"></i>
+                                        <div class="pc-empty-title">No Books Issued</div>
+                                        <div class="pc-empty-sub">There are no books currently issued from the library</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /pc-card -->
+
 </div>
+
+<!-- ═══════════════════════════════════════
+     BOOK RETURN CONFIRMATION MODAL
+     ═══════════════════════════════════════ -->
+<div id="returnModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
+
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--amber-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #fde68a;
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:42px;height:42px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(217,119,6,.15);
+        flex-shrink:0;">
+        <i class="fas fa-undo" style="color:var(--amber);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Return Book</div>
+        <div style="font-size:12px;color:var(--amber);font-weight:500;">Confirm book return</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px;color:var(--text-md);margin:0 0 16px 0;line-height:1.7;">
+        Are you sure you want to mark the book
+        <strong id="returnBookTitle" style="color:var(--text);"></strong>
+        as returned from
+        <strong id="returnStudentName" style="color:var(--text);"></strong>?
+      </p>
+      <div style="
+        background:var(--amber-lt);
+        border:1px solid #fde68a;
+        border-radius:var(--r);
+        padding:12px 14px;
+        display:flex;align-items:flex-start;gap:10px;">
+        <i class="fas fa-info-circle" style="color:var(--amber);font-size:16px;margin-top:2px;"></i>
+        <div style="font-size:12px;color:var(--text-md);line-height:1.6;">
+          This will update the book status and make it available for issue again.
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeReturnModal()">
+        Cancel
+      </button>
+      <form id="returnForm" method="get" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-warning">
+          <i class="fas fa-undo"></i> Yes, Return Book
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal animation -->
+<style>
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.92) translateY(10px); }
+    to   { opacity:1; transform:scale(1)   translateY(0); }
+  }
+</style>
+
+<!-- Modal Scripts -->
+<script>
+const returnModal = document.getElementById('returnModal');
+
+function openReturnModal(id, bookTitle, studentName) {
+  document.getElementById('returnBookTitle').textContent = '"' + bookTitle + '"';
+  document.getElementById('returnStudentName').textContent = studentName;
+  document.getElementById('returnForm').action = '{% url "book_return" 0 %}'.replace('0', id);
+  returnModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReturnModal() {
+  returnModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+returnModal.addEventListener('click', function(e) {
+  if (e.target === returnModal) closeReturnModal();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeReturnModal();
+});
+</script>
 
 {% endblock %}

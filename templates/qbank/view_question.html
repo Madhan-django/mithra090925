@@ -2,29 +2,89 @@
 {% block content %}
 
 <style>
+/* ── Option card ── */
 .qv-option {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  margin-bottom: 8px;
-  font-size: 13.5px;
-  background: var(--surface);
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 12px 16px; border: 2px solid var(--border);
+  border-radius: var(--r); margin-bottom: 8px;
+  font-size: 13.5px; background: var(--surface);
   transition: border-color 150ms, background 150ms;
 }
-.qv-option.correct {
-  border-color: #86efac;
-  background: #f0fdf4;
-}
+.qv-option.correct { border-color: #86efac; background: #f0fdf4; }
 .qv-option-mark {
-  width: 24px; height: 24px; border-radius: 50%;
+  width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; flex-shrink: 0;
-  background: var(--surface2); color: var(--text-sm);
-  border: 1px solid var(--border);
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+  background: var(--surface2); color: var(--text-sm); border: 1.5px solid var(--border);
 }
 .qv-option.correct .qv-option-mark {
   background: #dcfce7; color: #15803d; border-color: #86efac;
+}
+
+/* ── Detail row ── */
+.qv-detail-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px;
+}
+.qv-detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+.qv-detail-label {
+  font-size: 10.5px; font-weight: 700; color: var(--text-sm);
+  text-transform: uppercase; letter-spacing: .6px;
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+}
+.qv-detail-val { font-size: 13px; color: var(--text); font-weight: 600; text-align: right; }
+
+/* ── Badges ── */
+.qb-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; border-radius: 20px; padding: 3px 12px; border: 1px solid;
+}
+.qb-mcq    { color:#6d28d9; background:#ede9fe; border-color:#c4b5fd; }
+.qb-short  { color:#0369a1; background:#e0f2fe; border-color:#7dd3fc; }
+.qb-long   { color:#0f766e; background:#ccfbf1; border-color:#5eead4; }
+.qb-fill   { color:#b45309; background:#fef3c7; border-color:#fcd34d; }
+.qb-tf     { color:#15803d; background:#dcfce7; border-color:#86efac; }
+.qb-match  { color:#be123c; background:#ffe4e6; border-color:#fca5a5; }
+.qb-diff-easy   { color:#15803d; background:#dcfce7; border-color:#86efac; }
+.qb-diff-medium { color:#b45309; background:#fef3c7; border-color:#fcd34d; }
+.qb-diff-hard   { color:#b91c1c; background:#fee2e2; border-color:#fca5a5; }
+
+/* ── Match table ── */
+.qv-match-table { width:100%; border-collapse:collapse; margin-top:8px; border-radius:var(--r); overflow:hidden; }
+.qv-match-table th {
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+  color:var(--text-sm); padding:8px 14px; background:var(--surface2);
+  border:1px solid var(--border);
+}
+.qv-match-table td {
+  font-size:13px; color:var(--text); padding:9px 14px;
+  border:1px solid var(--border);
+}
+.qv-match-table tr:nth-child(even) td { background:var(--surface2); }
+
+/* ── Usage stat ── */
+.qv-usage-bar {
+  display:flex; align-items:center; gap:10px; margin-top:8px;
+}
+.qv-usage-bar-track {
+  flex:1; height:6px; background:var(--border);
+  border-radius:99px; overflow:hidden;
+}
+.qv-usage-bar-fill {
+  height:100%; background:var(--accent); border-radius:99px;
+}
+
+/* ── Approved banner ── */
+.qv-approved-banner {
+  background:#f0fdf4; border:1.5px solid #86efac; border-radius:var(--r);
+  padding:12px 16px; display:flex; align-items:center; gap:12px;
+  margin-bottom:14px;
+}
+.qv-pending-banner {
+  background:#fffbeb; border:1.5px solid #fcd34d; border-radius:var(--r);
+  padding:12px 16px; display:flex; align-items:center; gap:12px;
+  margin-bottom:14px;
 }
 </style>
 
@@ -36,11 +96,15 @@
         <span class="pc-breadcrumb-sep">›</span>
         <a href="{% url 'question_list' %}">Question Bank</a>
         <span class="pc-breadcrumb-sep">›</span>
-        <span>View Question</span>
+        <span>Question #{{ q.pk }}</span>
       </nav>
-      <h1 class="pc-page-title">Question #{{ q.pk }}</h1>
+      <h1 class="pc-page-title">Question <span style="color:var(--text-sm);font-weight:500;">#{{ q.pk }}</span></h1>
+      <p class="pc-page-sub">{{ q.cls.name }} · {{ q.subject.subject_name }}{% if q.chapter %} · {{ q.chapter.name }}{% endif %}</p>
     </div>
     <div class="pc-page-header-right">
+      <a href="{% url 'approve_question' q.pk %}" class="pc-btn pc-btn-outline">
+        <i class="ri-shield-check-line"></i> {% if q.is_approved %}Revoke{% else %}Approve{% endif %}
+      </a>
       <a href="{% url 'edit_question' q.pk %}" class="pc-btn pc-btn-primary">
         <i class="ri-edit-line"></i> Edit
       </a>
@@ -51,27 +115,67 @@
   </div>
 
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
+
+    <!-- Left: Question Content -->
     <div>
+
+      <!-- Question Card -->
       <div class="pc-card" style="margin-bottom:16px;">
-        <div class="pc-card-header"><p class="pc-card-title">Question</p></div>
+        <div class="pc-card-header">
+          <p class="pc-card-title">
+            <i class="ri-file-text-line" style="color:var(--accent);margin-right:6px;"></i>Question
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="qb-badge
+              {% if q.question_type == 'MCQ'   %}qb-mcq
+              {% elif q.question_type == 'SHORT'%}qb-short
+              {% elif q.question_type == 'LONG' %}qb-long
+              {% elif q.question_type == 'FILL' %}qb-fill
+              {% elif q.question_type == 'TF'   %}qb-tf
+              {% elif q.question_type == 'MATCH'%}qb-match{% endif %}">
+              <i class="ri-question-line"></i>
+              {{ q.get_question_type_display }}
+            </span>
+            <span class="qb-badge
+              {% if q.difficulty == 'EASY'  %}qb-diff-easy
+              {% elif q.difficulty == 'MEDIUM'%}qb-diff-medium
+              {% else %}qb-diff-hard{% endif %}">
+              {{ q.get_difficulty_display }}
+            </span>
+          </div>
+        </div>
         <div class="pc-card-body">
-          <p style="font-size:15px;line-height:1.7;color:var(--text);margin-bottom:16px;">{{ q.question_text }}</p>
+          <p style="font-size:16px;line-height:1.8;color:var(--text);margin-bottom:0;font-weight:500;">{{ q.question_text }}</p>
           {% if q.image %}
-          <img src="{{ q.image.url }}" style="max-width:100%;max-height:300px;border-radius:var(--r);border:1px solid var(--border);">
+          <div style="margin-top:18px;">
+            <img src="{{ q.image.url }}" style="max-width:100%;max-height:360px;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh-sm);">
+          </div>
           {% endif %}
         </div>
       </div>
 
+      <!-- MCQ Options -->
       {% if options %}
       <div class="pc-card" style="margin-bottom:16px;">
-        <div class="pc-card-header"><p class="pc-card-title">Options</p></div>
+        <div class="pc-card-header">
+          <p class="pc-card-title">
+            <i class="ri-list-check-3" style="color:#7c3aed;margin-right:6px;"></i>Options
+          </p>
+          <span style="font-size:11px;color:#15803d;font-weight:700;display:flex;align-items:center;gap:4px;">
+            <i class="ri-checkbox-circle-fill"></i> Green = Correct Answer
+          </span>
+        </div>
         <div class="pc-card-body">
           {% for opt in options %}
           <div class="qv-option {% if opt.is_correct %}correct{% endif %}">
-            <div class="qv-option-mark">{{ forloop.counter }}</div>
-            <div style="flex:1;">{{ opt.option_text }}</div>
+            <div class="qv-option-mark">
+              {% if forloop.counter == 1 %}A{% elif forloop.counter == 2 %}B{% elif forloop.counter == 3 %}C{% else %}D{% endif %}
+            </div>
+            <div style="flex:1;font-size:13.5px;line-height:1.6;padding-top:2px;">{{ opt.option_text }}</div>
             {% if opt.is_correct %}
-            <i class="ri-checkbox-circle-fill" style="color:#15803d;font-size:18px;flex-shrink:0;"></i>
+            <div style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#15803d;flex-shrink:0;">
+              <i class="ri-checkbox-circle-fill" style="font-size:18px;"></i> Correct
+            </div>
             {% endif %}
           </div>
           {% endfor %}
@@ -79,88 +183,168 @@
       </div>
       {% endif %}
 
+      <!-- Match the Following display -->
+      {% if q.question_type == 'MATCH' and match_pairs %}
+      <div class="pc-card" style="margin-bottom:16px;">
+        <div class="pc-card-header">
+          <p class="pc-card-title">
+            <i class="ri-arrow-left-right-line" style="color:#be123c;margin-right:6px;"></i>Match Pairs
+          </p>
+        </div>
+        <div class="pc-card-body">
+          <table class="qv-match-table">
+            <thead>
+              <tr><th>Column A</th><th>Column B</th></tr>
+            </thead>
+            <tbody>
+              {% for pair in match_pairs %}
+              <tr><td>{{ pair.left }}</td><td>{{ pair.right }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Answer & Explanation -->
       {% if answer %}
       <div class="pc-card">
-        <div class="pc-card-header"><p class="pc-card-title">Answer &amp; Explanation</p></div>
+        <div class="pc-card-header">
+          <p class="pc-card-title">
+            <i class="ri-lightbulb-line" style="color:#d97706;margin-right:6px;"></i>Answer &amp; Explanation
+          </p>
+        </div>
         <div class="pc-card-body">
-          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);padding:14px;margin-bottom:12px;">
-            <p style="font-size:12px;font-weight:700;color:#15803d;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px;">Answer</p>
-            <p style="font-size:13.5px;color:var(--text);">{{ answer.answer_text }}</p>
+          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-left:4px solid #22c55e;border-radius:var(--r);padding:16px 20px;margin-bottom:14px;">
+            <p style="font-size:10px;font-weight:700;color:#15803d;margin-bottom:8px;text-transform:uppercase;letter-spacing:.7px;display:flex;align-items:center;gap:5px;">
+              <i class="ri-checkbox-circle-fill"></i> Correct Answer
+            </p>
+            <p style="font-size:14px;color:var(--text);margin:0;line-height:1.7;">{{ answer.answer_text }}</p>
           </div>
           {% if answer.explanation %}
-          <div>
-            <p style="font-size:12px;font-weight:700;color:var(--text-sm);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px;">Explanation</p>
-            <p style="font-size:13.5px;color:var(--text);">{{ answer.explanation }}</p>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid #d97706;border-radius:var(--r);padding:14px 18px;">
+            <p style="font-size:10px;font-weight:700;color:#d97706;margin-bottom:8px;text-transform:uppercase;letter-spacing:.7px;display:flex;align-items:center;gap:5px;">
+              <i class="ri-information-line"></i> Explanation
+            </p>
+            <p style="font-size:13.5px;color:var(--text);margin:0;line-height:1.75;">{{ answer.explanation }}</p>
           </div>
           {% endif %}
         </div>
       </div>
       {% endif %}
+
     </div>
 
-    <!-- Meta -->
-    <div class="pc-card">
-      <div class="pc-card-header"><p class="pc-card-title">Details</p></div>
-      <div class="pc-card-body">
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          {% with items="Class,Subject,Chapter,Type,Difficulty,Marks,Status,Used Count,Created By,Tags" %}
-          {% endwith %}
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Class</span>
-            <span style="font-size:13px;color:var(--text);font-weight:600;">{{ q.cls.name }}</span>
+    <!-- Right: Meta Sidebar -->
+    <div>
+
+      <!-- Approval Status Banner -->
+      {% if q.is_approved %}
+      <div class="qv-approved-banner">
+        <i class="ri-checkbox-circle-fill" style="font-size:22px;color:#15803d;flex-shrink:0;"></i>
+        <div>
+          <p style="font-size:13px;font-weight:700;color:#15803d;margin-bottom:1px;">Approved</p>
+          <p style="font-size:11px;color:#166534;">Available in the paper builder</p>
+        </div>
+      </div>
+      {% else %}
+      <div class="qv-pending-banner">
+        <i class="ri-time-line" style="font-size:22px;color:#d97706;flex-shrink:0;"></i>
+        <div>
+          <p style="font-size:13px;font-weight:700;color:#b45309;margin-bottom:1px;">Pending Review</p>
+          <p style="font-size:11px;color:#92400e;">Not yet available in paper builder</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Details Card -->
+      <div class="pc-card" style="margin-bottom:14px;">
+        <div class="pc-card-header">
+          <p class="pc-card-title">
+            <i class="ri-information-line" style="color:var(--accent);margin-right:6px;"></i>Details
+          </p>
+        </div>
+        <div class="pc-card-body" style="padding-bottom:4px;">
+
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-government-line"></i> Class</span>
+            <span class="qv-detail-val">{{ q.cls.name }}</span>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Subject</span>
-            <span style="font-size:13px;color:var(--text);">{{ q.subject.subject_name }}</span>
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-book-line"></i> Subject</span>
+            <span class="qv-detail-val">{{ q.subject.subject_name }}</span>
           </div>
           {% if q.chapter %}
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Chapter</span>
-            <span style="font-size:13px;color:var(--text);">{{ q.chapter.name }}</span>
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-bookmark-line"></i> Chapter</span>
+            <span class="qv-detail-val">{{ q.chapter.name }}</span>
           </div>
           {% endif %}
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Type</span>
-            <span style="font-size:13px;color:var(--text);">{{ q.get_question_type_display }}</span>
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-list-check-3"></i> Type</span>
+            <span class="qv-detail-val">{{ q.get_question_type_display }}</span>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Difficulty</span>
-            <span style="font-size:13px;color:var(--text);">{{ q.get_difficulty_display }}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Marks</span>
-            <span style="font-size:14px;font-weight:700;color:var(--text);">{{ q.marks }}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Status</span>
-            {% if q.is_approved %}
-            <span style="color:#059669;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;">
-              <i class="ri-checkbox-circle-fill"></i> Approved
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-bar-chart-line"></i> Difficulty</span>
+            <span class="qv-detail-val">
+              <span class="qb-badge
+                {% if q.difficulty == 'EASY'  %}qb-diff-easy
+                {% elif q.difficulty == 'MEDIUM'%}qb-diff-medium
+                {% else %}qb-diff-hard{% endif %}">
+                {{ q.get_difficulty_display }}
+              </span>
             </span>
-            {% else %}
-            <span style="color:#d97706;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;">
-              <i class="ri-time-line"></i> Pending
-            </span>
-            {% endif %}
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Used In Papers</span>
-            <span style="font-size:13px;font-weight:700;color:var(--accent);">{{ q.usage_count }}</span>
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-award-line"></i> Marks</span>
+            <span style="font-size:20px;font-weight:900;color:var(--accent);">{{ q.marks }}</span>
           </div>
+          <div class="qv-detail-row">
+            <span class="qv-detail-label"><i class="ri-file-paper-2-line"></i> Used In</span>
+            <div style="text-align:right;">
+              <span style="font-size:16px;font-weight:800;color:var(--accent);">{{ q.usage_count }}</span>
+              <span style="font-size:12px;color:var(--text-sm);font-weight:600;"> paper{{ q.usage_count|pluralize }}</span>
+            </div>
+          </div>
+
           {% if q.tags %}
-          <div>
-            <span style="font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;">Tags</span>
-            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+          <div style="padding-top:12px;margin-top:4px;border-top:1px solid var(--border);">
+            <p style="font-size:10.5px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+              <i class="ri-price-tag-3-line"></i> Tags
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
               {% for tag in q.tags.split %}
-              <span style="font-size:11px;background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-mid);border-radius:20px;padding:2px 10px;">{{ tag }}</span>
+              <span style="font-size:11px;background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-mid);border-radius:20px;padding:3px 12px;font-weight:600;">{{ tag }}</span>
               {% endfor %}
             </div>
           </div>
           {% endif %}
+
         </div>
       </div>
+
+      <!-- Quick Actions -->
+      <div class="pc-card">
+        <div class="pc-card-header">
+          <p class="pc-card-title"><i class="ri-flashlight-line" style="color:var(--accent);margin-right:6px;"></i>Quick Actions</p>
+        </div>
+        <div class="pc-card-body" style="display:flex;flex-direction:column;gap:8px;">
+          <a href="{% url 'edit_question' q.pk %}" class="pc-btn pc-btn-primary" style="justify-content:center;">
+            <i class="ri-edit-line"></i> Edit Question
+          </a>
+          <a href="{% url 'approve_question' q.pk %}" class="pc-btn pc-btn-outline" style="justify-content:center;">
+            <i class="ri-shield-check-line"></i> {% if q.is_approved %}Revoke Approval{% else %}Approve Question{% endif %}
+          </a>
+          <a href="{% url 'delete_question' q.pk %}"
+             class="pc-btn pc-btn-outline"
+             style="justify-content:center;color:#e11d48;border-color:#fca5a5;"
+             onclick="return confirm('Delete this question? This cannot be undone.')">
+            <i class="ri-delete-bin-line"></i> Delete Question
+          </a>
+        </div>
+      </div>
+
     </div>
   </div>
-
 </div>
 {% endblock %}

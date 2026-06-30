@@ -11,7 +11,11 @@ urlpatterns =[
     path('school_notify',login_required(views.school_notify),name='school_notify'),
     path('notification',login_required(views.notification),name='notification'),
     path('ajax_push_load_section',login_required(views.ajax_push_load_section),name='ajax_push_load_section'),
-    path('sectionwise_notify_manual/',login_required(views.sectionwise_notify_manual),name='sectionwise_notify_manual')
+    path('sectionwise_notify_manual/',login_required(views.sectionwise_notify_manual),name='sectionwise_notify_manual'),
+    path('staff-notifications/', login_required(views.staff_notification_list), name='staff_notification_list'),
+    path('staff-notifications/send/',login_required( views.staff_notification_send), name='staff_notification_send'),
+    path('staff-notifications/<int:pk>/',login_required(views.staff_notification_detail), name='staff_notification_detail'),
+
     
     
     

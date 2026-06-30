@@ -1,85 +1,178 @@
 {% extends 'panel/index.html' %}
 
 {% block content %}
-<style>
-    h1, h3 {
-        font-family: Roboto;
-    }
-    th {
-        font-family: 'Roboto', sans-serif;
-        font-weight: bold !important;
-        font-size: 18px !important;
-    }
-    .align-right {
-        display: block;
-        padding: 30px;
 
-        text-align: right;
-    }
-    #searchby {
-        height: 50px;
-        font-family: Roboto;
-        font-size: 16px;
-    }
-    .table{
-    padding:15px;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f6fb;
+}
+
+/* ===== PAGE TITLE ===== */
+.page-title {
+    font-weight: 700;
+    color: #2a5298;
+}
+
+/* ===== INFO CARD ===== */
+.info-card {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* ===== SECTION CARD ===== */
+.section-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    padding: 20px;
+    height: 100%;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #2a5298;
+}
+
+/* ===== TABLE STYLING ===== */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead {
+    background: #2a5298;
+    color: white;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 14px;
+    border: none !important;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f4ff;
+    transition: 0.2s;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-row {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
 </style>
 
+
 <div class="container mt-4">
-        <h2 class="text-center">Employee Salary Record</h2>
 
-        <div class="card p-3 mt-3">
-            <h4>School: {{ skool.name }}</h4>
-            <h5>Academic Year: {{ year.acad_year }}</h5>
-        </div>
+    <!-- PAGE TITLE -->
+    <div class="text-center mb-4">
+        <h2 class="page-title">Employee Salary Record</h2>
+    </div>
 
-        <div class="row mt-4">
+    <!-- SCHOOL INFO -->
+    <div class="info-card mb-4">
+        <div class="row">
             <div class="col-md-6">
-                <h4>Allowances</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Allowance Type</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for allowance in allowances %}
-                        <tr>
-                            <td>{{ allowance.allowance_name.name }}</td>
-                            <td>{{ allowance.amount }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="2" class="text-center">No allowances available</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <h5 class="mb-1"><strong>School:</strong> {{ skool.name }}</h5>
             </div>
-
-            <div class="col-md-6">
-                <h4>Deductions</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Deduction Type</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for deduction in deductions %}
-                        <tr>
-                            <td>{{ deduction.deduction_name }}</td>
-                            <td>{{ deduction.amount }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="2" class="text-center">No deductions available</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="col-md-6 text-md-end">
+                <h5 class="mb-0"><strong>Academic Year:</strong> {{ year.acad_year }}</h5>
             </div>
         </div>
     </div>
 
-{% endblock %}
+    <!-- ALLOWANCES & DEDUCTIONS -->
+    <div class="row">
 
+        <!-- ALLOWANCES -->
+        <div class="col-md-6 mb-4">
+            <div class="section-card">
+                <h5 class="section-title">Allowances</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Allowance Type</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for allowance in allowances %}
+                            <tr>
+                                <td>{{ allowance.allowance_name.name }}</td>
+                                <td class="text-end fw-bold text-success">
+                                    ₹ {{ allowance.amount }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="empty-row">
+                                    No allowances available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DEDUCTIONS -->
+        <div class="col-md-6 mb-4">
+            <div class="section-card">
+                <h5 class="section-title">Deductions</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Deduction Type</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deduction in deductions %}
+                            <tr>
+                                <td>{{ deduction.deduction_name }}</td>
+                                <td class="text-end fw-bold text-danger">
+                                    ₹ {{ deduction.amount }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="empty-row">
+                                    No deductions available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

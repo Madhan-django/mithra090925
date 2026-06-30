@@ -1,78 +1,127 @@
 {% extends 'panel/index.html' %}
 {% block content %}
-<style>
- .text-end
-</style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <br>
-            <h5 class="mb-0">New Automated Task</h5>
-        </div>
-
-       <div class="card-body">
-            <div class="container">
-                <form id="" action="" method="POST">
-                    {% csrf_token %}
-                     <div class="">
-                         <b>
-                            <label class="wlsm-font-bold">
-                                <span class="wlsm-important">*</span> Date:
-                            </label>
-                            {% now "d-m-Y" %}
-                            {{ form.creation_date }}
-                             </b>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="wlsm-font-bold">
-                                <span class="wlsm-important">*</span> Select Task:
-                            </label>
-                            {{ form.task }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="wlsm-font-bold">
-                                <span class="wlsm-important">*</span> Schedule Type:
-                            </label>
-                            {{ form.schedule_type }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="wlsm-font-bold">
-                                <span class="wlsm-important">*</span>Schedule Time:
-                            </label>
-                            {{ form.schedule_time }}
-                        </div>
-                    </div>
-                    <div class="row">
-
-                         <div class="col-md-6">
-                            <label class="wlsm-font-bold">
-                                <span class="wlsm-important">*</span> Automate Type:
-                            </label>
-                            {{ form.automate_type }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="wlsm-font-bold">
-                                <span class="wlsm-important">*</span> Email/Whatsapp:
-                            </label>
-                            {{ form.send_to }}
-                        </div>
-                    </div>
-
-                    {{form.created_by}}
-                    {{form.school}}
-                     <br><br>
-                    <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="reset" class="btn btn-danger">Clear</button>
-                    </div>
-                </form>
-            </div>
-       </div>
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{%  url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'automate_list' %}">Automation</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Task</span>
     </div>
+    <div class="pc-page-title">New Automated Task</div>
+    <div class="pc-page-sub">Configure a new scheduled automation below</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'automate_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to List
+    </a>
+  </div>
 </div>
-{% endblock %}
 
+<!-- FORM CARD -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-robot-line me-2" style="color:var(--accent);"></i>Task Configuration
+      </div>
+      <div class="pc-card-sub">All fields marked with * are required</div>
+    </div>
+    <!-- Today's date badge -->
+    <span class="pc-badge pc-badge-no-dot"
+          style="background:#eff6ff; color:#1d4ed8; font-size:12px; padding:5px 14px;">
+      <i class="ri-calendar-line me-1"></i> {% now "d-m-Y" %}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Hidden creation date -->
+      {{ form.creation_date }}
+
+      <!-- Section: Schedule -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                    letter-spacing:0.8px; color:var(--text-md);
+                    border-bottom:1px solid var(--border);
+                    padding-bottom:8px; margin-bottom:1rem;">
+          <i class="ri-time-line me-1"></i> Schedule Settings
+        </div>
+        <div class="pc-filter-row" style="align-items:flex-start;">
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">
+              <span style="color:var(--rose);">*</span> Select Task
+            </label>
+            {{ form.task }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">
+              <span style="color:var(--rose);">*</span> Schedule Type
+            </label>
+            {{ form.schedule_type }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">
+              <span style="color:var(--rose);">*</span> Schedule Time
+            </label>
+            {{ form.schedule_time }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Delivery -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase;
+                    letter-spacing:0.8px; color:var(--text-md);
+                    border-bottom:1px solid var(--border);
+                    padding-bottom:8px; margin-bottom:1rem;">
+          <i class="ri-send-plane-line me-1"></i> Delivery Settings
+        </div>
+        <div class="pc-filter-row" style="align-items:flex-start;">
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">
+              <span style="color:var(--rose);">*</span> Automate Type
+            </label>
+            {{ form.automate_type }}
+          </div>
+          <div class="pc-form-group" style="flex:1;">
+            <label class="pc-label">
+              <span style="color:var(--rose);">*</span> Email / Whatsapp
+            </label>
+            {{ form.send_to }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden Fields -->
+      {{ form.created_by }}
+      {{ form.school }}
+
+      <!-- Divider -->
+      <hr style="border-color:var(--border); margin:1.5rem 0;">
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <a href="{% url 'automate_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+        <button type="reset" class="pc-btn pc-btn-secondary">
+          <i class="ri-refresh-line"></i> Clear
+        </button>
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Task
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div><!-- /pc-card -->
+
+{% endblock %}

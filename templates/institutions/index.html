@@ -1,114 +1,497 @@
 {% extends 'adminpanel/index.html' %}
-
 {% block content %}
+{% load static %}
+
 <style>
-    .card {
-    background-color: #fff;
-    border-radius: 10px;
-    border: none;
-    position: relative;
-    height: 150px;
-    margin-bottom: 30px;
-    box-shadow: 0 0.46875rem 2.1875rem rgba(90,97,105,0.1), 0 0.9375rem 1.40625rem rgba(90,97,105,0.1), 0 0.25rem 0.53125rem rgba(90,97,105,0.12), 0 0.125rem 0.1875rem rgba(90,97,105,0.1);
-}
-.l-bg-cherry {
-    background: linear-gradient(to right, #493240, #f09) !important;
-    color: #fff;
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ── Root tokens ── */
+:root {
+  --bg:       #07080f;
+  --surface:  #0f111a;
+  --surface2: #161825;
+  --border:   rgba(255,255,255,0.07);
+  --accent:   #c8f135;
+  --accent2:  #5b7fff;
+  --text:     #f0f2ff;
+  --muted:    #6b7194;
+  --muted2:   #9da3c8;
+  --r:        16px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-.l-bg-blue-dark {
-    background: linear-gradient(to right, #373b44, #4286f4) !important;
-    color: #fff;
+/* ── Page reset ── */
+.ent-page *,
+.ent-page *::before,
+.ent-page *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.ent-page {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text);
+  padding: 48px 40px 80px;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.l-bg-green-dark {
-    background: linear-gradient(to right, #0a504a, #38ef7d) !important;
-    color: #fff;
+/* ── Ambient glow blobs ── */
+.ent-page::before,
+.ent-page::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+  z-index: 0;
+}
+.ent-page::before {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(91,127,255,.18) 0%, transparent 70%);
+  top: -200px; right: -150px;
+}
+.ent-page::after {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(200,241,53,.1) 0%, transparent 70%);
+  bottom: 0; left: -100px;
 }
 
-.l-bg-orange-dark {
-    background: linear-gradient(to right, #a86008, #ffba56) !important;
-    color: #fff;
+/* ── Top bar ── */
+.ent-topbar {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 52px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.ent-eyebrow {
+  font-family: var(--font-head);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ent-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.ent-heading {
+  font-family: var(--font-head);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -1.2px;
+  line-height: 1.05;
+}
+.ent-heading span { color: var(--accent); }
+.ent-count-pill {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 8px 18px;
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.ent-count-pill strong { color: var(--text); font-size: 18px; }
+
+/* ── Grid ── */
+.ent-grid {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.card .card-statistic-3 .card-icon-large .fas, .card .card-statistic-3 .card-icon-large .far, .card .card-statistic-3 .card-icon-large .fab, .card .card-statistic-3 .card-icon-large .fal {
-    font-size: 110px;
+/* ── School card ── */
+.school-card-link {
+  text-decoration: none;
+  display: block;
+}
+.school-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px 26px 24px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    transform 0.22s cubic-bezier(0.34,1.56,0.64,1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  animation: cardIn 0.5s ease both;
 }
 
-.card .card-statistic-3 .card-icon {
-    text-align: center;
-    line-height: 50px;
-    margin-left: 15px;
-    color: #000;
-    position: absolute;
-    right: -7px;
-    top: 20px;
-    opacity: 0.1;
+/* staggered animation */
+.school-card:nth-child(1)  { animation-delay: .04s; }
+.school-card:nth-child(2)  { animation-delay: .08s; }
+.school-card:nth-child(3)  { animation-delay: .12s; }
+.school-card:nth-child(4)  { animation-delay: .16s; }
+.school-card:nth-child(5)  { animation-delay: .20s; }
+.school-card:nth-child(6)  { animation-delay: .24s; }
+.school-card:nth-child(7)  { animation-delay: .28s; }
+.school-card:nth-child(8)  { animation-delay: .32s; }
+.school-card:nth-child(9)  { animation-delay: .36s; }
+
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
-.l-bg-green {
-    background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%) !important;
-    color: #fff;
+.school-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(200,241,53,.15);
+  border-color: rgba(200,241,53,.2);
 }
 
-.l-bg-orange {
-    background: linear-gradient(to right, #f9900e, #ffba56) !important;
-    color: #fff;
+/* background glow on hover */
+.school-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(200,241,53,.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s ease;
+  pointer-events: none;
+  border-radius: 20px;
+}
+.school-card:hover::before { opacity: 1; }
+
+/* large bg icon */
+.school-card-bgicon {
+  position: absolute;
+  right: -16px; top: -10px;
+  font-size: 100px;
+  color: var(--text);
+  opacity: .04;
+  pointer-events: none;
+  line-height: 1;
 }
 
-.l-bg-cyan {
-    background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-    color: #fff;
+/* card badge / index number */
+.school-card-num {
+  position: absolute;
+  top: 22px; right: 22px;
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .5px;
 }
 
+/* icon circle */
+.school-card-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: rgba(200,241,53,.1);
+  border: 1px solid rgba(200,241,53,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  color: var(--accent);
+  margin-bottom: 18px;
+  transition: background .2s, transform .2s var(--spring);
+}
+.school-card:hover .school-card-icon {
+  background: rgba(200,241,53,.18);
+  transform: rotate(-4deg) scale(1.08);
+}
+
+/* name */
+.school-card-name {
+  font-family: var(--font-head);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.3px;
+  margin-bottom: 6px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 32px;
+}
+
+/* email */
+.school-card-email {
+  font-size: 12.5px;
+  color: var(--muted2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.school-card-email i { font-size: 12px; color: var(--muted); }
+
+/* address */
+.school-card-addr {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.5;
+}
+.school-card-addr i { font-size: 12px; margin-top: 2px; flex-shrink: 0; }
+
+/* divider */
+.school-card-div {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* cta row */
+.school-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.school-card-cta-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: .3px;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity .2s, transform .2s;
+}
+.school-card:hover .school-card-cta-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+.school-card-arrow {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted2);
+  font-size: 14px;
+  transition: background .2s, color .2s, transform .2s var(--spring);
+}
+.school-card:hover .school-card-arrow {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  transform: rotate(-45deg);
+}
+
+/* ══════════════════════════════
+   EMPTY STATE — New Enterprise
+   ══════════════════════════════ */
+.ent-empty {
+  position: relative; z-index: 1;
+  max-width: 560px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+.ent-empty-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.ent-empty-icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: rgba(91,127,255,.12);
+  border: 1px solid rgba(91,127,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  color: var(--accent2);
+  margin: 0 auto 20px;
+}
+.ent-empty-title {
+  font-family: var(--font-head);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+}
+.ent-empty-sub {
+  font-size: 14px;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+
+/* ── Form card ── */
+.ent-form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 36px;
+  animation: cardIn .45s ease both;
+}
+
+/* Django form field overrides */
+.ent-form-card p {
+  margin-bottom: 20px;
+}
+.ent-form-card label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+.ent-form-card input[type="text"],
+.ent-form-card input[type="email"],
+.ent-form-card input[type="url"],
+.ent-form-card input[type="number"],
+.ent-form-card input[type="password"],
+.ent-form-card textarea,
+.ent-form-card select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  appearance: none;
+}
+.ent-form-card input:focus,
+.ent-form-card textarea:focus,
+.ent-form-card select:focus {
+  border-color: rgba(200,241,53,.5);
+  box-shadow: 0 0 0 3px rgba(200,241,53,.08);
+}
+.ent-form-card input::placeholder,
+.ent-form-card textarea::placeholder { color: var(--muted); }
+
+.ent-submit-btn {
+  width: 100%;
+  padding: 13px 20px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .18s cubic-bezier(0.34,1.56,0.64,1), box-shadow .2s;
+  margin-top: 8px;
+}
+.ent-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(200,241,53,.3);
+}
+.ent-submit-btn:active { transform: scale(.98); }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .ent-page { padding: 28px 18px 60px; }
+  .ent-grid { grid-template-columns: 1fr; }
+  .ent-form-card { padding: 22px 18px; }
+}
 </style>
 
-{% if data %}
-<div class="row">
+<div class="ent-page">
+
+  {% if data %}
+
+  <!-- Top bar -->
+  <div class="ent-topbar">
+    <div>
+      <div class="ent-eyebrow">Enterprise Portal</div>
+      <h1 class="ent-heading">Select an <span>Institution</span></h1>
+    </div>
+    <div class="ent-count-pill">
+      <strong>{{ data|length }}</strong> institution{{ data|length|pluralize }} registered
+    </div>
+  </div>
+
+  <!-- School cards grid -->
+  <div class="ent-grid">
     {% for school in data %}
-        <div class="col-md-4">
-            <a href="{% url 'sels' school.id %}">
-                <div class="card l-bg-cherry">
-                    <div class="card-statistic-3 p-4">
-                        <div class="card-icon card-icon-large">
-                            <i class="fas fa-solid fa-graduation-cap"></i>
-                        </div>
-                        <div class="mb-4">
-                            <h4 class="card-title mb-0">{{ school.name }}</h4>
-                        </div>
-                        <div class="row align-items-center mb-2 d-flex">
+    <a href="{% url 'sels' school.id %}" class="school-card-link">
+      <div class="school-card">
+        <div class="school-card-bgicon"><i class="ri-building-4-line"></i></div>
+        <div class="school-card-num">#{{ forloop.counter|stringformat:"02d" }}</div>
 
-                                <h6 class="d-flex align-items-center mb-0">
-                                    {{ school.email }}
-                                </h6>
-                                <p>{{ school.address }}</p>
-
-
-                        </div>
-                        <!-- Add progress bar code here -->
-                    </div>
-                </div>
-            </a>
+        <div class="school-card-icon">
+          <i class="ri-graduation-cap-line"></i>
         </div>
-        {% if forloop.counter|divisibleby:5 and not forloop.last %}
-            </div><div class="row">
+
+        <div class="school-card-name">{{ school.name }}</div>
+
+        {% if school.email %}
+        <div class="school-card-email">
+          <i class="ri-mail-line"></i>
+          {{ school.email }}
+        </div>
         {% endif %}
+
+        {% if school.address %}
+        <div class="school-card-addr">
+          <i class="ri-map-pin-2-line"></i>
+          <span>{{ school.address }}</span>
+        </div>
+        {% endif %}
+
+        <div class="school-card-div"></div>
+
+        <div class="school-card-cta">
+          <span class="school-card-cta-text">Open Dashboard →</span>
+          <div class="school-card-arrow"><i class="ri-arrow-right-up-line"></i></div>
+        </div>
+
+      </div>
+    </a>
     {% endfor %}
+  </div>
+
+  {% else %}
+
+  <!-- Empty state — new enterprise form -->
+  <div class="ent-empty">
+    <div class="ent-empty-header">
+      <div class="ent-empty-icon"><i class="ri-building-add-line"></i></div>
+      <div class="ent-empty-title">New Enterprise</div>
+      <div class="ent-empty-sub">No institutions registered yet. Add your first institution below to get started.</div>
+    </div>
+
+    <div class="ent-form-card">
+      <form action="{% url 'addschool' %}" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="ent-submit-btn">
+          <i class="ri-add-circle-line"></i>
+          Add Institution
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% endif %}
+
 </div>
 
-
-{% else %}
-
-<div class="text-warning bg-dark"><h3 align="center">New Enterprise</h3></div><br><br>
-            <div class="row">
-                <div class="col-sm">
-                    <form action="{% url 'addschool' %}" method ="POST">
-                         {% csrf_token %}
-
-                          {{form.as_p}}
-                         <button type="submit" class="btn btn-primary">New Institution</button>
-                    </form>
-            </div>
-<br><br><br>
- {% endif %}
 {% endblock content %}

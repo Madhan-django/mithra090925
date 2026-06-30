@@ -9,6 +9,11 @@ from datetime import time
 from django.utils import timezone
 # Create your models here.
 
+staff_type = [
+    ('Permanent','Permanent'),
+    ('Probation','Probation')
+]
+
 class Skill(models.Model):
     name = models.CharField(max_length=50)
 
@@ -37,6 +42,7 @@ class staff(models.Model):
     EmpCode = models.CharField(max_length=20, blank=True, null=True)
     BioCode = models.CharField(max_length=15, blank=True, null=True)
     shift = models.ForeignKey(Shift,on_delete=models.SET_NULL,null=True,blank=True)
+    staff_type= models.CharField(max_length=15,choices=staff_type,default='Permanent',blank=True)
     first_name = models.CharField(max_length=35)
     last_name = models.CharField(max_length=35)
     gender = models.CharField(max_length=12)
@@ -47,7 +53,7 @@ class staff(models.Model):
     join = models.DateField()
     staff_photo = models.ImageField(upload_to='images/', null=True, blank=True)
     role = models.CharField(max_length=150)
-    salary = models.FloatField()
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
     desg = models.CharField(max_length=150)
     department = models.ForeignKey(Dept,on_delete=models.SET_NULL,null=True)
     qualification = models.CharField(max_length=150)

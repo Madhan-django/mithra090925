@@ -1,100 +1,72 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
-}
+<div class="container-fluid" style="max-width: 1400px; padding: 24px;">
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
-}
+    <!-- Page Header -->
+    <div class="pc-page-header">
+        <div class="pc-page-header-left">
+            <div class="pc-breadcrumb">
+                <a href="{% url 'home_dashboard' %}">Dashboard</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <a href="{%  url 'students_list' %}">Students</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <span>Authentication</span>
+            </div>
+            <h1 class="pc-page-title">Student Authentication</h1>
+            <p class="pc-page-sub">Manage student login credentials and account access</p>
+        </div>
+        <div class="pc-page-header-right">
+            <a href="{% url 'students_list' %}" class="pc-btn pc-btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Students
+            </a>
+        </div>
+    </div>
 
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
+    {% if page_obj %}
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
+    <!-- KPI Row -->
+    <div class="pc-kpi-row">
+        <div class="pc-kpi">
+            <div class="pc-kpi-val">{{ cnt }}</div>
+            <div class="pc-kpi-label">Total Student Accounts</div>
+        </div>
+        <div class="pc-kpi">
+            <div class="pc-kpi-val">{{ page_obj.paginator.num_pages }}</div>
+            <div class="pc-kpi-label">Pages</div>
+        </div>
+        <div class="pc-kpi">
+            <div class="pc-kpi-val">{{ page_obj.number }}</div>
+            <div class="pc-kpi-label">Current Page</div>
+        </div>
+    </div>
 
-}
+    <!-- Main Card -->
+    <div class="pc-card">
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
-
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
-
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
-    display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
-</style>
-
-{% if page_obj %}
-<br><br>
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Authentication</span></h5>
+        <!-- Card Header -->
+        <div class="pc-card-header">
+            <div>
+                <div class="pc-card-title">
+                    <i class="fas fa-user-lock" style="color:var(--accent);margin-right:6px;"></i>
+                    Student Authentication
+                </div>
+                <div class="pc-card-sub">Search and manage student login credentials</div>
+            </div>
+            <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                {{ cnt }} account{{ cnt|pluralize }}
+            </span>
         </div>
 
-        <div class="card-body" style="padding: 10px;">
+        <div class="pc-card-body">
 
             <!-- Search Form -->
-            <form action="{% url 'login_search' %}" method="POST" class="mb-4">
+            <form action="{% url 'login_search' %}" method="POST">
                 {% csrf_token %}
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label for="searchby">Search By:</label>
-                        <select name="searchby" id="searchby" class="form-control">
+                <div class="pc-filter-row">
+                    <div class="pc-form-group">
+                        <label class="pc-label">Search By</label>
+                        <select name="searchby" id="searchby" class="pc-select">
                             <option value="studname">Student Name</option>
                             <option value="fathername">Father Name</option>
                             <option value="studmob">Mobile No</option>
@@ -102,136 +74,385 @@ body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
                             <option value="studstatus">Status</option>
                         </select>
                     </div>
-                    <div class="col-md-5">
-                        <label for="searched">Search Term:</label>
-                        <input type="search" placeholder="Search..." name="searched" required class="form-control">
+
+                    <div class="pc-form-group" style="flex: 2;">
+                        <label class="pc-label">Search Term</label>
+                        <div class="pc-input-group">
+                            <i class="fas fa-search pc-input-icon"></i>
+                            <input type="search" placeholder="Enter search term..." name="searched" required class="pc-input">
+                        </div>
                     </div>
-                    <div class="col-md-4 text-center">
-                        <button class="btn btn-success me-2">Search</button>
-                        <a href="{% url 'students_login' %}" class="btn btn-danger">Clear</a>
+
+                    <div style="display: flex; align-items: flex-end; gap: 8px;">
+                        <button type="submit" class="pc-btn pc-btn-success">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="{% url 'students_login' %}" class="pc-btn pc-btn-outline">
+                            <i class="fas fa-redo"></i> Clear
+                        </a>
                     </div>
                 </div>
             </form>
 
-            <!-- Student Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle text-center">
-                    <thead class="table-dark">
+        </div>
+
+        <!-- Table -->
+        <div class="pc-card-body" style="padding:0;">
+            <div class="pc-table-wrap" style="border:none;border-radius:0;">
+                <table class="pc-table">
+                    <thead>
                         <tr>
-                            <th>S.No</th>
-                            <th>Name</th>
-                            <th>Admn No</th>
+                            <th>#</th>
+                            <th style="text-align:left;">Student Name</th>
+                            <th>Admission No</th>
                             <th>Class</th>
                             <th>Section</th>
-                            <th>User Name</th>
-                            <th>Account</th>
+                            <th>Username</th>
+                            <th>Account Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {% for stud in page_obj %}
-                        <tr align="left">
-                            <td><span class="serial-number"></span></td>
-                            <td>{{ stud.first_name }} {{ stud.last_name }}</td>
-                            <td>{{ stud.admn_no }}</td>
-                            <td>{{ stud.class_name }}</td>
-                            <td>{{ stud.secs }}</td>
-                            <td>{{ stud.usernm }}</td>
+                        <tr>
+                            <!-- Serial -->
+                            <td class="td-num serial-number"></td>
 
-                            <td align="center">
+                            <!-- Student Name with avatar -->
+                            <td class="td-name">
+                                <span style="display:inline-flex;align-items:center;gap:10px;">
+                                    <span style="
+                                        width:32px;height:32px;border-radius:8px;
+                                        background:var(--accent-lt);color:var(--accent);
+                                        display:inline-flex;align-items:center;justify-content:center;
+                                        font-weight:800;font-size:13px;flex-shrink:0;">
+                                        {{ stud.first_name|slice:":1"|upper }}
+                                    </span>
+                                    {{ stud.first_name }} {{ stud.last_name }}
+                                </span>
+                            </td>
+
+                            <!-- Admission No -->
+                            <td>
+                                <span class="font-mono" style="font-size:13px;">
+                                    {{ stud.admn_no }}
+                                </span>
+                            </td>
+
+                            <!-- Class -->
+                            <td>
+                                <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                                    {{ stud.class_name }}
+                                </span>
+                            </td>
+
+                            <!-- Section -->
+                            <td>
+                                <span class="pc-badge pc-badge-neutral pc-badge-no-dot">
+                                    {{ stud.secs }}
+                                </span>
+                            </td>
+
+                            <!-- Username -->
+                            <td>
+                                <span class="font-mono" style="font-size:13px; font-weight:600; color:var(--accent);">
+                                    {{ stud.usernm }}
+                                </span>
+                            </td>
+
+                            <!-- Account Status -->
+                            <td>
                                 {% if stud.account == 'Locked' %}
-                                    <i class="ri-lock-fill" style="color:red;"></i>
+                                    <span class="pc-badge pc-badge-danger">
+                                        <i class="fas fa-lock"></i> Locked
+                                    </span>
                                 {% else %}
-                                    <i class="ri-lock-unlock-fill" style="color:green;"></i>
+                                    <span class="pc-badge pc-badge-success">
+                                        <i class="fas fa-lock-open"></i> Active
+                                    </span>
                                 {% endif %}
                             </td>
 
-                            <td align="center">
-                                <a href="{% url 'student_password_reset' stud.usernm %}"
-                                   class="action-btn reset-btn"
-                                   title="Reset Password">
-                                    <i class="ri-key-2-fill"></i>
-                                </a>
+                            <!-- Actions -->
+                            <td>
+                                <div class="td-actions">
+                                    <a href="{% url 'student_password_reset' stud.usernm %}"
+                                       class="pc-btn pc-btn-warning pc-btn-sm"
+                                       title="Reset Password">
+                                        <i class="fas fa-key"></i> Reset
+                                    </a>
 
-                                {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                    {% if stud.account != 'Locked' %}
-                                        <a href="{% url 'deactivate_user' stud.id %}"
-                                           class="action-btn lock-btn"
-                                           title="Lock Account">
-                                           <i class="ri-lock-fill"></i>
-                                        </a>
-                                    {% else %}
-                                        <a href="{% url 'activate_user' stud.id %}"
-                                           class="action-btn unlock-btn"
-                                           title="Unlock Account">
-                                           <i class="ri-lock-unlock-fill"></i>
-                                        </a>
+                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                                        {% if stud.account != 'Locked' %}
+                                            <button type="button"
+                                               class="pc-btn pc-btn-danger pc-btn-sm"
+                                               title="Lock Account"
+                                               onclick="openLockModal('{{ stud.id }}', '{{ stud.first_name }} {{ stud.last_name }}')">
+                                               <i class="fas fa-lock"></i> Lock
+                                            </button>
+                                        {% else %}
+                                            <button type="button"
+                                               class="pc-btn pc-btn-success pc-btn-sm"
+                                               title="Unlock Account"
+                                               onclick="openUnlockModal('{{ stud.id }}', '{{ stud.first_name }} {{ stud.last_name }}')">
+                                               <i class="fas fa-unlock"></i> Unlock
+                                            </button>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
+                                </div>
                             </td>
-
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <b>{{ cnt }} - Records Available</b>
+        <!-- Card Footer with Pagination -->
+        <div class="pc-card-footer">
+            <div class="pc-pagination-info">
+                Total: <strong>{{ cnt }}</strong> student account{{ cnt|pluralize }}
+            </div>
+            <div class="pc-pagination-nav">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="pc-btn pc-btn-outline pc-btn-sm">
+                    <i class="fas fa-arrow-left"></i> Prev
+                </a>
+                {% endif %}
+                <span class="pc-pagination-page">
+                    Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="pc-btn pc-btn-outline pc-btn-sm">
+                    Next <i class="fas fa-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
 
-            <!-- PAGINATION -->
-            {% if page_obj.has_other_pages %}
-            <nav aria-label="Page navigation" class="mt-3">
-                <ul class="pagination">
+    </div><!-- /pc-card -->
 
-                    <!-- Previous -->
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
-                    {% endif %}
+    {% else %}
 
-                    <!-- Current Page -->
-                    <li class="page-item active">
-                        <span class="page-link">{{ page_obj.number }}</span>
-                    </li>
-
-                    <!-- Next -->
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                    {% endif %}
-
-                </ul>
-            </nav>
-            {% endif %}
-
+    <!-- Empty State -->
+    <div class="pc-card">
+        <div class="pc-card-body">
+            <div class="pc-empty">
+                <i class="fas fa-user-lock pc-empty-icon"></i>
+                <div class="pc-empty-title">No Student Accounts Found</div>
+                <div class="pc-empty-sub">There are no student authentication records available to display.</div>
+            </div>
         </div>
     </div>
+
+    {% endif %}
+
 </div>
 
-{% else %}
-<div class="alert alert-danger mt-5" role="alert">
-    No Student Records are available to show.
-</div>
-{% endif %}
+<!-- ═══════════════════════════════════════
+     LOCK ACCOUNT MODAL
+     ═══════════════════════════════════════ -->
+<div id="lockModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
 
-<!-- SERIAL NUMBER SCRIPT -->
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--rose-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #fecdd3;
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:42px;height:42px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(225,29,72,.15);
+        flex-shrink:0;">
+        <i class="fas fa-lock" style="color:var(--rose);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Lock Student Account</div>
+        <div style="font-size:12px;color:var(--rose);font-weight:500;">Prevent login access</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;line-height:1.7;">
+        Are you sure you want to lock the account for
+        <strong id="lockStudentName" style="color:var(--text);"></strong>?
+        This student will not be able to log in until the account is unlocked.
+      </p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeLockModal()">
+        Cancel
+      </button>
+      <form id="lockForm" method="get" style="margin:0;">
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="fas fa-lock"></i> Yes, Lock Account
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     UNLOCK ACCOUNT MODAL
+     ═══════════════════════════════════════ -->
+<div id="unlockModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
+
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%;max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--green-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #a7f3d0;
+      display:flex;align-items:center;gap:12px;">
+      <span style="
+        width:42px;height:42px;border-radius:50%;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 8px rgba(5,150,105,.15);
+        flex-shrink:0;">
+        <i class="fas fa-unlock" style="color:var(--green);font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Unlock Student Account</div>
+        <div style="font-size:12px;color:var(--green);font-weight:500;">Restore login access</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;line-height:1.7;">
+        Are you sure you want to unlock the account for
+        <strong id="unlockStudentName" style="color:var(--text);"></strong>?
+        This student will regain login access to the portal.
+      </p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeUnlockModal()">
+        Cancel
+      </button>
+      <form id="unlockForm" method="get" style="margin:0;">
+        <button type="submit" class="pc-btn pc-btn-success">
+          <i class="fas fa-unlock"></i> Yes, Unlock Account
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal animation -->
+<style>
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.92) translateY(10px); }
+    to   { opacity:1; transform:scale(1)   translateY(0); }
+  }
+</style>
+
+<!-- Serial Number & Modal Scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
+// Serial number calculation
 $(document).ready(function(){
     const serialNumberElements = document.getElementsByClassName("serial-number");
     let startSerial = ({{ page_obj.number }} - 1) * {{ page_obj.paginator.per_page }};
     for (let i = 0; i < serialNumberElements.length; i++) {
         serialNumberElements[i].textContent = startSerial + i + 1;
     }
+});
+
+// ═══════════════════════════════════════
+// LOCK MODAL FUNCTIONS
+// ═══════════════════════════════════════
+const lockModal = document.getElementById('lockModal');
+
+function openLockModal(id, studentName) {
+  document.getElementById('lockStudentName').textContent = studentName;
+  document.getElementById('lockForm').action = '{% url "deactivate_user" 0 %}'.replace('0', id);
+  lockModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLockModal() {
+  lockModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+lockModal.addEventListener('click', function(e) {
+  if (e.target === lockModal) closeLockModal();
+});
+
+// ═══════════════════════════════════════
+// UNLOCK MODAL FUNCTIONS
+// ═══════════════════════════════════════
+const unlockModal = document.getElementById('unlockModal');
+
+function openUnlockModal(id, studentName) {
+  document.getElementById('unlockStudentName').textContent = studentName;
+  document.getElementById('unlockForm').action = '{% url "activate_user" 0 %}'.replace('0', id);
+  unlockModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUnlockModal() {
+  unlockModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+unlockModal.addEventListener('click', function(e) {
+  if (e.target === unlockModal) closeUnlockModal();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeLockModal();
+    closeUnlockModal();
+  }
 });
 </script>
 

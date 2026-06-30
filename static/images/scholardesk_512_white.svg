@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="80" fill="#ffffff"/>
+  <rect width="512" height="512" rx="80" fill="none" stroke="#e8e4dc" stroke-width="2"/>
+  <defs>
+    <linearGradient id="arcG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5a623"/>
+      <stop offset="45%" style="stop-color:#4caf50"/>
+      <stop offset="100%" style="stop-color:#2e7d32"/>
+    </linearGradient>
+    <linearGradient id="bkL" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a3a6b"/>
+      <stop offset="100%" style="stop-color:#2196f3"/>
+    </linearGradient>
+    <linearGradient id="lfG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#66bb6a"/>
+      <stop offset="100%" style="stop-color:#2e7d32"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Arc sweep -->
+  <path d="M 96 316 A 178 178 0 0 1 426 148" fill="none" stroke="url(#arcG)" stroke-width="22" stroke-linecap="round"/>
+
+  <!-- Book left (navy-blue) -->
+  <path d="M 256 368 C 220 342 154 322 82 334 C 92 296 102 258 112 220 C 170 205 232 222 256 256Z" fill="url(#bkL)"/>
+  <!-- Book right (green) -->
+  <path d="M 256 368 C 292 342 358 322 430 334 C 420 296 410 258 400 220 C 342 205 280 222 256 256Z" fill="url(#lfG)"/>
+
+  <!-- Page detail lines left -->
+  <path d="M 168 295 C 200 286 236 284 251 289" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 152 318 C 188 308 230 306 251 311" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Page detail lines right -->
+  <path d="M 344 295 C 312 286 276 284 261 289" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Spine -->
+  <ellipse cx="256" cy="367" rx="10" ry="7" fill="#1a3a6b"/>
+
+  <!-- Person head -->
+  <circle cx="256" cy="232" r="18" fill="#1a3a6b"/>
+
+  <!-- Graduation cap board -->
+  <polygon points="256,148 372,188 256,212 140,188" fill="#1a3a6b"/>
+  <!-- Cap top -->
+  <rect x="238" y="124" width="36" height="26" rx="4" fill="#1a3a6b"/>
+  <!-- Cap highlight -->
+  <polygon points="256,156 352,188 256,206 160,188" fill="#243f7a" opacity="0.4"/>
+
+  <!-- Tassel -->
+  <line x1="372" y1="188" x2="392" y2="254" stroke="#1a3a6b" stroke-width="4" stroke-linecap="round"/>
+  <line x1="392" y1="254" x2="384" y2="298" stroke="#1a3a6b" stroke-width="3"/>
+  <line x1="392" y1="254" x2="392" y2="300" stroke="#1a3a6b" stroke-width="3"/>
+  <line x1="392" y1="254" x2="400" y2="298" stroke="#1a3a6b" stroke-width="3"/>
+  <circle cx="392" cy="254" r="6" fill="#1a3a6b"/>
+
+  <!-- Digital pixels dispersing top-right -->
+  <rect x="400" y="112" width="26" height="26" rx="4" fill="#1a6e3c" opacity="0.9"/>
+  <rect x="432" y="90"  width="20" height="20" rx="3" fill="#2196f3" opacity="0.85"/>
+  <rect x="430" y="118" width="16" height="16" rx="3" fill="#1a6e3c" opacity="0.72"/>
+  <rect x="456" y="102" width="14" height="14" rx="3" fill="#1a3a6b" opacity="0.65"/>
+  <rect x="450" y="130" width="11" height="11" rx="2" fill="#2196f3" opacity="0.52"/>
+  <rect x="474" y="92"  width="12" height="12" rx="2" fill="#1a6e3c" opacity="0.45"/>
+  <rect x="472" y="120" width="9"  height="9"  rx="2" fill="#1a3a6b" opacity="0.38"/>
+  <rect x="490" y="108" width="7"  height="7"  rx="2" fill="#2196f3" opacity="0.28"/>
+  <rect x="464" y="146" width="7"  height="7"  rx="2" fill="#1a6e3c" opacity="0.25"/>
+  <rect x="484" y="136" width="5"  height="5"  rx="1" fill="#1a3a6b" opacity="0.18"/>
+
+  <!-- Wordmark -->
+  <text x="256" y="432"
+        font-family="Arial Black, Arial, sans-serif"
+        font-size="72"
+        font-weight="900"
+        text-anchor="middle"
+        letter-spacing="-1">
+    <tspan fill="#1a3a6b">Scholar</tspan><tspan fill="#2e7d32">Desk</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <line x1="60"  y1="458" x2="96"  y2="458" stroke="#1a3a6b" stroke-width="2"/>
+  <text x="256" y="465"
+        font-family="Arial, sans-serif"
+        font-size="17"
+        font-weight="700"
+        fill="#555555"
+        text-anchor="middle"
+        letter-spacing="4">SCHOOL ERP SOFTWARE</text>
+  <line x1="416" y1="458" x2="452" y2="458" stroke="#2e7d32" stroke-width="2"/>
+
+  <!-- By Nexis -->
+  <text x="256" y="494"
+        font-family="Arial, sans-serif"
+        font-size="13"
+        fill="#bbbbbb"
+        text-anchor="middle"
+        letter-spacing="2">BY NEXIS CODELABS</text>
+</svg>

@@ -28,7 +28,8 @@ class AutomateFunc(models.Model):
         ('stocks', 'Stocks'),
         ('summarys', 'Summary'),
         ('Grievance_Report','Grievance_Report'),
-        ('Grievance_over_Due','Grievance_over_Due')
+        ('Grievance_over_Due','Grievance_over_Due'),
+        ('Morning_Attendance_Alert','Morning_Attendance_Alert')
     ]
 
     SEND_TYPES = [

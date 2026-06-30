@@ -1,141 +1,162 @@
 {% extends 'panel/index.html' %}
 {% block content %}
-<style>
-    h1, h3, h4 {
-        font-family: Roboto;
-    }
-    th {
-        font-family: 'Roboto', sans-serif;
-        font-weight: bold !important;
-        font-size: 18px !important;
-    }
-    .align-left {
-        text-align: left;
-        padding-right: 15px; /* Adjust the padding value as needed */
-    } /* Added missing closing brace */
-    .form-group {
-        margin-bottom: 15px;
-    }
-    label {
-        font-weight: bold;
-    }
-    input[type="text"],
-    input[type="email"],
-    textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
-    select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-        appearance: none;
-    }
-    img#staff_photo_preview {
-        max-width: 200px;
-        margin-top: 10px;
-    }
-    input[type="submit"] {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    input[type="submit"]:hover {
-        background-color: #45a049;
-    }
-    .card {
-        background-color: #f2f2f2;
-        padding: 20px;
-    }
-    .text-center {
-        text-align: center;
-    }
-    .mt-3 {
-        margin-top: 15px;
-    }
-    .wlsm-section-heading {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-    .wlsm-section-heading-box {
-        padding: 5px;
-    }
-    .wlsm-main-header {
-        margin-bottom: 15px;
-    }
-    .wlsm_text_secondary {
-        color: #888;
-        font-size: 14px;
-    }
-    .h3 {
-        margin-top: 0;
-    }
-    .row {
-        display: flex;
-        flex-wrap: wrap;
-        margin-right: -15px;
-        margin-left: -15px;
-    }
-    .col {
-        position: relative;
-        min-height: 1px;
-        padding-right: 15px;
-        padding-left: 15px;
-    }
-    .col-lg-6 {
-        width: 50%;
-    }
-    .mx-auto {
-        margin-right: auto;
-        margin-left: auto;
-    }
-    .align-center {
-        text-align: center;
-    }
-    select{
-      height:50px;
-      }
-    option{
-      font-family: Roboto;
-      font-size:18px;
-    }
-    .align-right{
-       text-align:right;
-       padding:15px;
 
-    }
-</style>
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <br>
-            <h3>New Block</h3>
-        </div>
-		<div class="card-body">
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-		</div>
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="#">Settings</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Block</span>
+    </div>
+    <div class="pc-page-title">New Block</div>
+    <div class="pc-page-sub">Create and configure a new block for the school</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="#" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
   </div>
 </div>
 
-<!-- Include the necessary JavaScript files for datepicker -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- ═══════════════════════════════
+     FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card" style="max-width:720px;">
 
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-building-2-line me-2" style="color:var(--accent);"></i>
+        Block Details
+      </div>
+      <div class="pc-card-sub">Fill in the details below to register a new block</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+      <i class="ri-add-line"></i>&nbsp; New Entry
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+
+    <div class="pc-alert pc-alert-info" style="margin-bottom:22px;">
+      <i class="ri-information-line"></i>
+      <div>All fields marked <strong style="color:var(--rose);">*</strong> are required.</div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="newBlockForm">
+      {% csrf_token %}
+
+      {{ form.as_p }}
+
+      <!-- ── Action buttons ── -->
+      <div class="pc-divider"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Block
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Reset
+        </button>
+        <a href="#" class="pc-btn pc-btn-danger">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════
+     STYLE: patch Django form.as_p
+     to match panel_components look
+     ═══════════════════════════════ -->
+<style>
+/* Make Django's auto-rendered <p> + <label> + <input> match pc-* system */
+#newBlockForm p {
+  margin-bottom: 18px;
+}
+#newBlockForm label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-sm);
+  margin-bottom: 6px;
+  font-family: var(--f-sans);
+}
+#newBlockForm input[type="text"],
+#newBlockForm input[type="email"],
+#newBlockForm input[type="number"],
+#newBlockForm input[type="date"],
+#newBlockForm input[type="tel"],
+#newBlockForm input[type="url"],
+#newBlockForm input[type="password"],
+#newBlockForm select,
+#newBlockForm textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+  box-sizing: border-box;
+  appearance: none;
+  height: auto;
+}
+#newBlockForm select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+#newBlockForm textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+#newBlockForm input:focus,
+#newBlockForm select:focus,
+#newBlockForm textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+#newBlockForm input::placeholder,
+#newBlockForm textarea::placeholder {
+  color: var(--muted);
+}
+/* helptext */
+#newBlockForm .helptext,
+#newBlockForm span.helptext {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-family: var(--f-sans);
+}
+/* error list */
+#newBlockForm ul.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+#newBlockForm ul.errorlist li {
+  font-size: 12px;
+  color: var(--rose);
+  font-weight: 600;
+  font-family: var(--f-sans);
+}
+</style>
 
 {% endblock %}

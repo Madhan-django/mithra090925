@@ -10,12 +10,14 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django_q.models import Schedule
 from django.utils.timezone import now
+
 from django.contrib.auth.models import User,Group
 from authenticate.decorators import allowed_users
 from django.contrib.auth.forms import PasswordChangeForm
 from .utils import render_to_pdf
 import csv
-
+from django.db.models import IntegerField
+from django.db.models.functions import Cast, Trim
 
 
 # Create your views here.
@@ -60,7 +62,7 @@ def Dept_update(request,dept_id):
             return redirect('dept')
     else:
         form  = add_deptfm(instance = data)
-    return render(request,'staff/add_dept.html',context={'form':form,'skool':sdata,'year':year})
+    return render(request,'staff/update_dept.html',context={'form':form,'skool':sdata,'year':year})
 
 def Dept_del(request,dept_id):
     sch_id = request.session['sch_id']
@@ -145,15 +147,15 @@ def add_staff(request):
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-
+    sft = Shift.objects.filter(sch=sdata)
     form = add_staff_form(initial={
         'staff_school': sdata,
     })
+    form.fields['shift'].queryset = sft
 
     if request.method == 'POST':
         form = add_staff_form(request.POST, request.FILES)
         if form.is_valid():
-            # Create the username
             name_str = request.POST['first_name']
             date_str1 = request.POST['dob']
             grp = request.POST['permission_group']
@@ -165,20 +167,36 @@ def add_staff(request):
             dt = date_str1[8:10]
             usernm = name_str + dt + dtmon + dtyr
 
-            # Create the Django user
             ruser = User.objects.create_user(
                 username=usernm,
                 email=eml,
                 password='Welcome@123'
             )
 
-            # Add to group
             group = Group.objects.get(name='Teacher')
             ruser.groups.add(group)
 
-            # Save staff object with the new user
             chgusernm = form.save(commit=False)
             chgusernm.staff_user = ruser
+
+            # ── Auto-assign next BioCode ──
+            last = (
+                staff.objects
+                .exclude(BioCode__isnull=True)
+                .exclude(BioCode='')
+                .annotate(
+                    bio_trim=Trim('BioCode'),
+                    bio_num=Cast(Trim('BioCode'), IntegerField())
+                )
+                .order_by('-bio_num')
+                .first()
+            )
+
+            chgusernm.BioCode = str((last.bio_num + 1) if last else 101)
+
+            print("Highest BioCode:", last.bio_num if last else None)
+            print("Next BioCode:", chgusernm.BioCode)
+
             chgusernm.save()
 
             messages.success(request, 'Staff has been added successfully')
@@ -191,11 +209,70 @@ def add_staff(request):
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def staff_update(request, staff_id):
     sch_id = request.session['sch_id']
+
+    sdata = school.objects.get(pk=sch_id)
+
+    yr = currentacademicyr.objects.get(school_name=sdata)
+
+    year = academicyr.objects.get(
+        acad_year=yr,
+        school_name=sdata
+    )
+
+    data = staff.objects.get(pk=staff_id)
+
+    sft = Shift.objects.filter(sch=sdata)
+
+    if request.method == 'POST':
+
+        form = add_staff_form(
+            request.POST or None,
+            request.FILES,
+            instance=data
+        )
+
+        form.fields['shift'].queryset = sft
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                'Staff Record Updated Successfully'
+            )
+
+            return redirect('stafflist')
+
+        else:
+            return HttpResponse(str(form.errors))
+
+    else:
+
+        form = add_staff_form(instance=data)
+
+        form.fields['shift'].queryset = sft
+
+    context = {
+        'form': form,
+        'skool': sdata,
+        'year': year
+    }
+
+    return render(
+        request,
+        'staff/update_staff.html',
+        context
+    )
+
+def staff_update_bak(request, staff_id):
+    sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = staff.objects.get(pk=staff_id)
+    sft = Shift.objects.filter(sch=sdata)
     form = add_staff_form(instance=data)
+    form.fields['shift'].queryset = sft
     if request.method=='POST':
         form = add_staff_form(request.POST or None, request.FILES, instance=data)
         if form.is_valid():
@@ -470,13 +547,18 @@ def add_homeworks(request):
     
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
 def add_homework(request):
+
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
+
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
     hclass = sclass.objects.filter(school_name=sdata)
+
     user = request.user.id
     usr = User.objects.get(id=user)
+
     try:
         stf = staff.objects.get(staff_user=usr)
     except:
@@ -488,16 +570,80 @@ def add_homework(request):
         'created_by': stf
     }
 
-    if request.method == 'POST':
-        form = add_homework_form(request.POST,request.FILES, initial=initial_data)
+    if request.method == "POST":
+
+        form = add_homework_form(request.POST, request.FILES)
+
         if form.is_valid():
-            instance = form.save()
-            messages.success(request, 'Homework Added and Scheduled Successfully')
+
+            instance = form.save(commit=False)
+
+            instance.acad_yr = yr
+            instance.school_homework = sdata
+            instance.created_by = stf
+
+            sections = request.POST.getlist('secs')
+            action = request.POST.get("action")
+
+            # SEND NOW
+            if action == "send_now":
+
+                for sec in sections:
+
+                    homework.objects.create(
+                        title=instance.title,
+                        hclass=instance.hclass,
+                        secs_id=sec,
+                        subj=instance.subj,
+                        homework_date=instance.homework_date,
+                        description=instance.description,
+                        submission_date=instance.submission_date,
+                        created_by=instance.created_by,
+                        acad_yr=instance.acad_yr,
+                        school_homework=instance.school_homework,
+                        attachment=instance.attachment
+                    )
+                    temp_homework.objects.create(
+                        title=instance.title,
+                        hclass=instance.hclass,
+                        secs_id=sec,
+                        subj=instance.subj,
+                        homework_date=instance.homework_date,
+                        description=instance.description,
+                        submission_date=instance.submission_date,
+                        created_by=instance.created_by,
+                        acad_yr=instance.acad_yr,
+                        school_homework=instance.school_homework,
+                        attachment=instance.attachment
+                    )
+
+                messages.success(request, "Homework Added Successfully")
+
+            # SCHEDULE
+            else:
+
+                for sec in sections:
+
+                    temp_homework.objects.create(
+                        title=instance.title,
+                        hclass=instance.hclass,
+                        secs_id=sec,
+                        subj=instance.subj,
+                        homework_date=instance.homework_date,
+                        description=instance.description,
+                        submission_date=instance.submission_date,
+                        created_by=instance.created_by,
+                        acad_yr=instance.acad_yr,
+                        school_homework=instance.school_homework,
+                        attachment=instance.attachment
+                    )
+
+                messages.success(request, "Homework Scheduled Successfully")
+
             return redirect('homework')
 
         else:
-            err = str(form.errors)
-            return HttpResponse(err)
+            return HttpResponse(str(form.errors))
 
     else:
         form = add_homework_form(initial=initial_data)
@@ -508,6 +654,8 @@ def add_homework(request):
         'skool': sdata,
         'usr': stf
     })
+
+
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def homework_view(request):
@@ -659,74 +807,239 @@ def homework_search(request):
     )
 
 
+
+
+
+
 @allowed_users(allowed_roles=['superadmin','Admin'])
 def staff_import_csv(request):
+
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
+
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
 
     if request.method == 'POST' and request.FILES.get('csv_file'):
+
         csv_file = request.FILES['csv_file']
 
-        # Check if the uploaded file is a CSV file
         if not csv_file.name.endswith('.csv'):
             messages.error(request, 'Please upload a CSV file.')
-            return redirect('staff_import_csv')  # Redirect to the import page
-
-        # Read the CSV file
-        csv_data = csv.reader(csv_file.read().decode('utf-8').splitlines())
-        next(csv_data)  # Skip the header row
+            return redirect('staff_import_csv')
 
         try:
-            for row in csv_data:
-                # Ensure that the row has the correct number of columns
-                if len(row) < 12:
-                    messages.error(request, 'CSV file format is incorrect.')
-                    return redirect('import_csv')
 
-                # Create a new staff object and set its attributes from CSV data
-                stf = staff()
-                stf.first_name = row[0]
-                stf.last_name = row[1]
-                stf.gender = row[2]
-                stf.dob = row[3]
-                stf.father_spouse_name=row[4]
-                stf.address = row[5]
-                stf.mobile = row[6]
-                stf.email = row[7]
-                stf.join = row[8]
-                stf.role = row[9]
-                stf.salary = row[10]
-                stf.desg = row[11]
-                stf.qualification = row[12]
-                stf.permission_group = row[13]
-                stf.status = 'Active'
-                stf.staff_school= sdata
+            csv_rows = list(
+                csv.reader(
+                    csv_file.read().decode('utf-8-sig').splitlines()
+                )
+            )
 
+            if len(csv_rows) <= 1:
+                messages.error(request, "CSV file is empty.")
+                return redirect('staff_import_csv')
 
-                # Ensure unique email for User model
-                email = row[7]
-                if User.objects.filter(email=email).exists():
-                    messages.error(request, f'User with email {email} already exists.')
-                    return redirect('staff_import_csv')
+            csv_rows.pop(0)  # remove header
 
-                # Create a new user for the staff
-                ruser = User.objects.create_user(username=email, email=email, password='Welcome@123')
-                group = Group.objects.get(name='Teacher')
-                ruser.groups.add(group)
-                stf.staff_user=ruser
-                # Save the staff object
-                stf.save()
+            errors = []
 
-            messages.success(request, 'Staff imported successfully.')
+            # -----------------------
+            # VALIDATION PHASE
+            # -----------------------
+
+            emails_in_csv = set()
+
+            for line_no, row in enumerate(csv_rows, start=2):
+
+                try:
+
+                    if len(row) < 13:
+                        errors.append(
+                            f"Row {line_no}: Expected 13 columns, found {len(row)}"
+                        )
+                        continue
+
+                    first_name = row[0].strip()
+                    last_name = row[1].strip()
+                    gender = row[2].strip()
+                    dob = row[3].strip()
+                    address = row[4].strip()
+                    mobile = row[5].strip()
+                    email = row[6].strip().lower()
+                    join_date = row[7].strip()
+                    role = row[8].strip()
+                    salary = row[9].strip()
+                    desg = row[10].strip()
+                    qualification = row[11].strip()
+                    permission_group = row[12].strip()
+
+                    if not first_name:
+                        errors.append(f"Row {line_no}: First Name is required")
+
+                    if not email:
+                        errors.append(f"Row {line_no}: Email is required")
+
+                    if not mobile:
+                        errors.append(f"Row {line_no}: Mobile is required")
+
+                    if len(mobile) != 10:
+                        errors.append(
+                            f"Row {line_no}: Mobile must be 10 digits"
+                        )
+
+                    try:
+                        datetime.strptime(dob, "%Y-%m-%d")
+                    except:
+                        errors.append(
+                            f"Row {line_no}: Invalid DOB format. Use YYYY-MM-DD"
+                        )
+
+                    try:
+                        datetime.strptime(join_date, "%Y-%m-%d")
+                    except:
+                        errors.append(
+                            f"Row {line_no}: Invalid Join Date format. Use YYYY-MM-DD"
+                        )
+
+                    try:
+                        Decimal(salary)
+                    except:
+                        errors.append(
+                            f"Row {line_no}: Invalid Salary"
+                        )
+
+                    if email in emails_in_csv:
+                        errors.append(
+                            f"Row {line_no}: Duplicate email in CSV ({email})"
+                        )
+
+                    emails_in_csv.add(email)
+
+                    if User.objects.filter(email=email).exists():
+                        errors.append(
+                            f"Row {line_no}: Email already exists ({email})"
+                        )
+
+                except Exception as e:
+                    errors.append(
+                        f"Row {line_no}: {str(e)}"
+                    )
+
+            # -----------------------
+            # STOP IF ERRORS
+            # -----------------------
+
+            if errors:
+
+                error_text = "<br>".join(errors)
+
+                messages.error(
+                    request,
+                    f"Import failed.<br>{error_text}"
+                )
+
+                return HttpResponse(error_text)
+
+            # -----------------------
+            # IMPORT PHASE
+            # -----------------------
+
+            group, created = Group.objects.get_or_create(
+                name='Teacher'
+            )
+
+            with transaction.atomic():
+
+                for row in csv_rows:
+
+                    email = row[6].strip().lower()
+
+                    ruser = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password='Welcome@123'
+                    )
+
+                    ruser.groups.add(group)
+
+                    stf = staff()
+
+                    stf.first_name = row[0].strip()
+                    stf.last_name = row[1].strip()
+                    stf.gender = row[2].strip()
+
+                    stf.dob = datetime.strptime(
+                        row[3].strip(),
+                        "%Y-%m-%d"
+                    ).date()
+
+                    stf.address = row[4].strip()
+                    stf.mobile = row[5].strip()
+
+                    stf.email = email
+
+                    stf.join = datetime.strptime(
+                        row[7].strip(),
+                        "%Y-%m-%d"
+                    ).date()
+
+                    stf.role = row[8].strip()
+
+                    stf.salary = Decimal(
+                        row[9].strip()
+                    )
+
+                    stf.desg = row[10].strip()
+                    stf.qualification = row[11].strip()
+                    stf.permission_group = row[12].strip()
+
+                    stf.status = 'Active'
+                    stf.staff_school = sdata
+                    stf.staff_user = ruser
+
+                    # Auto BioCode
+                    last = (
+                        staff.objects
+                        .exclude(BioCode__isnull=True)
+                        .exclude(BioCode='')
+                        .order_by('-id')
+                        .first()
+                    )
+
+                    if last and last.BioCode and last.BioCode.isdigit():
+                        stf.BioCode = str(
+                            int(last.BioCode) + 1
+                        )
+                    else:
+                        stf.BioCodFe = '101'
+
+                    stf.save()
+
+            messages.success(
+                request,
+                f'{len(csv_rows)} staff imported successfully.'
+            )
+
             return redirect('stafflist')
-        except Exception as e:
-            err = f'{e}'
-            messages.error(request, f'Staff import failed: {err}')
-            return HttpResponse(err)
 
-    return render(request, 'staff/import_csv.html', context={'skool': sdata, 'year': year})
+        except Exception as e:
+
+            messages.error(
+                request,
+                f'Import failed : {str(e)}'
+            )
+
+            return HttpResponse(str(e))
+
+    return render(
+        request,
+        'staff/import_csv.html',
+        {
+            'skool': sdata,
+            'year': year
+        }
+    )
 
 
 @allowed_users(allowed_roles=['superadmin','Admin'])
@@ -792,3 +1105,11 @@ def homeworkreal_view(request):
     return render(request,'staff/homework.html',context={'data':data,'skool':sdata,'year':year})
 
 
+def biocode_update(request):
+    stf    = staff.objects.all()
+    updated = 101
+    for st in stf:
+        st.BioCode = updated
+        st.save()
+        updated += 1
+    return HttpResponse(f"Bio code updated ")

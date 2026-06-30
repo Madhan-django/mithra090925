@@ -1,196 +1,346 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
 
 <style>
-    /* === General Typography === */
-    body, h1, h3, h4, h5, th, td, label, button, .page-link {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Amount chip ── */
+.td-amount {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-lt);
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: inline-block;
+  white-space: nowrap;
+}
 
-    /* === Card Layout === */
-    .card {
-        border-radius: 20px;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.15);
-        border: none;
-    }
+/* ── Date chip ── */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 
-    /* === Title Bar (Reduced Height) === */
-    .card-title {
-        background: linear-gradient(to right, #1e5799, #207cca, #2989d8);
-        padding: 6px 0;    /* reduced from 12px */
-        border-radius: 18px 18px 0 0;
-        margin-bottom: 0;
-    }
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: feeRowIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes feeRowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:185ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:215ms; }
 
-    .card-title h5 {
-        margin: 0;
-    }
+/* ── Pagination ── */
+.nb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.nb-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--f-sans);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-md);
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  white-space: nowrap;
+}
+.nb-page-btn:hover {
+  background: var(--accent-lt);
+  border-color: var(--accent-mid);
+  color: var(--accent);
+}
+.nb-page-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(79,70,229,.25);
+}
+.nb-page-btn.disabled {
+  opacity: .35;
+  pointer-events: none;
+}
 
-    .card-title span.badge {
-        background: #fff;
-        color: #000;
-        padding: 4px 16px;   /* reduced badge padding */
-        border-radius: 25px;
-        font-size: 15px;     /* slightly smaller */
-        font-weight: bold;
-        box-shadow: 0px 2px 6px rgba(0,0,0,0.20);
-    }
-
-    /* === Buttons === */
-    .btn-primary {
-        background: linear-gradient(to right, #1e5799, #207cca);
-        border: none;
-        font-weight: 600;
-    }
-
-    .btn-danger {
-        background: linear-gradient(to right, #d9534f, #c9302c);
-        border: none;
-        font-weight: 600;
-    }
-
-    .btn-info {
-        background: linear-gradient(to right, #17a2b8, #138496);
-        color: white;
-        border: none;
-        font-weight: 600;
-    }
-
-    /* === Table Styling === */
-    thead.table-dark th {
-        background-color: #212529 !important;
-        color: #fff !important;
-        font-size: 14px !important;
-        padding: 6px !important;   /* reduced from 10px */
-        text-align: center !important;
-    }
-
-    tbody td {
-        padding: 8px;
-        vertical-align: middle;
-        text-align: center;
-        font-size: 14px;
-        background: #fff;
-        border: 1px solid #e0e0e0;
-    }
-
-    /* === Pagination === */
-    .pagination .page-link {
-        color: #000;
-        font-weight: 500;
-        border-radius: 10px;
-        margin: 0 3px;
-    }
-
-    .pagination .active .page-link {
-        background: #1e5799;
-        border-color: #1e5799;
-        color: white;
-        font-weight: 700;
-    }
-
-    .text-end {
-        padding-right: 20px;
-        padding-top: 10px;
-    }
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
+}
+.nb-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15,23,42,.5);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+}
+.nb-modal.active { display: flex; }
+.nb-modal-box {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%; max-width: 420px;
+  margin: 20px;
+  overflow: hidden;
+  animation: modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  background: var(--rose-lt);
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #fecdd3;
+  display: flex; align-items: center; gap: 12px;
+}
+.nb-modal-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(225,29,72,.15);
+  flex-shrink: 0;
+}
+.nb-modal-body { padding: 22px; }
+.nb-modal-body p { font-size: 13.5px; color: var(--text-md); margin: 0; line-height: 1.7; }
+.nb-modal-footer {
+  padding: 14px 22px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
 </style>
 
+<div class="col-lg-12">
 
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Fee Category</span>
+      </nav>
+      <h1 class="pc-page-title">Fee Category</h1>
+      <p class="pc-page-sub">Manage invoice titles, classes and fee amounts.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'fee_add' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> New Fee Category
+      </a>
+    </div>
+  </div>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Fee Categories</p>
+        <p class="pc-card-sub">
+          {% if data %}
+            Page {{ data.number }} of {{ data.paginator.num_pages }}
+            &nbsp;·&nbsp; {{ data.paginator.count }} record{{ data.paginator.count|pluralize }} total
+          {% else %}
+            No records found
+          {% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-success pc-badge-no-dot">
+        <i class="ri-money-dollar-circle-line" style="font-size:12px;"></i>
+        {{ data.paginator.count }} Total
+      </span>
+      {% endif %}
+    </div>
 
-        <!-- Title Bar -->
-        <div class="card-title text-center">
-            <h5><span class="badge">Fee Category</span></h5>
-        </div>
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th style="text-align:left;">Invoice Title</th>
+              <th>Class</th>
+              <th>Issued Date</th>
+              <th>Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for frm in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
 
-        <!-- Add New Button -->
-        <div class="text-end">
-            <a href="{% url 'fee_add' %}" class="btn btn-sm btn-primary">New Fee Category</a>
-        </div>
+              <td class="td-name">{{ frm.invoice_title }}</td>
 
-        {% if data %}
+              <td>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot">{{ frm.iclass }}</span>
+              </td>
 
-        <div class="card-body">
-            <table class="table">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Invoice Title</th>
-                        <th>Class</th>
-                        <th>Issued Date</th>
-                        <th>Amount</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+              <td>
+                <span class="td-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ frm.issued_date }}
+                </span>
+              </td>
 
-                <tbody>
-                {% for frm in data %}
-                    <tr>
-                        <td>{{ frm.invoice_title }}</td>
-                        <td>{{ frm.iclass }}</td>
-                        <td>{{ frm.issued_date }}</td>
-                        <td>{{ frm.fee_amount }}</td>
-                        <td>
-                            <form action="{% url 'updatefee_cat' frm.id %}" method="" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-info btn-sm">Edit</button>
-                            </form>
+              <td>
+                <span class="td-amount">&#8377; {{ frm.fee_amount }}</span>
+              </td>
 
-                            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                                <form action="{% url 'delfee_cat' frm.id %}" method="" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+              <td>
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <a href="{% url 'updatefee_cat' frm.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ri-pencil-line"></i> Edit
+                  </a>
+                  {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <button type="button"
+                    class="pc-btn pc-btn-danger pc-btn-sm"
+                    onclick="openDeleteModal('{% url 'delfee_cat' frm.id %}', '{{ frm.invoice_title|escapejs }}')">
+                    <i class="ri-delete-bin-7-line"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Pagination -->
-        <div class="container-fluid">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-money-dollar-circle-line"></i></span>
+        <p class="pc-empty-title">No fee categories found</p>
+        <p class="pc-empty-sub">Click <strong>New Fee Category</strong> to create one.</p>
+      </div>
+      {% endif %}
+    </div>
 
-                    {% if data.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
-                        </li>
-                    {% endif %}
+    {% if data %}
+    <div class="pc-card-footer">
+      <!-- Pagination info -->
+      <span class="pc-pagination-info">
+        Showing
+        <strong>{{ data.start_index }}–{{ data.end_index }}</strong>
+        of <strong>{{ data.paginator.count }}</strong> records
+      </span>
 
-                    {% for num in data.paginator.page_range %}
-                        {% if data.number == num %}
-                            <li class="page-item active">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if data.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
-                        </li>
-                    {% endif %}
-
-                </ul>
-            </nav>
-        </div>
-
+      <!-- Pagination nav -->
+      <nav class="nb-pagination">
+        {% if data.has_previous %}
+        <a href="?page={{ data.previous_page_number }}" class="nb-page-btn">
+          <i class="ri-arrow-left-s-line"></i> Prev
+        </a>
         {% else %}
-            <div class="alert alert-danger text-center mt-3" role="alert">
-                No Records Available
-            </div>
+        <span class="nb-page-btn disabled">
+          <i class="ri-arrow-left-s-line"></i> Prev
+        </span>
         {% endif %}
 
+        {% for num in data.paginator.page_range %}
+          {% if data.number == num %}
+          <span class="nb-page-btn active">{{ num }}</span>
+          {% elif num >= data.number|add:"-2" and num <= data.number|add:"2" %}
+          <a href="?page={{ num }}" class="nb-page-btn">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if data.has_next %}
+        <a href="?page={{ data.next_page_number }}" class="nb-page-btn">
+          Next <i class="ri-arrow-right-s-line"></i>
+        </a>
+        {% else %}
+        <span class="nb-page-btn disabled">
+          Next <i class="ri-arrow-right-s-line"></i>
+        </span>
+        {% endif %}
+      </nav>
     </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
+
+<!-- ══════════════════════════════
+     DELETE MODAL
+══════════════════════════════ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Fee Category</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete
+        <strong id="deleteFeeLabel" style="color:var(--text);"></strong>?
+        This fee category will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <form id="deleteForm" method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteModal(url, label) {
+  document.getElementById('deleteFeeLabel').textContent = label;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
 
 {% endblock %}

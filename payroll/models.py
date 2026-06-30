@@ -263,6 +263,7 @@ class Attendance(models.Model):
 
     # ========== FLAGS ==========
     late = models.BooleanField(default=False)
+    late_exempted = models.BooleanField(default=False)
     mis_punch = models.BooleanField(default=False)
     is_manual = models.BooleanField(default=False)  # HR edited
 

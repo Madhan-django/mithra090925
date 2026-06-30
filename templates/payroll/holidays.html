@@ -2,179 +2,301 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, th, td, label, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Day badge ── */
+.td-day {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  display: inline-block;
+}
+.td-day-weekend {
+  background: var(--rose-lt);
+  color: var(--rose);
+  border: 1px solid #fecdd3;
+}
+.td-day-weekday {
+  background: var(--accent-lt);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+/* ── Date chip ── */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-/* ===== TITLE BAR (Style A) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 6px;
-    border-radius: 20px 20px 0 0;
-    text-align: center;
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: holRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-.card-title h3 span {
-    background: #f8f9fa;
-    color: #000;
-    padding: 5px 22px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
+@keyframes holRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
 }
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:185ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:215ms; }
 
-/* ===== ACTION BAR ===== */
-.action-bar {
-    text-align: right;
-    padding: 15px 20px 0 20px;
+/* ── Pagination ── */
+.nb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
-
-/* ===== TABLE ===== */
-.table {
-    margin-top: 10px;
+.nb-page-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--f-sans); font-size: 13px; font-weight: 600;
+  text-decoration: none; color: var(--text-md);
+  background: var(--surface); border: 1.5px solid var(--border-dark);
+  transition: background 150ms, color 150ms, border-color 150ms;
+  white-space: nowrap;
 }
+.nb-page-btn:hover { background:var(--accent-lt); border-color:var(--accent-mid); color:var(--accent); }
+.nb-page-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.25); }
+.nb-page-btn.disabled { opacity:.35; pointer-events:none; }
 
-.table thead {
-    background-color: #212529;
-    color: white;
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
 }
-
-.table th {
-    font-size: 16px;
-    text-align: center;
+.nb-modal {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(15,23,42,.5); backdrop-filter:blur(5px);
+  align-items:center; justify-content:center;
 }
-
-.table td {
-    text-align: center;
-    vertical-align: middle;
+.nb-modal.active { display:flex; }
+.nb-modal-box {
+  background:var(--surface); border-radius:var(--r-xl);
+  box-shadow:var(--sh-lg); width:100%; max-width:420px;
+  margin:20px; overflow:hidden;
+  animation:modalIn .25s var(--ease-spring);
 }
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
+.nb-modal-header {
+  background:var(--rose-lt); padding:20px 22px 16px;
+  border-bottom:1px solid #fecdd3; display:flex; align-items:center; gap:12px;
 }
-
-.btn-warning {
-    background: linear-gradient(90deg, #f0ad4e, #f7c873);
-    border: none;
-    color: #000;
+.nb-modal-icon {
+  width:42px; height:42px; border-radius:50%; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(225,29,72,.15); flex-shrink:0;
 }
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
-
-.btn-sm {
-    padding: 6px 14px;
-    font-weight: 500;
-}
-
-/* ===== PAGINATION ===== */
-.pagination {
-    justify-content: center;
+.nb-modal-body { padding:22px; }
+.nb-modal-body p { font-size:13.5px; color:var(--text-md); margin:0; line-height:1.7; }
+.nb-modal-footer {
+  padding:14px 22px; background:var(--surface2); border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:flex-end; gap:10px;
 }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Holiday Management</span>
+      </nav>
+      <h1 class="pc-page-title">Holiday Management</h1>
+      <p class="pc-page-sub">Manage school holidays and non-working days.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'add_holiday' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-add-line"></i> Add Holiday
+      </a>
+    </div>
+  </div>
 
-        <!-- TITLE -->
-        <div class="card-title">
-            <h3><span class="badge">Departments</span></h3>
-        </div>
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Holidays</p>
+        <p class="pc-card-sub">
+          {% if data %}
+            Page {{ data.number }} of {{ data.paginator.num_pages }}
+            &nbsp;·&nbsp; {{ data.paginator.count }} holiday{{ data.paginator.count|pluralize }} total
+          {% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-info pc-badge-no-dot">
+        <i class="ri-calendar-event-line" style="font-size:12px;"></i>
+        {{ data.paginator.count }} Total
+      </span>
+      {% endif %}
+    </div>
 
-        <!-- ACTION BAR -->
-        <div class="action-bar">
-            <a href="{% url 'add_holiday' %}" class="btn btn-sm btn-primary">
-                + New Holiday
-            </a>
-        </div>
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th>Date</th>
+              <th>Day</th>
+              <th style="text-align:left;">Holiday Name</th>
+              {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+              <th>Actions</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for frm in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
 
-        {% if data %}
-        <div class="card-body">
+              <td>
+                <span class="td-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ frm.date }}
+                </span>
+              </td>
 
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Day</th>
-                        <th>Holiday Type</th>
-                        <th style="width:180px;">Action</th>
-                    </tr>
-                </thead>
+              <td>
+                {% with day=frm.date|date:"l" %}
+                {% if day == "Saturday" or day == "Sunday" %}
+                  <span class="td-day td-day-weekend">{{ day }}</span>
+                {% else %}
+                  <span class="td-day td-day-weekday">{{ day }}</span>
+                {% endif %}
+                {% endwith %}
+              </td>
 
-                <tbody>
-                    {% for frm in data %}
-                    <tr>
-                        <td>{{ frm.date }}</td>
-                        <td>{{ frm.date|date:"l" }}</td>
-                        <td>{{frm.name}}</td>
-                        <td>
+              <td class="td-name">{{ frm.name }}</td>
 
-                            {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                            <form action="{% url 'delete_holiday' frm.id %}" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-danger">
-                                    Delete
-                                </button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+              {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+              <td>
+                <button type="button"
+                  class="pc-btn pc-btn-danger pc-btn-sm"
+                  onclick="openDeleteModal('{% url 'delete_holiday' frm.id %}', '{{ frm.name|escapejs }}')">
+                  <i class="ri-delete-bin-7-line"></i> Delete
+                </button>
+              </td>
+              {% endif %}
 
-        </div>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-        <!-- PAGINATION -->
-        <div class="container-fluid mb-3">
-            <nav>
-                <ul class="pagination">
-                    {% if data.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ data.previous_page_number }}">Previous</a>
-                        </li>
-                    {% endif %}
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-calendar-close-line"></i></span>
+        <p class="pc-empty-title">No holidays found</p>
+        <p class="pc-empty-sub">Click <strong>Add Holiday</strong> to create the first record.</p>
+      </div>
+      {% endif %}
+    </div>
 
-                    {% for num in data.paginator.page_range %}
-                        {% if data.number == num %}
-                            <li class="page-item active">
-                                <a class="page-link">{{ num }}</a>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if data.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ data.next_page_number }}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data.start_index }}–{{ data.end_index }}</strong>
+        of <strong>{{ data.paginator.count }}</strong> holidays
+      </span>
+      <nav class="nb-pagination">
+        {% if data.has_previous %}
+        <a href="?page={{ data.previous_page_number }}" class="nb-page-btn">
+          <i class="ri-arrow-left-s-line"></i> Prev
+        </a>
         {% else %}
-        <div class="alert alert-danger m-3 text-center">
-            No records available to show
-        </div>
+        <span class="nb-page-btn disabled"><i class="ri-arrow-left-s-line"></i> Prev</span>
         {% endif %}
 
+        {% for num in data.paginator.page_range %}
+          {% if data.number == num %}
+            <span class="nb-page-btn active">{{ num }}</span>
+          {% elif num >= data.number|add:"-2" and num <= data.number|add:"2" %}
+            <a href="?page={{ num }}" class="nb-page-btn">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if data.has_next %}
+        <a href="?page={{ data.next_page_number }}" class="nb-page-btn">
+          Next <i class="ri-arrow-right-s-line"></i>
+        </a>
+        {% else %}
+        <span class="nb-page-btn disabled">Next <i class="ri-arrow-right-s-line"></i></span>
+        {% endif %}
+      </nav>
     </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
+
+<!-- ══ DELETE MODAL ══ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Holiday</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete
+        <strong id="deleteHolLabel" style="color:var(--text);"></strong>?
+        This holiday record will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <form id="deleteForm" method="POST" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-danger">
+          <i class="ri-delete-bin-6-line"></i> Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteModal(url, label) {
+  document.getElementById('deleteHolLabel').textContent = label;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
 
 {% endblock %}

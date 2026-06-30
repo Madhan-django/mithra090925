@@ -2,104 +2,313 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, input, textarea, select, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Form enhancements ── */
+.pc-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+.pc-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
 }
 
-/* ===== TITLE BAR (Style A) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 6px;
-    border-radius: 20px 20px 0 0;
-    text-align: center;
+/* ── Help text styling ── */
+.pc-help-text {
+  font-size: 12px;
+  color: var(--text-sm);
+  margin-top: 6px;
+  display: block;
+  line-height: 1.5;
 }
 
-.card-title h4 span {
-    background: #f8f9fa;
-    color: #000;
-    padding: 5px 22px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* ===== FORM ===== */
-.card-body {
-    padding: 30px;
-}
-
-form p {
-    margin-bottom: 18px;
-}
-
-label {
-    font-weight: 500;
-    margin-bottom: 6px;
-}
-
-/* Inputs */
-input, textarea, select {
-    height: 50px;
-    font-size: 16px;
-}
-
-textarea {
-    height: auto;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-    padding: 8px 22px;
-}
-
-.btn-warning {
-    background: linear-gradient(90deg, #f0ad4e, #f7c873);
-    border: none;
-    font-weight: 500;
-    padding: 8px 22px;
-}
-
-/* ===== BUTTON BAR ===== */
-.button-bar {
-    text-align: center;
-    margin-top: 25px;
+/* ── Required field indicator ── */
+.pc-required {
+  color: var(--rose);
+  margin-left: 3px;
+  font-weight: 700;
 }
 </style>
 
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE -->
-        <div class="card-title">
-            <h4><span class="badge">New Shift</span></h4>
-        </div>
-
-        <div class="card-body">
-            <form method="POST">
-                {% csrf_token %}
-
-                {{ form.as_p }}
-
-                <div class="button-bar">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-warning">Reset</button>
-                </div>
-            </form>
-        </div>
-
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'shifts' %}">Shifts</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>New Shift</span>
     </div>
+    <div class="pc-page-title">Create Work Shift</div>
+    <div class="pc-page-sub">Add a new shift schedule to the system</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'shifts' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back to Shifts
+    </a>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════
+     MAIN FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-time-line me-2" style="color:var(--accent);"></i>Shift Details
+      </div>
+      <div class="pc-card-sub">Enter the shift schedule information below</div>
+    </div>
+    <span class="pc-badge pc-badge-success pc-badge-no-dot">
+      <i class="ri-add-line"></i> New Entry
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- ═══ Shift Name ═══ -->
+      {% for field in form %}
+        {% if field.name == 'shift_name' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            Shift Name<span class="pc-required">*</span>
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-sun-line"></i>
+            {{ field }}
+          </div>
+          <span class="pc-help-text">
+            <i class="ri-information-line" style="font-size:11px;"></i>
+            Enter the shift name (e.g., Morning Shift, Evening Shift, Night Shift)
+          </span>
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══ Start Time ═══ -->
+        {% if field.name == 'start_time' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            Start Time<span class="pc-required">*</span>
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-time-line"></i>
+            {{ field }}
+          </div>
+          <span class="pc-help-text">
+            <i class="ri-information-line" style="font-size:11px;"></i>
+            Select when this shift begins
+          </span>
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══ End Time ═══ -->
+        {% if field.name == 'end_time' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            End Time<span class="pc-required">*</span>
+          </label>
+          <div class="pc-input-group">
+            <i class="pc-input-icon ri-time-line"></i>
+            {{ field }}
+          </div>
+          <span class="pc-help-text">
+            <i class="ri-information-line" style="font-size:11px;"></i>
+            Select when this shift ends
+          </span>
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══ Other fields (if any) ═══ -->
+        {% if field.name != 'shift_name' and field.name != 'start_time' and field.name != 'end_time' %}
+        <div class="pc-form-group">
+          <label for="{{ field.id_for_label }}" class="pc-label">
+            {{ field.label }}{% if field.field.required %}<span class="pc-required">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.help_text %}
+            <span class="pc-help-text">{{ field.help_text }}</span>
+          {% endif %}
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      <!-- ═══ Form Actions ═══ -->
+      <div class="pc-form-actions">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Create Shift
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Clear Form
+        </button>
+        <a href="{% url 'shifts' %}" class="pc-btn pc-btn-outline" style="margin-left:auto;">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     HELPFUL TIPS CARD
+     ═══════════════════════════════ -->
+<div class="pc-card-flat" style="margin-top:20px;">
+  <div style="display:flex;gap:16px;align-items:start;">
+    <div style="flex-shrink:0;">
+      <div style="width:40px;height:40px;background:var(--accent-lt);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--accent);">
+        <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+        Quick Tips
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-md);line-height:1.8;">
+        <li>Shift names should be clear and easy to identify</li>
+        <li>Ensure start and end times don't overlap with existing shifts</li>
+        <li>Consider break times when setting shift durations</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Style Django form fields to match pc-input ── */
+#id_shift_name,
+#id_start_time,
+#id_end_time,
+input[type="text"],
+input[type="time"] {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px 9px 38px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+#id_shift_name:focus,
+#id_start_time:focus,
+#id_end_time:focus,
+input[type="text"]:focus,
+input[type="time"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+/* ── Error messages styling ── */
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.errorlist li {
+  background: var(--rose-lt);
+  color: var(--rose);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border-left: 3px solid var(--rose);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.errorlist li::before {
+  content: '\eb98'; /* RemixIcon error warning line */
+  font-family: 'remixicon';
+  font-size: 14px;
+}
+
+/* ── Style other possible input types ── */
+input[type="email"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+textarea {
+  resize: vertical;
+  min-height: auto;
+  height: auto;
+  padding: 9px 13px 9px 38px;
+}
+
+select {
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  appearance: none;
+}
+
+input[type="email"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+</style>
 
 {% endblock %}

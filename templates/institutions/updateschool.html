@@ -2,254 +2,350 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, h6, label, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
-    font-size: 14px; /* Reduced font size globally */
+/* ── Section dividers ── */
+.sec-div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 28px 0 18px;
+}
+.sec-div-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.sec-div-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text-sm);
+}
+.sec-div::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
-/* ===== CARD ===== */
-  .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── File input ── */
+input[type="file"].pc-input {
+  padding: 7px 12px;
+  cursor: pointer;
+}
+input[type="file"].pc-input::file-selector-button {
+  background: var(--accent-lt);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-family: var(--f-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background .15s;
+}
+input[type="file"].pc-input::file-selector-button:hover {
+  background: var(--accent-mid);
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Logo preview ── */
+.logo-preview {
+  width: 72px; height: 72px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  padding: 5px;
+  box-shadow: var(--sh-xs);
+  display: block;
+  margin-top: 10px;
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+/* ── Hint text ── */
+.pc-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-/* ===== SECTION TITLE ===== */
-.section-title {
-    font-weight: 600;
-    color: #444;
-    border-left: 4px solid #009ffd;
-    padding-left: 10px;
-    font-size: 14px;
+/* ── Checkbox row ── */
+.pc-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  height: 42px;
 }
-
-/* ===== FORM ===== */
-.form-floating > label {
-    color: #666;
-    font-size: 14px;
+.pc-checkbox-row:hover {
+  border-color: var(--accent);
+  background: var(--accent-lt);
 }
-
-.form-control,
-.form-select {
-    border-radius: 8px;
-    font-size: 14px; /* reduced font */
-    padding: 6px 10px;
+.pc-checkbox-row input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
 }
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(135deg, #009ffd, #2a2a72);
-    border: none;
-    font-size: 14px;
-    padding: 6px 16px;
-}
-
-.btn-cancel {
-    background: linear-gradient(135deg, #ff5f6d, #c31432);
-    border: none;
-    color: #fff;
-    font-size: 14px;
-    padding: 6px 16px;
-}
-
-/* ===== IMAGE PREVIEW ===== */
-.preview-img {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    background: #fff;
-    padding: 4px;
+.pc-checkbox-row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-md);
+  cursor: pointer;
+  margin: 0;
 }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== TITLE ===== -->
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                    Update Institution
-                </span>
-            </h5>
-        </div>
-
-        <!-- ===== FORM ===== -->
-        <form class="card-body p-3" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <!-- ===== SECTION 1 ===== -->
-            <h6 class="section-title mb-3">1. Institution Details</h6>
-            <div class="row g-3">
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.name }}
-                        <label>Institution Name</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.phone }}
-                        <label>Phone Number</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.email }}
-                        <label>Email</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.address }}
-                        <label>Address</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.regno }}
-                        <label>Registration Number</label>
-                    </div>
-                </div>
-
-                <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check mt-2">
-                        {{ form.isactive }}
-                        <label class="form-check-label ms-2">
-                            Active Status
-                        </label>
-                    </div>
-                </div>
-
-                <!-- ===== LOGO ===== -->
-                <div class="col-md-6">
-                    <label class="fw-semibold mb-1">Institution Logo</label>
-                    {{ form.logo }}
-                    {% if form.instance.logo %}
-                    <div class="mt-2">
-                        <img src="{{ form.instance.logo.url }}" class="preview-img border" alt="Logo">
-                    </div>
-                    {% endif %}
-                    <small class="text-muted d-block mt-1">
-                        Recommended: <strong>500×500 px</strong> (PNG / JPG)
-                    </small>
-                </div>
-
-                <!-- ===== NOTIFICATION ICON ===== -->
-                <div class="col-md-6">
-                    <label class="fw-semibold mb-1">
-                        Notification Icon <span class="text-muted">(Android App)</span>
-                    </label>
-                    {{ form.notification_logo }}
-                    {% if form.instance.notification_logo %}
-                    <div class="mt-2">
-                        <img src="{{ form.instance.notification_logo.url }}" class="preview-img border" alt="Notification Icon">
-                    </div>
-                    {% endif %}
-                    <small class="text-muted d-block mt-1">
-                        Recommended: <strong>512×512 px</strong> (Transparent PNG)
-                    </small>
-                </div>
-
-            </div>
-
-            <hr class="my-4">
-
-            <!-- ===== SECTION 2 ===== -->
-            <h6 class="section-title mb-3">2. Web & Mobile App Details</h6>
-            <div class="row g-3">
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.website }}
-                        <label>Website</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.web_aboutus }}
-                        <label>About Us</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.web_contactus }}
-                        <label>Contact Us</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.web_gallery }}
-                        <label>Gallery</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        {{ form.web_admission }}
-                        <label>Admission</label>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ===== ACTION BUTTONS ===== -->
-            <div class="d-flex justify-content-end mt-4">
-                <button type="submit" class="btn btn-primary px-3 me-2">
-                    <i class="ri-check-line me-1"></i> Update
-                </button>
-                <button type="reset" class="btn btn-cancel px-3">
-                    <i class="ri-close-line me-1"></i> Cancel
-                </button>
-            </div>
-
-        </form>
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="#">Institution</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Update</span>
     </div>
+    <div class="pc-page-title">Update Institution</div>
+    <div class="pc-page-sub">Edit institution details, branding and app configuration</div>
+  </div>
+  <div class="pc-page-header-right">
+    <span class="pc-badge pc-badge-warning pc-badge-no-dot" style="padding:6px 14px;font-size:12px;">
+      <i class="ri-edit-2-line me-1"></i> Edit Mode
+    </span>
+  </div>
 </div>
 
-<!-- ===== FIX FOR FLOATING LABEL EMPTY ISSUE ===== -->
+<!-- ═══════════════════════════════
+     FORM CARD
+     ═══════════════════════════════ -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-building-2-line me-2" style="color:var(--accent);"></i>Institution Profile
+      </div>
+      <div class="pc-card-sub">All changes are saved on submit</div>
+    </div>
+  </div>
+
+  <form class="pc-card-body" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- ══════════════════════════
+         SECTION 1 — Basic Details
+         ══════════════════════════ -->
+    <div class="sec-div">
+      <div class="sec-div-icon"><i class="ri-building-line"></i></div>
+      <span class="sec-div-label">1 · Institution Details</span>
+    </div>
+
+    <div class="row g-3">
+
+      <!-- Institution Name -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Institution Name <span class="req">*</span></label>
+          {{ form.name }}
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Phone Number</label>
+          {{ form.phone }}
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Email</label>
+          {{ form.email }}
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Address</label>
+          {{ form.address }}
+        </div>
+      </div>
+
+      <!-- Registration Number -->
+      <div class="col-md-4">
+        <div class="pc-form-group">
+          <label class="pc-label">Registration Number</label>
+          {{ form.regno }}
+        </div>
+      </div>
+
+      <!-- Group Code -->
+      <div class="col-md-4">
+        <div class="pc-form-group">
+          <label class="pc-label">Group Code</label>
+          {{ form.group_code }}
+        </div>
+      </div>
+
+      <!-- Active Status -->
+      <div class="col-md-4">
+        <div class="pc-form-group">
+          <label class="pc-label">Active Status</label>
+          <div class="pc-checkbox-row">
+            {{ form.isactive }}
+            <label for="{{ form.isactive.id_for_label }}">Mark as Active</label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════
+         SECTION 2 — Branding
+         ══════════════════════════ -->
+    <div class="sec-div">
+      <div class="sec-div-icon"><i class="ri-image-line"></i></div>
+      <span class="sec-div-label">2 · Branding &amp; Assets</span>
+    </div>
+
+    <div class="row g-3">
+
+      <!-- Institution Logo -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Institution Logo</label>
+          {{ form.logo }}
+          {% if form.instance.logo %}
+            <img src="{{ form.instance.logo.url }}" class="logo-preview" alt="Current Logo">
+          {% endif %}
+          <div class="pc-hint">
+            <i class="ri-information-line"></i>
+            Recommended: 500×500 px · PNG or JPG
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Icon -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">
+            Notification Icon
+            <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted);">(Android App)</span>
+          </label>
+          {{ form.notification_logo }}
+          {% if form.instance.notification_logo %}
+            <img src="{{ form.instance.notification_logo.url }}" class="logo-preview" alt="Notification Icon">
+          {% endif %}
+          <div class="pc-hint">
+            <i class="ri-information-line"></i>
+            Recommended: 512×512 px · Transparent PNG
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════
+         SECTION 3 — Web & App
+         ══════════════════════════ -->
+    <div class="sec-div">
+      <div class="sec-div-icon"><i class="ri-global-line"></i></div>
+      <span class="sec-div-label">3 · Web &amp; Mobile App Details</span>
+    </div>
+
+    <div class="row g-3">
+
+      <!-- Website -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Website URL</label>
+          <div class="pc-input-group">
+            <i class="ri-links-line pc-input-icon"></i>
+            {{ form.website }}
+          </div>
+        </div>
+      </div>
+
+      <!-- About Us -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">About Us</label>
+          {{ form.web_aboutus }}
+        </div>
+      </div>
+
+      <!-- Contact Us -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Contact Us</label>
+          {{ form.web_contactus }}
+        </div>
+      </div>
+
+      <!-- Gallery -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Gallery</label>
+          {{ form.web_gallery }}
+        </div>
+      </div>
+
+      <!-- Admission -->
+      <div class="col-md-6">
+        <div class="pc-form-group">
+          <label class="pc-label">Admission</label>
+          {{ form.web_admission }}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════
+         ACTION BUTTONS
+         ══════════════════════════ -->
+    <div class="pc-divider" style="margin-top:28px;"></div>
+    <div class="d-flex justify-content-end gap-2">
+      <button type="reset" class="pc-btn pc-btn-outline">
+        <i class="ri-close-line"></i> Cancel
+      </button>
+      <button type="submit" class="pc-btn pc-btn-primary">
+        <i class="ri-check-line"></i> Update Institution
+      </button>
+    </div>
+
+  </form>
+</div><!-- /pc-card -->
+
+<!-- Auto-apply pc-* classes to Django-rendered form fields -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".form-floating input, .form-floating textarea").forEach(function (el) {
-        if (!el.hasAttribute("placeholder")) {
-            el.setAttribute("placeholder", " ");
-        }
-    });
+  document.querySelectorAll(
+    '.pc-form-group input:not([type="checkbox"]):not([type="file"]), ' +
+    '.pc-input-group input'
+  ).forEach(el => el.classList.add('pc-input'));
+
+  document.querySelectorAll('.pc-form-group select').forEach(el => el.classList.add('pc-select'));
+  document.querySelectorAll('.pc-form-group textarea').forEach(el => el.classList.add('pc-textarea'));
+  document.querySelectorAll('.pc-form-group input[type="file"]').forEach(el => el.classList.add('pc-input'));
 });
 </script>
 

@@ -1,125 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  {% load static %}
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Reciept</title>
-     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-      </head>
-<style>
-a{
-align:center;
-}
-table {
-  border-spacing: 30px;
-}
- td {
+    <title>Receipt</title>
 
-  border-spacing: 5px;
-  text-align:center;
-  padding:15px;
-}
-th {
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  border-spacing: 5px;
-  text-align:center;
-  padding:5px;
+    <style>
+        /* HALF A4 PORTRAIT RECEIPT STYLE */
+
+@page{
+    size:A4 portrait;
+    margin:8mm;
 }
-table, th, td {
-  border: 1px solid black;
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#f3f5f7;
+    margin:0;
+    padding:0;
 }
-p {
-  margin: 0em;
+
+.receipt-container{
+
+    width:148mm;          /* Half of A4 width */
+    min-height:135mm;     /* Half page height */
+
+    margin:10px auto;
+
+    background:#fff;
+
+    border:2px solid #163b72;
+    border-radius:8px;
+
+    padding:14px;
+
+    box-sizing:border-box;
 }
-@media print {
-    /* Print-specific styles */
-    body {
-        font-size: 14px;
+
+.receipt-title{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.receipt-title h1{
+    font-size:26px;
+    color:#163b72;
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.school-box{
+
+    border:1.5px solid #163b72;
+
+    border-radius:6px;
+
+    padding:10px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:12px;
+}
+
+.school-logo img{
+    width:60px;
+    height:60px;
+    object-fit:contain;
+}
+
+.school-details h2{
+    color:#163b72;
+    font-size:20px;
+    margin-bottom:4px;
+    font-weight:700;
+}
+
+.school-details p{
+    font-size:11px;
+    margin:2px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.details-table{
+
+    border:1.5px solid #163b72;
+
+    border-radius:6px;
+
+    overflow:hidden;
+
+    margin-bottom:12px;
+}
+
+.details-table td{
+
+    border:1px solid #d8d8d8;
+
+    padding:10px;
+
+    font-size:12px;
+}
+
+.label{
+    width:20%;
+    background:#f5f8fd;
+    color:#163b72;
+    font-weight:600;
+}
+
+.value{
+    font-weight:600;
+}
+
+.amount-table{
+
+    border:1.5px solid #163b72;
+
+    border-radius:6px;
+
+    overflow:hidden;
+
+    margin-bottom:12px;
+}
+
+.amount-table th{
+
+    background:#eef4fb;
+
+    color:#163b72;
+
+    font-size:13px;
+
+    padding:10px;
+
+    border:1px solid #d5d5d5;
+}
+
+.amount-table td{
+
+    padding:10px;
+
+    border:1px solid #d5d5d5;
+
+    font-size:13px;
+}
+
+.total-row td{
+    font-weight:700;
+}
+
+.paid-status{
+    color:green;
+    font-weight:700;
+}
+
+.words-box{
+
+    border:1.5px solid #163b72;
+
+    border-radius:6px;
+
+    overflow:hidden;
+
+    margin-bottom:12px;
+}
+
+.words-header{
+
+    background:#eef4fb;
+
+    text-align:center;
+
+    padding:8px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    color:#163b72;
+
+    border-bottom:1px solid #d5d5d5;
+}
+
+.words-content{
+
+    text-align:center;
+
+    padding:16px;
+
+    font-size:18px;
+
+    font-weight:600;
+}
+
+.signature-box{
+
+    border-top:1px solid #d5d5d5;
+
+    height:70px;
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    padding-right:20px;
+}
+
+.signature{
+    text-align:center;
+}
+
+.signature img{
+    width:80px;
+}
+
+.signature h4{
+    font-size:11px;
+    color:#163b72;
+    margin-top:4px;
+}
+
+.footer{
+
+    border-top:1px solid #d5d5d5;
+
+    padding-top:8px;
+
+    text-align:center;
+
+    font-size:10px;
+
+    line-height:18px;
+}
+
+.buttons{
+    text-align:center;
+    margin-top:15px;
+}
+
+.btn{
+    border:none;
+    padding:8px 18px;
+    border-radius:6px;
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+    text-decoration:none;
+    cursor:pointer;
+    margin:0 4px;
+}
+
+.print-btn{
+    background:#16a34a;
+}
+
+.back-btn{
+    background:#eab308;
+}
+
+.invoice-btn{
+    background:#2563eb;
+}
+
+@media print{
+
+    body{
+        background:#fff;
     }
-    .hide-on-print {
-        display: none !important;
+
+    .buttons{
+        display:none;
     }
-    /* Add more print styles as needed */
+
+    .receipt-container{
+
+        width:148mm;
+        min-height:135mm;
+
+        margin:0 auto;
+
+        border:1.5px solid #163b72;
+
+        page-break-inside:avoid;
+    }
 }
 
-</style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Poppins',sans-serif;
+            background:#f4f6f9;
+            padding:20px;
+        }
+
+        .receipt-container{
+            max-width:800px;
+            margin:auto;
+            background:#fff;
+            border:2px solid #163b72;
+            border-radius:10px;
+            padding:25px;
+        }
+
+        .receipt-title{
+            text-align:center;
+            margin-bottom:25px;
+        }
+
+        .receipt-title h1{
+            color:#163b72;
+            font-size:42px;
+            letter-spacing:2px;
+            font-weight:700;
+        }
+
+        .school-box{
+            border:2px solid #163b72;
+            border-radius:8px;
+            padding:20px;
+            display:flex;
+            align-items:center;
+            gap:20px;
+            margin-bottom:25px;
+        }
+
+        .school-logo img{
+            width:100px;
+            height:100px;
+            object-fit:contain;
+        }
+
+        .school-details{
+            flex:1;
+        }
+
+        .school-details h2{
+            color:#163b72;
+            font-size:34px;
+            font-weight:700;
+            margin-bottom:10px;
+        }
+
+        .school-details p{
+            font-size:15px;
+            margin-bottom:6px;
+            color:#333;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .details-table{
+            margin-bottom:25px;
+            border:2px solid #163b72;
+            border-radius:8px;
+            overflow:hidden;
+        }
+
+        .details-table td{
+            border:1px solid #cfcfcf;
+            padding:18px;
+            font-size:16px;
+        }
+
+        .label{
+            width:22%;
+            font-weight:600;
+            color:#163b72;
+            background:#f7f9fc;
+        }
+
+        .value{
+            font-weight:600;
+            color:#111;
+        }
+
+        .amount-table{
+            margin-bottom:25px;
+            border:2px solid #163b72;
+            border-radius:8px;
+            overflow:hidden;
+        }
+
+        .amount-table th{
+            background:#eef4fb;
+            color:#163b72;
+            font-size:18px;
+            padding:16px;
+            border:1px solid #d5d5d5;
+        }
+
+        .amount-table td{
+            padding:18px;
+            border:1px solid #d5d5d5;
+            font-size:18px;
+        }
+
+        .paid-status{
+            color:green;
+            font-weight:700;
+        }
+
+        .total-row td{
+            font-weight:700;
+            font-size:22px;
+        }
+
+        .words-box{
+            border:2px solid #163b72;
+            border-radius:8px;
+            overflow:hidden;
+            margin-bottom:25px;
+        }
+
+        .words-header{
+            background:#eef4fb;
+            text-align:center;
+            padding:14px;
+            color:#163b72;
+            font-weight:700;
+            font-size:20px;
+            border-bottom:1px solid #d5d5d5;
+        }
+
+        .words-content{
+            text-align:center;
+            padding:30px;
+            font-size:30px;
+            font-weight:600;
+        }
+
+        .signature-box{
+            border-top:1px solid #d5d5d5;
+            display:flex;
+            justify-content:flex-end;
+            align-items:center;
+            height:120px;
+            padding-right:40px;
+        }
+
+        .signature{
+            text-align:center;
+        }
+
+        .signature h4{
+            color:#163b72;
+            margin-top:10px;
+        }
+
+        .footer{
+            border-top:1px solid #d5d5d5;
+            padding-top:20px;
+            text-align:center;
+            font-size:15px;
+            color:#333;
+        }
+
+        .footer span{
+            margin:0 10px;
+        }
+
+        .buttons{
+            margin-top:25px;
+            text-align:center;
+        }
+
+        .btn{
+            border:none;
+            padding:14px 35px;
+            color:#fff;
+            border-radius:8px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            margin:0 8px;
+            text-decoration:none;
+            display:inline-block;
+        }
+
+        .print-btn{
+            background:linear-gradient(to right,#1a9c39,#1fc04b);
+        }
+
+        .back-btn{
+            background:linear-gradient(to right,#d39e00,#f1b900);
+        }
+
+        .invoice-btn{
+            background:linear-gradient(to right,#0056b3,#0d6efd);
+        }
+
+        @media print{
+
+            body{
+                background:#fff;
+                padding:0;
+            }
+
+            .receipt-container{
+                border:none;
+                max-width:100%;
+                padding:0;
+            }
+
+            .buttons{
+                display:none;
+            }
+
+            @page{
+                size:A4;
+                margin:10mm;
+            }
+        }
+
+    </style>
+
+</head>
+
 <body>
 
-<div class="container">
-  <h2 align="center">Receipt</h2>
-  <div id="container" style="white-space:nowrap">
+<div class="receipt-container">
 
+    <div class="receipt-title">
+        <h1>RECEIPT</h1>
+    </div>
 
+    <div class="school-box">
 
-    <div id="texts" style="display:inline; white-space:nowrap;" align="right">
-        <p style="font-size:25px;font-family:courier;font-weight:bold;">{{data.reciept_no}}</p>
+        <div class="school-logo">
+            <img src="{{ skoollogo }}" alt="School Logo">
+        </div>
+
+        <div class="school-details">
+            <h2>{{ sch_name }}</h2>
+
+            <p>{{ sch_name.address }}</p>
+
+            <p>
+                Phone : {{ sch_name.phone }}
+            </p>
+        </div>
+
+    </div>
+
+    <table class="details-table">
+
+        <tr>
+
+            <td class="label">Student Name</td>
+
+            <td class="value">
+                {{data.reciept_inv.stud_name.first_name}}
+                {{data.reciept_inv.stud_name.last_name}}
+            </td>
+
+            <td class="label">Receipt No</td>
+
+            <td class="value">{{data.reciept_no}}</td>
+
+        </tr>
+
+        <tr>
+
+            <td class="label">Class & Sec</td>
+
+            <td class="value">
+                {{data.reciept_inv.fee_cat.desc}}
+                -
+                {{data.reciept_inv.stud_name.secs.section_name}}
+            </td>
+
+            <td class="label">Date</td>
+
+            <td class="value">
+                {{ data.reciept_date|date:"d-m-Y" }}
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td class="label">Father Name</td>
+
+            <td class="value">
+                {{data.reciept_inv.stud_name.father_name}}
+            </td>
+
+            <td class="label"></td>
+
+            <td class="value"></td>
+
+        </tr>
+
+    </table>
+
+    <table class="amount-table">
+
+        <tr>
+            <th>Particulars</th>
+            <th>Details</th>
+        </tr>
+
+        <tr>
+            <td>Amount</td>
+            <td><b>₹ {{data.paid_amt}}</b></td>
+        </tr>
+
+        <tr>
+            <td>Status</td>
+            <td class="paid-status">PAID</td>
+        </tr>
+
+        <tr class="total-row">
+            <td>Total</td>
+            <td>₹ {{data.paid_amt}}</td>
+        </tr>
+
+    </table>
+
+    <div class="words-box">
+
+        <div class="words-header">
+            Total in words
+        </div>
+
+        <div class="words-content">
+            ₹ {{amt_words}} only/-
+        </div>
+
+        <div class="signature-box">
+
+            <div class="signature">
+
+                <img src="{% static 'signature.png' %}"
+                     width="120">
+
+                <h4>Authorised Signatory</h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+
+        <span>Website : www.bmst.co.in</span>
+
+        <span>Instagram : bharathi_matric</span>
+
+        <span>YouTube : youtube.com/@gautamfb/featured</span>
+
+    </div>
+
+    <div class="buttons">
+
+        <button class="btn print-btn"
+                onclick="window.print()">
+            Print
+        </button>
+
+        <a href="{% url 'fee_reciepts' %}"
+           class="btn back-btn">
+            Back
+        </a>
+
+        <a href="{% url 'invoices' %}"
+           class="btn invoice-btn">
+            Back-Invoices
+        </a>
+
     </div>
 
 </div>
-  <div>
-    <p style="font-size:16px;font-family:arial;" align="right">Reciept Date :- {{ data.reciept_date|date:"d-m-Y" }}</p>
-  </div>
-  <div class="container" style="text-align: center;">
-    <div id="image" style="display: inline-block; vertical-align: middle;">
-        <img src="{{ skoollogo }}" alt="School Logo" width="85" height="75">
-    </div>
-    <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
-        <h2 style=" margin: 0;"><b>{{ sch_name }}</b></h2>
-        <p style="font-size: 15px; font-family: Courier, monospace; margin: 0;">{{ sch_name.address }}</p>
-    </div>
-</div>
-<br>
-  <table>
-  <tr>
-    <th>Student Name:- {{data.reciept_inv.stud_name.first_name}}&nbsp;&nbsp;{{data.reciept_inv.stud_name.last_name}}</th>
-    <th>Admission No:- {{data.reciept_inv.stud_name.admn_no}}</th>
-
-  </tr>
-  <tr>
-    <th>Father Name:- {{data.reciept_inv.stud_name.father_name}} </th>
-    <th>Mobile No:- {{data.reciept_inv.stud_name.phone}}</th>
-
-  </tr>
-
-</table>
-  <table class="table">
-    <thead>
-      <tr bgcolor="#BFE0FF">
-        <th   style="padding:3px">Fee</th>
-        <th  bgcolor="#BFE0FF">Fee Amount</th>
-        <th bgcolor="#BFE0FF">Amount Paid</th>
-      </tr>
-    </thead>
-    <br>
-    <tbody>
-      <tr>
-        <td >{{data.reciept_inv.fee_cat}}</td>
-        <td>{{data.total}}</td>
-        <td>{{data.paid_amt}}</td>
-      </tr>
-      <tr class="success">
-        <td colspan="2">Total</td>
-        <td> Rs-{{data.paid_amt}}/-</td>
-
-      </tr>
-
-    </tbody>
-  </table><br>
-  <p style="font-size:20px;font-family:courier;">Payment Type:- {{data.payment_type}}</p>
-  <p style="font-size:15px;font-family:courier;"> Thanks Recieved a sum of Rupees:- {{data.paid_amt}}</p>
-  <button class="hide-on-print btn btn-success" onclick="printPage()">Print</button>
-  <a  href="{% url 'html_to_pdf_directly' data.id %}" type="button" class="btn btn-primary hide-on-print" target="_blank" rel="noopener">Print Reciept</a>
-  <a  href="{% url 'fee_reciepts' %}" type="button" class="btn btn-warning hide-on-print">Back</a>
-  <a  href="{% url 'invoices' %}" type="button" class="btn btn-primary hide-on-print">Back-Invoices</a>
-</div>
-<script>
-function printPage() {
-    window.print();
-}
-</script>
 
 </body>
 </html>

@@ -4,7 +4,7 @@ from .models import fees,addindfee,bulkfee,fee_reciept
 
 isact = [
         ('yes', 'YES'),
-    ('no','NO')
+        ('no','NO')
 
     ]
 ptype= [
@@ -42,7 +42,8 @@ class fee_addform(forms.ModelForm):
 class addindfeeform(forms.ModelForm):
     class Meta:
         model = addindfee
-        fields = ('fee_cat','class_name','stud_name','concession','status','invoice_no','due_amt',)
+
+        fields = ('fee_cat','class_name','concession','status','invoice_no','due_amt',)
         widgets = {
 
             'fee_cat': forms.Select(attrs={'class': 'form-control'}),
@@ -50,7 +51,8 @@ class addindfeeform(forms.ModelForm):
             'status': forms.HiddenInput(),
             'due_amt':forms.HiddenInput(),
             'invoice_no' : forms.HiddenInput(),
-            'stud_name':forms.Select(attrs={'class': 'form-control'}),
+
+            'stud_name':forms.SelectMultiple(attrs={'class':'form-control'}),
             'concession':forms.TextInput(attrs={'class': 'form-control'})
 
         }
@@ -77,7 +79,12 @@ class addfeerecieptform(forms.ModelForm):
             'payment_type':forms.Select(choices=ptype,attrs={'class':'form-control'}),
             'total':forms.NumberInput(attrs={'readonly':'readonly','class':'form-control'}),
             'reciept_date': forms.DateInput(attrs={'class':'form-control','type':'date'}),
-            'paid_amt':forms.NumberInput(attrs={'class':'form-control'}),
+            'paid_amt': forms.TextInput(attrs={
+                'class': 'form-control',
+                'inputmode': 'numeric',
+                'pattern': '[0-9]*',
+                'onkeydown': 'return event.keyCode !== 38 && event.keyCode !== 40;',
+            }),
             'reciept_no':forms.HiddenInput(),
             'note':forms.Textarea(attrs={'class':'form-control','rows':4}),
             'payment_id':forms.TextInput(attrs={'class':'form-control'}),

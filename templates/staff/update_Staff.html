@@ -1,702 +1,381 @@
 {% extends 'panel/index.html' %}
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
-}
+  .staff-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 24px;
+  }
+  .sf-field-full { grid-column: 1 / -1; }
+  .sf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .sf-field label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .sf-field label .req { color: var(--rose); margin-left: 2px; }
+  .sf-field input,
+  .sf-field select,
+  .sf-field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .sf-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  .sf-field textarea { resize: vertical; min-height: 78px; }
+  .sf-field input:focus,
+  .sf-field select:focus,
+  .sf-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+  /* Photo box — shows preview or upload prompt */
+  .photo-box-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .photo-box-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-sm);
+  }
+  .photo-preview-ring {
+    width: 120px; height: 145px;
+    border-radius: var(--r-lg);
+    border: 1.5px solid var(--border-dark);
     overflow: hidden;
-}
-
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
-
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
-
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
-    display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
-h6 {
+    background: var(--surface2);
+    position: relative;
+    cursor: pointer;
+    transition: border-color 150ms;
+  }
+  .photo-preview-ring:hover { border-color: var(--accent); }
+  .photo-preview-ring img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(79,70,229,.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #fff;
+    font-size: 11px;
     font-weight: 600;
-    color: #007bff;
-}
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+  .photo-preview-ring:hover .photo-overlay { opacity: 1; }
+  .photo-overlay i { font-size: 22px; }
+  .photo-preview-ring input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  /* Section label */
+  .form-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 14px;
+  }
+  .form-section-label:first-child { margin-top: 0; }
+  .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
+
+  .sf-hidden { display: none; }
+
+  @media (max-width: 640px) {
+    .staff-form-grid { grid-template-columns: 1fr; }
+    .sf-field-full { grid-column: 1; }
+  }
 </style>
 
-<div class="card">
+<div class="col-lg-12">
 
-    <div class="card-body">
-        <div class="card-title text-center">
-        <h5><span class="badge bg-light text-dark">Update Staff</span></h5>
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'stafflist' %}">Staff</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Update Staff</span>
+      </nav>
+      <h1 class="pc-page-title">Update Staff</h1>
+      <p class="pc-page-sub">Edit personal, employment and academic details for this staff member.</p>
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- ── SECTION 1: PERSONAL ── -->
+    <div class="pc-card mb-4">
+      <div class="pc-card-header">
+        <div>
+          <p class="pc-card-title">Personal Information</p>
+          <p class="pc-card-sub">Identity, contact and photo</p>
+        </div>
+        <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+          <i class="ti ti-user" style="font-size:12px;"></i> Step 1 of 3
+        </span>
+      </div>
+      <div class="pc-card-body">
+
+        <!-- Name grid + Photo side by side -->
+        <div style="display:grid; grid-template-columns:1fr 140px; gap:24px; align-items:start; margin-bottom:14px;">
+          <div class="staff-form-grid" style="margin-bottom:0;">
+
+            <div class="sf-field">
+              <label>First Name <span class="req">*</span></label>
+              {{ form.first_name }}
+            </div>
+            <div class="sf-field">
+              <label>Last Name <span class="req">*</span></label>
+              {{ form.last_name }}
+            </div>
+            <div class="sf-field">
+              <label>Gender <span class="req">*</span></label>
+              {{ form.gender }}
+            </div>
+            <div class="sf-field">
+              <label>Date of Birth</label>
+              {{ form.dob }}
+            </div>
+            <div class="sf-field">
+              <label>Mobile <span class="req">*</span></label>
+              {{ form.mobile }}
+            </div>
+            <div class="sf-field">
+              <label>Email</label>
+              {{ form.email }}
+            </div>
+
+          </div>
+
+          <!-- Photo with live preview -->
+          <div class="photo-box-wrap">
+            <span class="photo-box-label">Photo</span>
+            <div class="photo-preview-ring" id="photo-ring">
+              {% if form.staff_photo.value %}
+                <img id="staff_photo_preview" src="{{ form.staff_photo.value.url }}" alt="Staff photo">
+              {% else %}
+                <img id="staff_photo_preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                <div class="photo-overlay" style="opacity:1;">
+                  <i class="ti ti-camera"></i>
+                  <span>Upload</span>
+                </div>
+              {% endif %}
+              <div class="photo-overlay">
+                <i class="ti ti-camera"></i>
+                <span>Change</span>
+              </div>
+              {{ form.staff_photo }}
+            </div>
+          </div>
+        </div>
+
+        <div class="staff-form-grid">
+          <div class="sf-field sf-field-full">
+            <label>Address</label>
+            {{ form.address }}
+          </div>
+        </div>
+
+      </div>
     </div>
 
-         <!-- Multi Column with Form Separator -->
-              <div class="card mb-6">
-                  <form class="card-body"  method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                  <h6>1. Personal Information</h6>
+    <!-- ── SECTION 2: EMPLOYMENT ── -->
+    <div class="pc-card mb-4">
+      <div class="pc-card-header">
+        <div>
+          <p class="pc-card-title">Employment Details</p>
+          <p class="pc-card-sub">Role, salary and operational codes</p>
+        </div>
+        <span class="pc-badge pc-badge-info pc-badge-no-dot">
+          <i class="ti ti-briefcase" style="font-size:12px;"></i> Step 2 of 3
+        </span>
+      </div>
+      <div class="pc-card-body">
+        <div class="staff-form-grid">
 
+          <div class="sf-field">
+            <label>Date of Joining</label>
+            {{ form.join }}
+          </div>
+          <div class="sf-field">
+            <label>Role <span class="req">*</span></label>
+            {{ form.role }}
+          </div>
+          <div class="sf-field">
+            <label>Designation</label>
+            {{ form.desg }}
+          </div>
+          <div class="sf-field">
+            <label>Salary</label>
+            {{ form.salary }}
+          </div>
+          <div class="sf-field">
+            <label>Employee Code</label>
+            {{ form.EmpCode }}
+          </div>
+          <div class="sf-field">
+            <label>Bio Code</label>
+            {{ form.BioCode }}
+          </div>
+          <div class="sf-field">
+            <label>Shift</label>
+            {{ form.shift }}
+          </div>
+          <div class="sf-field">
+            <label>Staff Type</label>
+            {{ form.staff_type }}
+          </div>
 
+        </div>
+      </div>
+    </div>
 
-                  <div class="row g-6">
-                    <div class="col-md-6">
-                       <div class="form-floating form-floating-outline">
-                        {{form.first_name}}
-                        <label for="id_first_name">First Name</label>
-                      </div>
-                    </div>
-                      <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{form.last_name}}
-                        <label for="id_last_name">Last Name</label>
-                      </div>
-                    </div>
-                  </div>
-                    <br>
-                 <div class="row g-6">
-                   <div class="col-md-6">
-                     <div class="form-floating form-floating-outline">
-                        {{form.gender}}
-                         <label for="id_gender">Gender</label>
-                     </div>
-                   </div>
-                   <div class="col-md-6">
-                     <div class="form-floating form-floating-outline">
-                        {{form.dob}}
-                         <label for="id_dob">Date of Birth</label>
-                     </div>
-                   </div>
-                 </div>
-                    <br>
-                 <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
+    <!-- ── SECTION 3: ACADEMIC & SYSTEM ── -->
+    <div class="pc-card mb-4">
+      <div class="pc-card-header">
+        <div>
+          <p class="pc-card-title">Academic &amp; System Details</p>
+          <p class="pc-card-sub">Qualifications, permissions and status</p>
+        </div>
+        <span class="pc-badge pc-badge-success pc-badge-no-dot">
+          <i class="ti ti-school" style="font-size:12px;"></i> Step 3 of 3
+        </span>
+      </div>
+      <div class="pc-card-body">
+        <div class="staff-form-grid">
 
-                         {{ form.staff_photo }}
-                          <label for="id_staff_photo">Staff Pic</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.email }}
-                           <label for="id_email">Email</label>
-                     </div>
-                   </div>
-                 </div>
-                    <br>
-                    <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
+          <div class="sf-field">
+            <label>Department</label>
+            {{ form.department }}
+          </div>
+          <div class="sf-field">
+            <label>Qualification</label>
+            {{ form.qualification }}
+          </div>
+          <div class="sf-field">
+            <label>Certifications</label>
+            {{ form.certifications }}
+          </div>
+          <div class="sf-field">
+            <label>Experience</label>
+            {{ form.experience }}
+          </div>
+          <div class="sf-field">
+            <label>Permission Group</label>
+            <select name="permission_group" id="id_permission_group">
+              <option value="Teacher">Teacher</option>
+            </select>
+          </div>
+          <div class="sf-field">
+            <label>Status</label>
+            {{ form.status }}
+          </div>
+          <div class="sf-field sf-field-full">
+            <label>Other Notes</label>
+            {{ form.desc }}
+          </div>
 
-                         {{ form.mobile }}
-                          <label for="id_mobile">Mobile</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.address }}
-                           <label for="id_address">Address</label>
-                     </div>
-                   </div>
-                 </div>
+        </div>
+      </div>
 
-    <br>
-                    <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
+      <!-- Hidden system fields -->
+      <div class="sf-hidden">
+        {{ form.staff_school }}
+        {{ form.staff_user }}
+        {{ form.subjects_taught }}
+      </div>
 
-                         {{ form.join }}
-                          <label for="id_join">Date of Joining</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.role }}
-                           <label for="id_role">Role</label>
-                     </div>
-                   </div>
-                 </div>
-                     <br>
-                    <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
+      <div class="pc-card-footer">
+        <p class="pc-card-sub" style="margin:0;">
+          <i class="ti ti-shield-check" style="color:var(--green); margin-right:4px;"></i>
+          Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+        </p>
+        <div style="display:flex; gap:10px;">
+          <a href="#" class="pc-btn pc-btn-outline">
+            <i class="ti ti-x" style="font-size:14px;"></i> Cancel
+          </a>
+          <button type="submit" class="pc-btn pc-btn-primary">
+            <i class="ti ti-device-floppy" style="font-size:14px;"></i> Save Changes
+          </button>
+        </div>
+      </div>
 
-                         {{ form.desg }}
-                          <label for="id_desg">Designation</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.salary }}
-                           <label for="id_salary">Salary</label>
-                     </div>
-                   </div>
-                 </div>
-                 <hr class="my-6 mx-n4" />
-                  <h6>2. Acaademic Info</h6>
-                    <br>
-                      <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="form-floating form-floating-outline">
-                        {{ form.department }}
-                        <label>Department</label>
-                    </div>
-                </div>
+    </div>
 
-
-            </div>
-            <br>
-                    <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-
-                         {{ form.qualification }}
-                          <label for="id_qualification">Qualification</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.desc }}
-                           <label for="id_desc">Other if Any</label>
-                     </div>
-                   </div>
-                 </div>
-                   <br>
-                    <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-
-                         {{ form.certifications }}
-                          <label for="id_certifications">Certifications if Any</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.experience}}
-                           <label for="id_experience">Years of Experience</label>
-                     </div>
-                   </div>
-                 </div>
-                 <br>
-                    <div class="row g-6">
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         <select name="permission_group" maxlength="15" id="id_permission_group"  class="select2 form-select" data-allow-clear="true">
-
-                              <option value="Teacher">Teacher</option>
-
-                         </select>
-
-                          <label for="id_permission_group">Permission Group</label>
-                      </div>
-                   </div>
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{ form.status}}
-                           <label for="id_status">Status</label>
-                     </div>
-                   </div>
-                 </div>
-                    <br>
-
-
-                  <div class="row g-6">
-                    <div class="col-md-6">
-                       <div class="form-floating form-floating-outline">
-                        {{form.EmpCode}}
-                        <label>Employee Code</label>
-                      </div>
-                    </div>
-                      <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                         {{form.BioCode}}
-                        <label>Bio Code</label>
-                      </div>
-                    </div>
-                  </div>
-                  <br>
-                   <div class="row g-6">
-                    <div class="col-md-6">
-                       <div class="form-floating form-floating-outline">
-                        {{form.shift}}
-                        <label>Shift</label>
-                      </div>
-                    </div>
-
-                  </div>
-                  <br>
-                     <div class="row g-6">
-
-                   <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                          {% if form.staff_photo.value %}
-					<img id="staff_photo_preview" src="{{ form.staff_photo.value.url }}" alt="Staff photo preview" height="150" width="150">
-				{% else %}
-					<img id="staff_photo_preview" src="#" alt="No photo selected">
-				{% endif %}
-                     </div>
-                   </div>
-                 </div>
-
-                          {{form.staff_school}}
-                          {{ form.staff_user }}
-                          {{ form.subjects_taught }}
-                    <br>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <button class="btn btn-danger">Cancel</button>
-                    </div>
-                </form>
+  </form>
+</div>
 
 <script>
-function previewStaffPhoto() {
-    const staffPhotoInput = document.querySelector('#id_staff_photo');
-    const staffPhotoPreview = document.querySelector('#staff_photo_preview');
+  (function () {
+    const input   = document.querySelector('#id_staff_photo');
+    const preview = document.querySelector('#staff_photo_preview');
+    const ring    = document.querySelector('#photo-ring');
 
-    staffPhotoInput.addEventListener('change', function() {
-        const file = this.files[0];
+    if (!input || !preview) return;
 
-        if (file) {
-            const reader = new FileReader();
-
-            reader.addEventListener('load', function() {
-                staffPhotoPreview.setAttribute('src', this.result);
-            });
-
-            reader.readAsDataURL(file);
-        } else {
-            staffPhotoPreview.setAttribute('src', '#');
-        }
+    input.addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.addEventListener('load', function () {
+        preview.setAttribute('src', this.result);
+        preview.style.display = 'block';
+        /* hide the static upload overlay once a photo is chosen */
+        const staticOverlay = ring.querySelector('.photo-overlay[style]');
+        if (staticOverlay) staticOverlay.style.opacity = '0';
+      });
+      reader.readAsDataURL(file);
     });
-}
-
-previewStaffPhoto();
+  })();
 </script>
 
-<!--
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-password-toggle">
-                        <div class="input-group input-group-merge">
-                          <div class="form-floating form-floating-outline">
-                            <input
-                              type="password"
-                              id="multicol-password"
-                              class="form-control"
-                              placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                              aria-describedby="multicol-password2" />
-                            <label for="multicol-password">Password</label>
-                          </div>
-                          <span class="input-group-text cursor-pointer" id="multicol-password2"
-                            ><i class="ri-eye-off-line"></i
-                          ></span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-password-toggle">
-                        <div class="input-group input-group-merge">
-                          <div class="form-floating form-floating-outline">
-                            <input
-                              type="password"
-                              id="multicol-confirm-password"
-                              class="form-control"
-                              placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                              aria-describedby="multicol-confirm-password2" />
-                            <label for="multicol-confirm-password">Confirm Password</label>
-                          </div>
-                          <span class="input-group-text cursor-pointer" id="multicol-confirm-password2"
-                            ><i class="ri-eye-off-line"></i
-                          ></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <hr class="my-6 mx-n4" />
-                  <h6>2. Personal Info</h6>
-                  <div class="row g-6">
-                    <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multicol-first-name" class="form-control" placeholder="John" />
-                        <label for="multicol-first-name">First Name</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multicol-last-name" class="form-control" placeholder="Doe" />
-                        <label for="multicol-last-name">Last Name</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                        <select id="multicol-country" class="select2 form-select" data-allow-clear="true">
-                          <option value="">Select</option>
-                          <option value="Australia">Australia</option>
-                          <option value="Bangladesh">Bangladesh</option>
-                          <option value="Belarus">Belarus</option>
-                          <option value="Brazil">Brazil</option>
-                          <option value="Canada">Canada</option>
-                          <option value="China">China</option>
-                          <option value="France">France</option>
-                          <option value="Germany">Germany</option>
-                          <option value="India">India</option>
-                          <option value="Indonesia">Indonesia</option>
-                          <option value="Israel">Israel</option>
-                          <option value="Italy">Italy</option>
-                          <option value="Japan">Japan</option>
-                          <option value="Korea">Korea, Republic of</option>
-                          <option value="Mexico">Mexico</option>
-                          <option value="Philippines">Philippines</option>
-                          <option value="Russia">Russian Federation</option>
-                          <option value="South Africa">South Africa</option>
-                          <option value="Thailand">Thailand</option>
-                          <option value="Turkey">Turkey</option>
-                          <option value="Ukraine">Ukraine</option>
-                          <option value="United Arab Emirates">United Arab Emirates</option>
-                          <option value="United Kingdom">United Kingdom</option>
-                          <option value="United States">United States</option>
-                        </select>
-                        <label for="multicol-country">Country</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 select2-primary">
-                      <div class="form-floating form-floating-outline">
-                        <select id="multicol-language" class="select2 form-select" multiple>
-                          <option value="en" selected>English</option>
-                          <option value="fr" selected>French</option>
-                          <option value="de">German</option>
-                          <option value="pt">Portuguese</option>
-                        </select>
-                        <label for="multicol-language">Language</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                        <input
-                          type="text"
-                          id="multicol-birthdate"
-                          class="form-control dob-picker"
-                          placeholder="YYYY-MM-DD" />
-                        <label for="multicol-birthdate">Birth Date</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-floating form-floating-outline">
-                        <input
-                          type="text"
-                          id="multicol-phone"
-                          class="form-control phone-mask"
-                          placeholder="658 799 8941"
-                          aria-label="658 799 8941" />
-                        <label for="multicol-phone">Phone No</label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pt-6">
-                    <button type="submit" class="btn btn-primary me-4">Submit</button>
-                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
-                  </div>
-                </form>
-              </div>
-
-
-<!--        Multiple coloum end -->
-
-
-<!--        <form class="form-sample" method="POST" enctype="multipart/form-data">-->
-<!--                    {% csrf_token %}-->
-<!--                    <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">First name<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.first_name }}-->
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Last name<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.last_name }}-->
-<!--                        </div>-->
-
-<!--                    </div>-->
-<!--                     <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Gender<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.gender }}-->
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Date of Birth<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.dob }}-->
-<!--                        </div>-->
-
-<!--                    </div>-->
-<!--                      <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Profile Pic<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.staff_photo }}-->
-<!--                            <img id="staff_photo_preview" src="#" alt="Staff photo preview">-->
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Email<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.email }}-->
-<!--                        </div>-->
-<!--                      </div>-->
-<!--                      <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Mobile<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.mobile }}-->
-
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Address<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.address }}-->
-<!--                        </div>-->
-
-<!--                      </div>-->
-<!--                     <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Date of Joining<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.join }}-->
-
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Role<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.role }}-->
-<!--                        </div>-->
-<!--                      </div>-->
-<!--                    <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Designation<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.desg }}-->
-
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Salary<span class="text-danger"> *</span></label>-->
-<!--                             {{ form.salary }}-->
-<!--                        </div>-->
-<!--                      </div>-->
-<!--                    <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Qualification<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.qualification }}-->
-
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Other if Any<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.desc }}-->
-<!--                        </div>-->
-<!--                      </div>-->
-<!--                    <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Certifications<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.certifications }}-->
-
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Experience<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.experience }}-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="row justify-content-between text-left">-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex">-->
-<!--                            <label class="form-control-label px-3">Permission Group<span class="text-danger"> *</span></label>-->
-<!--                             <select name="permission_group" maxlength="15" id="id_permission_group">-->
-<!--                                    {% for group in ggrp %}-->
-<!--                                    <option value="{{ group.id }}">{{ group }}</option>-->
-<!--                                    {% endfor %}-->
-<!--                                </select>-->
-
-<!--                        </div>-->
-<!--                        <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Status<span class="text-danger"> *</span></label>-->
-<!--                            {{ form.status }}-->
-<!--                        </div>-->
-<!--                    </div>-->
-
-<!--                          {{form.staff_school}}-->
-<!--                          {{ form.staff_user }}-->
-<!--                          {{ form.subjects_taught }}-->
-<!--                    <div class="align-center">-->
-<!--                        <button type="submit" class="btn btn-primary me-2">Submit</button>-->
-<!--                        <button class="btn btn-light">Cancel</button>-->
-<!--                    </div>-->
-<!--                </form>-->
-<!--            </div>-->
-
-<!--    </div>-->
-<!--</div>-->
-<!--        <div class="main-panel">-->
-<!--            <div class="content-wrapper">-->
-<!--                <form class="form-sample" method="POST" enctype="multipart/form-data">-->
-<!--                    {% csrf_token %}-->
-<!--                    <div class="row">-->
-<!--                        <div class="col-lg-6">-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_first_name">First Name</label>-->
-<!--                                {{ form.first_name }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_last_name">Last Name</label>-->
-<!--                                {{ form.last_name }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_gender">Gender</label>-->
-<!--                                {{ form.gender }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_dob">Date of Birth</label>-->
-<!--                                {{ form.dob }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_staff_photo">Staff Photo:</label>-->
-<!--                                {{ form.staff_photo }}-->
-<!--                                <img id="staff_photo_preview" src="#" alt="Staff photo preview">-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_email">Email address</label>-->
-<!--                                {{ form.email }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_address">Address</label>-->
-<!--                                {{ form.address }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_doj">Date of Joining</label>-->
-<!--                                {{ form.join }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_role">Role</label>-->
-<!--                                {{ form.role }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_desg">Designation</label>-->
-<!--                                {{ form.desg }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_salary">Salary</label>-->
-<!--                                {{ form.salary }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_qualification">Qualification</label>-->
-<!--                                {{ form.qualification }}-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="col-lg-6">-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_mobile">Mobile No</label>-->
-<!--                                {{form.mobile}}-->
-<!--                            </div>-->
-
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_desc">Description</label>-->
-<!--                                {{ form.desc }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_certification">Any Certification</label>-->
-<!--                                {{ form.certifications }}-->
-<!--                            </div>-->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_experience">Experience</label>-->
-<!--                                {{ form.experience }}-->
-<!--                            </div>-->
-
-<!--                                {{ form.subjects_taught }}-->
-
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_permission_group">Permission Group</label>-->
-<!--                               <select name="permission_group" maxlength="15" id="id_permission_group">-->
-<!--								   <option value="Teacher">Teacher</option>-->
-<!--							   </select>-->
-<!--                            </div>-->
-<!--                   -->
-<!--                             -->
-<!--                                {{ form.staff_user }}-->
-<!--                            -->
-<!--                            <div class="form-group">-->
-<!--                                <label for="id_status">Status</label>-->
-<!--                                {{ form.status }}-->
-<!--                            </div>-->
-<!--                            {{form.staff_school}}-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="align-center">-->
-<!--                        <button type="submit" class="btn btn-primary me-2">Submit</button>-->
-<!--                        <button class="btn btn-light">Cancel</button>-->
-<!--                    </div>-->
-<!--                </form>-->
-
-<!--    </div>-->
-<!--</div>-->
-<script>
-function previewStaffPhoto() {
-    const staffPhotoInput = document.querySelector('#id_staff_photo');
-    const staffPhotoPreview = document.querySelector('#staff_photo_preview');
-
-    staffPhotoInput.addEventListener('change', function() {
-        const file = this.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-
-            reader.addEventListener('load', function() {
-                staffPhotoPreview.setAttribute('src', this.result);
-            });
-
-            reader.readAsDataURL(file);
-        } else {
-            staffPhotoPreview.setAttribute('src', '#');
-        }
-    });
-}
-
-previewStaffPhoto();
-</script>
 {% endblock %}
-
-

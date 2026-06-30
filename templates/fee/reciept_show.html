@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Receipt - {{ data.reciept_no }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            color: #1f2937;
+        }
+
+        /* A4 Half Page Container */
+        .receipt-container {
+            width: 210mm;
+            height: 148.5mm; /* A4 half page */
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header - Simple White with Border */
+        .receipt-header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-bottom: 3px solid #1f2937;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .school-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .school-logo {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 6px;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .school-details h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1f2937;
+        }
+
+        .school-details p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .receipt-number {
+            text-align: right;
+        }
+
+        .receipt-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b7280;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .receipt-id {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #1f2937;
+        }
+
+        .receipt-date {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Content - Compact Layout */
+        .receipt-content {
+            padding: 20px 30px;
+        }
+
+        .student-info {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 13px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        /* Table - Compact */
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .fee-table thead {
+            background: #1f2937;
+            color: white;
+        }
+
+        .fee-table th {
+            padding: 10px 16px;
+            text-align: left;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 600;
+        }
+
+        .fee-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .fee-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .fee-table .total-row {
+            background: #f9fafb;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .amount-cell {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* Payment Summary - Compact */
+        .payment-summary {
+            background: #ecfdf5;
+            border-radius: 8px;
+            padding: 12px 16px;
+            border: 1px solid #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .payment-type {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-badge {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .payment-amount {
+            font-size: 12px;
+            color: #065f46;
+        }
+
+        .payment-amount strong {
+            font-size: 15px;
+            color: #047857;
+        }
+
+        /* Buttons - Positioned Outside Receipt */
+        .action-buttons {
+            width: 210mm;
+            margin: 20px auto 0;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #1f2937;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #111827;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #1f2937;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-outline:hover {
+            border-color: #1f2937;
+        }
+
+        .receipt-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 12px;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .receipt-container {
+                box-shadow: none;
+                width: 210mm;
+                height: 148.5mm;
+                margin: 0;
+                page-break-after: always;
+            }
+
+            .action-buttons,
+            .hide-on-print {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .receipt-container {
+                width: 100%;
+                height: auto;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .receipt-number {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <!-- Header - Simple White -->
+        <div class="receipt-header">
+            <div class="header-top">
+                <div class="school-info">
+                    <div class="school-logo">
+                        <img src="{{ skoollogo }}" alt="School Logo">
+                    </div>
+                    <div class="school-details">
+                        <h1>{{ sch_name }}</h1>
+                        <p>{{ sch_name.address }}</p>
+                    </div>
+                </div>
+                <div class="receipt-number">
+                    <div class="receipt-label">Receipt No.</div>
+                    <div class="receipt-id">{{ data.reciept_no }}</div>
+                    <div class="receipt-date">Date: {{ data.reciept_date|date:"d-m-Y" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="receipt-content">
+            <!-- Student Information -->
+            <div class="student-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Student Name</div>
+                        <div class="info-value">{{ data.reciept_inv.stud_name.first_name }} {{ data.reciept_inv.stud_name.last_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Admission No.</div>
+                        <div class="info-value">{{ data.reciept_inv.stud_name.admn_no }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Father's Name</div>
+                        <div class="info-value">{{ data.reciept_inv.stud_name.father_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Mobile No.</div>
+                        <div class="info-value">{{ data.reciept_inv.stud_name.phone }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Table -->
+            <table class="fee-table">
+                <thead>
+                    <tr>
+                        <th>Fee Category</th>
+                        <th style="text-align: right;">Fee Amount</th>
+                        <th style="text-align: right;">Amount Paid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ data.reciept_inv.fee_cat }}</td>
+                        <td class="amount-cell">₹ {{ data.total }}</td>
+                        <td class="amount-cell">₹ {{ data.paid_amt }}</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Total Amount Paid</td>
+                        <td colspan="2" class="amount-cell">₹ {{ data.paid_amt }}/-</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Payment Summary -->
+            <div class="payment-summary">
+                <div class="payment-type">
+                    <span class="payment-badge">{{ data.payment_type }}</span>
+                    <span class="payment-amount">Received with thanks a sum of <strong>₹ {{ data.paid_amt }}/-</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+            This is a computer-generated receipt and does not require a signature. | {{ sch_name }}
+        </div>
+    </div>
+
+    <!-- Action Buttons - Outside Receipt -->
+    <!-- Action Buttons - Outside Receipt -->
+<div class="action-buttons hide-on-print">
+    <button class="btn btn-primary" onclick="window.print()">
+        🖨️ Print Receipt
+    </button>
+    <a href="{% url 'html_to_pdf_directly' data.id %}" class="btn btn-secondary" target="_blank">
+        📄 Download PDF
+    </a>
+
+    {% if is_online %}
+    <a href="{% url 'student_fee_invoice' %}" class="btn btn-outline">
+        ← Back to Fee Details
+    </a>
+    {% else %}
+    <a href="{% url 'fee_reciepts' %}" class="btn btn-outline">
+        ← Back to Receipts
+    </a>
+    <a href="{% url 'invoices' %}" class="btn btn-outline">
+        📋 View Invoices
+    </a>
+    {% endif %}
+</div>
+</body>
+</html>

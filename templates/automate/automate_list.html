@@ -1,217 +1,301 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
+<!-- PAGE HEADER -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Automation</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Tasks</span>
+    </div>
+    <div class="pc-page-title">Automated Tasks</div>
+    <div class="pc-page-sub">Manage scheduled tasks and automation rules</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'add_automate_task' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> New Task
+    </a>
+  </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="pc-kpi-row">
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">{{ data|length }}</div>
+    <div class="pc-kpi-label">Total Tasks</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">
+      {% with active=data|length %}{{ active }}{% endwith %}
+    </div>
+    <div class="pc-kpi-label">Scheduled</div>
+  </div>
+  <div class="pc-kpi">
+    <div class="pc-kpi-val">—</div>
+    <div class="pc-kpi-label">Last Run</div>
+  </div>
+</div>
+
+<!-- MAIN CARD -->
+<div class="pc-card">
+
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-robot-line me-2" style="color:var(--accent);"></i>Task Schedule
+      </div>
+      <div class="pc-card-sub">All configured automated tasks</div>
+    </div>
+    <span class="pc-badge pc-badge-primary pc-badge-no-dot"
+          id="recordCount"
+          style="font-size:12px; padding:5px 14px;">
+      {{ data|length }} task{{ data|length|pluralize }}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+
+    <!-- Search -->
+    <div class="pc-filter-row" style="margin-bottom:1.25rem;">
+      <div class="pc-form-group" style="flex:1; max-width:320px;">
+        <label class="pc-label">Search</label>
+        <div class="pc-input-group">
+          <i class="ri-search-line pc-input-icon"></i>
+          <input type="text" id="searchInput" class="pc-input"
+                 placeholder="Search by task, schedule, recipient…">
+        </div>
+      </div>
+      <div class="pc-form-group" style="min-width:90px; align-self:flex-end;">
+        <button class="pc-btn pc-btn-outline"
+                onclick="filterRows(''); document.getElementById('searchInput').value='';"
+                style="width:100%;">
+          <i class="ri-refresh-line"></i> Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <div class="pc-table-wrap">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px;">#</th>
+              <th style="text-align:left;">Creation Date</th>
+              <th style="text-align:left;">Task</th>
+              <th>Schedule Type</th>
+              <th>Schedule Time</th>
+              <th>Send To</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% if data %}
+              {% for dt in data %}
+              <tr class="data-row">
+
+                <td class="td-num">{{ forloop.counter }}</td>
+
+                <td style="font-size:13px; color:var(--text-md);">
+                  <i class="ri-calendar-line me-1"></i>{{ dt.creation_date }}
+                </td>
+
+                <td class="td-name">
+                  <div style="font-weight:600; color:var(--text);">
+                    {{ dt.get_task_display }}
+                  </div>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                    {{ dt.get_schedule_type_display }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="pc-badge pc-badge-no-dot"
+                        style="background:#fffbeb; color:#d97706; font-weight:600; padding:5px 14px;">
+                    <i class="ri-time-line me-1"></i>{{ dt.schedule_time }}
+                  </span>
+                </td>
+
+                <td style="font-size:13px; color:var(--text-md);">
+                  <i class="ri-send-plane-line me-1"></i>{{ dt.send_to }}
+                </td>
+
+                <td>
+                  <div class="td-actions">
+                    <button type="button"
+                            class="pc-btn pc-btn-danger pc-btn-sm"
+                            onclick="openDeleteModal('{{ dt.id }}', '{{ dt.get_task_display }}')">
+                      <i class="ri-delete-bin-6-line"></i>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="pc-table-empty">
+                <td colspan="7">
+                  <div class="pc-empty">
+                    <i class="ri-robot-line pc-empty-icon"></i>
+                    <div class="pc-empty-title">No automated tasks found</div>
+                    <div class="pc-empty-sub">Click "New Task" to schedule your first automation</div>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="pc-card-footer">
+    <div class="pc-pagination-info">
+      Total: <strong>{{ data|length }}</strong> task{{ data|length|pluralize }}
+    </div>
+  </div>
+
+</div><!-- /pc-card -->
+
+
+<!-- DELETE MODAL -->
+<div id="deleteModal" style="
+  display:none;
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(5px);
+  align-items:center;
+  justify-content:center;">
+
+  <div style="
+    background:var(--surface);
+    border-radius:var(--r-xl);
+    box-shadow:var(--sh-lg);
+    width:100%; max-width:420px;
+    margin:20px;
+    overflow:hidden;
+    animation:modalIn .25s var(--ease-spring);">
+
+    <!-- Modal Header -->
+    <div style="
+      background:var(--rose-lt);
+      padding:20px 22px 16px;
+      border-bottom:1px solid #fecdd3;
+      display:flex; align-items:center; gap:12px;">
+      <span style="
+        width:42px; height:42px; border-radius:50%;
+        background:#fff;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 8px rgba(225,29,72,.15);
+        flex-shrink:0;">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:16px;"></i>
+      </span>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Task</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding:22px;">
+      <p style="font-size:13.5px; color:var(--text-md); margin:0; line-height:1.7;">
+        Are you sure you want to delete the task
+        <strong id="deleteTaskName" style="color:var(--text);"></strong>?
+        This will <strong>permanently remove</strong> the schedule and all associated settings.
+      </p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="
+      padding:14px 22px;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <a id="deleteConfirmBtn" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete
+      </a>
+    </div>
+
+  </div>
+</div>
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
- .text-end{
-    padding-right:15px;
-    }
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.92) translateY(10px); }
+    to   { opacity:1; transform:scale(1)   translateY(0); }
+  }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<script>
+  /* ── Search ── */
+  const searchInput = document.getElementById('searchInput');
+  const rows        = document.querySelectorAll('.data-row');
+  const recordCount = document.getElementById('recordCount');
+  const tableBody   = document.getElementById('tableBody');
 
-        <!-- ===== TITLE ===== -->
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                    Automated Task List
-                </span>
-            </h5>
-        </div>
+  function filterRows(q) {
+    let visible = 0;
+    rows.forEach(row => {
+      const match = row.innerText.toLowerCase().includes(q.toLowerCase().trim());
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    recordCount.textContent = visible + ' task' + (visible !== 1 ? 's' : '');
+    let noResult = document.getElementById('noResultRow');
+    if (visible === 0 && q !== '') {
+      if (!noResult) {
+        noResult = document.createElement('tr');
+        noResult.id = 'noResultRow';
+        noResult.className = 'pc-table-empty';
+        noResult.innerHTML = `<td colspan="7">
+          <div class="pc-empty">
+            <i class="ri-search-line pc-empty-icon"></i>
+            <div class="pc-empty-title">No results found</div>
+            <div class="pc-empty-sub">Try a different keyword</div>
+          </div>
+        </td>`;
+        tableBody.appendChild(noResult);
+      }
+    } else {
+      if (noResult) noResult.remove();
+    }
+  }
 
-        <!-- ===== ACTION BUTTON ===== -->
-         <div class="text-end mb-3">
-            <a href="{% url 'add_automate_task' %}" class="btn btn-sm btn-primary">
-                <i class="ri-add-line"></i>&nbsp; Automate
-            </a>
-        </div>
+  searchInput.addEventListener('input', function () { filterRows(this.value); });
 
-        <!-- ===== TABLE ===== -->
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table  table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Creation Date</th>
-                            <th>Task</th>
-                            <th>Schedule Type</th>
-                            <th>Schedule Time</th>
-                            <th>Send To</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if data %}
-                            {% for dt in data %}
-                            <tr>
-                                <td>{{ dt.creation_date }}</td>
-                                <td>{{ dt.get_task_display }}</td>
-                                <td>{{ dt.get_schedule_type_display }}</td>
-                                <td>{{ dt.schedule_time }}</td>
-                                <td>{{ dt.send_to }}</td>
-                                <td>
-                                    <a href = "{% url 'delete_automated_task' dt.id %}" class="btn btn-danger">Delete</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="5" class="no-data">
-                                    No Schedules to Show
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  /* ── Delete Modal ── */
+  const deleteModal = document.getElementById('deleteModal');
 
-    </div>
-</div>
+  function openDeleteModal(id, taskName) {
+    document.getElementById('deleteTaskName').textContent = taskName;
+    document.getElementById('deleteConfirmBtn').href = '{% url "delete_automated_task" 0 %}'.replace('0', id);
+    deleteModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDeleteModal() {
+    deleteModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  deleteModal.addEventListener('click', function (e) {
+    if (e.target === deleteModal) closeDeleteModal();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+</script>
+
 {% endblock %}

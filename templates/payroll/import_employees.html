@@ -1,39 +1,125 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<div class="col-lg-6 grid-margin stretch-card">
-    <div class="card">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        <div class="card-title text-center">
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f6fb;
+}
+
+/* ===== WRAPPER CENTERING ===== */
+.center-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+}
+
+/* ===== CARD ===== */
+.import-card {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+    background: #ffffff;
+}
+
+/* ===== HEADER ===== */
+.card-header-custom {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 18px;
+    text-align: center;
+}
+
+.card-header-custom span {
+    background: #ffffff;
+    padding: 6px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== BODY ===== */
+.card-body-custom {
+    padding: 30px;
+}
+
+/* ===== FILE INPUT ===== */
+.file-input {
+    border-radius: 10px !important;
+    height: 45px;
+}
+
+/* ===== BUTTON ===== */
+.btn-import {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    background: linear-gradient(45deg, #0053d6, #2a92ff);
+    border: none;
+    font-weight: 500;
+    color: white;
+    transition: 0.2s;
+}
+
+.btn-import:hover {
+    opacity: 0.9;
+    color: white;
+}
+
+/* ===== ALERTS ===== */
+.alert {
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+</style>
+
+
+<div class="center-wrapper">
+    <div class="import-card">
+
+        <!-- HEADER -->
+        <div class="card-header-custom">
             <h5>
-                <span class="badge bg-light text-dark">
-                    Import Employees
-                </span>
+                <span>Import Employees</span>
             </h5>
         </div>
 
-        <div class="card-body">
+        <!-- BODY -->
+        <div class="card-body-custom">
 
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-info">{{ message }}</div>
+                    <div class="alert alert-info text-center">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
 
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 
-                <div class="mb-3">
-                    <label class="form-label">Upload Excel File</label>
-                    <input type="file" name="file" class="form-control" required>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold mb-2">
+                        Upload Excel File
+                    </label>
+                    <input type="file" name="file"
+                           class="form-control file-input"
+                           required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-import">
                     Import Employees
                 </button>
             </form>
 
         </div>
+
     </div>
 </div>
 

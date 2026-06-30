@@ -1,173 +1,282 @@
 {% extends 'panel/index.html' %}
 
 {% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-    h1, h3 {
-        font-family: Roboto;
-    }
-    th {
-        font-family: 'Roboto', sans-serif;
-        font-weight: bold !important;
-        font-size: 18px !important;
-    }
-    .editable {
-        cursor: pointer;
-        background-color: #f8f9fa;
-    }
-    .editable:focus {
-        outline: none;
-        background-color: #e9ecef;
-    }
+
+/* ===== GLOBAL ===== */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f6fb;
+}
+
+.page-title {
+    font-weight: 700;
+    color: #1e3c72;
+}
+
+/* ===== MAIN CARD ===== */
+.main-card {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    padding: 30px;
+}
+
+/* ===== INFO SECTION ===== */
+.info-section {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border-radius: 15px;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+}
+
+.info-section h6 {
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #2a5298;
+}
+
+/* ===== TABLE CARD ===== */
+.table-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    padding: 20px;
+    height: 100%;
+}
+
+/* ===== TABLE STYLE ===== */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead {
+    background: #2a5298;
+    color: white;
+}
+
+.table th {
+    font-size: 14px;
+    font-weight: 600;
+    border: none !important;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+/* ===== EDITABLE FIELD ===== */
+.editable {
+    cursor: pointer;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 4px 8px;
+    transition: 0.2s;
+}
+
+.editable:hover {
+    background-color: #e9f2ff;
+}
+
+.editable:focus {
+    outline: none;
+    background-color: #d0e2ff;
+}
+
+/* ===== LOAN BOX ===== */
+.loan-box {
+    background: #fff8e1;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+/* ===== SUCCESS FLASH EFFECT ===== */
+.success-update {
+    background-color: #d4edda !important;
+}
+
 </style>
 
+
 <div class="container mt-4">
-    <h2 class="text-center">Employee Salary Record</h2>
 
-    <div class="card p-3 mt-3">
-        <h4>School: {{ skool.name }}</h4>
-        <h5>Academic Year: {{ year.acad_year }}</h5><br><br><hr>
+    <div class="text-center mb-4">
+        <h2 class="page-title">Employee Salary Record</h2>
+    </div>
 
-            <table>
-               <tr>
-                 <th>Employee Details</th>
-                 <th>Bank Details</th>
+    <div class="main-card">
 
-               </tr>
+        <!-- SCHOOL INFO -->
+        <div class="mb-4">
+            <h5><strong>School:</strong> {{ skool.name }}</h5>
+            <h6><strong>Academic Year:</strong> {{ year.acad_year }}</h6>
+        </div>
 
-               <tr>
-               <td><h6>Employee Code : &nbsp;{{emp.emp_code}}</h6></td>
-               <td><h6>Account No : &nbsp;{{bank_detail.AccNo}}</h6></td>
-               </tr>
-                <tr>
-               <td><h6>Employee Name : &nbsp;{{emp.name}} </h6></td>
-               <td><h6>CIF No : &nbsp;{{bank_detail.CIFNo}}</h6></td>
-                </tr>
-                <tr>
-               <td><h6>Department : &nbsp;{{emp.department}} </h6></td>
-               <td><h6>IFSC Code : &nbsp;{{bank_detail.IFSC}}</h6></td>
-                </tr>
-                <tr>
-               <td><h6>Designation : &nbsp;{{emp.designation}} </h6></td>
-               <td><h6>Bank Name : &nbsp;{{bank_detail.BankName}}</h6></td>
-                </tr>
-                <tr>
-               <td><h6><h6>Date of Joining : &nbsp;{{emp.date_of_joining}} </h6></td>
-               <td><h6>Branch Name : &nbsp;{{bank_detail.Branch}}</h6></td>
-               </tr>
+        <!-- EMPLOYEE + BANK DETAILS -->
+        <div class="info-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><strong>Employee Code:</strong> {{ emp.emp_code }}</h6>
+                    <h6><strong>Employee Name:</strong> {{ emp.name }}</h6>
+                    <h6><strong>Department:</strong> {{ emp.department }}</h6>
+                    <h6><strong>Designation:</strong> {{ emp.designation }}</h6>
+                    <h6><strong>Date of Joining:</strong> {{ emp.date_of_joining }}</h6>
+                </div>
+                <div class="col-md-6">
+                    <h6><strong>Account No:</strong> {{ bank_detail.AccNo }}</h6>
+                    <h6><strong>CIF No:</strong> {{ bank_detail.CIFNo }}</h6>
+                    <h6><strong>IFSC Code:</strong> {{ bank_detail.IFSC }}</h6>
+                    <h6><strong>Bank Name:</strong> {{ bank_detail.BankName }}</h6>
+                    <h6><strong>Branch:</strong> {{ bank_detail.Branch }}</h6>
+                </div>
+            </div>
+        </div>
 
-            </table>
+        <div class="row">
 
+            <!-- ALLOWANCES -->
+            <div class="col-md-6 mb-4">
+                <div class="table-card">
+                    <h5 class="section-title">Allowances</h5>
 
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Salary Component</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Basic Salary</strong></td>
+                                <td class="text-end text-success fw-bold">
+                                    ₹ {{ emp.basic_salary }}
+                                </td>
+                            </tr>
 
+                            {% for allowance in allowances %}
+                            <tr>
+                                <td>{{ allowance.allowance_name.name }}</td>
+                                <td contenteditable="true"
+                                    class="editable text-end"
+                                    data-id="{{ allowance.id }}"
+                                    data-type="allowance">
+                                    ₹ {{ allowance.amount }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">
+                                    No allowances available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
+                </div>
+            </div>
 
+            <!-- DEDUCTIONS -->
+            <div class="col-md-6 mb-4">
+                <div class="table-card">
+                    <h5 class="section-title">Deductions</h5>
 
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Deduction Type</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deduction in deductions %}
+                            <tr>
+                                <td>{{ deduction.deduction_name }}</td>
+                                <td contenteditable="true"
+                                    class="editable text-end"
+                                    data-id="{{ deduction.id }}"
+                                    data-type="deduction">
+                                    ₹ {{ deduction.amount }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">
+                                    No deductions available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- LOANS -->
+                    {% for loan in emp_loan %}
+                    <div class="loan-box mt-3">
+                        <strong>Loan Details</strong><br>
+                        Loan Amount: ₹ {{ loan.loan_amount }}<br>
+                        EMI: ₹ {{ loan.monthly_installment }}<br>
+                        Remaining Balance: ₹ {{ loan.remaining_amount }}
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
 
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <h4>Allowances</h4>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Salary</th>
-                        <th>Amount</th>
-                    </tr>
-                    <tr>
-                        <td>Basic</td>
-                        <td>{{emp.basic_salary}}</td>
-                    </tr>
-                    <tr>
-                        <th>Allowance Type</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for allowance in allowances %}
-                    <tr>
-                        <td>{{ allowance.allowance_name.name }}</td>
-                        <td contenteditable="true" class="editable" data-id="{{ allowance.id }}" data-type="allowance">{{ allowance.amount }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="2" class="text-center">No allowances available</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="col-md-6">
-            <h4>Deductions</h4>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Deduction Type</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for deduction in deductions %}
-                    <tr>
-                        <td>{{ deduction.deduction_name }}</td>
-                        <td contenteditable="true" class="editable" data-id="{{ deduction.id }}" data-type="deduction">{{ deduction.amount }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="2" class="text-center">No deductions available</td></tr>
-                    {% endfor %}
-                </tbody>
-                <thead>
-                    <th>Loans</th>
-                </thead>
-                <tbody>
-                  <tr>   </tr>
-                  {% for loan in emp_loan %}
-                  <tr>
-                      <td>Loan</td>
-                      <td>{{loan.loan_amount}}</td>
-                  </tr><tr>
-                      <td>EMI/</td>
-                      <td>{{loan.monthly_installment}}</td>
-                  </tr>
-                  <tr>
-                      <td>Balance</td>
-                       <td>{{loan.remaining_amount}}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.editable').on('blur', function() {
-            var newValue = $(this).text();
-            var id = $(this).data('id');
-            var type = $(this).data('type');
+$(document).ready(function() {
+    $('.editable').on('blur', function() {
 
-            $.ajax({
-                url: "{% url 'update_salary' %}",
-                type: "POST",
-                data: {
-                    'id': id,
-                    'type': type,
-                    'value': newValue,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        $(this).css('background-color', '#d4edda'); // Green highlight
-                    } else {
-                        alert('Error updating data!');
-                    }
-                },
-                error: function() {
-                    alert('Something went wrong. Please try again.');
+        var cell = $(this);
+        var newValue = cell.text().replace('₹','').trim();
+        var id = cell.data('id');
+        var type = cell.data('type');
+
+        $.ajax({
+            url: "{% url 'update_salary' %}",
+            type: "POST",
+            data: {
+                'id': id,
+                'type': type,
+                'value': newValue,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    cell.addClass('success-update');
+                    setTimeout(function(){
+                        cell.removeClass('success-update');
+                    }, 800);
+                } else {
+                    alert('Error updating data!');
                 }
-            });
+            },
+            error: function() {
+                alert('Something went wrong. Please try again.');
+            }
         });
     });
+});
 </script>
+
 {% endblock %}

@@ -2,240 +2,247 @@
 {% block content %}
 
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Current session highlight card ── */
+.pc-current-session {
+  background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+  border: none;
+  padding: 20px 24px;
+  border-radius: var(--r-xl);
+  color: white;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 24px rgba(79,70,229,.25);
+}
+.pc-current-session-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: .85;
+  margin-bottom: 8px;
+}
+.pc-current-session-year {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -.6px;
+  margin-bottom: 4px;
+}
+.pc-current-session-school {
+  font-size: 13px;
+  opacity: .9;
+  font-weight: 500;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Form floating enhancement ── */
+.pc-form-floating {
+  position: relative;
+  margin-bottom: 18px;
+}
+.pc-form-floating .pc-select,
+.pc-form-floating .pc-input {
+  padding-top: 22px;
+  padding-bottom: 8px;
+  height: auto;
+}
+.pc-form-floating label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 8px 13px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  pointer-events: none;
+  transition: all var(--t) ease;
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+/* ── Session setup card styling ── */
+.pc-setup-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--accent-lt);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 26px;
+  margin-bottom: 16px;
 }
-
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
-    .search-row .form-control {
-    height: 45px !important;
-    font-size: 12px;
-    border-radius: 8px;
-    width:300px
-}
-
-.search-row .btn {
-    min-width: 110px;
-    height: 35px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-    .text-center{
-    text-align:center;
-    }
-    .text-end{
-    padding-right:15px;
-    }
-    td{
-     text-align:center;
-    }
 </style>
 
-{% if adata %}
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== TITLE ===== -->
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">
-                   Set Current session
-                </span>
-            </h5>
-        </div>
-
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>School Name</th>
-                            <th>Academic Year</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ adata.school_name }}</td>
-                            <td>{{ adata.current_year }}</td>
-                            <td>
-                                <form action="{% url 'update_acad_yr' adata.id %}" method="POST" class="d-inline">
-                                    {% csrf_token %}
-                                    {{ form.as_p }}
-                                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<!-- ═══════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Current Session</span>
     </div>
+    <div class="pc-page-title">Current Academic Session</div>
+    <div class="pc-page-sub">Set and manage the active academic year for your school</div>
+  </div>
 </div>
 
-{% else %}
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title">
-            <h5>
-                <span class="badge bg-light text-dark">
-                   Set Session
-                </span>
+<!-- ═══════════════════════════════
+     CURRENT SESSION (if set)
+     ═══════════════════════════════ -->
+{% if adata %}
+<div class="pc-current-session">
+  <div class="pc-current-session-label">Active Session</div>
+  <div class="pc-current-session-year">
+    <i class="ri-calendar-check-line" style="margin-right:10px;"></i>{{ adata.current_year }}
+  </div>
+  <div class="pc-current-session-school">{{ adata.school_name }}</div>
+</div>
 
-        </div>
-
-        <div class="card-body">
-            <form method="POST" action="{% url 'set_current_yr' %}" class="row g-3 align-items-center">
-                {% csrf_token %}
-                {{ form.school_name }}
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <select name="current_year" required id="id_current_year" class="form-select">
-                            <option value="" selected>---------</option>
-                            {% for yr in ydata %}
-                            <option value="{{ yr.id }}">{{ yr }}</option>
-                            {% endfor %}
-                        </select>
-                        <label for="id_current_year">Select Academic Year</label>
-                    </div>
-                </div>
-
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="submit" class="btn btn-primary px-4">Submit</button>
-                </div>
-            </form>
-        </div>
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-settings-3-line me-2" style="color:var(--accent);"></i>Update Current Session
+      </div>
+      <div class="pc-card-sub">Change the active academic year for this school</div>
     </div>
+  </div>
+
+  <div class="pc-card-body">
+    <div class="table-responsive">
+      <div class="pc-table-wrap">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:22px;">School Name</th>
+              <th>Current Academic Year</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-name" style="padding-left:22px;">{{ adata.school_name }}</td>
+              <td>
+                <span class="year-badge">
+                  <i class="ri-calendar-line"></i>{{ adata.current_year }}
+                </span>
+              </td>
+              <td>
+                <div class="td-actions">
+                  <form action="{% url 'update_acad_yr' adata.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <div style="display:inline-flex;gap:8px;align-items:center;">
+                      {{ form.as_p }}
+                      <button type="submit" class="pc-btn pc-btn-primary pc-btn-sm">
+                        <i class="ri-refresh-line"></i> Update Session
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     SETUP FORM (if not set)
+     ═══════════════════════════════ -->
+{% else %}
+<div class="pc-card">
+  <div class="pc-card-body" style="text-align:center;padding:48px 32px;">
+    <div class="pc-setup-icon" style="margin-left:auto;margin-right:auto;">
+      <i class="ri-calendar-todo-line"></i>
+    </div>
+    <div style="max-width:480px;margin:0 auto 32px;">
+      <h3 style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.3px;">
+        Set Your Current Academic Session
+      </h3>
+      <p style="font-size:13.5px;color:var(--text-md);margin:0;">
+        Choose the academic year that is currently active for your school. This will be used throughout the system.
+      </p>
+    </div>
+
+    <form method="POST" action="{% url 'set_current_yr' %}" style="max-width:520px;margin:0 auto;text-align:left;">
+      {% csrf_token %}
+
+      <!-- Hidden school field -->
+      <div style="display:none;">
+        {{ form.school_name }}
+      </div>
+
+      <div class="pc-form-floating">
+        <select name="current_year" required id="id_current_year" class="pc-select">
+          <option value="">---------</option>
+          {% for yr in ydata %}
+          <option value="{{ yr.id }}">{{ yr }}</option>
+          {% endfor %}
+        </select>
+        <label for="id_current_year">Academic Year</label>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:24px;">
+        <button type="submit" class="pc-btn pc-btn-primary pc-btn-lg">
+          <i class="ri-check-line"></i> Set Current Session
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endif %}
+
+<!-- ═══════════════════════════════
+     INFO ALERT
+     ═══════════════════════════════ -->
+<div class="pc-alert pc-alert-info" style="margin-top:20px;">
+  <i class="ri-information-line"></i>
+  <div>
+    <strong>Important:</strong> The current session determines which academic year is active across all modules including attendance, grades, and reports.
+  </div>
+</div>
+
+<style>
+/* ── Year badge styling (reused from academic sessions) ── */
+.year-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-family: var(--f-mono);
+  letter-spacing: .3px;
+}
+.year-badge i { font-size: 13px; }
+
+/* ── Form field inline styling ── */
+.td-actions form > div > p {
+  display: inline-block;
+  margin: 0;
+}
+.td-actions form > div > p > select {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border-dark);
+  font-family: var(--f-sans);
+  color: var(--text);
+  background: var(--surface);
+  margin-right: 8px;
+  min-width: 180px;
+}
+.td-actions form > div > p > select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+</style>
 
 {% endblock %}

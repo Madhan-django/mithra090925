@@ -42,6 +42,9 @@ class add_staff_form(forms.ModelForm):
         widgets = {
             'EmpCode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Employee Code'}),
             'BioCode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bio Code'}),
+            'department': forms.Select(attrs={'class': 'form-control'}),
+            'shift': forms.Select(attrs={'class': 'form-control'}),
+            'staff_type': forms.Select(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control','placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control','placeholder':'Last Name'}),
             'gender':forms.Select(choices=gend,attrs={'class':'form-control','placeholder':'Gender'}),
@@ -53,7 +56,7 @@ class add_staff_form(forms.ModelForm):
             'role': forms.TextInput(attrs={'class': 'form-control'}),
             'salary':forms.NumberInput(attrs={'class': 'form-control'}),
             'desg':forms.TextInput(attrs={'class': 'form-control'}),
-            'department': forms.Select(attrs={'class':'form-control'}),
+
             'qualification':forms.TextInput(attrs={'class': 'form-control'}),
             'status':forms.Select(choices=state,attrs={ 'class':'select2 form-select','data-allow-clear':'true'}),
             'desc':forms.TextInput(attrs={'class': 'form-control'}),
@@ -63,6 +66,7 @@ class add_staff_form(forms.ModelForm):
             'permission_group':forms.Select(choices=perm_group),
             'staff_photo':forms.FileInput(attrs={'class':'form-control','placeholder':'Staff Photograph'}),
             'subjects_taught':forms.MultipleHiddenInput()
+
         }
 
 

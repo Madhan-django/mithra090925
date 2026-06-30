@@ -6,7 +6,7 @@ urlpatterns = [
 
     path('dept',views.Dept_list,name='dept'),
     path('add_dept',views.Dept_add,name='add_dept'),
-    path('update_dept/<dept_id>',views.Dept_update,name='update_dept'),
+    path('update_dept/<dept_id>',views.Dept_update,name='deptupdate'),
     path('del_dept/<dept_id>',views.Dept_del,name='del_dept'),
     path('shifts',views.shifts,name='shifts'),
     path('shift_add',views.shift_add,name='shift_add'),
@@ -34,5 +34,6 @@ urlpatterns = [
     path('homework_search', login_required(views.homework_search), name='homework_search'),
     path('homework_manual',views.homework_manual,name='homework_manual'),
     path('homeworkreal_view',views.homeworkreal_view,name='homeworkreal_view'),
+    path('biocode_update',views.biocode_update,name='biocode_update')
 
 ]

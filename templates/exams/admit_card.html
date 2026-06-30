@@ -1,134 +1,203 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h5, th, td, label, button {
-    font-family: 'Roboto', sans-serif;
-}
+  .action-btns { display:flex; align-items:center; justify-content:center; gap:5px; }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* ===== TITLE BAR ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px 0 !important;      /* reduced height */
-    border-radius: 20px 20px 0 0;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;
-    padding: 4px 12px;
-    border-radius: 6px;
-}
-
-/* ===== TABLE ===== */
-.table {
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-td {
-    font-size: 14px !important;
-    padding: 10px 8px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-/* Align dropdown icon properly */
-.dropdown-toggle {
-    border: none;
-}
-
-/* Table empty message */
-.alert-danger {
-    margin-top: 15px;
-    text-align: center;
-    font-size: 14px;
-}
-
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(15,23,42,.45); z-index:9999;
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal-box {
+    background:var(--surface); border-radius:var(--r-xl);
+    border:1px solid var(--border);
+    box-shadow:0 20px 50px rgba(15,23,42,.2);
+    width:100%; max-width:400px; overflow:hidden;
+    animation:modalIn 180ms ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform:scale(.96) translateY(8px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .modal-head {
+    padding:16px 20px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .modal-head-title { font-size:14px; font-weight:700; color:var(--text); margin:0; }
+  .modal-head-sub   { font-size:12px; color:var(--text-sm); margin:2px 0 0; }
+  .modal-close-btn {
+    width:28px; height:28px; border-radius:var(--r-sm);
+    border:1px solid var(--border); background:var(--surface2);
+    color:var(--text-sm); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; transition:background 120ms;
+  }
+  .modal-close-btn:hover { background:var(--rose-lt); color:var(--rose); border-color:#fecdd3; }
+  .modal-body-inner { padding:20px; }
+  .modal-foot {
+    padding:14px 20px; border-top:1px solid var(--border);
+    display:flex; justify-content:flex-end; gap:8px; background:var(--surface2);
+  }
+  .delete-warning {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:14px 16px; background:var(--rose-lt);
+    border:1px solid #fecdd3; border-radius:var(--r-lg);
+  }
+  .delete-warning i { font-size:22px; color:var(--rose); flex-shrink:0; margin-top:1px; }
+  .delete-warning p { margin:0; font-size:13.5px; color:var(--rose); font-weight:500; line-height:1.6; }
+  .delete-warning strong { font-weight:700; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- TITLE -->
-        <div class="card-title">
-            <h5><span class="badge bg-light text-dark">Admit Cards</span></h5>
-        </div>
-
-        <div class="card-body">
-            {% if data %}
-            <table class="table">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Exam Name</th>
-                        <th>Class</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for examdet in data %}
-                    <tr>
-                        <td>{{ examdet.exam_title }}</td>
-                        <td>{{ examdet.exam_class }}</td>
-                        <td>{{ examdet.exam_start_date }}</td>
-                        <td>{{ examdet.exam_end_date }}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                    <i class="ri-more-2-line"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{% url 'generate_admit_card' examdet.id %}">
-                                        <i class="ri-pencil-line me-1"></i> Admit Card / Exam Results
-                                    </a>
-                                    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
-                                    <a class="dropdown-item" href="{% url 'delete_admit_card' examdet.id %}">
-                                        <i class="ri-delete-bin-7-line me-1"></i> Delete
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="alert alert-danger" role="alert">
-                No Records are available to Show
-            </div>
-            {% endif %}
-        </div>
-
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'examlist' %}">Exams</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Admit Cards</span>
+      </nav>
+      <h1 class="pc-page-title">Admit Cards</h1>
+      <p class="pc-page-sub">Generate admit cards and view exam results per exam.</p>
     </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Exam List</p>
+        <p class="pc-card-sub">Select an exam to generate admit cards or view results</p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-id-badge" style="font-size:12px;"></i>
+        {{ data|length }} exam{{ data|length|pluralize }}
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-table-wrap" style="border:none; border-radius:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:18px;">#</th>
+            <th style="text-align:left;">Exam Name</th>
+            <th>Class</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if data %}
+            {% for examdet in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td style="text-align:left; font-weight:600; color:var(--text); font-size:13.5px;">
+                {{ examdet.exam_title }}
+              </td>
+              <td>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                  {{ examdet.exam_class }}
+                </span>
+              </td>
+              <td style="font-family:var(--f-mono); font-size:12.5px; color:var(--text-sm);">
+                {{ examdet.exam_start_date }}
+              </td>
+              <td style="font-family:var(--f-mono); font-size:12.5px; color:var(--text-sm);">
+                {{ examdet.exam_end_date }}
+              </td>
+              <td>
+                <div class="action-btns">
+                  <!-- Admit Card / Results -->
+                  <a href="{% url 'generate_admit_card' examdet.id %}"
+                     class="pc-btn pc-btn-info pc-btn-sm">
+                    <i class="ti ti-id-badge" style="font-size:12px;"></i> Admit Card
+                  </a>
+                  <!-- Delete — Admin/superadmin only -->
+                  {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+                  <button class="pc-btn pc-btn-danger pc-btn-sm"
+                          data-url="{% url 'delete_admit_card' examdet.id %}"
+                          data-name="{{ examdet.exam_title }}"
+                          onclick="confirmDelete(this)">
+                    <i class="ti ti-trash" style="font-size:12px;"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="pc-table-empty">
+              <td colspan="6">No admit card records found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not data %}
+    <div class="pc-card-body" style="padding-top:0;">
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ti ti-id-badge-off"></i></span>
+        <p class="pc-empty-title">No exams available</p>
+        <p class="pc-empty-sub">Admit cards will appear here once exams are created.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <p class="modal-head-title">Delete Admit Card</p>
+        <p class="modal-head-sub">This action cannot be undone</p>
+      </div>
+      <button class="modal-close-btn" onclick="closeDeleteModal()">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="modal-body-inner">
+      <div class="delete-warning">
+        <i class="ti ti-alert-triangle"></i>
+        <p>Are you sure you want to delete the admit card for
+           <strong id="deleteExamName"></strong>?
+           All generated cards may be affected.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <a id="deleteConfirmBtn" href="#" class="pc-btn pc-btn-danger">
+        <i class="ti ti-trash" style="font-size:14px;"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmDelete(btn) {
+    document.getElementById('deleteExamName').textContent = '"' + btn.dataset.name + '"';
+    document.getElementById('deleteConfirmBtn').href = btn.dataset.url;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('open');
+  }
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+</script>
+
 {% endblock %}

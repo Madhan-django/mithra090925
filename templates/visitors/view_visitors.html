@@ -1,71 +1,264 @@
 {% extends 'panel/index.html' %}
 {% block content %}
-<style>
 
+<style>
+  /* Visitor card layout */
+  .visitor-layout {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* Photo box */
+  .visitor-photo {
+    width: 160px;
+    height: 190px;
+    border-radius: var(--r-lg);
+    border: 1.5px solid var(--border-dark);
+    overflow: hidden;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .visitor-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .visitor-photo i { font-size: 40px; opacity: .3; }
+
+  /* Detail rows */
+  .visitor-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 32px;
+  }
+
+  .vd-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .vd-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--muted);
+  }
+  .vd-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .vd-value-mono {
+    font-family: var(--f-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Section label */
+  .form-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0 14px;
+  }
+  .form-section-label:first-child { margin-top: 0; }
+  .form-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .form-section-label i { font-size:13px; color:var(--accent); opacity:.7; }
+
+  /* School banner */
+  .visitor-school-banner {
+    background: var(--accent-lt);
+    border: 1px solid var(--accent-mid);
+    border-radius: var(--r-lg);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .visitor-school-banner i { font-size:16px; color:var(--accent); }
+  .visitor-school-banner span {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Check-in/out highlight */
+  .time-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--f-mono);
+  }
+  .time-in  { background: var(--green-lt); color: var(--green); }
+  .time-out { background: var(--rose-lt);  color: var(--rose);  }
+
+  @media print {
+    .no-print { display: none !important; }
+    .pc-card  { box-shadow: none !important; border: 1px solid #ccc !important; }
+  }
+
+  @media (max-width: 600px) {
+    .visitor-layout  { grid-template-columns: 1fr; }
+    .visitor-details { grid-template-columns: 1fr; }
+    .visitor-photo   { width: 120px; height: 145px; }
+  }
 </style>
 
 {% if data %}
-<div class="col-lg-12 grid-margin stretch-card" >
-    <div class="card">
-        <div class="card-title text-center">
-            <h5 class="mb-0">Visitor</h5>
-        </div>
-        <div class="card-body">
-            <div class="row mt-4">
-                <div class="col-sm-6">
-                    <dl class="row">
+<div class="col-lg-12">
 
-                        <dd class="col-sm-8">
-                            {% if data.photo %}
-                                <img src="{{ MEDIA_URL }}{{ data.photo.url }}" alt="Visitor Photo" class="img-fluid rounded">
-                            {% endif %}
-                        </dd>
-
-                    </dl>
-                </div>
-               <div class="col-sm-6">
-    <dl class="row">
-        <dt class="col-sm-4 fw-bold text-muted">Institution:</dt>
-        <dd class="col-sm-8" style="font-size:18px;">{{ skool }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Name:</dt>
-        <dd class="col-sm-8">{{ data.name }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Phone:</dt>
-        <dd class="col-sm-8">{{ data.phone }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Email:</dt>
-        <dd class="col-sm-8">{{ data.email }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Company:</dt>
-        <dd class="col-sm-8">{{ data.company }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Address:</dt>
-        <dd class="col-sm-8">{{ data.address }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Purpose:</dt>
-        <dd class="col-sm-8">{{ data.purpose }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Meeting Person:</dt>
-        <dd class="col-sm-8">{{ data.meeting_person }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Check-in Time:</dt>
-        <dd class="col-sm-8">{{ data.check_in_time }}</dd>
-
-        <dt class="col-sm-4 fw-bold text-muted">Check-out Time:</dt>
-        <dd class="col-sm-8">{{ data.check_out_time }}</dd>
-    </dl>
-      <br>
-<button onclick="window.print()" class="btn btn-primary d-print-none">
-    <i class="ri-printer-line"></i> Print
-</button>
-
-</div>
-
-
-            </div>
-        </div>
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3 no-print">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'visitors_list' %}">Visitors</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Visitor Detail</span>
+      </nav>
+      <h1 class="pc-page-title">Visitor Detail</h1>
+      <p class="pc-page-sub">Full profile and visit information for this visitor.</p>
     </div>
+    <div class="pc-page-header-right no-print">
+      <button onclick="window.print()" class="pc-btn pc-btn-primary">
+        <i class="ti ti-printer" style="font-size:14px;"></i> Print
+      </button>
+    </div>
+  </div>
+
+  <div class="pc-card" style="max-width:820px;">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">{{ data.name }}</p>
+        <p class="pc-card-sub">Visitor pass &amp; visit record</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ti ti-id-badge" style="font-size:12px;"></i> Visitor
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+
+      <!-- School banner -->
+      <div class="visitor-school-banner">
+        <i class="ti ti-building-school"></i>
+        <span>{{ skool }}</span>
+      </div>
+
+      <!-- Photo + details -->
+      <div class="visitor-layout">
+
+        <!-- Photo -->
+        <div>
+          <p class="form-section-label" style="margin-top:0;"><i class="ti ti-camera"></i> Photo</p>
+          <div class="visitor-photo">
+            {% if data.photo %}
+              <img src="{{ MEDIA_URL }}{{ data.photo.url }}" alt="Visitor Photo">
+            {% else %}
+              <i class="ti ti-user"></i>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div>
+          <p class="form-section-label" style="margin-top:0;"><i class="ti ti-user"></i> Personal Info</p>
+          <div class="visitor-details">
+
+            <div class="vd-row">
+              <span class="vd-label">Name</span>
+              <span class="vd-value">{{ data.name }}</span>
+            </div>
+
+            <div class="vd-row">
+              <span class="vd-label">Phone</span>
+              <span class="vd-value-mono">{{ data.phone }}</span>
+            </div>
+
+            <div class="vd-row">
+              <span class="vd-label">Email</span>
+              <span class="vd-value">{{ data.email }}</span>
+            </div>
+
+            <div class="vd-row">
+              <span class="vd-label">Company</span>
+              <span class="vd-value">{{ data.company }}</span>
+            </div>
+
+            <div class="vd-row" style="grid-column:1/-1;">
+              <span class="vd-label">Address</span>
+              <span class="vd-value">{{ data.address }}</span>
+            </div>
+
+          </div>
+
+          <p class="form-section-label"><i class="ti ti-door-enter"></i> Visit Details</p>
+          <div class="visitor-details">
+
+            <div class="vd-row">
+              <span class="vd-label">Purpose</span>
+              <span class="vd-value">{{ data.purpose }}</span>
+            </div>
+
+            <div class="vd-row">
+              <span class="vd-label">Meeting Person</span>
+              <span class="vd-value">{{ data.meeting_person }}</span>
+            </div>
+
+            <div class="vd-row">
+              <span class="vd-label">Check-in Time</span>
+              <span class="time-chip time-in">
+                <i class="ti ti-login" style="font-size:12px;"></i>
+                {{ data.check_in_time }}
+              </span>
+            </div>
+
+            <div class="vd-row">
+              <span class="vd-label">Check-out Time</span>
+              <span class="time-chip time-out">
+                <i class="ti ti-logout" style="font-size:12px;"></i>
+                {{ data.check_out_time }}
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pc-card-footer no-print">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ti ti-info-circle" style="color:var(--accent); margin-right:4px;"></i>
+        This record is read-only. Use the print button to generate a visitor pass.
+      </p>
+      <button onclick="window.print()" class="pc-btn pc-btn-primary">
+        <i class="ti ti-printer" style="font-size:14px;"></i> Print Pass
+      </button>
+    </div>
+
+  </div>
 </div>
 {% endif %}
+
 {% endblock %}

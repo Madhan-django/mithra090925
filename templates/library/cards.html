@@ -1,148 +1,179 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h5, th, td, label, button, input, select {
-    font-family: 'Roboto', sans-serif;
+/* ── Card number chip ── */
+.td-cardno {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-lt);
+  border: 1px solid var(--accent-mid);
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: inline-block;
+  letter-spacing: .3px;
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+/* ── Date chip ── */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-/* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: lcRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+@keyframes lcRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== TOP RIGHT BUTTON ===== */
-.text-end {
-    padding: 18px 20px 10px 20px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-info {
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
-    border: none;
-    padding: 8px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* ===== TABLE ===== */
-.table {
-    margin-top: 10px;
-    border-radius: 14px;
-    overflow: hidden;
-}
-
-.table-dark th {
-    font-size: 14px;
-    padding-top: 5px !important;
-    padding-bottom: 5px !important;
-}
-
-/* Rows */
-.table tbody td {
-    vertical-align: middle;
-    font-size: 14px;
-    padding: 10px 6px;
-}
-
-/* Print button */
-.table .btn-info {
-    padding: 6px 14px;
-    border-radius: 8px;
-}
-
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:185ms; }
+.pc-table tbody tr:nth-child(8) { animation-delay:215ms; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Library Cards</span></h5>
-        </div>
-
-        <!-- TOP RIGHT BUTTON -->
-        <div class="col-md text-end">
-            <form action="{% url 'gen_lib_card' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-info">Issue Library Card</button>
-            </form>
-        </div>
-
-        <div class="card-body">
-
-            <table class="table">
-                <thead class="table-dark" align="center">
-                    <tr>
-                        <th>Card Number</th>
-                        <th>Issued To</th>
-                        <th>Class</th>
-                        <th>Section</th>
-                        <th>Date Issued</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% if data %}
-                    {% for libcard in data %}
-                    <tr align="center">
-                        <td>{{ libcard.card_no }}</td>
-                        <td>{{ libcard.issued_to.first_name }}</td>
-                        <td>{{ libcard.issued_to.class_name }}</td>
-                        <td>{{ libcard.issued_to.secs }}</td>
-                        <td>{{ libcard.card_issued_date }}</td>
-
-                        <td>
-                            <form action="{% url 'print_card' libcard.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-info">Print Card</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="6">
-                            <div class="alert alert-danger text-center m-0" role="alert">
-                                No Records Available
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-                </tbody>
-            </table>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'books_list' %}">Library</a>
+            <span class="pc-breadcrumb-sep">›</span>
+        <span>Library Cards</span>
+      </nav>
+      <h1 class="pc-page-title">Library Cards</h1>
+      <p class="pc-page-sub">Manage and print student library membership cards.</p>
     </div>
+    <div class="pc-page-header-right">
+      <form action="{% url 'gen_lib_card' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-id-card-line"></i> Issue Library Card
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Library Cards</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} card{{ data|length|pluralize }} issued{% else %}No cards issued{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-id-card-line" style="font-size:12px;"></i>
+        {{ data|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:44px;">#</th>
+              <th>Card No</th>
+              <th style="text-align:left;">Issued To</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Date Issued</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for libcard in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+
+              <td>
+                <span class="td-cardno">{{ libcard.card_no }}</span>
+              </td>
+
+              <td class="td-name">
+                {{ libcard.issued_to.first_name }}
+              </td>
+
+              <td>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot"
+                      style="font-size:11.5px;">
+                  {{ libcard.issued_to.class_name }}
+                </span>
+              </td>
+
+              <td>{{ libcard.issued_to.secs }}</td>
+
+              <td>
+                <span class="td-date">
+                  <i class="ri-calendar-line" style="font-size:11px; opacity:.6;"></i>
+                  {{ libcard.card_issued_date }}
+                </span>
+              </td>
+
+              <td>
+                <form action="{% url 'print_card' libcard.id %}" class="d-inline" style="margin:0;">
+                  {% csrf_token %}
+                  <button type="submit" class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ri-printer-line"></i> Print Card
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-id-card-line"></i></span>
+        <p class="pc-empty-title">No library cards issued</p>
+        <p class="pc-empty-sub">Click <strong>Issue Library Card</strong> to generate cards.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> card{{ data|length|pluralize }}
+      </span>
+      <form action="{% url 'gen_lib_card' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-secondary pc-btn-sm">
+          <i class="ri-add-line"></i> Issue More Cards
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

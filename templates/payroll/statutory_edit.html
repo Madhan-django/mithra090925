@@ -1,97 +1,301 @@
 {% extends "panel/index.html" %}
 {% block content %}
 
-<div class="container mt-4">
+<div class="container-fluid" style="max-width: 1200px; padding: 24px;">
 
-    <div class="card shadow-lg rounded-4">
-
-        <div class="card-header text-white text-center"
-             style="background: linear-gradient(45deg,#1e3c72,#2a5298); height:70px;">
-
-            <div class="card-title text-center">
-                <h5>
-                    <span class="badge bg-light text-dark">
-                        Edit Statutory Settings
-                    </span>
-                </h5>
+    <!-- Page Header -->
+    <div class="pc-page-header">
+        <div class="pc-page-header-left">
+            <div class="pc-breadcrumb">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <a href="{% url 'statutory_settings_list' %}">Statutory Settings</a>
+                <span class="pc-breadcrumb-sep">/</span>
+                <span>Edit</span>
             </div>
-
+            <h1 class="pc-page-title">Edit Statutory Settings</h1>
+            <p class="pc-page-sub">Update PF & ESI compliance parameters</p>
         </div>
-
-        <div class="card-body">
-
-            <form method="POST">
-                {% csrf_token %}
-
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-                        <label>PF Employee %</label>
-                        <input type="number" step="0.01"
-                               name="pf_employee_percent"
-                               value="{{ settings.pf_employee_percent }}"
-                               class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>PF Employer %</label>
-                        <input type="number" step="0.01"
-                               name="pf_employer_percent"
-                               value="{{ settings.pf_employer_percent }}"
-                               class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>PF Basic Limit</label>
-                        <input type="number" step="0.01"
-                               name="pf_basic_limit"
-                               value="{{ settings.pf_basic_limit }}"
-                               class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>ESI Employee %</label>
-                        <input type="number" step="0.01"
-                               name="esi_employee_percent"
-                               value="{{ settings.esi_employee_percent }}"
-                               class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>ESI Employer %</label>
-                        <input type="number" step="0.01"
-                               name="esi_employer_percent"
-                               value="{{ settings.esi_employer_percent }}"
-                               class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>ESI Gross Limit</label>
-                        <input type="number" step="0.01"
-                               name="esi_gross_limit"
-                               value="{{ settings.esi_gross_limit }}"
-                               class="form-control" required>
-                    </div>
-
-                </div>
-
-                <div class="mt-4 text-center">
-                    <button type="submit" class="btn btn-success">
-                        Update Settings
-                    </button>
-
-                    <a href="{% url 'statutory_settings_list' %}"
-                       class="btn btn-secondary">
-                        Cancel
-                    </a>
-                </div>
-
-            </form>
-
+        <div class="pc-page-header-right">
+            <a href="{% url 'statutory_settings_list' %}" class="pc-btn pc-btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Settings
+            </a>
         </div>
-
     </div>
 
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Info Alert -->
+        <div class="pc-alert pc-alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Important:</strong> Changes to these settings will affect payroll calculations for all employees. Please verify all values before saving.
+            </div>
+        </div>
+
+        <!-- Provident Fund Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">Provident Fund (PF) Configuration</div>
+                    <div class="pc-card-sub">Set employee & employer contribution rates and basic salary ceiling</div>
+                </div>
+                <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+                    <i class="fas fa-piggy-bank"></i> PF Settings
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-user"></i> Employee Contribution
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.pf_employee_percent }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Percentage deducted from employee's basic salary
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-building"></i> Employer Contribution
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.pf_employer_percent }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Percentage contributed by employer
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-rupee-sign"></i> Basic Salary Ceiling
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.pf_basic_limit }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Maximum basic salary for PF calculation (₹)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pc-alert pc-alert-info" style="margin-top: 20px; margin-bottom: 0;">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Note:</strong> Standard PF rates are typically 12% for both employee and employer, with a basic salary ceiling of ₹15,000 as per EPFO regulations.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- ESI Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">Employee State Insurance (ESI) Configuration</div>
+                    <div class="pc-card-sub">Set contribution rates and gross salary threshold for ESI eligibility</div>
+                </div>
+                <span class="pc-badge pc-badge-success pc-badge-no-dot">
+                    <i class="fas fa-medkit"></i> ESI Settings
+                </span>
+            </div>
+            <div class="pc-card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-user"></i> Employee Contribution
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.esi_employee_percent }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Percentage deducted from employee's gross salary
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-building"></i> Employer Contribution
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.esi_employer_percent }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Percentage contributed by employer
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="pc-form-group">
+                            <label class="pc-label">
+                                <i class="fas fa-rupee-sign"></i> Gross Salary Limit
+                                <span class="req">*</span>
+                            </label>
+                            {{ form.esi_gross_limit }}
+                            <small class="text-muted-pc" style="font-size: 11px; display: block; margin-top: 4px;">
+                                Maximum gross salary for ESI applicability (₹)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pc-alert pc-alert-info" style="margin-top: 20px; margin-bottom: 0;">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Note:</strong> Standard ESI rates are 0.75% (employee) and 3.25% (employer), applicable for employees earning up to ₹21,000 gross salary per month.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Summary Preview Card -->
+        <div class="pc-card">
+            <div class="pc-card-header">
+                <div>
+                    <div class="pc-card-title">Configuration Summary</div>
+                    <div class="pc-card-sub">Review your changes before saving</div>
+                </div>
+            </div>
+            <div class="pc-card-body" style="padding: 0;">
+                <div class="pc-table-wrap" style="border: none; border-radius: 0;">
+                    <table class="pc-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">Parameter</th>
+                                <th>Employee %</th>
+                                <th>Employer %</th>
+                                <th>Ceiling / Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="td-name">
+                                    <i class="fas fa-piggy-bank text-accent" style="margin-right: 8px;"></i>
+                                    Provident Fund (PF)
+                                </td>
+                                <td><span class="pc-badge pc-badge-primary pc-badge-no-dot" id="pf-emp-preview">--</span></td>
+                                <td><span class="pc-badge pc-badge-primary pc-badge-no-dot" id="pf-empr-preview">--</span></td>
+                                <td><span class="font-mono" id="pf-limit-preview">₹ --</span></td>
+                            </tr>
+                            <tr>
+                                <td class="td-name">
+                                    <i class="fas fa-medkit" style="color: var(--green); margin-right: 8px;"></i>
+                                    Employee State Insurance (ESI)
+                                </td>
+                                <td><span class="pc-badge pc-badge-success pc-badge-no-dot" id="esi-emp-preview">--</span></td>
+                                <td><span class="pc-badge pc-badge-success pc-badge-no-dot" id="esi-empr-preview">--</span></td>
+                                <td><span class="font-mono" id="esi-limit-preview">₹ --</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <!-- Action Buttons -->
+        <div class="pc-card">
+            <div class="pc-card-body" style="padding: 24px;">
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <button type="submit" class="pc-btn pc-btn-success pc-btn-lg">
+                        <i class="fas fa-check"></i> Update Settings
+                    </button>
+                    <a href="{% url 'statutory_settings_list' %}" class="pc-btn pc-btn-outline pc-btn-lg">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
 </div>
+
+<script>
+// Live preview update
+document.addEventListener('DOMContentLoaded', function() {
+    const fields = {
+        pf_employee_percent: document.getElementById('id_pf_employee_percent'),
+        pf_employer_percent: document.getElementById('id_pf_employer_percent'),
+        pf_basic_limit: document.getElementById('id_pf_basic_limit'),
+        esi_employee_percent: document.getElementById('id_esi_employee_percent'),
+        esi_employer_percent: document.getElementById('id_esi_employer_percent'),
+        esi_gross_limit: document.getElementById('id_esi_gross_limit')
+    };
+
+    function updatePreview() {
+        document.getElementById('pf-emp-preview').textContent =
+            fields.pf_employee_percent.value ? fields.pf_employee_percent.value + '%' : '--';
+        document.getElementById('pf-empr-preview').textContent =
+            fields.pf_employer_percent.value ? fields.pf_employer_percent.value + '%' : '--';
+        document.getElementById('pf-limit-preview').textContent =
+            fields.pf_basic_limit.value ? '₹ ' + parseFloat(fields.pf_basic_limit.value).toLocaleString('en-IN') : '₹ --';
+
+        document.getElementById('esi-emp-preview').textContent =
+            fields.esi_employee_percent.value ? fields.esi_employee_percent.value + '%' : '--';
+        document.getElementById('esi-empr-preview').textContent =
+            fields.esi_employer_percent.value ? fields.esi_employer_percent.value + '%' : '--';
+        document.getElementById('esi-limit-preview').textContent =
+            fields.esi_gross_limit.value ? '₹ ' + parseFloat(fields.esi_gross_limit.value).toLocaleString('en-IN') : '₹ --';
+    }
+
+    // Add event listeners
+    Object.values(fields).forEach(field => {
+        if (field) {
+            field.addEventListener('input', updatePreview);
+            field.classList.add('pc-input');
+        }
+    });
+
+    // Initial update
+    updatePreview();
+});
+</script>
+
+<style>
+/* Ensure form fields use the panel component styling */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-dark);
+    border-radius: var(--r);
+    padding: 9px 13px;
+    font-family: var(--f-sans);
+    font-size: 13.5px;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+input::placeholder {
+    color: var(--muted);
+}
+</style>
 
 {% endblock %}

@@ -95,7 +95,7 @@ def search_enquiry(request):
 def addstudents(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
-    cdata = sclass.objects.filter(school_name=sdata)
+    cls = sclass.objects.filter(school_name=sdata)
     year = currentacademicyr.objects.get(school_name=sch_id)
     yr = academicyr.objects.get(school_name=sch_id,acad_year=year)
 
@@ -120,7 +120,7 @@ def addstudents(request):
             messages.success(request, 'Student Admitted Successfully')
             return redirect('students_list')
     form = add_studentsForm(initial=initial_data)
-    return render(request,'admission/Admit.html',context={'form':form,'cls':cdata,'skool':sdata,'year':year})
+    return render(request,'admission/Admit.html',context={'form':form,'cls':cls,'skool':sdata,'year':year})
 
 def load_section(request):
     class_id = request.GET.get('Class_Id')
