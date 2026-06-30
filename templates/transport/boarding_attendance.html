@@ -1,0 +1,249 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Boarding Attendance</span>
+      </nav>
+      <div class="pc-page-title">Boarding Attendance</div>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'boarding_report' %}" class="pc-btn pc-btn-outline pc-btn-sm">
+        <i class="ri-bar-chart-line"></i> Report
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="pc-card mb-3">
+    <div class="pc-card-body">
+      <form method="GET" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="pc-form-group" style="min-width:220px;">
+          <label class="pc-label">Route</label>
+          <select name="route" class="form-select" required>
+            <option value="">Select Route</option>
+            {% for r in routes %}
+            <option value="{{ r.pk }}" {% if selected_route == r.pk|stringformat:"s" %}selected{% endif %}>
+              {{ r.route_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">Date</label>
+          <input type="date" name="date" class="form-control" value="{{ att_date }}" style="min-width:160px;">
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">Trip</label>
+          <select name="trip" class="form-select" style="min-width:140px;">
+            {% for val, label in trip_choices %}
+            <option value="{{ val }}" {% if trip == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-search-line"></i> Load</button>
+      </form>
+    </div>
+  </div>
+
+  {% if route_obj %}
+
+  <!-- Summary -->
+  {% if summary.total %}
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="pc-card" style="border-left:4px solid #3b82f6;">
+        <div class="pc-card-body" style="text-align:center;padding:14px;">
+          <div style="font-size:28px;font-weight:800;color:#3b82f6;">{{ summary.total }}</div>
+          <div style="font-size:12px;color:var(--text-sm);">Total Students</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="pc-card" style="border-left:4px solid #22c55e;">
+        <div class="pc-card-body" style="text-align:center;padding:14px;">
+          <div style="font-size:28px;font-weight:800;color:#22c55e;">{{ summary.boarded }}</div>
+          <div style="font-size:12px;color:var(--text-sm);">Boarded</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="pc-card" style="border-left:4px solid #ef4444;">
+        <div class="pc-card-body" style="text-align:center;padding:14px;">
+          <div style="font-size:28px;font-weight:800;color:#ef4444;">{{ summary.absent }}</div>
+          <div style="font-size:12px;color:var(--text-sm);">Absent</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="pc-card" style="border-left:4px solid #f59e0b;">
+        <div class="pc-card-body" style="text-align:center;padding:14px;">
+          <div style="font-size:28px;font-weight:800;color:#f59e0b;">{{ summary.missed }}</div>
+          <div style="font-size:12px;color:var(--text-sm);">Missed Bus</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if records %}
+  <form method="POST" action="{% url 'boarding_mark' %}">
+    {% csrf_token %}
+    <input type="hidden" name="route_id" value="{{ route_obj.pk }}">
+    <input type="hidden" name="date" value="{{ att_date }}">
+    <input type="hidden" name="trip" value="{{ trip }}">
+
+    <div class="pc-card">
+      <div class="pc-card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="pc-card-title">
+          {{ route_obj.route_name }} &mdash;
+          {{ att_date }} &mdash;
+          {% if trip == 'AM' %}Morning{% else %}Evening{% endif %}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="pc-btn pc-btn-success pc-btn-sm" onclick="markAll('Boarded')">
+            <i class="ri-checkbox-circle-line"></i> All Boarded
+          </button>
+          <button type="submit" class="pc-btn pc-btn-primary pc-btn-sm">
+            <i class="ri-save-line"></i> Save Attendance
+          </button>
+        </div>
+      </div>
+      <div class="pc-card-body" style="padding:0;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student</th>
+              <th>Stop</th>
+              <th style="text-align:center;">Boarded</th>
+              <th style="text-align:center;">Absent</th>
+              <th style="text-align:center;">Missed Bus</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% regroup records by stop as stop_groups %}
+            {% for stop_group in stop_groups %}
+            <tr style="background:var(--primary-light,#eff6ff);">
+              <td colspan="6" style="font-weight:700;font-size:12px;padding:6px 16px;">
+                <i class="ri-map-pin-line"></i>
+                {{ stop_group.grouper.stop_name }}
+                {% if stop_group.grouper.pickup_time %}
+                  &mdash; Pickup {{ stop_group.grouper.pickup_time|time:"H:i" }}
+                {% endif %}
+                <span style="float:right;font-weight:400;color:var(--text-sm);">
+                  {{ stop_group.list|length }} student{{ stop_group.list|length|pluralize }}
+                </span>
+              </td>
+            </tr>
+            {% for rec in stop_group.list %}
+            <tr id="row-{{ rec.student.pk }}">
+              <td style="color:var(--text-sm);">{{ forloop.parentloop.counter }}.{{ forloop.counter }}</td>
+              <td style="font-weight:600;">{{ rec.student }}</td>
+              <td style="font-size:12px;color:var(--text-sm);">{{ rec.stop.stop_name }}</td>
+              <td style="text-align:center;">
+                <label class="status-label boarded-label" id="lbl-B-{{ rec.student.pk }}">
+                  <input type="radio" name="status_{{ rec.student.pk }}" value="Boarded"
+                         {% if rec.status == 'Boarded' %}checked{% endif %}
+                         onchange="highlightRow({{ rec.student.pk }}, 'Boarded')" style="display:none;">
+                  <span class="status-btn" style="background:{% if rec.status == 'Boarded' %}#dcfce7{% else %}#f1f5f9{% endif %};color:{% if rec.status == 'Boarded' %}#166534{% else %}#94a3b8{% endif %};">
+                    <i class="ri-checkbox-circle-line"></i>
+                  </span>
+                </label>
+              </td>
+              <td style="text-align:center;">
+                <label class="status-label absent-label" id="lbl-A-{{ rec.student.pk }}">
+                  <input type="radio" name="status_{{ rec.student.pk }}" value="Absent"
+                         {% if rec.status == 'Absent' %}checked{% endif %}
+                         onchange="highlightRow({{ rec.student.pk }}, 'Absent')" style="display:none;">
+                  <span class="status-btn" style="background:{% if rec.status == 'Absent' %}#fee2e2{% else %}#f1f5f9{% endif %};color:{% if rec.status == 'Absent' %}#991b1b{% else %}#94a3b8{% endif %};">
+                    <i class="ri-close-circle-line"></i>
+                  </span>
+                </label>
+              </td>
+              <td style="text-align:center;">
+                <label class="status-label missed-label" id="lbl-M-{{ rec.student.pk }}">
+                  <input type="radio" name="status_{{ rec.student.pk }}" value="Missed"
+                         {% if rec.status == 'Missed' %}checked{% endif %}
+                         onchange="highlightRow({{ rec.student.pk }}, 'Missed')" style="display:none;">
+                  <span class="status-btn" style="background:{% if rec.status == 'Missed' %}#fef3c7{% else %}#f1f5f9{% endif %};color:{% if rec.status == 'Missed' %}#92400e{% else %}#94a3b8{% endif %};">
+                    <i class="ri-run-line"></i>
+                  </span>
+                </label>
+              </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="pc-card-footer" style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Attendance</button>
+      </div>
+    </div>
+  </form>
+
+  {% else %}
+  <div class="pc-card">
+    <div class="pc-card-body" style="text-align:center;padding:48px;color:var(--text-sm);">
+      <i class="ri-user-unfollow-line" style="font-size:48px;opacity:.3;"></i>
+      <div style="margin-top:12px;">No students allocated to this route.</div>
+      <a href="{% url 'allocation_add' %}" class="pc-btn pc-btn-primary pc-btn-sm" style="margin-top:12px;">Allocate Students</a>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+
+</div>
+
+<style>
+.status-btn {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:50%;cursor:pointer;
+  font-size:18px;transition:all .15s;
+}
+.status-btn:hover { filter: brightness(.92); transform: scale(1.1); }
+</style>
+
+<script>
+function highlightRow(studentId, status) {
+  const row = document.getElementById('row-' + studentId);
+  row.style.background = status === 'Boarded' ? '#f0fdf4'
+                       : status === 'Absent'  ? '#fef2f2'
+                       : '#fffbeb';
+
+  const colors = {
+    B: { bg: '#dcfce7', color: '#166534' },
+    A: { bg: '#fee2e2', color: '#991b1b' },
+    M: { bg: '#fef3c7', color: '#92400e' },
+  };
+  const prefixMap = { 'Boarded': 'B', 'Absent': 'A', 'Missed': 'M' };
+
+  ['B', 'A', 'M'].forEach(p => {
+    const lbl = document.getElementById('lbl-' + p + '-' + studentId);
+    const btn = lbl ? lbl.querySelector('.status-btn') : null;
+    if (!btn) return;
+    if (p === prefixMap[status]) {
+      btn.style.background = colors[p].bg;
+      btn.style.color      = colors[p].color;
+    } else {
+      btn.style.background = '#f1f5f9';
+      btn.style.color      = '#94a3b8';
+    }
+  });
+}
+
+function markAll(status) {
+  document.querySelectorAll('input[type="radio"][value="' + status + '"]').forEach(r => {
+    r.checked = true;
+    const sid = r.name.replace('status_', '');
+    highlightRow(parseInt(sid), status);
+  });
+}
+</script>
+{% endblock %}

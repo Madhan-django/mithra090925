@@ -1,0 +1,108 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'boarding_attendance' %}">Boarding Attendance</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Report</span>
+      </nav>
+      <div class="pc-page-title">Boarding Attendance Report</div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="pc-card mb-3">
+    <div class="pc-card-body">
+      <form method="GET" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="pc-form-group" style="min-width:220px;">
+          <label class="pc-label">Route</label>
+          <select name="route" class="form-select" required>
+            <option value="">Select Route</option>
+            {% for r in routes %}
+            <option value="{{ r.pk }}" {% if selected_route == r.pk|stringformat:"s" %}selected{% endif %}>{{ r.route_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">From</label>
+          <input type="date" name="from" class="form-control" value="{{ from_date }}" style="min-width:150px;">
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">To</label>
+          <input type="date" name="to" class="form-control" value="{{ to_date }}" style="min-width:150px;">
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">Trip</label>
+          <select name="trip" class="form-select" style="min-width:130px;">
+            <option value="">All</option>
+            {% for val, label in trip_choices %}
+            <option value="{{ val }}" {% if trip == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-search-line"></i> Load</button>
+      </form>
+    </div>
+  </div>
+
+  {% if records %}
+    {% for key, entries in records.items %}
+    {% with att_date=key.0 att_trip=key.1 %}
+    <div class="pc-card mb-3">
+      <div class="pc-card-header">
+        <div class="pc-card-title">
+          {{ att_date }} &mdash;
+          {% if att_trip == 'AM' %}Morning{% else %}Evening{% endif %} Trip
+        </div>
+        <div style="display:flex;gap:6px;margin-left:auto;">
+          {% with boarded=entries|length %}
+          <span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+            {{ entries|length }} records
+          </span>
+          {% endwith %}
+        </div>
+      </div>
+      <div class="pc-card-body" style="padding:0;">
+        <table class="pc-table">
+          <thead>
+            <tr><th>Student</th><th>Stop</th><th>Status</th><th>Marked At</th></tr>
+          </thead>
+          <tbody>
+            {% for rec in entries %}
+            <tr>
+              <td style="font-weight:600;">{{ rec.student }}</td>
+              <td>{{ rec.stop.stop_name }}</td>
+              <td>
+                {% if rec.status == 'Boarded' %}
+                  <span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">Boarded</span>
+                {% elif rec.status == 'Absent' %}
+                  <span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">Absent</span>
+                {% else %}
+                  <span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">Missed Bus</span>
+                {% endif %}
+              </td>
+              <td style="font-size:12px;color:var(--text-sm);font-family:var(--f-mono);">{{ rec.marked_at|date:"d M H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  {% elif route_obj %}
+  <div class="pc-card">
+    <div class="pc-card-body" style="text-align:center;padding:48px;color:var(--text-sm);">
+      <i class="ri-file-list-3-line" style="font-size:48px;opacity:.3;"></i>
+      <div style="margin-top:12px;">No boarding records found for the selected filters.</div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

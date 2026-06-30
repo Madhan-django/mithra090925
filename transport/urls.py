@@ -42,6 +42,11 @@ urlpatterns = [
     # AJAX
     path('ajax/stops/',               views.stops_for_route,                      name='stops_for_route'),
 
+    # Boarding Attendance
+    path('boarding/',         login_required(views.boarding_attendance), name='boarding_attendance'),
+    path('boarding/mark/',    login_required(views.boarding_mark),       name='boarding_mark'),
+    path('boarding/report/',  login_required(views.boarding_report),     name='boarding_report'),
+
     # GPS
     path('gps/push/',                 views.gps_push,                             name='gps_push'),
     path('gps/positions/',            login_required(views.gps_positions),        name='gps_positions'),

@@ -12,7 +12,8 @@ from setup.models import currentacademicyr, academicyr
 from authenticate.decorators import allowed_users
 
 from .models import (VehicleType, Vehicle, Driver, Route, Stop, StudentTransport,
-                     GpsSettings, VehiclePosition, VehiclePositionHistory)
+                     GpsSettings, VehiclePosition, VehiclePositionHistory,
+                     BoardingAttendance)
 from .forms import VehicleTypeForm, VehicleForm, DriverForm, RouteForm, StopForm, StudentTransportForm
 
 
@@ -475,4 +476,146 @@ def gps_settings(request):
     vehicles = Vehicle.objects.filter(sch=sdata).order_by('vehicle_name')
     return render(request, 'transport/gps_settings.html', {
         'skool': sdata, 'year': year, 'cfg': cfg, 'vehicles': vehicles,
+    })
+
+
+# ─── Boarding Attendance ──────────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def boarding_attendance(request):
+    """
+    Landing page: filter by route + date + trip, then show the attendance sheet
+    or redirect to the mark page.
+    """
+    sdata, year = _base(request)
+    routes = Route.objects.filter(sch=sdata, is_active=True)
+
+    route_id  = request.GET.get('route')
+    att_date  = request.GET.get('date', date.today().isoformat())
+    trip      = request.GET.get('trip', 'AM')
+
+    records   = None
+    route_obj = None
+    summary   = {}
+
+    if route_id:
+        route_obj = get_object_or_404(Route, pk=route_id, sch=sdata)
+
+        # All active students on this route grouped by stop
+        allocations = (StudentTransport.objects
+                       .filter(route=route_obj, is_active=True)
+                       .select_related('student', 'stop')
+                       .order_by('stop__sequence', 'student__first_name'))
+
+        # Existing attendance records for this trip
+        existing = {
+            a.student_id: a
+            for a in BoardingAttendance.objects.filter(
+                route=route_obj, date=att_date, trip=trip
+            )
+        }
+
+        records = []
+        for alloc in allocations:
+            att = existing.get(alloc.student_id)
+            records.append({
+                'alloc':   alloc,
+                'student': alloc.student,
+                'stop':    alloc.stop,
+                'status':  att.status if att else None,
+                'att_id':  att.pk if att else None,
+            })
+
+        boarded = sum(1 for r in records if r['status'] == 'Boarded')
+        absent  = sum(1 for r in records if r['status'] == 'Absent')
+        missed  = sum(1 for r in records if r['status'] == 'Missed')
+        summary = {'total': len(records), 'boarded': boarded,
+                   'absent': absent, 'missed': missed,
+                   'unmarked': len(records) - boarded - absent - missed}
+
+    return render(request, 'transport/boarding_attendance.html', {
+        'skool': sdata, 'year': year,
+        'routes': routes, 'route_obj': route_obj,
+        'records': records, 'summary': summary,
+        'att_date': att_date, 'trip': trip,
+        'selected_route': route_id,
+        'trip_choices': BoardingAttendance.TRIP_CHOICES,
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def boarding_mark(request):
+    """Saves attendance for all students in one POST."""
+    if request.method != 'POST':
+        return redirect('boarding_attendance')
+
+    sdata, _ = _base(request)
+    route_id = request.POST.get('route_id')
+    att_date = request.POST.get('date')
+    trip     = request.POST.get('trip')
+
+    route_obj = get_object_or_404(Route, pk=route_id, sch=sdata)
+
+    allocations = StudentTransport.objects.filter(
+        route=route_obj, is_active=True
+    ).select_related('student', 'stop')
+
+    for alloc in allocations:
+        status = request.POST.get(f'status_{alloc.student_id}')
+        if not status:
+            continue
+        BoardingAttendance.objects.update_or_create(
+            student=alloc.student,
+            date=att_date,
+            trip=trip,
+            defaults={
+                'sch':       sdata,
+                'route':     route_obj,
+                'stop':      alloc.stop,
+                'status':    status,
+                'marked_by': request.user,
+            }
+        )
+
+    messages.success(request, f'Boarding attendance saved for {att_date} ({trip}).')
+    return redirect(
+        f"{request.build_absolute_uri('/transport/boarding/')}?route={route_id}&date={att_date}&trip={trip}"
+    )
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def boarding_report(request):
+    """Monthly/date-range boarding report per route."""
+    sdata, year = _base(request)
+    routes    = Route.objects.filter(sch=sdata, is_active=True)
+    route_id  = request.GET.get('route')
+    from_date = request.GET.get('from', date.today().replace(day=1).isoformat())
+    to_date   = request.GET.get('to', date.today().isoformat())
+    trip      = request.GET.get('trip', '')
+
+    records = None
+    route_obj = None
+
+    if route_id:
+        route_obj = get_object_or_404(Route, pk=route_id, sch=sdata)
+        qs = (BoardingAttendance.objects
+              .filter(route=route_obj, date__range=[from_date, to_date])
+              .select_related('student', 'stop'))
+        if trip:
+            qs = qs.filter(trip=trip)
+
+        from itertools import groupby
+        qs = list(qs.order_by('date', 'trip', 'stop__sequence', 'student__first_name'))
+        grouped = {}
+        for k, g in groupby(qs, key=lambda x: (x.date, x.trip)):
+            grouped[k] = list(g)
+        records = grouped
+
+    return render(request, 'transport/boarding_report.html', {
+        'skool': sdata, 'year': year,
+        'routes': routes, 'route_obj': route_obj,
+        'records': records,
+        'from_date': from_date, 'to_date': to_date,
+        'trip': trip, 'selected_route': route_id,
+        'trip_choices': BoardingAttendance.TRIP_CHOICES,
     })

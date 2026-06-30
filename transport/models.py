@@ -155,6 +155,34 @@ class StudentTransport(models.Model):
         return f"{self.student} → {self.stop}"
 
 
+# ─── Boarding Attendance ──────────────────────────────────────────────────────
+
+class BoardingAttendance(models.Model):
+    TRIP_CHOICES   = [('AM', 'Morning'), ('PM', 'Evening')]
+    STATUS_CHOICES = [
+        ('Boarded', 'Boarded'),
+        ('Absent',  'Absent'),
+        ('Missed',  'Missed Bus'),
+    ]
+
+    sch       = models.ForeignKey(school, on_delete=models.CASCADE)
+    route     = models.ForeignKey(Route, on_delete=models.CASCADE)
+    stop      = models.ForeignKey(Stop, on_delete=models.CASCADE)
+    student   = models.ForeignKey(students, on_delete=models.CASCADE)
+    date      = models.DateField()
+    trip      = models.CharField(max_length=2, choices=TRIP_CHOICES, default='AM')
+    status    = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Boarded')
+    marked_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    marked_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('student', 'date', 'trip')
+        ordering        = ['stop__sequence', 'student__first_name']
+
+    def __str__(self):
+        return f"{self.student} | {self.date} {self.trip} | {self.status}"
+
+
 # ─── GPS ──────────────────────────────────────────────────────────────────────
 
 class GpsSettings(models.Model):
