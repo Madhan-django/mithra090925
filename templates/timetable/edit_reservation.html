@@ -2,117 +2,149 @@
 {% block content %}
 
 <style>
-/* ===================== GLOBAL FONT ===================== */
-body, h1, h3, h4, h5, th, td, label, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 
-/* ===================== CARD ===================== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+/* Section label */
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 14px;
 }
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
-/* ===================== TITLE BAR ===================== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 6px;
-    border-radius: 20px 20px 0 0;
-    text-align: center;
-}
-
-.card-title h4 span,
-.card-title h5 span {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 14px;
-    padding: 5px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-}
-
-/* ===================== FORM GRID (2x2) ===================== */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px 30px;
-}
-
-/* Make radios aligned properly */
-.form-check-label {
-    margin-left: 5px;
-}
-
-/* ===================== BUTTONS ===================== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-outline-secondary {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-    color: white;
-    font-weight: 500;
-}
-
-.pt-6 {
-    text-align: right;
-}
+.nb-hidden { display: none; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE BAR -->
-        <div class="card-title text-center">
-            <h4><span class="badge bg-light text-dark">Update Reservation</span></h4>
-        </div>
-
-        <div class="card-body">
-
-            <form method="post">
-                {% csrf_token %}
-
-                <!-- Hidden fields -->
-                {{ form.sch_class }}
-                {{ form.section }}
-                {{ form.subject }}
-                {{ form.school }}
-
-                <!-- 2x2 GRID -->
-                <div class="form-grid">
-
-                    <div class="form-group">
-                        <label>Reservation Slot:</label>
-                        {{ form.timeslot }}
-                    </div>
-
-                    <div class="form-group">
-                        <label>Adaptive Day:</label><br>
-                        {{ form.adaptive_day }}
-                        <label class="form-check-label" for="id_adaptive_day"></label>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Adaptive Period:</label><br>
-                        {{ form.adaptive_period }}
-                        <label class="form-check-label" for="id_adaptive_period"></label>
-                    </div>
-
-                </div>
-
-                <div class="pt-6 mt-3">
-                    <button type="submit" class="btn btn-primary me-3">Submit</button>
-                    <a href="{% url 'add_reservation' %}" class="btn btn-outline-secondary">Cancel</a>
-                </div>
-
-            </form>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'add_reservation' %}">Reservations</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Update Reservation</span>
+      </nav>
+      <h1 class="pc-page-title">Update Reservation</h1>
+      <p class="pc-page-sub">Modify the reservation slot or adaptive settings.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Reservation Details</p>
+        <p class="pc-card-sub">Update the fields below and save</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-edit-2-line" style="font-size:12px;"></i> Editing
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="editresform" method="post">
+        {% csrf_token %}
+
+        <!-- Hidden fields -->
+        <div class="nb-hidden">
+          {{ form.sch_class }}
+          {{ form.section }}
+          {{ form.subject }}
+          {{ form.school }}
+        </div>
+
+        <!-- ── Slot ── -->
+        <p class="form-section-label"><i class="ri-time-line"></i> Reservation Slot</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Reservation Slot <span style="color:var(--rose)">*</span></label>
+              {{ form.timeslot }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Adaptive Options ── -->
+        <p class="form-section-label"><i class="ri-settings-3-line"></i> Adaptive Options</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Adaptive Day</label>
+              {{ form.adaptive_day }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Adaptive Period</label>
+              {{ form.adaptive_period }}
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Update the slot or adaptive settings then save.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'add_reservation' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="submit" form="editresform" class="pc-btn pc-btn-warning">
+          <i class="ri-save-line"></i> Save Changes
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

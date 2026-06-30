@@ -2,277 +2,412 @@
 {% block content %}
 
 <style>
-    /* === General Typography === */
-    body, h1, h3, h4, h5, th, td, label {
-        font-family: 'Roboto', sans-serif;
-    }
-
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
+/* Section label */
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 14px;
+}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
+/* Hidden */
+.nb-hidden { display: none; }
+
+/* ── Timeslot chip ── */
+.td-slot {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--accent-lt);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+  border-radius: 6px;
+  padding: 3px 10px;
+  display: inline-block;
+  white-space: nowrap;
 }
 
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: resRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-
-     /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+@keyframes resRowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:185ms; }
 
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-    /* === Buttons === */
-    .btn-primary {
-        background: linear-gradient(90deg, #0d6efd, #3b8bff);
-        border: none;
-        padding: 8px 20px;
-        border-radius: 10px;
-
-    }
-
-    .btn-danger {
-        background: linear-gradient(90deg, #ff4b4b, #cc0000);
-        border: none;
-        padding: 8px 20px;
-        border-radius: 10px;
-    }
-
-    .btn-outline-secondary {
-        border-radius: 10px;
-    }
-
-    .btn-info {
-        background: linear-gradient(90deg, #17a2b8, #1fc8d4);
-        border: none;
-        border-radius: 10px;
-    }
-
-    /* Modal Title */
-    .modal-header {
-        background: linear-gradient(90deg, #0d6efd, #3b8bff);
-        color: white;
-    }
-    .col-md-6{
-    padding:15px;
-    }
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
+}
+.nb-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15,23,42,.5);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+}
+.nb-modal.active { display: flex; }
+.nb-modal-box {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%; max-width: 420px;
+  margin: 20px;
+  overflow: hidden;
+  animation: modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  background: var(--rose-lt);
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #fecdd3;
+  display: flex; align-items: center; gap: 12px;
+}
+.nb-modal-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(225,29,72,.15);
+  flex-shrink: 0;
+}
+.nb-modal-body { padding: 22px; }
+.nb-modal-body p { font-size: 13.5px; color: var(--text-md); margin: 0; line-height: 1.7; }
+.nb-modal-footer {
+  padding: 14px 22px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
 </style>
 
-<!-- ======================= FORM CARD ======================= -->
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- Title -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">New Reservation</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <form method="post" data-section-url="{% url 'ajax_load_secsub' %}" id="addresform">
-                {% csrf_token %}
-
-                <div class="row">
-
-                    <!-- CLASS -->
-                    <div class="col-md-6 form-block">
-                        <label class="form-label" for="id_sch_class">Class</label>
-                        <select name="sch_class" class="form-control" required id="id_sch_class">
-                            <option value="" selected>---------</option>
-                            {% for cl in cls %}
-                                <option value="{{ cl.id }}">{{ cl }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- SECTION -->
-                    <div class="col-md-6 form-block">
-                        <label class="form-label" for="id_section">Section</label>
-                        <select name="section" class="form-control" required id="id_section">
-                            <option value="" selected>---------</option>
-                            {% for sc in sec %}
-                                <option value="{{ sc.id }}" {% if sel == sc %}selected{% endif %}>{{ sc }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- SUBJECT -->
-                    <div class="col-md-6 form-block">
-                        <label class="form-label" for="id_subject">Subject</label>
-                        <select name="subject" class="form-control" required id="id_subject">
-                            <option value="" selected>---------</option>
-                        </select>
-                    </div>
-
-                    <!-- TIMESLOT -->
-                    <div class="col-md-6 form-block">
-                        <label class="form-label" for="id_timeslot">Reservation Slot</label>
-                        {{ form.timeslot }}
-                    </div>
-
-                    <!-- ADAPTIVE DAY -->
-                    <div class="col-md-6 form-block">
-                      <label class="form-label" for="id_adaptive_day" ><span class="h6 mb-0">Adaptive Day</span></label>
-                        {{ form.adaptive_day }}
-                    </div>
-
-                    <!-- ADAPTIVE PERIOD -->
-                    <div class="col-md-6 form-block">
-                        <label class="form-label" for="id_adaptive_period"><span class="h6 mb-0">Adaptive Period</span></label>
-                        {{ form.adaptive_period }}
-                    </div>
-
-                    {{ form.school }}
-
-                </div>
-
-                <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-primary me-2">Submit</button>
-                    <button type="reset" class="btn btn-danger me-2">Clear</button>
-                </div>
-
-            </form>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Reservations</span>
+      </nav>
+      <h1 class="pc-page-title">Reservations</h1>
+      <p class="pc-page-sub">Reserve timetable slots for classes, sections and subjects.</p>
     </div>
-</div>
+  </div>
 
-<!-- ======================= TABLE CARD ======================= -->
-<div class="col-lg-12 grid-margin stretch-card mt-3">
-    <div class="card">
+  <!-- ② New Reservation Form Card -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">New Reservation</p>
+        <p class="pc-card-sub">Fill in the details to reserve a slot</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-calendar-event-line" style="font-size:12px;"></i> New
+      </span>
+    </div>
 
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Reservations</span></h5>
-        </div>
+    <div class="pc-card-body">
+      <form method="post"
+            data-section-url="{% url 'ajax_load_secsub' %}"
+            id="addresform">
+        {% csrf_token %}
 
-        <div class="card-body">
+        <div class="nb-hidden">{{ form.school }}</div>
 
-           <div class="table-responsive">
-                    <table class="table table-hover table-striped table-bordered">
-                        <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Subject</th>
-                            <th>Time Slot</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+        <!-- ── Class & Section ── -->
+        <p class="form-section-label"><i class="ri-building-line"></i> Class &amp; Section</p>
+        <div class="row g-3">
 
-                    <tbody>
-                        {% if data %}
-                            {% for hw in data %}
-                                <tr align="center">
-                                    <td>{{ hw.id }}</td>
-                                    <td>{{ hw.section.class_sec_name }}</td>
-                                    <td>{{ hw.section }}</td>
-                                    <td>{{ hw.subject }}</td>
-                                    <td>{{ hw.timeslot }}</td>
-
-                                    <td>
-                                        {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
-                                            <a class="btn btn-primary btn-sm" href="{% url 'edit_reservation' hw.id %}">
-                                                <i class="fa fa-pencil-can"></i> Edit
-                                            </a>
-                                            <a class="btn btn-danger btn-sm" href="{% url 'delete_reservation' hw.id %}">
-                                                <i class="fa fa-trash-can"></i> Delete
-                                            </a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                        <tr>
-                            <td colspan="6" align="center" class="text-danger">No Reserved Slots Available.</td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-
-                </table>
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+              <select name="sch_class" id="id_sch_class" required>
+                <option value="">— Select Class —</option>
+                {% for cl in cls %}
+                <option value="{{ cl.id }}">{{ cl }}</option>
+                {% endfor %}
+              </select>
             </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Section <span style="color:var(--rose)">*</span></label>
+              <select name="section" id="id_section" required>
+                <option value="">— Select class first —</option>
+                {% for sc in sec %}
+                <option value="{{ sc.id }}" {% if sel == sc %}selected{% endif %}>{{ sc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Subject <span style="color:var(--rose)">*</span></label>
+              <select name="subject" id="id_subject" required>
+                <option value="">— Select class first —</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Reservation Slot <span style="color:var(--rose)">*</span></label>
+              {{ form.timeslot }}
+            </div>
+          </div>
 
         </div>
+
+        <!-- ── Adaptive Options ── -->
+        <p class="form-section-label"><i class="ri-settings-3-line"></i> Adaptive Options</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Adaptive Day</label>
+              {{ form.adaptive_day }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Adaptive Period</label>
+              {{ form.adaptive_period }}
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <button type="reset" form="addresform" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="addresform" class="pc-btn pc-btn-primary">
+          <i class="ri-calendar-check-line"></i> Submit Reservation
+        </button>
+      </div>
     </div>
+
+  </div><!-- /pc-card -->
+
+  <!-- ③ Reservations Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Reservations</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} reservation{{ data|length|pluralize }} found{% else %}No reservations yet{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-calendar-event-line" style="font-size:12px;"></i>
+        {{ data|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:60px;">ID</th>
+              <th style="text-align:left;">Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Time Slot</th>
+              {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+              <th>Actions</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for hw in data %}
+            <tr>
+              <td class="td-num" style="text-align:left; padding-left:18px;">{{ hw.id }}</td>
+              <td class="td-name">{{ hw.section.class_sec_name }}</td>
+              <td>{{ hw.section }}</td>
+              <td>{{ hw.subject }}</td>
+              <td>
+                <span class="td-slot">
+                  <i class="ri-time-line" style="font-size:11px; margin-right:3px; opacity:.7;"></i>
+                  {{ hw.timeslot }}
+                </span>
+              </td>
+              {% if request.user.groups.all.0.name == "admin" or request.user.groups.all.0.name == "superadmin" %}
+              <td>
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <a href="{% url 'edit_reservation' hw.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ri-pencil-line"></i> Edit
+                  </a>
+                  <button type="button"
+                    class="pc-btn pc-btn-danger pc-btn-sm"
+                    onclick="openDeleteModal('{% url 'delete_reservation' hw.id %}', '{{ hw.section.class_sec_name|escapejs }} — {{ hw.subject|escapejs }}')">
+                    <i class="ri-delete-bin-7-line"></i>
+                  </button>
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-calendar-close-line"></i></span>
+        <p class="pc-empty-title">No reservations found</p>
+        <p class="pc-empty-sub">Use the form above to reserve a slot.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> reservation{{ data|length|pluralize }}
+      </span>
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
 
+<!-- ══════════════════════════════
+     DELETE MODAL
+══════════════════════════════ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Reservation</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete the reservation for
+        <strong id="deleteResLabel" style="color:var(--text);"></strong>?
+        This slot will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <a id="deleteResLink" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
 
-<!-- AJAX Script -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+/* ── AJAX: load sections + subjects ── */
 $(document).ready(function () {
-    $('#id_sch_class').change(function () {
-        var classId = $(this).val();
-        if (classId) {
-            $.ajax({
-                url: "{% url 'ajax_load_secsub' %}",
-                data: { 'Class_Id': classId },
-                success: function (data) {
-                    $('#id_section').html(data.sections_html);
-                    $('#id_subject').html(data.subjects_html);
-                }
-            });
-        } else {
-            $('#id_section').html('<option value="">Select Section</option>');
-            $('#id_subject').html('<option value="">Select Subject</option>');
+  $('#id_sch_class').change(function () {
+    var classId = $(this).val();
+    if (classId) {
+      $.ajax({
+        url: "{% url 'ajax_load_secsub' %}",
+        data: { 'Class_Id': classId },
+        success: function (data) {
+          $('#id_section').html(data.sections_html);
+          $('#id_subject').html(data.subjects_html);
         }
-    });
+      });
+    } else {
+      $('#id_section').html('<option value="">— Select class first —</option>');
+      $('#id_subject').html('<option value="">— Select class first —</option>');
+    }
+  });
+});
+
+/* ── Delete modal ── */
+function openDeleteModal(url, label) {
+  document.getElementById('deleteResLabel').textContent = label;
+  document.getElementById('deleteResLink').href = url;
+  document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+}
+
+document.getElementById('deleteModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeDeleteModal();
 });
 </script>
 

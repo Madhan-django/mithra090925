@@ -2,360 +2,371 @@
 {% block content %}
 
 <style>
-/* ================= GLOBAL STYLES ================= */
-body, h1, h3, h4, h5, label, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group textarea { resize: vertical; min-height: 90px; }
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder,
+.pc-form-group textarea::placeholder { color: var(--muted); }
+.pc-form-group input:disabled,
+.pc-form-group textarea:disabled {
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: not-allowed;
+  border-color: var(--border);
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.10);
-    padding-bottom: 15px;
+/* ── Django error / help text ── */
+.pc-form-group .errorlist {
+  list-style: none; padding: 0; margin: 3px 0 0;
+  font-size: 11.5px; color: var(--rose); font-weight: 600;
 }
+.pc-form-group .helptext { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
-/* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 2px 0 !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 10px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-/* ================= MATRIX (2×2) ================= */
-.row-matrix {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-}
-
-.col-matrix {
-    flex: 1;
-    min-width: 48%;
-}
-
-/* ================= FLOATING LABEL (UNIVERSAL) ================= */
-.form-floating-custom {
-    position: relative;
-    margin-bottom: 18px;
-}
-
-.form-floating-custom input,
-.form-floating-custom select,
-.form-floating-custom textarea {
-    width: 100%;
-    padding: 14px 12px 6px 12px;
-    border: 1px solid #bbb;
-    border-radius: 10px;
-    font-size: 15px;
-    background-color: white;
-}
-
-/* DOUBLE HEIGHT FOR TEXTAREAS */
-.form-floating-custom textarea {
-    min-height: 120px !important;
-}
-
-/* LABEL FLOAT */
-.form-floating-custom label {
-    position: absolute;
-    top: -10px;
-    left: 14px;
-    background: white;
-    padding: 0 6px;
-    font-size: 13px;
-    color: #444;
-    pointer-events: none;
-    z-index: 2;
-}
-
-/* SELECT2 FIX: ENSURE HEIGHT MATCHES */
+/* ── Select2 theme ── */
 .select2-container .select2-selection--single {
-    height: 50px !important;
-    padding-top: 10px;
-    border: 1px solid #bbb !important;
-    border-radius: 10px !important;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark) !important;
+  border-radius: var(--r) !important;
+  height: 40px !important;
+  display: flex; align-items: center;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-.select2-selection__rendered {
-    padding-top: 5px !important;
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12) !important;
+  outline: none;
 }
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: var(--text); padding-left: 13px; line-height: 38px;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow { height: 38px; }
+.select2-dropdown {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--sh-md) !important;
+  font-family: var(--f-sans); font-size: 13.5px;
+}
+.select2-container--default .select2-results__option--highlighted {
+  background: var(--accent-lt) !important; color: var(--accent) !important;
+}
+.select2-container--default .select2-results__option--selected {
+  background: var(--accent) !important; color: #fff !important;
+}
+.select2-search--dropdown .select2-search__field {
+  border: 1.5px solid var(--border-dark) !important;
+  border-radius: var(--r-sm) !important;
+  padding: 6px 10px; font-family: var(--f-sans); font-size: 13px; outline: none;
+}
+.select2-container { width: 100% !important; }
 
-/* ================= BUTTONS ================= */
-.btn-primary {
-    background: linear-gradient(135deg, #009ffd, #2a2a72);
-    border: none;
-    padding: 10px 30px;
-    font-size: 15px;
-    border-radius: 10px;
-    transition: 0.3s;
-}
+/* ── Status select live colour ── */
+#id_complaint_status.status-open       { color: var(--sky);   font-weight: 700; }
+#id_complaint_status.status-pending    { color: var(--rose);  font-weight: 700; }
+#id_complaint_status.status-inprogress { color: var(--amber); font-weight: 700; }
+#id_complaint_status.status-resolved   { color: var(--green); font-weight: 700; }
 
-.btn-danger {
-    background: linear-gradient(135deg, #ff4e50, #c31432);
-    border: none;
-    padding: 10px 30px;
-    font-size: 15px;
-    border-radius: 10px;
+/* ── Section label ── */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
-/* ================= ALIGN ================= */
-.align-right {
-    text-align: right;
-    padding: 15px;
-}
-    <style>
-#id_aoc_other:disabled {
-    background: #eee;
-}
-h6{
-        font-weight: 600;
-        color: #007bff;
-        line-height3.75
-    }
+.nb-hidden { display: none; }
 </style>
 
+<div class="col-lg-12">
 
-
-
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <div class="card-title text-center">
-            <h5><span class="badge">{{ title }}</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <form method="post" enctype="multipart/form-data" id="addform"
-                  data-section-url="{% url 'ajax_load_section' %}"
-                  data-student-url="{% url 'ajax_load_students' %}">
-                {% csrf_token %}
-
-                {{ form.gschool }}
-                {{ form.ac_year }}
-                <!-- hidden fields safe -->
-
-                <!-- ================= MATRIX BLOCK 1 ================= -->
-                <h6>1. Register Grievance</h6><br>
-                <div class="row-matrix">
-
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.gclass }}
-                        <label>Class</label>
-                    </div>
-
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.gsec }}
-                        <label>Section</label>
-                    </div>
-
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.stud_name }}
-                        <label>Student Name</label>
-                    </div>
-                    <div class="col-matrix form-floating-custom">
-                    {{ form.concern_person_name }}
-                    <label>Concern Person Name</label>
-                    </div>
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.mobile }}
-                        <label>Mobile Number</label>
-                    </div>
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.complaint_date }}
-                        <label>Complaint Date</label>
-                    </div>
-
-
-                </div>
-
-                <!-- ================= MATRIX BLOCK 2 ================= -->
-                <div class="row-matrix">
-
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.area_of_complaint }}
-                        <label>Area of Complaint</label>
-                    </div>
-
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.aoc_other }}
-                        <label>If Other, specify</label>
-                    </div>
-
-                     <div class="col-matrix form-floating-custom">
-                        {{ form.complaint_received }}
-                        <label>Complaint Received Mode</label>
-                    </div>
-
-                    <div class="col-matrix form-floating-custom">
-                        {{ form.complaint_status }}
-                        <label>Status</label>
-                    </div>
-                </div>
-
-                <!-- ================= FULL WIDTH FLOATING FIELDS ================= -->
-                <h6>2. Response</h6><br>
-                <div class="form-floating-custom">
-                    {{ form.detail }}
-                    <label>Complaint Details</label>
-                </div>
-
-                <div class="form-floating-custom">
-                    {{ form.principal_remark }}
-                    <label>Principal Remark</label>
-                </div>
-
-                <div class="form-floating-custom">
-                    {{ form.concern_person_remark }}
-                    <label>Concern Person Remark</label>
-                </div>
-
-                <div class="form-floating-custom">
-                    {{ form.act_details }}
-                    <label>Action Details</label>
-                </div>
-
-
-
-                <!-- ================= MATRIX BLOCK 3 ================= -->
-                <div class="row-matrix">
-
-
-
-                     <div class="col-matrix form-floating-custom">
-                        {{ form.action_date }}
-                        <label>Action Date</label>
-                    </div>
-                     <div class="col-matrix form-floating-custom">
-                    {{ form.act_intimation_to_person }}
-                    <label>Act Intimation to Person</label>
-                   </div>
-
-
-
-
-                </div>
-
-
-                <div class="align-right">
-                    <button type="submit" class="btn-primary">Submit</button>
-                    <button type="reset" class="btn-danger">Clear</button>
-                </div>
-
-            </form>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'grievance_list' %}">Grievance</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>{{ title }}</span>
+      </nav>
+      <h1 class="pc-page-title">{{ title }}</h1>
+      <p class="pc-page-sub">Register a student complaint and track its resolution.</p>
     </div>
-</div>
+  </div>
 
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Grievance Form</p>
+        <p class="pc-card-sub">Complete all required fields before submitting</p>
+      </div>
+      <span class="pc-badge pc-badge-danger pc-badge-no-dot">
+        <i class="ri-file-damage-line" style="font-size:12px;"></i> Complaint
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form method="post" enctype="multipart/form-data" id="addform"
+            data-section-url="{% url 'ajax_load_section' %}"
+            data-student-url="{% url 'ajax_load_students' %}">
+        {% csrf_token %}
+
+        <!-- Hidden system fields -->
+        <div class="nb-hidden">
+          {{ form.gschool }}
+          {{ form.ac_year }}
+        </div>
+
+        <!-- ── 1. Register Grievance ── -->
+        <p class="form-section-label"><i class="ri-user-line"></i> 1. Register Grievance</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+              {{ form.gclass }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Section <span style="color:var(--rose)">*</span></label>
+              {{ form.gsec }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Student Name <span style="color:var(--rose)">*</span></label>
+              {{ form.stud_name }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Concern Person Name</label>
+              {{ form.concern_person_name }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Mobile Number</label>
+              {{ form.mobile }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Complaint Date <span style="color:var(--rose)">*</span></label>
+              {{ form.complaint_date }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── 2. Complaint Classification ── -->
+        <p class="form-section-label"><i class="ri-list-check-2"></i> 2. Complaint Classification</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Area of Complaint <span style="color:var(--rose)">*</span></label>
+              {{ form.area_of_complaint }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">If Other, Specify</label>
+              {{ form.aoc_other }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Complaint Received Mode</label>
+              {{ form.complaint_received }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status <span style="color:var(--rose)">*</span></label>
+              {{ form.complaint_status }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── 3. Response ── -->
+        <p class="form-section-label"><i class="ri-chat-3-line"></i> 3. Response</p>
+        <div class="row g-3">
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Complaint Details</label>
+              {{ form.detail }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Principal Remark</label>
+              {{ form.principal_remark }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Concern Person Remark</label>
+              {{ form.concern_person_remark }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Action Details</label>
+              {{ form.act_details }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── 4. Action ── -->
+        <p class="form-section-label"><i class="ri-checkbox-circle-line"></i> 4. Action</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Action Date</label>
+              {{ form.action_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Act Intimation to Person</label>
+              {{ form.act_intimation_to_person }}
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{% url 'grievance_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="addform" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="addform" class="pc-btn pc-btn-primary">
+          <i class="ri-send-plane-line"></i> Submit Grievance
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
+</div>
 
 <!-- jQuery + Select2 -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 $(document).ready(function () {
 
-    // ==========================
-    // Load sections
-    // ==========================
-    $("#id_gclass").change(function () {
-        $.get($("#addform").data("section-url"), { "Class_Id": $(this).val() }, function (data) {
-            $("#id_gsec").html(data);
-            $("#id_stud_name").html("<option value=''>Select Student</option>").trigger("change");
-        });
+  // ── Load sections on class change ──
+  $("#id_gclass").change(function () {
+    $.get($("#addform").data("section-url"), { "Class_Id": $(this).val() }, function (data) {
+      $("#id_gsec").html(data);
+      $("#id_stud_name").html("<option value=''>Select Student</option>").trigger("change");
     });
+  });
 
-    // ==========================
-    // Load students
-    // ==========================
-    $("#id_gsec").change(function () {
-        $.get($("#addform").data("student-url"), {
-            "class_id": $("#id_gclass").val(),
-            "sec_id": $(this).val()
-        }, function (data) {
-            $("#id_stud_name").html(data);
-            $("#id_stud_name").select2({ width: "100%", allowClear: true });
-        });
+  // ── Load students on section change ──
+  $("#id_gsec").change(function () {
+    $.get($("#addform").data("student-url"), {
+      "class_id": $("#id_gclass").val(),
+      "sec_id": $(this).val()
+    }, function (data) {
+      $("#id_stud_name").html(data);
+      $("#id_stud_name").select2({ width: "100%", allowClear: true });
     });
+  });
 
-    // ==========================
-    // Initialize Select2
-    // ==========================
-    $("#id_stud_name").select2({ width: "100%", allowClear: true });
+  // ── Init Select2 ──
+  $("#id_stud_name").select2({ width: "100%", allowClear: true });
 
+  // ── AOC Other: enable/disable ──
+  function toggleAOCOther() {
+    var val = $("#id_area_of_complaint").val();
+    var isOther = (val === "Other" || val === "other" || val === "Others");
+    $("#id_aoc_other").prop("disabled", !isOther);
+    if (!isOther) $("#id_aoc_other").val("");
+  }
+  toggleAOCOther();
+  $("#id_area_of_complaint").change(toggleAOCOther);
 
-
-    // ==========================================================
-    //   AOC - Other: Enable / Disable Textbox Based on Selection
-    // ==========================================================
-
-    function toggleAOCOther() {
-        let selected = $("#id_area_of_complaint").val();
-
-        if (selected === "Other" || selected === "other" || selected === "Others") {
-            $("#id_aoc_other").prop("disabled", false);
-        } else {
-            $("#id_aoc_other").val("");
-            $("#id_aoc_other").prop("disabled", true);
-        }
-    }
-
-    // Run on page load (edit mode support)
-    toggleAOCOther();
-
-    // Run on change
-    $("#id_area_of_complaint").change(function () {
-        toggleAOCOther();
-    });
-
-
-
-    // ==========================================================
-    //   STATUS COLOR SYSTEM
-    //   Open → Blue | Pending → Red | Inprogress → Yellow | Close → Green
-    // ==========================================================
-
-function colorStatus() {
-    let status = $("#id_complaint_status option:selected").text().trim();
-
-    let color = "#0066ff";  // Open → blue
-
-    if (status === "Pending") color = "#d00000";       // red
-    if (status === "In-progress") color = "#d4a100";    // yellow
-    if (status === "Resolved") color = "#0f9d58";         // green
-
-    $("#id_complaint_status").css({
-        "color": color,
-        "font-weight": "bold",
-        "background-color": "",   // remove background
-    });
-}
-
-// Run on page load
-colorStatus();
-
-// Run when status changes
-$("#id_complaint_status").change(function(){
-    colorStatus();
-});
+  // ── Status colour ──
+  function colorStatus() {
+    var status = $("#id_complaint_status option:selected").text().trim();
+    var $sel = $("#id_complaint_status");
+    $sel.removeClass("status-open status-pending status-inprogress status-resolved");
+    if (status === "Open")        $sel.addClass("status-open");
+    if (status === "Pending")     $sel.addClass("status-pending");
+    if (status === "In-progress") $sel.addClass("status-inprogress");
+    if (status === "Resolved")    $sel.addClass("status-resolved");
+  }
+  colorStatus();
+  $("#id_complaint_status").change(colorStatus);
 
 });
 </script>
-
 
 {% endblock %}

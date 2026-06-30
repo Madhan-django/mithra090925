@@ -2,189 +2,167 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]) {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group input:not([type=hidden]):focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder { color: var(--muted); }
+
+/* Checkbox row */
+.nb-checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  padding: 4px 0;
+}
+.nb-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.nb-checkbox input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.nb-checkbox span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-md);
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+/* Section label */
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 14px;
 }
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
-
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
-
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
-    display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
+.nb-hidden { display: none; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- ===== TITLE BAR ===== -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Update Allocation</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <form id="allocateform" data-section-url="{% url 'ajax_load_secsub' %}" method="post">
-                {% csrf_token %}
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.teacher }}   <!-- label removed -->
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.cls }}       <!-- label removed -->
-                        </div>
-                    </div>
-                </div><br>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.section }}
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.subject }}
-                        </div>
-                    </div>
-                </div><br>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            {{ form.hours_per_week }}
-                            <label for="id_hours_per_week">Workload per Week</label> <!-- keep only this -->
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <div class="form-check form-check-primary mt-4">
-                                {{ form.is_classteacher }}
-                                <label class="form-check-label" for="id_is_classteacher">Is Class Teacher</label>
-                            </div>
-                        </div>
-                    </div>
-                </div><br>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <div class="form-check form-check-primary mt-4">
-                                {{ form.not_first }}
-                                <label class="form-check-label" for="id_not_first">Not First</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <div class="form-check form-check-primary mt-4">
-                                {{ form.not_last }}
-                                <label class="form-check-label" for="id_not_last">Not Last</label>
-                            </div>
-                        </div>
-                    </div>
-                </div><br>
-
-                {{ form.teacher_school }}
-
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="reset" class="btn btn-secondary">Clear</button>
-                </div>
-
-            </form>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'create_teaching_allocation' %}">Teaching Allocation</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Edit Allocation</span>
+      </nav>
+      <h1 class="pc-page-title">Edit Allocation</h1>
+      <p class="pc-page-sub">Update workload hours and scheduling options for this allocation.</p>
     </div>
-</div>
+  </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $("#id_cls").change(function() {
-            var url = $("#allocateform").attr("data-section-url");
-            var classId = $(this).val();
-            $.ajax({
-                url: url,
-                data: { 'Class_Id': classId },
-                success: function(response) {
-                    $("#id_section").html(response.sections_html);
-                    $("#id_subject").html(response.subjects_html);
-                }
-            });
-        });
-    });
-</script>
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Allocation Details</p>
+        <p class="pc-card-sub">Modify hours per week or toggle scheduling options</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-edit-2-line" style="font-size:12px;"></i> Editing
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="editallocform" method="post">
+        {% csrf_token %}
+
+        <!-- Hidden fields -->
+        <div class="nb-hidden">
+          {{ form.teacher_school }}
+          {{ form.teacher }}
+          {{ form.cls }}
+          {{ form.section }}
+          {{ form.subject }}
+        </div>
+
+        <!-- ── Schedule ── -->
+        <p class="form-section-label"><i class="ri-calendar-check-line"></i> Schedule</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Workload Per Week <span style="color:var(--rose)">*</span></label>
+              {{ form.hours_per_week }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Options ── -->
+        <p class="form-section-label"><i class="ri-settings-3-line"></i> Options</p>
+        <div class="nb-checkbox-row">
+
+          <label class="nb-checkbox">
+            {{ form.is_classteacher }}
+            <span>Is Class Teacher</span>
+          </label>
+
+          <label class="nb-checkbox">
+            {{ form.not_first }}
+            <span>Not First Period</span>
+          </label>
+
+          <label class="nb-checkbox">
+            {{ form.not_last }}
+            <span>Not Last Period</span>
+          </label>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Update hours per week or toggle options then save.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'create_teaching_allocation' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="submit" form="editallocform" class="pc-btn pc-btn-warning">
+          <i class="ri-save-line"></i> Save Changes
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
+</div>
 
 {% endblock %}

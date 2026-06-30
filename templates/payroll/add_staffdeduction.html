@@ -3,118 +3,186 @@
 {% block content %}
 
 <style>
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder { color: var(--muted); }
 
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
+/* Checkbox */
+.nb-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.nb-checkbox input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.nb-checkbox span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-md);
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+/* Section label */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
-/* ===== TITLE BAR (Style A) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 6px !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 500;
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;
-    padding: 4px 20px;
-    border-radius: 6px;
-}
-
-/* ===== SCHOOL HEADER ===== */
-.school-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.school-header img {
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-/* ===== FORM ===== */
-.form-control, select {
-    border-radius: 10px !important;
-    height: 45px;
-}
-
-textarea.form-control {
-    height: auto;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-    padding: 8px 25px;
-}
-
-.btn-warning {
-    background: linear-gradient(90deg, #ffb347, #ffcc33);
-    border: none;
-    font-weight: 500;
-    padding: 8px 25px;
-}
-
+/* Hidden */
+.nb-hidden { display: none; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== Title ===== -->
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">New Deduction</span>
-            </h5>
-        </div>
-
-        <!-- ===== Body ===== -->
-        <div class="card-body">
-            <div class="container">
-
-                <form method="POST">
-                    {% csrf_token %}
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            {{ form.as_p }}
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary me-2">
-                            Submit
-                        </button>
-
-                        <button type="reset" class="btn btn-warning">
-                            Reset
-                        </button>
-                    </div>
-
-                </form>
-
-            </div>
-        </div>
-
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'staff_deduction_list' %}">Staff Deductions</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>New Deduction</span>
+      </nav>
+      <h1 class="pc-page-title">New Staff Deduction</h1>
+      <p class="pc-page-sub">Assign a deduction to a staff member with amount and validity period.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Deduction Details</p>
+        <p class="pc-card-sub">Fill in all required fields before submitting</p>
+      </div>
+      <span class="pc-badge pc-badge-danger pc-badge-no-dot">
+        <i class="ri-subtract-line" style="font-size:12px;"></i> New Entry
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="addstaffdeductionform" method="POST">
+        {% csrf_token %}
+
+        <!-- Hidden -->
+        <div class="nb-hidden">{{ form.sch }}</div>
+
+        <!-- ── Assignment ── -->
+        <p class="form-section-label"><i class="ri-user-settings-line"></i> Assignment</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Deduction Type <span style="color:var(--rose)">*</span></label>
+              {{ form.name }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Staff Member <span style="color:var(--rose)">*</span></label>
+              {{ form.staff }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Amount <span style="color:var(--rose)">*</span></label>
+              {{ form.ded_amount }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Period ── -->
+        <p class="form-section-label"><i class="ri-calendar-line"></i> Validity Period</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Start Date <span style="color:var(--rose)">*</span></label>
+              {{ form.start_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">End Date</label>
+              {{ form.end_date }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Settings ── -->
+        <p class="form-section-label"><i class="ri-settings-3-line"></i> Settings</p>
+        <label class="nb-checkbox">
+          {{ form.active }}
+          <span>Active</span>
+        </label>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'staff_deduction_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="addstaffdeductionform" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Reset
+        </button>
+        <button type="submit" form="addstaffdeductionform" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Deduction
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

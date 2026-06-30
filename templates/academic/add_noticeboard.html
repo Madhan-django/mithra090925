@@ -2,128 +2,188 @@
 {% block content %}
 
 <style>
-/* ================= GLOBAL FONT ================= */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
 }
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group textarea { resize: vertical; min-height: 90px; }
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder,
+.pc-form-group textarea::placeholder { color: var(--muted); }
+.pc-form-group input[type="file"] { padding: 7px 10px; cursor: pointer; }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+/* Django error / help text */
+.pc-form-group .errorlist {
+  list-style: none; padding: 0; margin: 3px 0 0;
+  font-size: 11.5px; color: var(--rose); font-weight: 600;
 }
+.pc-form-group .helptext { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.helptext { font-size: 11px; color: var(--muted); margin-top: 4px; display: block; }
 
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* Section label */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-/* ================= FORM GRID (2x2 auto layout) ================= */
-.two-by-two {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px 25px;
-}
-
-.two-by-two p {
-    margin-bottom: 0;
-}
-
-.two-by-two label {
-    font-weight: 500;
-    font-size: 14px;
-    margin-bottom: 4px;
-}
-
-.two-by-two input,
-.two-by-two select,
-.two-by-two textarea {
-    width: 100%;
-    border: 1px solid #ced4da;
-    padding: 8px;
-    border-radius: 6px;
-}
-
-/* ================= BUTTONS ================= */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    padding: 8px 25px;
-    border-radius: 8px;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-    padding: 8px 25px;
-    border-radius: 8px;
-    font-weight: 500;
-}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">New Notice</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <!-- Form in 2-column auto grid -->
-                <div class="two-by-two">
-                    {{ form.as_p }}
-                </div>
-
-                <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-danger">Clear</button>
-                </div>
-            </form>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'academic_noticeboard' %}">Notice Board</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>New Notice</span>
+      </nav>
+      <h1 class="pc-page-title">New Notice</h1>
+      <p class="pc-page-sub">Fill in the details below to publish a new announcement.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Notice Details</p>
+        <p class="pc-card-sub">Complete all required fields before submitting</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-notification-3-line" style="font-size:12px;"></i> Announcement
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="addnotice" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- ── Basic Info ── -->
+        <p class="form-section-label"><i class="ri-file-text-line"></i> Basic Info</p>
+        <div class="row g-3">
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Notice Title <span style="color:var(--rose)">*</span></label>
+              {{ form.title }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Notice Date <span style="color:var(--rose)">*</span></label>
+              {{ form.notice_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status <span style="color:var(--rose)">*</span></label>
+              {{ form.status }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Content ── -->
+        <p class="form-section-label"><i class="ri-align-left"></i> Content</p>
+        <div class="row g-3">
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Description</label>
+              {{ form.description }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Attachment & URL ── -->
+        <p class="form-section-label"><i class="ri-links-line"></i> Attachment &amp; URL</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">File Attachment</label>
+              {{ form.file }}
+              <span class="helptext">PDF, DOC, or image files accepted</span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">External URL</label>
+              {{ form.url }}
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{% url 'noticeboard' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="addnotice" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="addnotice" class="pc-btn pc-btn-primary">
+          <i class="ri-send-plane-line"></i> Publish Notice
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
-
-<!-- DATE PICKER SCRIPTS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.0.0-alpha18/js/tempusdominus-bootstrap-4.min.js"></script>
-
 <script>
 $(document).ready(function () {
-    $('#exam_start_date_picker').datetimepicker({
-        format: 'YYYY-MM-DD'
-    });
-
-    $('#exam_end_date_picker').datetimepicker({
-        format: 'YYYY-MM-DD'
-    });
+  $('#exam_start_date_picker').datetimepicker({ format: 'YYYY-MM-DD' });
+  $('#exam_end_date_picker').datetimepicker({ format: 'YYYY-MM-DD' });
 });
 </script>
 

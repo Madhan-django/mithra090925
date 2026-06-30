@@ -2,184 +2,223 @@
 {% block content %}
 
 <style>
-    /* ===== GLOBAL FONT ===== */
-body, label, input, select, button, h4 {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group textarea { resize: vertical; min-height: 80px; }
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder,
+.pc-form-group textarea::placeholder { color: var(--muted); }
+
+/* Checkbox row */
+.nb-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.nb-checkbox input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.nb-checkbox span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-md);
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 18px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
-    overflow: hidden;
+/* Section label */
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 14px;
 }
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 
-/* ===== TITLE BAR (Reduced Height) ===== */
-.card-title {
-    background: linear-gradient(90deg, #0D47A1, #1976D2);
-    padding: 6px 0;   /* Reduced height */
-    margin: 0;
-    color: white;
-}
-
-.card-title h4 {
-    margin: 0;
-    font-size: 20px;
-}
-
-/* ===== BADGE STYLE TITLE ===== */
-.card-title h4 span.badge {
-    background: #fff;
-    color: #000;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* ===== FORM LAYOUT ===== */
-.form-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.form-group label {
-    font-weight: 600;
-}
-
-input, select, textarea {
-    border-radius: 8px !important;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #1565C0, #1E88E5);
-    border: none;
-    padding: 6px 18px;
-    border-radius: 8px;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #B71C1C, #D32F2F);
-    border: none;
-    padding: 6px 18px;
-    border-radius: 8px;
-}
-
-.btn-danger:hover,
-.btn-primary:hover {
-    opacity: 0.92;
-}
-
-/* ===== CENTER BUTTONS ===== */
-.text-center button {
-    margin: 0 6px;
-}
-
+.nb-hidden { display: none; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- TITLE BAR -->
-        <div class="card-title text-center">
-            <h4 class="mb-0">
-                <span class="badge bg-light text-dark px-3 py-2" style="font-size: 16px;">
-                    Update Fee Category
-                </span>
-            </h4>
-        </div>
-        <br><br>
-        <div class="card-body">
-            <div class="container">
-
-                <form id="addfee" action="" method="POST">
-                    {% csrf_token %}
-                    <div class="row">
-
-                        <!-- LEFT SIDE -->
-                        <div class="col-md-6">
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Invoice Title:</label></div>
-                                <div class="col-md-8">{{ form.invoice_title }}</div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Invoice Description:</label></div>
-                                <div class="col-md-8">{{ form.desc }}</div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Invoice Date:</label></div>
-                                <div class="col-md-8">{{ form.issued_date }}</div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Due Date:</label></div>
-                                <div class="col-md-8">{{ form.due_date }}</div>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT SIDE -->
-                        <div class="col-md-6">
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Class:</label></div>
-                                <div class="col-md-8">
-                                    <select name="iclass" class="form-control" required id="id_iclass">
-                                        <option value="">---------</option>
-                                        {% for option in iclass %}
-                                            <option value="{{ option.id }}">{{ option.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Fee Amount:</label></div>
-                                <div class="col-md-4">{{ form.fee_amount }}</div>
-
-                            </div>
-                            <div class="form-row">
-
-                                <div class="col-md-4"><label>Late Fee</label></div>
-                                 <div class="col-md-4">{{ form.latefee }}</div>
-
-                            </div>
-
-
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Is-Active:</label></div>
-                                <div class="col-md-8">{{ form.isactive }}</div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col-md-4"><label>Fee Year:</label></div>
-                                <div class="col-md-8">
-                                    <select name="ac_year" class="form-control" required id="id_ac_year">
-                                        <option value="">---------</option>
-                                        {% for yr in yr2 %}
-                                            <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            {{ form.fees_school }}
-                        </div>
-
-                    </div>
-
-                    <br>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <button type="reset" class="btn btn-danger">Reset</button>
-                    </div>
-
-                </form>
-
-            </div>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'fee_details' %}">Fee Category</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Update Fee Category</span>
+      </nav>
+      <h1 class="pc-page-title">Update Fee Category</h1>
+      <p class="pc-page-sub">Edit invoice details, amounts and validity settings.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Fee Category Details</p>
+        <p class="pc-card-sub">Update the fields below and save</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-edit-2-line" style="font-size:12px;"></i> Editing
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="addfee" method="POST" action="">
+        {% csrf_token %}
+
+        <!-- Hidden system field -->
+        <div class="nb-hidden">{{ form.fees_school }}</div>
+
+        <!-- ── Invoice Info ── -->
+        <p class="form-section-label"><i class="ri-file-text-line"></i> Invoice Info</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Invoice Title <span style="color:var(--rose)">*</span></label>
+              {{ form.invoice_title }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Invoice Date <span style="color:var(--rose)">*</span></label>
+              {{ form.issued_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Due Date</label>
+              {{ form.due_date }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Invoice Description</label>
+              {{ form.desc }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Fee Details ── -->
+        <p class="form-section-label"><i class="ri-money-dollar-circle-line"></i> Fee Details</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+              <select name="iclass" id="id_iclass" required>
+                <option value="">— Select Class —</option>
+                {% for option in iclass %}
+                <option value="{{ option.id }}">{{ option.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Fee Year <span style="color:var(--rose)">*</span></label>
+              <select name="ac_year" id="id_ac_year" required>
+                <option value="">— Select Year —</option>
+                {% for yr in yr2 %}
+                <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Fee Amount <span style="color:var(--rose)">*</span></label>
+              {{ form.fee_amount }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Late Fee</label>
+              {{ form.latefee }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Settings ── -->
+        <p class="form-section-label"><i class="ri-settings-3-line"></i> Settings</p>
+        <label class="nb-checkbox">
+          {{ form.isactive }}
+          <span>Is Active</span>
+        </label>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'fee_details' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="addfee" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Reset
+        </button>
+        <button type="submit" form="addfee" class="pc-btn pc-btn-warning">
+          <i class="ri-save-line"></i> Save Changes
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

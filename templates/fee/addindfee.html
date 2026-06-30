@@ -1,307 +1,397 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+
 <style>
-/* ===== Global Styling ===== */
-body, label, select, input, button {
-    font-family: 'Roboto', sans-serif !important;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder { color: var(--muted); }
+
+/* Hidden fields */
+.nb-hidden { display: none; }
+
+/* Section label */
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 14px;
+}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
+
+/* ── Fee type toggle tabs ── */
+.fee-type-tabs {
+  display: flex;
+  background: rgba(0,0,0,.03);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+.fee-type-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 20px;
+  border-radius: calc(var(--r) - 2px);
+  font-family: var(--f-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sm);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+.fee-type-tab.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(79,70,229,.3);
+}
+.fee-type-tab:not(.active):hover {
+  background: var(--accent-lt);
+  color: var(--accent);
 }
 
-/* ===== Card Styling ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.15);
-    overflow: hidden;
+/* ── Select2 theme (multi-select) ── */
+.select2-container .select2-selection--multiple {
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark) !important;
+  border-radius: var(--r) !important;
+  min-height: 42px;
+  padding: 4px 8px;
+  font-family: var(--f-sans);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12) !important;
+  outline: none;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background: var(--accent-lt);
+  border: 1px solid var(--accent-mid);
+  color: var(--accent);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+  color: var(--accent); margin-right: 4px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+  color: var(--rose); background: transparent;
+}
+.select2-dropdown {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--sh-md) !important;
+  font-family: var(--f-sans); font-size: 13.5px;
+}
+.select2-container--default .select2-results__option--highlighted {
+  background: var(--accent-lt) !important; color: var(--accent) !important;
+}
+.select2-container--default .select2-results__option--selected {
+  background: var(--accent) !important; color: #fff !important;
+}
+.select2-search--dropdown .select2-search__field {
+  border: 1.5px solid var(--border-dark) !important;
+  border-radius: var(--r-sm) !important;
+  padding: 6px 10px; font-family: var(--f-sans); font-size: 13px; outline: none;
+}
+.select2-container { width: 100% !important; }
 
-/* ===== Title Bar with Badge ===== */
-.card-title {
-    background: linear-gradient(135deg, #1a73e8, #0056d6);
-    padding: 6px 0; /* Reduced padding */
-    border-radius: 20px 20px 0 0;
-    text-align: center;
-}
-.card-title h5 {
-    margin: 0;
-    font-size: 20px; /* Smaller font */
-    color: white;
-}
-.card-title h5 span.badge {
-    background: #fff;
-    color: #000;
-    padding: 4px 10px; /* Badge padding */
-    font-size: 14px;
-    border-radius: 10px;
-}
+/* Form panel show/hide */
+.fee-panel { display: none; }
+.fee-panel.active { display: block; }
 
-/* ===== Buttons ===== */
-.btn-info {
-    background: linear-gradient(135deg, #1a73e8, #0056d6) !important;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 6px 15px;
-}
-.btn-danger {
-    background: linear-gradient(135deg, #ff5b5b, #cc0000) !important;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 6px 15px;
-}
-.btn-success {
-    background: linear-gradient(135deg, #28a745, #1c7c31) !important;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 6px 15px;
-}
-.btn-primary {
-    background: linear-gradient(135deg, #007bff, #0056d2) !important;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 6px 15px;
-}
-
-/* ===== Table Styling ===== */
-.table {
-    border-radius: 15px;
-    overflow: hidden;
-}
-.table th, .table td {
-    vertical-align: middle !important;
-    text-align: center;
-}
-.table th {
-    font-size: 13px;      /* Smaller font */
-    padding: 4px 8px;     /* Reduced padding */
-    height: 30px;         /* Reduced header height */
-}
-.table td {
-    font-size: 13px;      /* Row font size */
-    padding: 5px 8px;
-}
-.table-dark th {
-    background-color: #212529 !important;
-    color: white;
-}
-
-/* ===== Text Alignment ===== */
-.text-end {
-    text-align: right;
-    padding-bottom: 10px;
-}
-
-/* ===== Form Controls ===== */
-select.form-control, input.form-control {
-    border-radius: 10px !important;
-}
-
-/* ===== Pagination Styling ===== */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-.pagination .page-item .page-link {
-    border-radius: 10px;
-    padding: 5px 10px;
-}
-.pagination .page-item.active .page-link {
-    background-color: #1a73e8 !important;
-    border-color: #0056d6 !important;
-    color: white;
-}
-.pagination .page-item.disabled .page-link {
-    color: #6c757d;
-}
-    .myDiv {
-    display: none;
+@media (max-width: 640px) {
+  .fee-type-tabs { width: 100%; }
+  .fee-type-tab { flex: 1; justify-content: center; }
 }
 </style>
 
-<div class="card">
-<div class="card-title text-center">
-     <h5 class="mb-0">
-        <span class="badge">Fee Generation</span>
-      </h5>
-</div>
-    <div class="card-body">
-        <div class="col-md-6">
-        <div class="form-group row">
-            <label class="col-sm-3 col-form-label"></label>
-            <div class="col-sm-4">
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios1" value="Two" checked> Individual Fee </label>
-                </div>
-            </div>
-            <div class="col-sm-4">
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="membershipRadios" id="membershipRadios2" value="One"> Bulk Fee</label>
-                </div>
-            </div>
-        </div>
+<div class="col-lg-12">
+
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'invoices' %}">Fee Invoice</a>
+      </nav>
+      <h1 class="pc-page-title">Fee Generation</h1>
+      <p class="pc-page-sub">Generate individual or bulk fee invoices for students.</p>
+    </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Generate Fee</p>
+        <p class="pc-card-sub">Select fee type then fill in the details</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-money-dollar-circle-line" style="font-size:12px;"></i> Invoice
+      </span>
     </div>
 
+    <div class="pc-card-body">
 
-<div id="showTwo" class="myDiv"><center>
-  	<strong >Individual Fee</strong></center><br>
-    	<form id="addindfeeform" data-class-url="{% url 'ajax_load_class' %}" method ="POST">
-                      {% csrf_token %}
-            <div class="row">
-               <div class="col-md-6">
-                  <div class="form-floating form-floating-outline">
-                  <select id="id_fee_cat" name="fee_cat" class="form-control">
-                          <option value="" selected="">---------</option>
-                          {% for sel in data %}
-                          <option value="{{sel.id}}">{{sel.invoice_title}}</option>
-                          {% endfor %}
-                  </select>
-                  <label for="id_fee_cat">Fee Category</label>
-                  </div>
-               </div>
-                <div class="col-md-6">
-                   <div class="form-floating form-floating-outline">
-                   <select id="id_class_name" name="class_name" class="form-control">
-                          <option value="" selected="">---------</option>
-                          {% for sel in cdata %}
-                          <option value="{{sel.id}}">{{sel.name}}</option>
-                          {% endfor %}
-                    </select>
-                  <label for="id_class_name">Class</label>
-                  </div>
-               </div>
+      <!-- Fee type toggle -->
+      <div class="fee-type-tabs">
+        <button type="button" class="fee-type-tab active" data-target="panel-individual">
+          <i class="ri-user-line"></i> Individual Fee
+        </button>
+        <button type="button" class="fee-type-tab" data-target="panel-bulk">
+          <i class="ri-group-line"></i> Bulk Fee
+        </button>
+      </div>
+
+      <!-- ══ INDIVIDUAL FEE PANEL ══ -->
+      <div id="panel-individual" class="fee-panel active">
+        <form id="addindfeeform"
+              data-class-url="{% url 'ajax_load_class' %}"
+              method="POST">
+          {% csrf_token %}
+
+          <!-- Hidden form fields -->
+          <div class="nb-hidden">
+            {{ form.due_amt }}
+            {{ form.invoice_no }}
+            {{ form.status }}
+          </div>
+
+          <p class="form-section-label"><i class="ri-file-list-line"></i> Fee &amp; Class</p>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <div class="pc-form-group">
+                <label class="pc-label">Fee Category <span style="color:var(--rose)">*</span></label>
+                <select id="id_fee_cat" name="fee_cat">
+                  <option value="">— Select Fee Category —</option>
+                  {% for sel in data %}
+                  <option value="{{ sel.id }}">{{ sel.invoice_title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-            <br>
-             <div class="row">
-               <div class="col-md-6">
-                  <div class="form-floating form-floating-outline">
-                    <div class="select2-primary">
-                      <select name="stud_name" id="id_stud_name" class="form-control select2 select2-primary" multiple>
-                             <!-- Options will be loaded dynamically -->
-                      </select>
-                    </div>
-                  <label for="id_stud_name">Students</label>
-                  </div>
-               </div>
-                <div class="col-md-6">
-                   <div class="form-floating form-floating-outline">
-                     {{form.concession}}
-                  <label for="id_concession">Concession</label>
-                  </div>
-               </div>
+
+            <div class="col-md-6">
+              <div class="pc-form-group">
+                <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+                <select id="id_ind_class" name="class_name">
+                  <option value="">— Select Class —</option>
+                  {% for sel in cdata %}
+                  <option value="{{ sel.id }}">{{ sel.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-            <br>
-              {{form.due_amt}}
-              {{form.invoice_no}}
-              {{form.status}}
-            <div class="text-end">
-                      <button type="submit" class="btn btn-info">Submit</button>
-                      <button  type="reset"class="btn btn-danger">Clear</button>
+
+          </div>
+
+          <p class="form-section-label"><i class="ri-user-search-line"></i> Student &amp; Concession</p>
+          <div class="row g-3">
+
+            <div class="col-12">
+              <div class="pc-form-group">
+                <label class="pc-label">Students <span style="color:var(--rose)">*</span></label>
+                <select name="stud_name" id="id_stud_name" multiple>
+                  <!-- Loaded via AJAX -->
+                </select>
+              </div>
             </div>
+
+            <div class="col-md-6">
+              <div class="pc-form-group">
+                <label class="pc-label">Concession</label>
+                {{ form.concession }}
+              </div>
+            </div>
+
+          </div>
+
+          <div class="pc-card-footer" style="margin: 24px -22px -20px; border-radius:0;">
+            <p class="pc-card-sub" style="margin:0;">
+              <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+              Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+            </p>
+            <div style="display:flex; gap:10px;">
+              <button type="reset" class="pc-btn pc-btn-outline">
+                <i class="ri-eraser-line"></i> Clear
+              </button>
+              <button type="submit" class="pc-btn pc-btn-primary">
+                <i class="ri-send-plane-line"></i> Submit
+              </button>
+            </div>
+          </div>
+
         </form>
-</div>
-<div id="showOne" class="myDiv"><center>
-	<strong>Bulk Fee</strong></center><br>
-	<form action ="{% url 'addbulkfee' %}" method ="POST">
-        {% csrf_token %}
-            <div class="row">
-               <div class="col-md-6">
-                  <div class="form-floating form-floating-outline">
-                  <select name="fee_cat" class="form-control" required="" id="id_fee_cat">
-                        <option value="" selected="">---------</option>
-                          {% for sel in data %}
-                          <option value="{{sel.id}}">{{sel.invoice_title}}</option>
-                          {% endfor %}
-                   </select>
-                  <label for="id_fee_cat">Fee Category</label>
-                  </div>
-               </div>
-                <div class="col-md-6">
-                   <div class="form-floating form-floating-outline">
-                   <select name="class_name" required="" id="id_class_name" class="form-control">
-                         <option value="" selected="">---------</option>
-                         {% for cls in cdata %}
-                        <option value="{{cls.id}}">{{cls}}</option>
-                         {% endfor %}
-                    </select>
-                  <label for="id_class_name">Class</label>
-                  </div>
-               </div>
-            </div>
-            <br>
-            <div class="row">
-               <div class="col-md-6">
-                  <div class="form-floating form-floating-outline">
-                  <select name="years" id="id_years" class="form-control">
-                       <option value="" selected="">---------</option>
-                         {% for yrs in years %}
-                        <option value="{{yrs.id}}">{{yrs}}</option>
-                         {% endfor %}
-                    </select>
-                  <label for="id_years">Academic Year</label>
-                  </div>
-               </div>
-                <div class="col-md-6">
-                   <div class="form-floating form-floating-outline">
+      </div>
 
-                  </div>
-               </div>
+      <!-- ══ BULK FEE PANEL ══ -->
+      <div id="panel-bulk" class="fee-panel">
+        <form action="{% url 'addbulkfee' %}" method="POST">
+          {% csrf_token %}
+
+          <p class="form-section-label"><i class="ri-file-list-line"></i> Fee &amp; Class</p>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <div class="pc-form-group">
+                <label class="pc-label">Fee Category <span style="color:var(--rose)">*</span></label>
+                <select name="fee_cat" required>
+                  <option value="">— Select Fee Category —</option>
+                  {% for sel in data %}
+                  <option value="{{ sel.id }}">{{ sel.invoice_title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-            <br>
-        <div class="text-center">
-            <button type="submit" class="btn btn-info">Generate</button>
-            <button  type="reset"class="btn btn-danger">Clear</button>
-        </div>
-    </form>
-</div>
-    </div>
+
+            <div class="col-md-6">
+              <div class="pc-form-group">
+                <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+                <select name="class_name" required>
+                  <option value="">— Select Class —</option>
+                  {% for cls in cdata %}
+                  <option value="{{ cls.id }}">{{ cls }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <p class="form-section-label"><i class="ri-calendar-line"></i> Academic Year</p>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <div class="pc-form-group">
+                <label class="pc-label">Academic Year <span style="color:var(--rose)">*</span></label>
+                <select name="years" id="id_years" required>
+                  <option value="">— Select Year —</option>
+                  {% for yrs in years %}
+                  <option value="{{ yrs.id }}">{{ yrs }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="pc-card-footer" style="margin: 24px -22px -20px; border-radius:0;">
+            <p class="pc-card-sub" style="margin:0;">
+              <i class="ri-information-line" style="color:var(--accent); margin-right:4px;"></i>
+              Bulk fee will be generated for all students in the selected class.
+            </p>
+            <div style="display:flex; gap:10px;">
+              <button type="reset" class="pc-btn pc-btn-outline">
+                <i class="ri-eraser-line"></i> Clear
+              </button>
+              <button type="submit" class="pc-btn pc-btn-primary">
+                <i class="ri-flashlight-line"></i> Generate Bulk Fee
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+    </div><!-- /pc-card-body -->
+  </div><!-- /pc-card -->
+
 </div>
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function () {
 
-<script type='text/javascript'  src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  <script>
+  // ── Fee type tab switcher ──
+  $('.fee-type-tab').on('click', function () {
+    $('.fee-type-tab').removeClass('active');
+    $(this).addClass('active');
+    var target = $(this).data('target');
+    $('.fee-panel').removeClass('active');
+    $('#' + target).addClass('active');
+  });
 
+  // ── Init Select2 on students field ──
+  $('#id_stud_name').select2({
+    placeholder: 'Select students…',
+    allowClear: true,
+    width: '100%'
+  });
 
-    // Initialize Select2 if the element exists
+  // ── AJAX load students when class changes (Individual Fee only) ──
+  $('#id_ind_class').on('change', function () {
+    var url     = $('#addindfeeform').attr('data-class-url');
+    var classId = $(this).val();
 
+    if (!classId) {
+      $('#id_stud_name').html('').trigger('change');
+      return;
+    }
 
-    $("#id_class_name").change(function () {
-        var url = $("#addindfeeform").attr("data-class-url");
-        var classid = $(this).val();
-        console.log('Test Working');
-
-        $.ajax({
-            url: url,
-            data: {
-                'selclassid': classid
-            },
-            success: function (data) {
-                $("#id_stud_name").html(data);
-
-                // Refresh Select2 to recognize new <option>s
-                $('#id_stud_name').trigger('change');
-                console.log('stud', data);
-            }
+    $.ajax({
+      url: url,
+      data: { 'selclassid': classId },
+      success: function (data) {
+        $('#id_stud_name').html(data);
+        $('#id_stud_name').select2('destroy').select2({
+          placeholder: 'Select students…',
+          allowClear: true,
+          width: '100%'
         });
+      }
     });
+  });
 
-    $('input[type="radio"]').click(function () {
-        var demovalue = $(this).val();
-        $("div.myDiv").hide();
-        $("#show" + demovalue).show();
-    });
-      $('#id_stud_name').select2({
-            placeholder: "Select students",
-            allowClear: true,
-            width: '100%' // Ensures proper width if inside Bootstrap
-        });
+});
 </script>
 
 {% endblock %}

@@ -1,200 +1,227 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h5, label, button, input, select, textarea {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
 }
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder { color: var(--muted); }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+/* Section label */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
-
-/* ===== SLIM TITLE BAR ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    height: 32px; /* reduced */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 20px 20px 0 0;
-    padding: 0 !important;
-}
-
-.card-title h3 {
-    margin: 0;
-}
-
-.card-title h3 span {
-    background: #f8f9fa;
-    color: #000;
-    padding: 3px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* ===== FORM GRID ===== */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-bottom: 20px;
-}
-
-/* ===== FLOATING LABEL STYLE ===== */
-.form-floating-outline {
-    position: relative;
-}
-
-.form-floating-outline label {
-    position: absolute;
-    top: -9px;
-    left: 12px;
-    background: #fff;
-    padding: 0 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-}
-
-.form-floating-outline .form-control,
-.form-floating-outline select {
-    height: 48px !important;
-    border-radius: 10px;
-    font-size: 15px;
-    padding-left: 12px;
-}
-
-/* Card padding */
-.card-body {
-    padding: 30px 40px;
-}
-
-/* Buttons */
-.btn-primary {
-    padding: 8px 20px;
-    border-radius: 10px;
-    font-size: 15px;
-}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h3><span class="badge bg-light text-dark">Issue Book</span></h3>
-        </div>
-
-        <div class="card-body">
-
-            <form id="addstudform"
-                  data-section-url="{% url 'ajax_load_section' %}"
-                  data-student-url="{% url 'ajax_load_student' %}"
-                  method="POST" enctype="multipart/form-data">
-
-                {% csrf_token %}
-
-                <div class="form-grid">
-
-                    <div class="form-floating-outline">
-                        {{ form.book_title }}
-                        <label for="{{ form.book_title.id_for_label }}">Book Title</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        <select name="sclass" id="id_sclass" class="form-control" required>
-                            <option value="">Select Class</option>
-                            {% for opt in lib_class %}
-                                <option value="{{ opt.id }}">{{ opt.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <label for="id_sclass">Class</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        <select name="section" id="id_section" class="form-control" required>
-                            <option value="">Select Section</option>
-                        </select>
-                        <label for="id_section">Section</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        <select name="issued_to" id="id_issued_to" class="form-control" required>
-                            <option value="">Select Student</option>
-                        </select>
-                        <label for="id_issued_to">Student</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        {{ form.issued_quantity }}
-                        <label for="{{ form.issued_quantity.id_for_label }}">Issued Quantity</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        {{ form.issued_date }}
-                        <label for="{{ form.issued_date.id_for_label }}">Issue Date</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        {{ form.return_date }}
-                        <label for="{{ form.return_date.id_for_label }}">Return Date</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        {{ form.status }}
-                        <label for="{{ form.status.id_for_label }}">Status</label>
-                    </div>
-
-                    <div class="form-floating-outline">
-                        {{ form.acd_year }}
-                        <label for="{{ form.acd_year.id_for_label }}">Academic Year</label>
-                    </div>
-
-                </div>
-
-                <button type="submit" class="btn btn-primary mt-2">Submit</button>
-            </form>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'books_list' %}">Books</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Issue Book</span>
+      </nav>
+      <h1 class="pc-page-title">Issue Book</h1>
+      <p class="pc-page-sub">Assign a book to a student with issue and return dates.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Issue Details</p>
+        <p class="pc-card-sub">Fill in all required fields before submitting</p>
+      </div>
+      <span class="pc-badge pc-badge-success pc-badge-no-dot">
+        <i class="ri-book-open-line" style="font-size:12px;"></i> Issue
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="addstudform"
+            data-section-url="{% url 'ajax_load_section' %}"
+            data-student-url="{% url 'ajax_load_student' %}"
+            method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- ── Book ── -->
+        <p class="form-section-label"><i class="ri-book-2-line"></i> Book</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Book Title <span style="color:var(--rose)">*</span></label>
+              {{ form.book_title }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Issued Quantity <span style="color:var(--rose)">*</span></label>
+              {{ form.issued_quantity }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Student ── -->
+        <p class="form-section-label"><i class="ri-user-line"></i> Student</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+              <select name="sclass" id="id_sclass" required>
+                <option value="">— Select Class —</option>
+                {% for opt in lib_class %}
+                <option value="{{ opt.id }}">{{ opt.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Section <span style="color:var(--rose)">*</span></label>
+              <select name="section" id="id_section" required>
+                <option value="">— Select class first —</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Student <span style="color:var(--rose)">*</span></label>
+              <select name="issued_to" id="id_issued_to" required>
+                <option value="">— Select section first —</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Dates & Status ── -->
+        <p class="form-section-label"><i class="ri-calendar-line"></i> Dates &amp; Status</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Issue Date <span style="color:var(--rose)">*</span></label>
+              {{ form.issued_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Return Date <span style="color:var(--rose)">*</span></label>
+              {{ form.return_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status <span style="color:var(--rose)">*</span></label>
+              {{ form.status }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Academic Year <span style="color:var(--rose)">*</span></label>
+              {{ form.acd_year }}
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'books_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="addstudform" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="addstudform" class="pc-btn pc-btn-success">
+          <i class="ri-book-open-line"></i> Issue Book
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
-
-<!-- AJAX -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
-$(document).ready(function() {
+$(document).ready(function () {
 
-    $("#id_sclass").change(function() {
-        var url = $("#addstudform").attr("data-section-url");
-        var classId = $(this).val();
-        $.ajax({
-            url: url,
-            data: { 'Class_Id': classId },
-            success: function(data) {
-                $("#id_section").html(data);
-            }
-        });
+  // Load sections on class change
+  $("#id_sclass").change(function () {
+    $.ajax({
+      url: $("#addstudform").attr("data-section-url"),
+      data: { 'Class_Id': $(this).val() },
+      success: function (data) {
+        $("#id_section").html(data);
+        $("#id_issued_to").html('<option value="">— Select section first —</option>');
+      }
     });
+  });
 
-    $("#id_section").change(function() {
-        var url = $("#addstudform").attr("data-student-url");
-        var secId = $(this).val();
-
-        $.ajax({
-            url: url,
-            data: { 'SecsId': secId },
-            success: function(data) {
-                $("#id_issued_to").html(data);
-            }
-        });
+  // Load students on section change
+  $("#id_section").change(function () {
+    $.ajax({
+      url: $("#addstudform").attr("data-student-url"),
+      data: { 'SecsId': $(this).val() },
+      success: function (data) {
+        $("#id_issued_to").html(data);
+      }
     });
+  });
 
 });
 </script>

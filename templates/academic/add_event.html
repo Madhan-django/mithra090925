@@ -1,152 +1,231 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, th, td, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group textarea { resize: vertical; min-height: 96px; }
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder,
+.pc-form-group textarea::placeholder { color: var(--muted); }
+.pc-form-group input[type="file"] { padding: 7px 10px; cursor: pointer; font-size: 13px; }
+
+/* Django error / help text */
+.pc-form-group .errorlist {
+  list-style: none; padding: 0; margin: 3px 0 0;
+  font-size: 11.5px; color: var(--rose); font-weight: 600;
+}
+.helptext { font-size: 11px; color: var(--muted); margin-top: 4px; display: block; }
+
+/* Image preview */
+.nb-img-preview {
+  margin-top: 8px;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  display: none;
+  max-height: 180px;
+}
+.nb-img-preview img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
-    overflow: hidden;
+/* Hidden system field */
+.nb-hidden { display: none; }
+
+/* Section label */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
-
-/* ===== TITLE BAR (Style A) ===== */
- /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
-}
-
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
-}
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FORM SPACING ===== */
-.form-group {
-    margin-bottom: 18px;
-}
-
-/* ===== PHOTO PREVIEW ===== */
-#camera-box {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-}
-
-#video-preview {
-    width: 100%;
-    border-radius: 12px;
-    display: none;
-}
-
-#captured-photo {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-primary {
-    background: linear-gradient(90deg, #0053d6, #2a92ff);
-    border: none;
-    font-weight: 500;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #d9534f, #ff6b60);
-    border: none;
-}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-         <div class="card-title text-center">
-        <h5><span class="badge bg-light text-dark">New Event</span></h5>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'academic_events' %}">Events</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>New Event</span>
+      </nav>
+      <h1 class="pc-page-title">New Event</h1>
+      <p class="pc-page-sub">Create a new school event with dates, location and details.</p>
+    </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Event Details</p>
+        <p class="pc-card-sub">Complete all required fields before submitting</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-calendar-event-line" style="font-size:12px;"></i> Event
+      </span>
     </div>
 
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
+    <div class="pc-card-body">
+      <form id="addevent" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
 
-            <div class="container">
-                 <br>
-                <!-- === Row 1 === -->
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Event Title</label>
-                        {{ form.event_title }}
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Event Location</label>
-                        {{ form.event_location }}
-                    </div>
-                </div>
+        <!-- Hidden system field -->
+        <div class="nb-hidden">{{ form.event_school }}</div>
 
-                <!-- === Row 2 === -->
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Start Date</label>
-                        {{ form.start_date }}
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>End Date</label>
-                        {{ form.end_date }}
-                    </div>
-                </div>
+        <!-- ── Basic Info ── -->
+        <p class="form-section-label"><i class="ri-information-line"></i> Basic Info</p>
+        <div class="row g-3">
 
-                <!-- === Row 3 === -->
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Post Date</label>
-                        {{ form.post_date }}
-                    </div>
-                    <div class="col-md-6 form-group">
-
-    <input type="file" class="form-control" id="inputGroupFile02" name="event_image">
-
-                        <label>Event Image</label>
-
-                    </div>
-                </div>
-
-                <!-- === Row 4 (Full Width) === -->
-                <div class="row">
-                    <div class="col-md-12 form-group">
-                        <label>Event Description</label>
-                        {{ form.event_desc }}
-                    </div>
-                </div>
-
-                {{ form.event_school }}
-
-                <!-- Buttons -->
-                <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <a href="#" class="btn btn-danger">Cancel</a>
-                </div>
-                <br><br>
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Event Title <span style="color:var(--rose)">*</span></label>
+              {{ form.event_title }}
             </div>
-        </form>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Event Location <span style="color:var(--rose)">*</span></label>
+              {{ form.event_location }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Schedule ── -->
+        <p class="form-section-label"><i class="ri-calendar-line"></i> Schedule</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Start Date <span style="color:var(--rose)">*</span></label>
+              {{ form.start_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">End Date <span style="color:var(--rose)">*</span></label>
+              {{ form.end_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Post Date</label>
+              {{ form.post_date }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Description & Image ── -->
+        <p class="form-section-label"><i class="ri-file-image-line"></i> Description &amp; Image</p>
+        <div class="row g-3">
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Event Description</label>
+              {{ form.event_desc }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Event Image</label>
+              <input type="file" id="event_image_input" name="event_image"
+                     accept="image/*" onchange="previewImage(this)">
+              <span class="helptext">JPG, PNG or WebP recommended</span>
+              <div class="nb-img-preview" id="img-preview-box">
+                <img id="img-preview-el" src="" alt="Preview">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{% url 'academic_events' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="addevent" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="addevent" class="pc-btn pc-btn-primary">
+          <i class="ri-calendar-check-line"></i> Create Event
+        </button>
+      </div>
     </div>
+
+  </div><!-- /pc-card -->
+
 </div>
+
+<script>
+function previewImage(input) {
+  var box = document.getElementById('img-preview-box');
+  var img = document.getElementById('img-preview-el');
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      img.src = e.target.result;
+      box.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  } else {
+    box.style.display = 'none';
+    img.src = '';
+  }
+}
+</script>
 
 {% endblock %}

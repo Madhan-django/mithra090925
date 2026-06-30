@@ -1,281 +1,329 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, th, td, label, button {
-    font-family: 'Roboto', sans-serif;
+/* ── Info grid (student + exam cards) ── */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
 }
 
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* ── Info card ── */
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-xs);
+  overflow: hidden;
 }
-
-/* ===== TITLE BAR ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px 0 !important;          /* reduced height */
-    border-radius: 10px 20px 0 0;
-    margin-bottom: 0px;
+.info-card-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-
-.card-title h5 {
-    margin: 0;
-    font-size: 14px;
-}
-
-.card-title h5 span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 14px;
-    padding: 4px 12px;
-    border-radius: 6px;
-}
-
-/* ===== TABLE ===== */
-.table {
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding: 6px 10px !important;      /* compact header height */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-td {
-    font-size: 14px !important;
-    padding: 10px 8px !important;
-    vertical-align: middle;
-    text-align: center;
-}
-
-/* ===== DROPDOWN BUTTON ===== */
-.dropdown-toggle {
-    border: none;
-}
-
-/* ===== ALERT ===== */
-.alert {
-    margin-top: 10px;
-}
-.text-end{
-    padding:20px;
-    }
- /* Base title styling (optional — keeps h5 consistent) */
-.profession-title {
-  margin: 0;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.2;
-}
-
-/* Base profession label */
-.profession-label {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 14px;               /* pill shape */
-  border: 1px solid rgba(0,0,0,0.06);
-  background-color: #f5f6f8;         /* subtle light background */
-  color: #212529;                    /* dark text */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  vertical-align: middle;
-  letter-spacing: 0.2px;
-}
-
-/* Small modifier */
-.profession-label.small {
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-/* Outline variant */
-.profession-label.outline {
-  background: transparent;
-  border: 1px solid #ced4da;
-  color: #343a40;
-  box-shadow: none;
-}
-
-/* Blue gradient variant — use when you want the header-style gradient */
-.profession-label.gradient {
-  background: linear-gradient(90deg, #0477ff 0%, #2b9bff 100%);
+.info-card-header-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
   color: #fff;
-  border: none;
-  box-shadow: 0 6px 18px rgba(43,155,255,0.18);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.info-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
 }
 
-/* Icon support: place an icon inside the span before text */
-.profession-label .icon {
+.info-card-body {
+  padding: 18px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Info rows */
+.info-rows { flex: 1; display: flex; flex-direction: column; gap: 0; }
+.info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: none; }
+.info-row-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-sm);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+.info-row-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Student photo */
+.student-photo {
+  width: 90px; height: 110px;
+  border-radius: var(--r);
+  object-fit: cover;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.student-photo-placeholder {
+  width: 90px; height: 110px;
+  border-radius: var(--r);
+  background: var(--accent-lt);
+  border: 2px solid var(--accent-mid);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 28px;
+  color: var(--accent);
+}
+
+/* Date chip */
+.td-date {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 8px;
   display: inline-block;
-  margin-right: 6px;
-  vertical-align: middle;
-  font-size: 0.95em;
 }
 
+/* ── Marks form fields ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 7px 11px;
+  font-family: var(--f-sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.pc-form-group input::placeholder,
+.pc-form-group textarea::placeholder { color: var(--muted); }
+
+/* ── Hidden formset fields ── */
+.nb-hidden { display: none; }
+
+/* ── Marks table ── */
+.pc-table .pc-form-group { margin: 0; }
+
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: markRowIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes markRowIn {
+  from { opacity:0; transform:translateY(5px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 55ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 80ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:105ms; }
+
+@media (max-width: 768px) {
+  .info-grid { grid-template-columns: 1fr; }
+}
 </style>
 
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'examlist' %}">Exams</a>
+        <span class="pc-breadcrumb-sep">›</span>
+          <a href="{{ request.META.HTTP_REFERER }}">Admit Card</a>
+          <span class="pc-breadcrumb-sep">›</span>
+        <span>Marks Updation</span>
+      </nav>
+      <h1 class="pc-page-title">{{ data.exam_label }}</h1>
+      <p class="pc-page-sub">Update subject-wise marks for this student.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{{ request.META.HTTP_REFERER }}" class="pc-btn pc-btn-outline">
+        <i class="ri-arrow-left-line"></i> Back
+      </a>
+    </div>
+  </div>
 
-            <div class="card-title text-center">
-               <h5><span>{{data.exam_label}}</span></h5>
-            </div>
+  <!-- ② Student + Exam Info Grid -->
+  <div class="info-grid">
+
+    <!-- Student Details -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-header-icon"><i class="ri-graduation-cap-line"></i></div>
+        <span class="info-card-title">Student Details</span>
+      </div>
+      <div class="info-card-body">
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-row-label">Name</span>
+            <span class="info-row-value">{{ data.exam_stu }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Father</span>
+            <span class="info-row-value">{{ data.exam_stu.father_name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Class</span>
+            <span class="info-row-value">{{ data.exam_label.exam_class }}</span>
+          </div>
         </div>
-        <br><br><br>
-        <div class="text-end">
-            <a href="{{request.META.HTTP_REFERER}}" class="btn btn-md btn-primary">Back</a>
+        {% if data.exam_stu.student_photo %}
+        <img src="https://mithran.co.in/media/{{ data.exam_stu.student_photo }}"
+             alt="Student Photo" class="student-photo">
+        {% else %}
+        <div class="student-photo-placeholder">
+          <i class="ri-user-line"></i>
         </div>
-		<div class="card-body">
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6">
-
-
-                <div class="card mb-3">
-                    <div class="card-header wlsm-form-sub-heading wlsm-font-bold text-center">
-                         <h5 class="profession-title">
-                            <span class="profession-label gradient">
-                                <i class="ri-graduation-cap-line"></i>
-                                Student Details
-                            </span>
-                         </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                             <div class="col-md-8">
-                        <ul class="list-group list-group-timeline">
-                            <li class="list-group-item list-group-timeline-primary"><span class="wlsm-font-bold">Student Name:</span>
-                                <span >{{ data.exam_stu }}</span></li>
-
-                            <li class="list-group-item list-group-timeline-warning">
-                                <span class="wlsm-font-bold">Father Name:</span>
-                                <span >{{ data.exam_stu.father_name }}</span>
-                            </li>
-                            <li class="list-group-item list-group-timeline-secondary">
-                                <span class="wlsm-font-bold">Class:</span>
-                                <span >{{ data.exam_label.exam_class }}</span>
-                            </li>
-                             <li class="list-group-item">
-                                <br>
-                            </li>
-                        </ul>
-                        </div>
-                            <div class="col-md-4">
-
-                                 <img  src="https://mithran.co.in/media/{{data.exam_stu.student_photo}}" alt="image" width="130" height="150"  />
-                             </div>
-                        </div>
-                    </div>
-                </div>
-               </div>
-
-
-
-
-            <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-header wlsm-form-sub-heading wlsm-font-bold text-center">
-                         <h5 class="profession-title">
-                            <span class="profession-label gradient">
-                                <i class="ri-file-list-3-line"></i>
-                                Exam Details
-                            </span>
-                         </h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-timeline">
-                            <li class="list-group-item list-group-timeline-danger">
-                                <span class="wlsm-font-bold">Exam Title:</span>
-                                <span>{{ data.exam_label }}</span>
-                            </li>
-                            <li class="list-group-item list-group-timeline-primary">
-                                <span class="wlsm-font-bold">Exam Center:</span>
-                                <span>{{ data.exam_label.exam_centre }}</span>
-                            </li>
-                            <li class="list-group-item list-group-timeline-secondary">
-                                <span class="wlsm-font-bold">Start Date:</span>
-                                <span>{{ data.exam_label.exam_start_date }}</span>
-                            </li>
-                            <li class="list-group-item list-group-timeline-warning">
-                                <span class="wlsm-font-bold">End Date:</span>
-                                <span>{{ data.exam_label.exam_end_date }}</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endif %}
+      </div>
     </div>
 
- <div class="container mt-5">
-        <div class="card">
-            <div class="card-header text-center">
-                <button type="button" class="btn btn-dark waves-effect waves-light" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-info" data-bs-original-title="Update Marks">
-                      Marks Updation
-                    </button>
-
-            </div>
-            <div class="card-body">
-                <form method="post" onsubmit="return enableFieldsBeforeSubmit();">
-                    {% csrf_token %}
-                    {{ formset.management_form }}
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped table-bordered">
-                            <thead class="table-dark ">
-                                <tr>
-                                    <th><center>Subject</center></th>
-                                    <th><center>Mark</center></th>
-                                    <th><center>Remark</center></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for form in formset %}
-                                <tr>
-
-
-                                  <td>{{ form.subb }}</td>
-                                  <td>{{ form.obtained_marks }}</td>
-
-                                  <td>{{ form.remark }}</td>
-
-                                </tr>
-                                 {{ form.exam_sub }}
-                                  {{ form.adm_card }}
-                                  {{ form.id }}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Submit</button>&nbsp;&nbsp;&nbsp;
-
-                    <a href="{{request.META.HTTP_REFERER}}"type="button" class="btn btn-warning">&nbsp;Back&nbsp;</a>
-                    </div>
-                </form>
-            </div>
+    <!-- Exam Details -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-header-icon" style="background:var(--sky);">
+          <i class="ri-file-list-3-line"></i>
         </div>
+        <span class="info-card-title">Exam Details</span>
+      </div>
+      <div class="info-card-body" style="flex-direction:column; padding:18px;">
+        <div class="info-rows" style="width:100%;">
+          <div class="info-row">
+            <span class="info-row-label">Exam Title</span>
+            <span class="info-row-value">{{ data.exam_label }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Centre</span>
+            <span class="info-row-value">{{ data.exam_label.exam_centre }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Start Date</span>
+            <span class="td-date">{{ data.exam_label.exam_start_date }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">End Date</span>
+            <span class="td-date">{{ data.exam_label.exam_end_date }}</span>
+          </div>
+        </div>
+      </div>
     </div>
+
+  </div>
+
+  <!-- ③ Marks Updation Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Marks Updation</p>
+        <p class="pc-card-sub">Enter marks and remarks for each subject</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-edit-2-line" style="font-size:12px;"></i> Editing
+      </span>
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      <form id="marksform" method="POST" onsubmit="return enableFieldsBeforeSubmit();">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        <div class="pc-table-wrap" style="border-radius:0; border:none;">
+          <table class="pc-table">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding-left:18px;">Subject</th>
+                <th>Mark</th>
+                <th>Remark</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for form in formset %}
+              <tr>
+                <td style="text-align:left; padding-left:18px; font-weight:600; color:var(--text);">
+                  <div class="pc-form-group" style="margin-bottom:0;">{{ form.subb }}</div>
+                </td>
+                <td>
+                  <div class="pc-form-group" style="margin-bottom:0;" style="max-width:120px; margin:0 auto;">
+                    {{ form.obtained_marks }}
+                  </div>
+                </td>
+                <td>
+                  <div class="pc-form-group" style="margin-bottom:0;" style="max-width:200px; margin:0 auto;">
+                    {{ form.remark }}
+                  </div>
+                </td>
+              </tr>
+              <!-- Hidden formset fields -->
+              <tr class="nb-hidden">
+                <td>{{ form.exam_sub }}{{ form.adm_card }}{{ form.id }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pc-card-footer" style="border-radius:0;">
+          <p class="pc-card-sub" style="margin:0;">
+            <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+            Ensure all marks are entered correctly before submitting.
+          </p>
+          <div style="display:flex; gap:10px;">
+            <a href="{{ request.META.HTTP_REFERER }}" class="pc-btn pc-btn-outline">
+              <i class="ri-arrow-left-line"></i> Back
+            </a>
+            <button type="submit" form="marksform" class="pc-btn pc-btn-primary">
+              <i class="ri-save-line"></i> Submit Marks
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+  </div><!-- /pc-card -->
+
+</div>
+
 <script>
-    function enableFieldsBeforeSubmit() {
-
-    }
+function enableFieldsBeforeSubmit() {
+  return true;
+}
 </script>
-</div>
-    </div>
-</div>
 
 {% endblock %}

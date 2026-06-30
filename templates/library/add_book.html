@@ -1,126 +1,167 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h5, label, button, input, select, textarea {
-    font-family: 'Roboto', sans-serif;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
 }
-
-/* ===== CARD ===== */
-/* ===== TITLE BAR (REDUCED SIZE) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 20px 20px 0 0;
-    padding: 0 !important;
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
+.pc-form-group input::placeholder { color: var(--muted); }
 
-.card-title h5 {
-    margin: 0;
+/* Section label */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
-
-.card-title h5 span {
-    background: #f8f9fa;
-    color: #000;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-}
-
-
-/* ===== FORM GRID ===== */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 15px;
-}
-
-/* ===== FLOATING LABEL FIX ===== */
-.form-floating label {
-    font-weight: 600;
-}
-
-/* Card padding */
-.card-body {
-    padding: 25px 35px;
-}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 </style>
 
-<br><br>
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- TITLE -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">New Book</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <form id="add_book" method="POST">
-                {% csrf_token %}
-
-                <div class="form-row">
-                    <div class="form-floating form-floating-outline">
-                        {{ form.title }}
-                        <label for="{{ form.title.id_for_label }}">Title</label>
-                    </div>
-
-                    <div class="form-floating form-floating-outline">
-                        {{ form.author }}
-                        <label for="{{ form.author.id_for_label }}">Author</label>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-floating form-floating-outline">
-                        {{ form.subject }}
-                        <label for="{{ form.subject.id_for_label }}">Subject</label>
-                    </div>
-
-                    <div class="form-floating form-floating-outline">
-                        {{ form.rack }}
-                        <label for="{{ form.rack.id_for_label }}">Rack</label>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-floating form-floating-outline">
-                        {{ form.book_no }}
-                        <label for="{{ form.book_no.id_for_label }}">Book No</label>
-                    </div>
-
-                    <div class="form-floating form-floating-outline">
-                        {{ form.isbn }}
-                        <label for="{{ form.isbn.id_for_label }}">ISBN</label>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-floating form-floating-outline">
-                        {{ form.price }}
-                        <label for="{{ form.price.id_for_label }}">Price</label>
-                    </div>
-
-                    <div class="form-floating form-floating-outline">
-                        {{ form.quantity }}
-                        <label for="{{ form.quantity.id_for_label }}">Quantity</label>
-                    </div>
-                </div>
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary mt-3">Submit</button>
-                    <button type="reset" class="btn btn-danger mt-3">Clear</button>
-                </div>
-            </form>
-
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'books_list' %}">Books</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>New Book</span>
+      </nav>
+      <h1 class="pc-page-title">New Book</h1>
+      <p class="pc-page-sub">Add a new book entry to the library catalogue.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Book Details</p>
+        <p class="pc-card-sub">Fill in all required fields before submitting</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-book-2-line" style="font-size:12px;"></i> New Book
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="add_book" method="POST">
+        {% csrf_token %}
+
+        <!-- ── Book Info ── -->
+        <p class="form-section-label"><i class="ri-book-open-line"></i> Book Info</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Title <span style="color:var(--rose)">*</span></label>
+              {{ form.title }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Author <span style="color:var(--rose)">*</span></label>
+              {{ form.author }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Subject</label>
+              {{ form.subject }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">ISBN</label>
+              {{ form.isbn }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Location & Stock ── -->
+        <p class="form-section-label"><i class="ri-archive-line"></i> Location &amp; Stock</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Rack</label>
+              {{ form.rack }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Book No</label>
+              {{ form.book_no }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Price <span style="color:var(--rose)">*</span></label>
+              {{ form.price }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Quantity <span style="color:var(--rose)">*</span></label>
+              {{ form.quantity }}
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-shield-check-line" style="color:var(--green); margin-right:4px;"></i>
+        Fields marked <span style="color:var(--rose); font-weight:700;">*</span> are required.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'books_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="add_book" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="add_book" class="pc-btn pc-btn-primary">
+          <i class="ri-book-2-line"></i> Add Book
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
 {% endblock %}

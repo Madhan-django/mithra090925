@@ -1,111 +1,95 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, th, td, label, button, .page-link, select, textarea {
-    font-family: 'Roboto', sans-serif;
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
 }
-
-/* ===== CARD ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    overflow: hidden;
-    margin-bottom: 20px;
-    background-color: #fff;
-}
-
-/* ===== TITLE BAR (STYLE A BADGE) ===== */
-.card-title {
-    background: linear-gradient(135deg, #1a73e8, #0056d6);
-    padding: 6px 0;
-    text-align: center;
-}
-.card-title h5 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-}
-.card-title h5 span.badge {
-    background: #fff;
-    color: #000;
-    padding: 5px 12px;
-    border-radius: 10px;
-    font-size: 15px;
-}
-
-/* ===== INLINE ROW ===== */
-.form-inline-row {
-    display: flex;
-    align-items: center;       /* Keeps button & field aligned */
-    gap: 15px;
-}
-
-/* WIDTH FOR THE SELECT FIELD */
-.input-container select {
-    width: 900px !important;   /* 4× width */
-    height: 38px !important;
-    padding: 5px 10px !important;
-    border-radius: 10px;
-    border: 1px solid #ced4da;
-    font-size: 14px;
-}
-
-/* BUTTON SMALL */
-.button-container button {
-    height: 36px !important;
-    padding: 0 20px !important;
-    font-size: 14px;
-    border-radius: 8px;
-}
-
-/* ===== SUBMIT BUTTON STYLE ===== */
-.btn-success {
-    background: linear-gradient(135deg, #28a745, #218838);
-    color: #fff;
-    font-weight: 600;
-    border: none;
-}
-.btn-success:hover {
-    background: linear-gradient(135deg, #218838, #28a745);
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 </style>
 
+<div class="col-lg-12">
 
-<!-- CARD -->
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <div class="card-title text-center">
-            <h5><span class="badge">Update Fee Category</span></h5>
-        </div>
-
-        <div class="card-body">
-
-            <form action="" method="POST">
-                {% csrf_token %}
-
-                <div class="form-inline-row">
-
-                    <!-- Select Field -->
-                    <div class="input-container">
-                        {{ form.fee_cat }}
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="button-container">
-                        <button type="submit" class="btn btn-success btn-sm">Submit</button>
-                        <a href="{% url 'invoices' %}" class="btn btn-danger">Clear</a>
-                    </div>
-
-                </div>
-
-            </form>
-
-        </div>
-
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'invoices' %}">Fee Details</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Change Fee Category</span>
+      </nav>
+      <h1 class="pc-page-title">Change Fee Category</h1>
+      <p class="pc-page-sub">Select a new fee category to reassign this invoice.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Fee Category</p>
+        <p class="pc-card-sub">Choose the correct category for this invoice</p>
+      </div>
+      <span class="pc-badge pc-badge-warning pc-badge-no-dot">
+        <i class="ri-swap-2-line" style="font-size:12px;"></i> Change
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="changecatform" method="POST" action="">
+        {% csrf_token %}
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Fee Category <span style="color:var(--rose);">*</span></label>
+              {{ form.fee_cat }}
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-information-line" style="color:var(--accent); margin-right:4px;"></i>
+        This will reassign the invoice to the selected fee category.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'invoices' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="submit" form="changecatform" class="pc-btn pc-btn-warning">
+          <i class="ri-swap-2-line"></i> Submit Change
+        </button>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
 {% endblock %}

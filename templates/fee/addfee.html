@@ -2,179 +2,378 @@
 {% block content %}
 
 <style>
-    /* === General Typography === */
-    body, h1, h3, h4, h5, label, input, select, button {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── pc-form-group inputs (--m-* design system) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select,
+.pc-form-group textarea {
+  width: 100%;
+  background: #f8fafc;
+  border: 1.5px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 9px 13px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+  background-color: #f8fafc;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus,
+.pc-form-group textarea:focus {
+  border-color: var(--m-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--m-accent-glow);
+}
+.pc-form-group input::placeholder { color: var(--m-text-3); }
 
-    /* === Card Layout === */
-    .card {
-        border-radius: 22px;
-        box-shadow: 0px 4px 14px rgba(0,0,0,0.18);
-        border: none;
-    }
+/* pc-label override for --m-* system */
+.pc-form-group .pc-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--m-text-2);
+  margin-bottom: 5px;
+  display: block;
+}
 
-    /* === Title Bar (Style A, reduced height) === */
-    .card-title {
-        background: linear-gradient(to right, #1e5799, #207cca, #2989d8);
-        padding: 8px 0; /* reduced height */
-        border-radius: 22px 22px 0 0;
-        margin-bottom: 0;
-    }
+/* Checkbox row */
+.nb-field-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  background: #f8fafc;
+  border: 1.5px solid var(--m-border);
+  border-radius: var(--m-radius);
+  cursor: pointer;
+  transition: border-color 150ms;
+  margin: 0;
+}
+.nb-field-check:hover { border-color: var(--m-accent); }
+.nb-field-check input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  accent-color: var(--m-accent);
+  cursor: pointer;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  flex-shrink: 0;
+}
+.nb-field-check span {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text-2);
+}
 
-    .card-title h5 {
-        margin: 0;
-        font-size: 14px;
-    }
+/* Section label */
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--m-text-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 14px;
+}
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--m-border);
+}
+.form-section-label i {
+  font-size: 13px;
+  color: var(--m-accent);
+  opacity: .8;
+}
 
-    .card-title span.badge {
-        background: #fff;
-        color: #000;
-        padding: 5px 18px; /* smaller badge */
-        border-radius: 25px;
-        font-size: 15px;
-        font-weight: bold;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    }
+/* ── pc-card ── */
+.pc-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius-lg);
+  box-shadow: var(--m-shadow);
+  overflow: hidden;
+}
+.pc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--m-border-soft);
+}
+.pc-card-title {
+  font-family: var(--m-font);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--m-text);
+  margin: 0 0 2px;
+}
+.pc-card-sub {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-3);
+  margin: 0;
+}
+.pc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--m-font);
+  font-size: 12px;
+  font-weight: 600;
+}
+.pc-badge-primary {
+  background: rgba(37,99,235,0.1);
+  color: var(--m-accent);
+  border: 1px solid rgba(37,99,235,0.2);
+}
+.pc-card-body { padding: 22px; }
+.pc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  background: #f8fafc;
+  border-top: 1px solid var(--m-border-soft);
+  margin: 24px -22px -22px;
+}
 
-    /* === Form Styling === */
-    label {
-        font-weight: 600;
-        font-size: 14px;
-    }
+/* ── Page header ── */
+.pc-page-header { display: flex; align-items: flex-start; justify-content: space-between; }
+.pc-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--m-font);
+  font-size: 12px;
+  color: var(--m-text-3);
+  margin-bottom: 4px;
+}
+.pc-breadcrumb a { color: var(--m-accent); text-decoration: none; }
+.pc-breadcrumb a:hover { text-decoration: underline; }
+.pc-breadcrumb-sep { color: var(--m-text-3); }
+.pc-page-title {
+  font-family: var(--m-font);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--m-text);
+  margin: 0 0 4px;
+  letter-spacing: -0.4px;
+}
+.pc-page-sub {
+  font-family: var(--m-font);
+  font-size: 13px;
+  color: var(--m-text-3);
+  margin: 0;
+}
 
-    .form-control, select {
-        border-radius: 10px;
-        font-size: 14px;
+/* ── Buttons ── */
+.pc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: var(--m-radius);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.pc-btn:hover { transform: translateY(-1px); }
+.pc-btn:active { transform: translateY(0); }
+.pc-btn-primary {
+  background: var(--m-accent);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+.pc-btn-primary:hover {
+  background: var(--m-accent-2);
+  box-shadow: 0 6px 18px rgba(37,99,235,0.4);
+}
+.pc-btn-outline {
+  background: #fff;
+  color: var(--m-text-2);
+  border: 1.5px solid var(--m-border) !important;
+}
+.pc-btn-outline:hover {
+  border-color: #dc2626 !important;
+  color: #dc2626;
+}
 
-    }
+/* Hidden */
+.nb-hidden { display: none; }
 
-    .form-row {
-        margin-bottom: 12px;
-    }
-
-    /* === Buttons === */
-    .btn-primary {
-        background: linear-gradient(to right, #1e5799, #207cca);
-        border: none;
-        padding: 8px 28px;
-        font-weight: 600;
-        border-radius: 25px;
-    }
-
-    .btn-danger {
-        background: linear-gradient(to right, #e63946, #d62839); /* red gradient */
-        border: none;
-        padding: 8px 28px;
-        font-weight: 600;
-        border-radius: 25px;
-    }
-
+@media (max-width: 640px) {
+  .pc-card-footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+}
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- Title Bar -->
-        <div class="card-title text-center">
-            <h5>
-                <span class="badge bg-light text-dark">New Fee Category</span>
-            </h5>
-        </div>
-
-        <div class="card-body">
-            <div class="container">
-
-                <form id="addfee" action="" method="POST">
-                    {% csrf_token %}
-
-                    <div class="row">
-
-                        <!-- Left Column -->
-                        <div class="col-md-6">
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Invoice Title:</label></div>
-                                <div class="form-group col-md-8">{{ form.invoice_title }}</div>
-                            </div>
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Description:</label></div>
-                                <div class="form-group col-md-8">{{ form.desc }}</div>
-                            </div>
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Invoice Date:</label></div>
-                                <div class="form-group col-md-8">{{ form.issued_date }}</div>
-                            </div>
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Due Date:</label></div>
-                                <div class="form-group col-md-8">{{ form.due_date }}</div>
-                            </div>
-
-                        </div>
-
-                        <!-- Right Column -->
-                        <div class="col-md-6">
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Class:</label></div>
-                                <div class="form-group col-md-8">
-                                    <select name="iclass" class="form-control" required id="id_iclass">
-                                        <option value="">---------</option>
-                                        {% for option in options %}
-                                        <option value="{{ option.id }}">{{ option.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Fee Amount:</label></div>
-                                <div class="form-group col-md-4">{{ form.fee_amount }}</div>
-
-                                <div class="form-group col-md-4">
-                                    <label>Late Fee:</label>
-                                    {{ form.latefee }}
-                                </div>
-                            </div>
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Is-Active:</label></div>
-                                <div class="form-group col-md-8">{{ form.isactive }}</div>
-                            </div>
-
-                            <div class="form-row align-items-center">
-                                <div class="form-group col-md-4"><label>Fee Year:</label></div>
-                                <div class="form-group col-md-8">
-                                    <select name="ac_year" class="form-control" required id="id_ac_year">
-                                        <option value="">---------</option>
-                                        {% for yr in yr2 %}
-                                        <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            {{ form.fees_school }}
-
-                        </div>
-
-                    </div>
-
-                    <br>
-
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary me-3">Submit</button>
-                        <button type="reset" class="btn btn-danger">Clear</button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div>
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'fee_details' %}">Finance</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Fee Category</span>
+      </nav>
+      <h1 class="pc-page-title">New Fee Category</h1>
+      <p class="pc-page-sub">Create a new fee structure for a class and academic year.</p>
     </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="pc-card">
+
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Fee Category Details</p>
+        <p class="pc-card-sub">Fill in the invoice and fee configuration below</p>
+      </div>
+      <span class="pc-badge pc-badge-primary">
+        <i class="ri-price-tag-3-line" style="font-size:12px;"></i> Fee Setup
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="addfee" action="" method="POST">
+        {% csrf_token %}
+
+        <!-- Hidden field -->
+        <div class="nb-hidden">{{ form.fees_school }}</div>
+
+        <!-- Section 1: Invoice Details -->
+        <p class="form-section-label"><i class="ri-file-text-line"></i> Invoice Details</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Invoice Title <span style="color:#e63946">*</span></label>
+              {{ form.invoice_title }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Description</label>
+              {{ form.desc }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Invoice Date <span style="color:#e63946">*</span></label>
+              {{ form.issued_date }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Due Date <span style="color:#e63946">*</span></label>
+              {{ form.due_date }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section 2: Fee Configuration -->
+        <p class="form-section-label"><i class="ri-money-rupee-circle-line"></i> Fee Configuration</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Class <span style="color:#e63946">*</span></label>
+              <select name="iclass" required id="id_iclass">
+                <option value="">— Select Class —</option>
+                {% for option in options %}
+                <option value="{{ option.id }}">{{ option.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Academic Year <span style="color:#e63946">*</span></label>
+              <select name="ac_year" required id="id_ac_year">
+                <option value="">— Select Year —</option>
+                {% for yr in yr2 %}
+                <option value="{{ yr.id }}">{{ yr.acad_year }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Fee Amount <span style="color:#e63946">*</span></label>
+              {{ form.fee_amount }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Late Fee</label>
+              {{ form.latefee }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Status</label>
+              <label class="nb-field-check">
+                {{ form.isactive }}
+                <span>Mark this fee category as Active</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="pc-card-footer">
+          <p class="pc-card-sub">
+            <i class="ri-shield-check-line" style="color:#059669; margin-right:4px;"></i>
+            Fields marked <span style="color:#e63946; font-weight:700;">*</span> are required.
+          </p>
+          <div style="display:flex; gap:10px;">
+            <button type="reset" class="pc-btn pc-btn-outline">
+              <i class="ri-eraser-line"></i> Clear
+            </button>
+            <button type="submit" class="pc-btn pc-btn-primary">
+              <i class="ri-save-line"></i> Save Category
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
 </div>
 
 {% endblock %}

@@ -1,163 +1,174 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
 <style>
-/* ===== GLOBAL FONT ===== */
-body, h1, h3, h4, h5, label, input, select, textarea, button {
-    font-family: 'Roboto', sans-serif !important;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
 }
-
-/* ===== CARD STYLE ===== */
-.card {
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
 }
-
-/* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
+.pc-form-group input::placeholder { color: var(--muted); }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* Section label */
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 14px;
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
-}
-
-
-/* ===== FLOATING OUTLINE FIX ===== */
-.form-floating > label {
-    padding-left: 10px !important;
-    font-size: 15px;
-}
-
-.form-floating-outline .form-control {
-    height: 55px !important;
-    padding-top: 15px !important;
-}
-
-.form-floating-outline {
-    margin-bottom: 20px;
-}
-
-/* ===== BUTTONS ===== */
-.btn-info {
-    background: linear-gradient(135deg, #009ffd, #2a2a72);
-    color: #fff;
-    font-weight: bold;
-    padding: 10px 25px;
-    border-radius: 10px;
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ff4e4e, #b30000);
-    color: white;
-    padding: 10px 25px;
-    border-radius: 10px;
-}
-
-/* ===== ROW GAP ===== */
-.row {
-    margin-bottom: 10px;
-}
-
+.form-section-label:first-child { margin-top: 0; }
+.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.form-section-label i { font-size: 13px; color: var(--accent); opacity: .7; }
 </style>
 
-<br><br>
+<div class="col-lg-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-
-        <!-- ===== TITLE BAR WITH BADGE STYLE A ===== -->
-        <div class="card-title text-center">
-            <h5 class="mb-0">
-                <span class="badge bg-light text-dark">Generate Library Card</span>
-            </h5>
-        </div>
-
-        <div class="card-body">
-            <form id="libgen_form" data-section-url="{% url 'ajax_load_section' %}"
-                  method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <input class="form-control" type="text" name="prefix" id="id_prefix">
-                            <label for="id_prefix">Prefix</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <input class="form-control" type="text" name="start_no" id="startno">
-                            <label for="startno">Starting No</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-6">
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select class="form-control" id="id_class_name" name="class_name">
-                                <option value="">Select Class</option>
-                                {% for cls in lib_class %}
-                                <option value="{{cls.id}}">{{cls.name}}</option>
-                                {% endfor %}
-                            </select>
-                            <label for="id_class_name">Class</label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating form-floating-outline">
-                            <select class="form-control" name="secs" id="id_secs">
-                                <option value="">Select Section</option>
-                            </select>
-                            <label for="id_secs">Section</label>
-
-                            <input type="hidden" name="year" value="{{ year }}">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-end">
-                    <button type="submit" class="btn btn-info">Submit</button>
-                    <button type="reset" class="btn btn-danger">Clear</button>
-                </div>
-
-            </form>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'library_cards' %}">Library Cards</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Generate Cards</span>
+      </nav>
+      <h1 class="pc-page-title">Generate Library Cards</h1>
+      <p class="pc-page-sub">Bulk generate library cards for a class and section.</p>
     </div>
+  </div>
+
+  <!-- ② Form Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Card Generation Settings</p>
+        <p class="pc-card-sub">Set prefix, starting number and target class</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-id-card-line" style="font-size:12px;"></i> Generate
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="libgen_form"
+            data-section-url="{% url 'ajax_load_section' %}"
+            method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Hidden academic year -->
+        <input type="hidden" name="year" value="{{ year }}">
+
+        <!-- ── Card Numbering ── -->
+        <p class="form-section-label"><i class="ri-hashtag"></i> Card Numbering</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Prefix</label>
+              <input type="text" name="prefix" id="id_prefix"
+                     placeholder="e.g. LIB-">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Starting Number <span style="color:var(--rose)">*</span></label>
+              <input type="text" name="start_no" id="startno"
+                     placeholder="e.g. 1001" required>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Target Class ── -->
+        <p class="form-section-label"><i class="ri-building-line"></i> Target Class</p>
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+              <select id="id_class_name" name="class_name" required>
+                <option value="">— Select Class —</option>
+                {% for cls in lib_class %}
+                <option value="{{ cls.id }}">{{ cls.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Section <span style="color:var(--rose)">*</span></label>
+              <select name="secs" id="id_secs" required>
+                <option value="">— Select class first —</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /pc-card-body -->
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-information-line" style="color:var(--accent); margin-right:4px;"></i>
+        Cards will be generated for all students in the selected class and section.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'library_cards' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
+        <button type="reset" form="libgen_form" class="pc-btn pc-btn-outline">
+          <i class="ri-eraser-line"></i> Clear
+        </button>
+        <button type="submit" form="libgen_form" class="pc-btn pc-btn-primary">
+          <i class="ri-id-card-line"></i> Generate Cards
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
-<script type="text/javascript">
-$(document).ready(function(){
-    $("#id_class_name").change(function(){
-        var url = $("#libgen_form").attr("data-section-url");
-        var classId = $(this).val();
-
-        $.ajax({
-            url: url,
-            data: {'Class_Id': classId},
-            success: function (data) {
-                $("#id_secs").html(data);
-            }
-        });
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+$(document).ready(function () {
+  $("#id_class_name").change(function () {
+    $.ajax({
+      url: $("#libgen_form").attr("data-section-url"),
+      data: { 'Class_Id': $(this).val() },
+      success: function (data) {
+        $("#id_secs").html(data);
+      }
     });
+  });
 });
 </script>
 

@@ -1,216 +1,289 @@
 {% extends 'panel/index.html' %}
-
 {% block content %}
+
 <style>
-    /* General Typography */
-    h1, h3, h5, th, td {
-        font-family: 'Roboto', sans-serif;
-    }
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: blkRowIn .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes blkRowIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 65ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 95ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:125ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:155ms; }
 
-    /* Card Layout - full width look */
-    .col-lg-12.grid-margin.stretch-card {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Add Building Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.nb-modal {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(15,23,42,.5); backdrop-filter:blur(5px);
+  align-items:center; justify-content:center;
+}
+.nb-modal.active { display:flex; }
+.nb-modal-box {
+  background:var(--surface); border-radius:var(--r-xl);
+  box-shadow:var(--sh-lg); width:100%; max-width:440px;
+  margin:20px; overflow:hidden;
+  animation:modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  padding:18px 22px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface2);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.nb-modal-header-title {
+  font-size:15px; font-weight:700; color:var(--text);
+}
+.nb-modal-close {
+  width:28px; height:28px; border-radius:var(--r-sm);
+  border:1.5px solid var(--border-dark); background:var(--surface);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--text-sm); font-size:14px;
+  transition:background 150ms ease, color 150ms ease;
+  flex-shrink:0;
+}
+.nb-modal-close:hover { background:var(--rose-lt); color:var(--rose); border-color:#fecdd3; }
+.nb-modal-body { padding:22px; }
+.nb-modal-footer {
+  padding:14px 22px; background:var(--surface2); border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:flex-end; gap:10px;
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Form field inside modal ── */
+.pc-form-group input:not([type=hidden]) {
+  width:100%;
+  background:var(--surface);
+  border:1.5px solid var(--border-dark);
+  border-radius:var(--r);
+  padding:9px 13px;
+  font-family:var(--f-sans); font-size:13.5px; color:var(--text);
+  outline:none;
+  transition:border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing:border-box;
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+.pc-form-group input:not([type=hidden]):focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(79,70,229,.12);
 }
+.pc-form-group input::placeholder { color:var(--muted); }
+.pc-form-group .error { font-size:11.5px; color:var(--rose); font-weight:600; margin-top:3px; }
 
-
-    /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+/* ── Delete Modal ── */
+.nb-modal-del-header {
+  background:var(--rose-lt); padding:20px 22px 16px;
+  border-bottom:1px solid #fecdd3; display:flex; align-items:center; gap:12px;
 }
+.nb-modal-icon {
+  width:42px; height:42px; border-radius:50%; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(225,29,72,.15); flex-shrink:0;
+}
+.nb-modal-body p { font-size:13.5px; color:var(--text-md); margin:0; line-height:1.7; }
 
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        border: none;
-    }
-
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056d2;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #b52a36;
-    }
-
-    /* Alert Styling */
-    .alert {
-        width: 95%;
-        margin: 20px auto;
-        font-size: 15px;
-    }
+/* ── Hidden field ── */
+.nb-hidden { display:none; }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="col-lg-12">
 
-        <!-- Header -->
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Blocks</span></h5>
-        </div>
-
-        <!-- Add Button -->
-        <div class="container text-end my-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newblock">
-                + New Building
-            </button>
-        </div>
-
-        <!-- Modal -->
-        <div class="modal fade" id="newblock" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-md modal-dialog-centered">
-                <div class="modal-content">
-                    <button type="button" class="btn-close ms-auto mt-2 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div class="modal-body">
-                        <div class="text-center mb-3">
-                            <h5 class="mb-2">Add New Building</h5>
-                        </div>
-                        <form method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            {{ form.school }}
-                            <div class="mb-3">
-                                <label for="{{ form.name.id_for_label }}" class="form-label">Building Name</label>
-                                {{ form.name }}
-                                {% if form.name.errors %}
-                                    <div class="text-danger small">{{ form.name.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table -->
-        <div class="card-body pt-0 mt-0">
-            {% if data %}
-            <table class="table table-bordered table-striped align-middle text-center">
-                <thead class="table-dark">
-                    <tr>
-                        <th>S.No</th>
-                        <th>Building Name</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for block in data %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ block.name }}</td>
-                        <td>
-                            <a href="{% url 'edit_block' block.id %}" class="btn btn-primary btn-sm">Edit</a>
-                            <a href="{% url 'delete_block' block.id %}" class="btn btn-danger btn-sm">Delete</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="alert alert-danger text-center" role="alert">
-                No records available to show.
-            </div>
-            {% endif %}
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="#">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Blocks</span>
+      </nav>
+      <h1 class="pc-page-title">Blocks</h1>
+      <p class="pc-page-sub">Manage school building and block records.</p>
     </div>
+    <div class="pc-page-header-right">
+      <button type="button" class="pc-btn pc-btn-primary" onclick="openAddModal()">
+        <i class="ri-add-line"></i> New Building
+      </button>
+    </div>
+  </div>
+
+  <!-- ② Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">All Buildings</p>
+        <p class="pc-card-sub">
+          {% if data %}{{ data|length }} record{{ data|length|pluralize }}{% else %}No records{% endif %}
+        </p>
+      </div>
+      {% if data %}
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-building-line" style="font-size:12px;"></i>
+        {{ data|length }} Total
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if data %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:60px;">#</th>
+              <th style="text-align:left;">Building Name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for block in data %}
+            <tr>
+              <td class="td-num">{{ forloop.counter }}</td>
+              <td class="td-name">{{ block.name }}</td>
+              <td>
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <a href="{% url 'edit_block' block.id %}"
+                     class="pc-btn pc-btn-secondary pc-btn-sm">
+                    <i class="ri-pencil-line"></i> Edit
+                  </a>
+                  <button type="button"
+                    class="pc-btn pc-btn-danger pc-btn-sm"
+                    onclick="openDeleteModal('{% url 'delete_block' block.id %}', '{{ block.name|escapejs }}')">
+                    <i class="ri-delete-bin-7-line"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-building-line"></i></span>
+        <p class="pc-empty-title">No buildings found</p>
+        <p class="pc-empty-sub">Click <strong>New Building</strong> to add the first one.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if data %}
+    <div class="pc-card-footer">
+      <span class="pc-pagination-info">
+        Showing <strong>{{ data|length }}</strong> building{{ data|length|pluralize }}
+      </span>
+      <button type="button" class="pc-btn pc-btn-secondary pc-btn-sm" onclick="openAddModal()">
+        <i class="ri-add-line"></i> Add Another
+      </button>
+    </div>
+    {% endif %}
+
+  </div><!-- /pc-card -->
+
 </div>
+
+<!-- ══ ADD BUILDING MODAL ══ -->
+<div id="addModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div>
+        <div class="nb-modal-header-title">Add New Building</div>
+        <div style="font-size:12px; color:var(--text-sm); margin-top:2px;">
+          Enter the building name below
+        </div>
+      </div>
+      <button type="button" class="nb-modal-close" onclick="closeAddModal()">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="nb-modal-body">
+      <form id="addBlockForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="nb-hidden">{{ form.school }}</div>
+        <div class="pc-form-group">
+          <label class="pc-label">Building Name <span style="color:var(--rose);">*</span></label>
+          {{ form.name }}
+          {% if form.name.errors %}
+          <span class="error">{{ form.name.errors }}</span>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeAddModal()">
+        Cancel
+      </button>
+      <button type="submit" form="addBlockForm" class="pc-btn pc-btn-primary">
+        <i class="ri-save-line"></i> Save Building
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DELETE MODAL ══ -->
+<div id="deleteModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-del-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Building</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body" style="padding:22px;">
+      <p>Are you sure you want to delete
+        <strong id="deleteBlockLabel" style="color:var(--text);"></strong>?
+        This building record will be <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <a id="deleteBlockLink" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Add modal ── */
+function openAddModal()  { document.getElementById('addModal').classList.add('active'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('active'); }
+
+/* ── Delete modal ── */
+function openDeleteModal(url, label) {
+  document.getElementById('deleteBlockLabel').textContent = label;
+  document.getElementById('deleteBlockLink').href = url;
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('active'); }
+
+/* Backdrop + Escape */
+['addModal','deleteModal'].forEach(function(id) {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+  });
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeAddModal();
+    closeDeleteModal();
+  }
+});
+
+/* Auto-open add modal if form has errors (validation failed) */
+{% if form.errors %}
+document.addEventListener('DOMContentLoaded', function() { openAddModal(); });
+{% endif %}
+</script>
 
 {% endblock %}

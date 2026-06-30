@@ -2,247 +2,337 @@
 {% block content %}
 
 <style>
-    /* === General Typography === */
-    body, h1, h3, h4, h5, th, td, label {
-        font-family: 'Roboto', sans-serif;
-    }
-
-
-    .card {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 0;
-    }
-
-   /* ===== TITLE BAR (Gradient + Badge) ===== */
-.card-title {
-    background: linear-gradient(90deg, #005C97, #363795);
-    padding: 4px  !important;
-    border-radius: 20px 20px 0 0;
+/* ── Widget styling (pc-form-group wrappers) ── */
+.pc-form-group input:not([type=hidden]),
+.pc-form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-sizing: border-box;
+}
+.pc-form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.pc-form-group input:not([type=hidden]):focus,
+.pc-form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 
-.card-title h5 {
-    margin: 0;
-    font-size: 17px;                  /* reduced */
-    font-weight: 500;
-
+/* ── Row stagger ── */
+.pc-table tbody tr {
+  animation: tsRowIn .3s cubic-bezier(.22,1,.36,1) both;
 }
-
-.card-title span.badge {
-    background: #f8f9fa;
-    color: #000;
-    font-size: 13px;                  /* reduced badge font */
-    padding: 4px 20px;                /* reduced badge padding */
-    border-radius: 6px;
+@keyframes tsRowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.pc-table tbody tr:nth-child(1) { animation-delay:  0ms; }
+.pc-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.pc-table tbody tr:nth-child(3) { animation-delay: 55ms; }
+.pc-table tbody tr:nth-child(4) { animation-delay: 80ms; }
+.pc-table tbody tr:nth-child(5) { animation-delay:105ms; }
+.pc-table tbody tr:nth-child(6) { animation-delay:130ms; }
+.pc-table tbody tr:nth-child(7) { animation-delay:155ms; }
 
-
-     /* Table Styling */
-    .table {
-        margin: 0;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 6px;
-    }
-
-    .table thead {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-dark th {
-    background-color: #212529 !important;
-    color: #fff !important;
-    padding-top: 6px !important;    /* reduced top padding */
-    padding-bottom: 6px !important; /* reduced bottom padding */
-    font-size: 14px !important;
-    vertical-align: middle;
-    text-align: center;
+/* ── Delete Modal ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
 }
-
-
-    td {
-        background-color: #ffffff;
-        vertical-align: middle;
-        font-size: 15px !important;
-        padding: 10px 10px !important;
-        border: none;
-    }
-
-    tr {
-        transition: all 0.2s ease;
-    }
-
-    tr:hover td {
-        background-color: #f6f8ff;
-    }
-    /* === Buttons === */
-    .btn-primary {
-        background: linear-gradient(90deg, #0d6efd, #3b8bff);
-        border: none;
-        padding: 10px 25px;
-        border-radius: 10px;
-        font-weight: 500;
-    }
-
-    .btn-danger {
-        background: linear-gradient(90deg, #ff4b4b, #cc0000);
-        border: none;
-        padding: 8px 20px;
-        border-radius: 10px;
-    }
-
-    .btn-outline-secondary {
-        border-radius: 10px;
-    }
-
-    .btn-info {
-        background: linear-gradient(90deg, #17a2b8, #1fc8d4);
-        border: none;
-        border-radius: 10px;
-    }
-
-    /* Modal Title */
-    .modal-header {
-        background: linear-gradient(90deg, #0d6efd, #3b8bff);
-        color: white;
-    }
-
+.nb-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15,23,42,.5);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+}
+.nb-modal.active { display: flex; }
+.nb-modal-box {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%; max-width: 420px;
+  margin: 20px;
+  overflow: hidden;
+  animation: modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  background: var(--rose-lt);
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #fecdd3;
+  display: flex; align-items: center; gap: 12px;
+}
+.nb-modal-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(225,29,72,.15);
+  flex-shrink: 0;
+}
+.nb-modal-body { padding: 22px; }
+.nb-modal-body p { font-size: 13.5px; color: var(--text-md); margin: 0; line-height: 1.7; }
+.nb-modal-footer {
+  padding: 14px 22px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
 </style>
 
+<div class="col-lg-12">
 
-<!-- ================== FORM CARD ================== -->
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Time Slot</span></h5>
-        </div>
-
-        <div class="card-body">
-            <div class="container">
-
-                {% if existing_slots %}
-                <!-- Delete All Modal -->
-                <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-
-                      <div class="modal-header">
-                        <h4 class="modal-title">Delete All Time Slots</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-
-                      <div class="modal-body">
-                        <p>Are you sure you want to delete all time slots?</p>
-                      </div>
-
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <a href="{% url 'delete_timeslot' %}" class="btn btn-danger">Delete</a>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
-
-                <!-- Form -->
-                <form method="post">
-                  {% csrf_token %}
-
-                  <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="form-floating form-floating-outline">
-                                <select class="form-select" id="working_days" name="working_days" required>
-                                   <option value="">Select...</option>
-                                   <option value="mon-fri">Monday to Friday (5 Days)</option>
-                                   <option value="mon-sat">Monday to Saturday (6 Days)</option>
-                                </select>
-                                <label for="working_days">Working Days Per Week</label>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-floating form-floating-outline">
-                                <input type="number" class="form-control" id="periods_per_day" name="periods_per_day" min="1" max="10" required>
-                                <label for="periods_per_day">Periods Per Day</label>
-                            </div>
-                        </div>
-                  </div>
-
-                  <br>
-
-                  <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                  </div>
-
-                </form>
-
-            </div>
-        </div>
+  <!-- ① Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Time Slot</span>
+      </nav>
+      <h1 class="pc-page-title">Time Slot</h1>
+      <p class="pc-page-sub">Configure working days and periods per day for the timetable.</p>
     </div>
+  </div>
+
+  <!-- ② Configure Form Card -->
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Configure Time Slots</p>
+        <p class="pc-card-sub">Set working days and number of periods</p>
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-time-line" style="font-size:12px;"></i> Setup
+      </span>
+    </div>
+
+    <div class="pc-card-body">
+      <form id="slotForm" method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Working Days Per Week <span style="color:var(--rose)">*</span></label>
+              <select name="working_days" id="working_days" required>
+                <option value="">— Select —</option>
+                <option value="mon-fri">Monday to Friday (5 Days)</option>
+                <option value="mon-sat">Monday to Saturday (6 Days)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Periods Per Day <span style="color:var(--rose)">*</span></label>
+              <input type="number" name="periods_per_day" id="periods_per_day"
+                     min="1" max="10" placeholder="e.g. 8" required>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="pc-card-footer">
+      <p class="pc-card-sub" style="margin:0;">
+        <i class="ri-information-line" style="color:var(--accent); margin-right:4px;"></i>
+        Submitting will generate slots for each day and period combination.
+      </p>
+      <button type="submit" form="slotForm" class="pc-btn pc-btn-primary">
+        <i class="ri-save-line"></i> Generate Slots
+      </button>
+    </div>
+  </div>
+
+  <!-- ③ Slots Table Card -->
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div>
+        <p class="pc-card-title">Existing Time Slots</p>
+        <p class="pc-card-sub">
+          {% if existing_slots %}{{ existing_slots|length }} slot{{ existing_slots|length|pluralize }} configured{% else %}No slots configured{% endif %}
+        </p>
+      </div>
+      {% if existing_slots %}
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span class="pc-badge pc-badge-info pc-badge-no-dot">
+          <i class="ri-calendar-line" style="font-size:12px;"></i>
+          {{ existing_slots|length }} Slots
+        </span>
+        <button type="button"
+          class="pc-btn pc-btn-danger pc-btn-sm"
+          onclick="openDeleteAllModal()">
+          <i class="ri-delete-bin-7-line"></i> Delete All
+        </button>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="pc-card-body" style="padding:0;">
+      {% if existing_slots %}
+      <div class="pc-table-wrap" style="border-radius:0; border:none;">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:18px; width:80px;">ID</th>
+              <th style="text-align:left;">Day</th>
+              <th>Period Number</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for hw in existing_slots %}
+            <tr>
+              <td class="td-num" style="text-align:left; padding-left:18px;">{{ hw.id }}</td>
+              <td class="td-name">{{ hw.day }}</td>
+              <td>
+                <span style="
+                  font-family: var(--f-mono);
+                  font-size: 12px;
+                  background: var(--accent-lt);
+                  color: var(--accent);
+                  border: 1px solid var(--accent-mid);
+                  border-radius: 6px;
+                  padding: 3px 10px;
+                  font-weight: 700;">
+                  Period {{ hw.period_number }}
+                </span>
+              </td>
+              <td>
+                <button type="button"
+                  class="pc-btn pc-btn-danger pc-btn-sm"
+                  onclick="openDeleteSingleModal('{% url 'delete_singleslot' hw.id %}', '{{ hw.day }} — Period {{ hw.period_number }}')">
+                  <i class="ri-delete-bin-7-line"></i> Delete
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="pc-empty">
+        <span class="pc-empty-icon"><i class="ri-time-line"></i></span>
+        <p class="pc-empty-title">No time slots yet</p>
+        <p class="pc-empty-sub">Use the form above to generate slots.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div><!-- /pc-card -->
+
 </div>
 
-
-
-
-<!-- ================== TABLE CARD ================== -->
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-title text-center">
-            <h5><span class="badge bg-light text-dark">Time Slots</span></h5>
-        </div>
-
-        <div class="card-body">
-            <div class="container">
-
-                {% if existing_slots %}
-
-                <!-- Delete All Button -->
-                <div class="text-end mb-3">
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#basicModal">
-                        <i class="fa fa-trash"></i> Delete All Time Slots
-                    </button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped table-bordered">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Day</th>
-                                <th>Period Number</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for hw in existing_slots %}
-                                <tr align="center">
-                                    <td>{{ hw.id }}</td>
-                                    <td>{{ hw.day }}</td>
-                                    <td>{{ hw.period_number }}</td>
-                                    <td>
-                                        <a class="btn btn-danger" href="{% url 'delete_singleslot' hw.id %}">
-                                            <i class="fa fa-trash-can"></i> Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-
-                    </table>
-                </div>
-
-                {% else %}
-                    <p class="text-center text-danger">No TimeSlot available</p>
-                {% endif %}
-
-            </div>
-        </div>
+<!-- ══════════════════════════════
+     DELETE SINGLE SLOT MODAL
+══════════════════════════════ -->
+<div id="deleteSingleModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete Time Slot</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
     </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete
+        <strong id="deleteSlotName" style="color:var(--text);"></strong>?
+        This slot will be <strong>permanently removed</strong> from the timetable.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeModal('deleteSingleModal')">
+        Cancel
+      </button>
+      <a id="deleteSingleLink" href="#" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete
+      </a>
+    </div>
+  </div>
 </div>
+
+<!-- ══════════════════════════════
+     DELETE ALL SLOTS MODAL
+══════════════════════════════ -->
+<div id="deleteAllModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose); font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text);">Delete All Time Slots</div>
+        <div style="font-size:12px; color:var(--rose); font-weight:500;">This action cannot be undone</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to delete <strong>all time slots</strong>?
+        The entire timetable slot configuration will be
+        <strong>permanently removed</strong>.
+      </p>
+    </div>
+    <div class="nb-modal-footer">
+      <button type="button" class="pc-btn pc-btn-outline" onclick="closeModal('deleteAllModal')">
+        Cancel
+      </button>
+      <a href="{% url 'delete_timeslot' %}" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Delete All
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteSingleModal(url, label) {
+  document.getElementById('deleteSlotName').textContent = label;
+  document.getElementById('deleteSingleLink').href = url;
+  document.getElementById('deleteSingleModal').classList.add('active');
+}
+
+function openDeleteAllModal() {
+  document.getElementById('deleteAllModal').classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+/* Backdrop click closes both modals */
+['deleteSingleModal', 'deleteAllModal'].forEach(function(id) {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) closeModal(id);
+  });
+});
+
+/* Escape key */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeModal('deleteSingleModal');
+    closeModal('deleteAllModal');
+  }
+});
+</script>
 
 {% endblock %}
