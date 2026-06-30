@@ -65,6 +65,7 @@
 .pb-add-sec-grid {
   display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;
 }
+.pb-add-sec-grid .pc-form-group { margin-bottom: 0; }
 .pb-add-sec-grid .pc-input,
 .pb-add-sec-grid .pc-select { padding: 7px 10px; font-size: 13px; }
 .pb-add-sec-grid .pc-select { padding-right: 34px; }
@@ -116,10 +117,11 @@
 .pb-ch-pills-empty { font-size:11px; color:var(--text-sm); font-style:italic; }
 
 .pb-bank-filter-row {
-  display: flex; gap: 6px; flex-wrap: wrap;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end;
 }
+.pb-bank-filter-row .pc-form-group { margin-bottom: 0; }
 .pb-bank-filter-row .pc-select,
-.pb-bank-filter-row .pc-input { flex: 1; min-width: 80px; padding: 6px 10px; font-size: 12px; }
+.pb-bank-filter-row .pc-input { min-width: 70px; padding: 6px 10px; font-size: 12px; }
 .pb-bank-filter-row .pc-select { padding-right: 32px; }
 
 /* ── Active chapter chips indicator ── */
@@ -292,19 +294,19 @@
         <form method="POST" action="{% url 'add_section' paper.pk %}">
           {% csrf_token %}
           <div class="pb-add-sec-grid">
-            <div>
-              <label class="pc-label" style="margin-bottom:3px;">Section Name</label>
+            <div class="pc-form-group" style="margin-bottom:0;">
+              <label class="pc-label">Section Name</label>
               <input class="pc-input" type="text" name="section_name" required placeholder="e.g. Section A – MCQ">
             </div>
-            <div>
-              <label class="pc-label" style="margin-bottom:3px;">Marks/Q</label>
+            <div class="pc-form-group" style="margin-bottom:0;">
+              <label class="pc-label">Marks/Q</label>
               <input class="pc-input" type="number" name="marks_per_question" value="1" min="1">
             </div>
-            <div>
-              <label class="pc-label" style="margin-bottom:3px;">Attempt (opt)</label>
+            <div class="pc-form-group" style="margin-bottom:0;">
+              <label class="pc-label">Attempt (opt)</label>
               <input class="pc-input" type="number" name="num_to_attempt" placeholder="All">
             </div>
-            <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 14px;">
+            <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 14px;align-self:flex-end;">
               <i class="ri-add-line"></i> Add
             </button>
           </div>
@@ -430,23 +432,32 @@
           {% endif %}
 
           <div class="pb-bank-filter-row" style="margin-top:6px;">
-            <input class="pc-input" type="text" name="bq" value="{{ search }}" placeholder="Search questions…">
-            <select class="pc-select" name="qt" onchange="this.form.submit()">
-              <option value="">All Types</option>
-              <option value="MCQ" {% if type_filter == 'MCQ' %}selected{% endif %}>MCQ</option>
-              <option value="SHORT" {% if type_filter == 'SHORT' %}selected{% endif %}>Short</option>
-              <option value="LONG" {% if type_filter == 'LONG' %}selected{% endif %}>Long</option>
-              <option value="FILL" {% if type_filter == 'FILL' %}selected{% endif %}>Fill</option>
-              <option value="TF" {% if type_filter == 'TF' %}selected{% endif %}>T/F</option>
-              <option value="MATCH" {% if type_filter == 'MATCH' %}selected{% endif %}>Match</option>
-            </select>
-            <select class="pc-select" name="df" onchange="this.form.submit()">
-              <option value="">All Levels</option>
-              <option value="EASY" {% if diff_filter == 'EASY' %}selected{% endif %}>Easy</option>
-              <option value="MEDIUM" {% if diff_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
-              <option value="HARD" {% if diff_filter == 'HARD' %}selected{% endif %}>Hard</option>
-            </select>
-            <button type="submit" class="pc-btn pc-btn-primary" style="padding:6px 10px;font-size:12px;">
+            <div class="pc-form-group" style="flex:1;">
+              <label class="pc-label"><i class="ri-search-line"></i> Search</label>
+              <input class="pc-input" type="text" name="bq" value="{{ search }}" placeholder="Search questions…">
+            </div>
+            <div class="pc-form-group">
+              <label class="pc-label">Type</label>
+              <select class="pc-select" name="qt" onchange="this.form.submit()">
+                <option value="">All Types</option>
+                <option value="MCQ" {% if type_filter == 'MCQ' %}selected{% endif %}>MCQ</option>
+                <option value="SHORT" {% if type_filter == 'SHORT' %}selected{% endif %}>Short</option>
+                <option value="LONG" {% if type_filter == 'LONG' %}selected{% endif %}>Long</option>
+                <option value="FILL" {% if type_filter == 'FILL' %}selected{% endif %}>Fill</option>
+                <option value="TF" {% if type_filter == 'TF' %}selected{% endif %}>T/F</option>
+                <option value="MATCH" {% if type_filter == 'MATCH' %}selected{% endif %}>Match</option>
+              </select>
+            </div>
+            <div class="pc-form-group">
+              <label class="pc-label">Difficulty</label>
+              <select class="pc-select" name="df" onchange="this.form.submit()">
+                <option value="">All Levels</option>
+                <option value="EASY" {% if diff_filter == 'EASY' %}selected{% endif %}>Easy</option>
+                <option value="MEDIUM" {% if diff_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                <option value="HARD" {% if diff_filter == 'HARD' %}selected{% endif %}>Hard</option>
+              </select>
+            </div>
+            <button type="submit" class="pc-btn pc-btn-primary" style="padding:6px 10px;font-size:12px;align-self:flex-end;">
               <i class="ri-search-line"></i>
             </button>
           </div>
@@ -544,31 +555,37 @@
           <i class="ri-layout-row-line" style="color:var(--accent);"></i> {{ sec.section_name }}
         </p>
         <input type="hidden" class="as-sec-id" value="{{ sec.pk }}">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-          <div>
-            <label class="pc-label" style="margin-bottom:4px;">Questions to Add</label>
-            <input type="number" class="as-num pc-input" style="padding:7px 10px;font-size:13px;" value="5" min="0">
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="pc-form-group" style="margin-bottom:0;">
+              <label class="pc-label">Questions to Add</label>
+              <input type="number" class="as-num pc-input" style="padding:7px 10px;font-size:13px;" value="5" min="0">
+            </div>
           </div>
-          <div>
-            <label class="pc-label" style="margin-bottom:4px;">Type</label>
-            <select class="as-type pc-select" style="padding:7px 10px;font-size:13px;padding-right:32px;">
-              <option value="">Any</option>
-              <option value="MCQ">MCQ</option>
-              <option value="SHORT">Short</option>
-              <option value="LONG">Long</option>
-              <option value="FILL">Fill</option>
-              <option value="TF">T/F</option>
-              <option value="MATCH">Match</option>
-            </select>
+          <div class="col-4">
+            <div class="pc-form-group" style="margin-bottom:0;">
+              <label class="pc-label">Type</label>
+              <select class="as-type pc-select" style="padding:7px 10px;font-size:13px;padding-right:32px;">
+                <option value="">Any</option>
+                <option value="MCQ">MCQ</option>
+                <option value="SHORT">Short</option>
+                <option value="LONG">Long</option>
+                <option value="FILL">Fill</option>
+                <option value="TF">T/F</option>
+                <option value="MATCH">Match</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label class="pc-label" style="margin-bottom:4px;">Difficulty</label>
-            <select class="as-diff pc-select" style="padding:7px 10px;font-size:13px;padding-right:32px;">
-              <option value="">Any</option>
-              <option value="EASY">Easy</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HARD">Hard</option>
-            </select>
+          <div class="col-4">
+            <div class="pc-form-group" style="margin-bottom:0;">
+              <label class="pc-label">Difficulty</label>
+              <select class="as-diff pc-select" style="padding:7px 10px;font-size:13px;padding-right:32px;">
+                <option value="">Any</option>
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HARD">Hard</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
