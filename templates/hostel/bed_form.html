@@ -1,0 +1,51 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'bed_list' room_pk=room.pk %}">Room {{ room.room_number }} Beds</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.room }}
+    <div class="pc-card" style="max-width:400px;">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-hotel-bed-line me-2" style="color:var(--accent);"></i>Bed Details</div>
+      </div>
+      <div class="pc-card-body">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Bed Number <span class="pc-required">*</span></label>
+              <div class="pc-input-group"><i class="pc-input-icon ri-hashtag"></i>{{ form.bed_number }}</div>
+              {% if form.bed_number.errors %}<div class="field-error">{{ form.bed_number.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status</label>
+              {{ form.status }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-card-footer">
+        <a href="{% url 'bed_list' room_pk=room.pk %}" class="pc-btn pc-btn-outline">Cancel</a>
+        <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Bed</button>
+      </div>
+    </div>
+  </form>
+
+</div>
+{% include 'hostel/_form_styles.html' %}
+{% endblock %}

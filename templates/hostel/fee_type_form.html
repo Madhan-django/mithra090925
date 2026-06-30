@@ -1,0 +1,69 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'hostel_fee_type_list' %}">Fee Types</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+    <div class="pc-card" style="max-width:520px;">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-price-tag-3-line me-2" style="color:var(--accent);"></i>Fee Type Details</div>
+      </div>
+      <div class="pc-card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Fee Name <span class="pc-required">*</span></label>
+              <div class="pc-input-group"><i class="pc-input-icon ri-price-tag-3-line"></i>{{ form.name }}</div>
+              {% if form.name.errors %}<div class="field-error">{{ form.name.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Hostel <span class="pc-required">*</span></label>
+              {{ form.hostel }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Amount (₹) <span class="pc-required">*</span></label>
+              <div class="pc-input-group"><i class="pc-input-icon ri-money-rupee-circle-line"></i>{{ form.amount }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Fee Period</label>
+              {{ form.fee_period }}
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="pc-form-group" style="display:flex;align-items:center;gap:10px;">
+              {{ form.is_active }}
+              <label class="pc-label" style="margin:0;">Active</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-card-footer">
+        <a href="{% url 'hostel_fee_type_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+        <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+      </div>
+    </div>
+  </form>
+
+</div>
+{% include 'hostel/_form_styles.html' %}
+{% endblock %}

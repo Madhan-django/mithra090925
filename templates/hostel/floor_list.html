@@ -1,0 +1,56 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'block_list' hostel_pk=block.hostel.pk %}">{{ block.hostel.name }}</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ block.name }} — Floors</span>
+      </nav>
+      <div class="pc-page-title">{{ block.name }} — Floors</div>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'room_list' block_pk=block.pk %}" class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-hotel-bed-line"></i> Rooms</a>
+      <a href="{% url 'floor_add' block_pk=block.pk %}" class="pc-btn pc-btn-primary pc-btn-sm"><i class="ri-add-line"></i> Add Floor</a>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-body" style="padding:0;">
+      {% if floors %}
+      <table class="pc-table">
+        <thead>
+          <tr><th>#</th><th>Floor</th><th>Floor Number</th><th>Total Rooms</th><th>Capacity</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for f in floors %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td style="font-weight:700;">{{ f.display_name }}</td>
+            <td style="text-align:center;">{{ f.floor_number }}</td>
+            <td style="text-align:center;">{{ f.total_rooms }}</td>
+            <td style="text-align:center;">{{ f.capacity }}</td>
+            <td>
+              <a href="{% url 'floor_edit' f.pk %}" class="pc-btn pc-btn-outline pc-btn-xs"><i class="ri-edit-line"></i></a>
+              <a href="{% url 'floor_delete' f.pk %}" class="pc-btn pc-btn-danger pc-btn-xs" onclick="return confirm('Delete floor?')"><i class="ri-delete-bin-line"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:60px;text-align:center;color:var(--text-sm);">
+        <i class="ri-stack-line" style="font-size:48px;opacity:.3;"></i>
+        <div style="margin-top:12px;">No floors added yet.</div>
+        <a href="{% url 'floor_add' block_pk=block.pk %}" class="pc-btn pc-btn-primary pc-btn-sm" style="margin-top:12px;">Add Floor</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

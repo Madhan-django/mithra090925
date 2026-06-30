@@ -1,0 +1,64 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Waiting List</span>
+      </nav>
+      <div class="pc-page-title">Waiting List</div>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'hostel_waiting_add' %}" class="pc-btn pc-btn-primary pc-btn-sm"><i class="ri-add-line"></i> Add to Waiting List</a>
+    </div>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-body" style="padding:0;">
+      {% if entries %}
+      <table class="pc-table">
+        <thead>
+          <tr><th>#</th><th>Priority</th><th>Student</th><th>Hostel</th><th>Room Type</th><th>Requested</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for e in entries %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td style="text-align:center;">
+              <span style="background:{% if e.priority == 1 %}#fee2e2;color:#991b1b{% elif e.priority == 2 %}#fef3c7;color:#92400e{% else %}#f1f5f9;color:#475569{% endif %};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">P{{ e.priority }}</span>
+            </td>
+            <td style="font-weight:700;">{{ e.student.first_name }} {{ e.student.last_name }}</td>
+            <td>{{ e.hostel.name }}</td>
+            <td style="font-size:12px;">{{ e.room_type|default:"Any" }}</td>
+            <td style="font-size:12px;">{{ e.requested_date }}</td>
+            <td>
+              {% if e.status == 'Waiting' %}
+                <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Waiting</span>
+              {% elif e.status == 'Allocated' %}
+                <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Allocated</span>
+              {% else %}
+                <span style="background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Cancelled</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'hostel_waiting_edit' e.pk %}" class="pc-btn pc-btn-outline pc-btn-xs"><i class="ri-edit-line"></i></a>
+              <a href="{% url 'hostel_waiting_delete' e.pk %}" class="pc-btn pc-btn-danger pc-btn-xs" onclick="return confirm('Remove from waiting list?')"><i class="ri-delete-bin-line"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:60px;text-align:center;color:var(--text-sm);">
+        <i class="ri-time-line" style="font-size:48px;opacity:.3;"></i>
+        <div style="margin-top:12px;">Waiting list is empty.</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'hostel_waiting_list' %}">Waiting List</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+    <div class="pc-card" style="max-width:580px;">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-time-line me-2" style="color:var(--accent);"></i>Waiting List Entry</div>
+      </div>
+      <div class="pc-card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Student <span class="pc-required">*</span></label>
+              {{ form.student }}
+            </div>
+          </div>
+          <div class="col-sm-8">
+            <div class="pc-form-group">
+              <label class="pc-label">Hostel <span class="pc-required">*</span></label>
+              {{ form.hostel }}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="pc-form-group">
+              <label class="pc-label">Priority</label>
+              {{ form.priority }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Preferred Room Type</label>
+              {{ form.room_type }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Request Date</label>
+              {{ form.requested_date }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status</label>
+              {{ form.status }}
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Remarks</label>
+              {{ form.remarks }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-card-footer">
+        <a href="{% url 'hostel_waiting_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+        <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+      </div>
+    </div>
+  </form>
+
+</div>
+{% include 'hostel/_form_styles.html' %}
+{% endblock %}

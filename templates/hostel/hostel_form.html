@@ -1,0 +1,136 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'hostel_list' %}">Hostels</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="pc-card h-100">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-building-2-line me-2" style="color:var(--accent);"></i>Basic Info</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              <div class="col-sm-8">
+                <div class="pc-form-group">
+                  <label class="pc-label">Hostel Name <span class="pc-required">*</span></label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-building-2-line"></i>{{ form.name }}</div>
+                  {% if form.name.errors %}<div class="field-error">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="pc-form-group">
+                  <label class="pc-label">Hostel Code <span class="pc-required">*</span></label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-hashtag"></i>{{ form.code }}</div>
+                  {% if form.code.errors %}<div class="field-error">{{ form.code.errors.0 }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Hostel Type</label>
+                  {{ form.hostel_type }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Category</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-price-tag-3-line"></i>{{ form.category }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Campus</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-map-pin-line"></i>{{ form.campus }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Total Capacity (beds)</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-hotel-bed-line"></i>{{ form.capacity }}</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Address</label>
+                  {{ form.address }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="pc-card h-100">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-contacts-line me-2" style="color:var(--accent);"></i>Contact &amp; Warden</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Contact Number</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-phone-line"></i>{{ form.contact }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Email</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-mail-line"></i>{{ form.email }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Warden Name</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-user-star-line"></i>{{ form.warden }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Warden Mobile</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-phone-line"></i>{{ form.warden_mobile }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Status</label>
+                  {{ form.status }}
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Description</label>
+                  {{ form.description }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'hostel_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Hostel</button>
+    </div>
+  </form>
+
+</div>
+{% include 'hostel/_form_styles.html' %}
+{% endblock %}

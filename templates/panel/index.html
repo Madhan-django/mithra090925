@@ -826,6 +826,26 @@
           </ul>
         </li>
 
+        <li class="menu-header"><span class="menu-header-text">Hostel</span></li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons ri-building-2-line"></i>
+            <div>Hostel</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="{% url 'hostel_dashboard' %}" class="menu-link"><div>Dashboard</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_list' %}" class="menu-link"><div>Hostel Master</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_admission_list' %}" class="menu-link"><div>Student Admissions</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_attendance' %}" class="menu-link"><div>Attendance</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_leave_list' %}" class="menu-link"><div>Leave Applications</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_gatepass_list' %}" class="menu-link"><div>Gate Passes</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_fee_invoice_list' %}" class="menu-link"><div>Fee Invoices</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_fee_type_list' %}" class="menu-link"><div>Fee Types</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_transfer_list' %}" class="menu-link"><div>Room Transfers</div></a></li>
+            <li class="menu-item"><a href="{% url 'hostel_waiting_list' %}" class="menu-link"><div>Waiting List</div></a></li>
+          </ul>
+        </li>
+
         {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
         <li class="menu-header"><span class="menu-header-text">Petty Cash</span></li>
         <li class="menu-item">

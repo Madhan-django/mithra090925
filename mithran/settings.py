@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'jacobreports',
     'qbank',
     'transport',
+    'hostel',
 ]
 
 Q_CLUSTER = {

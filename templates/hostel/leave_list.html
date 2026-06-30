@@ -1,0 +1,77 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Leave Applications</span>
+      </nav>
+      <div class="pc-page-title">Leave Applications</div>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'hostel_leave_add' %}" class="pc-btn pc-btn-primary pc-btn-sm"><i class="ri-add-line"></i> New Leave</a>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <a href="?status=Pending"  class="pc-btn pc-btn-xs {% if status_filter == 'Pending' %}pc-btn-primary{% else %}pc-btn-outline{% endif %}">Pending</a>
+    <a href="?status=Approved" class="pc-btn pc-btn-xs {% if status_filter == 'Approved' %}pc-btn-primary{% else %}pc-btn-outline{% endif %}">Approved</a>
+    <a href="?status=Returned" class="pc-btn pc-btn-xs {% if status_filter == 'Returned' %}pc-btn-primary{% else %}pc-btn-outline{% endif %}">Returned</a>
+    <a href="?status=Rejected" class="pc-btn pc-btn-xs {% if status_filter == 'Rejected' %}pc-btn-primary{% else %}pc-btn-outline{% endif %}">Rejected</a>
+    <a href="{% url 'hostel_leave_list' %}" class="pc-btn pc-btn-xs pc-btn-outline">All</a>
+  </div>
+
+  <div class="pc-card">
+    <div class="pc-card-body" style="padding:0;">
+      {% if leaves %}
+      <table class="pc-table">
+        <thead>
+          <tr><th>#</th><th>Student</th><th>Hostel</th><th>From</th><th>To</th><th>Days</th><th>Destination</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for lv in leaves %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td style="font-weight:700;">{{ lv.student.first_name }} {{ lv.student.last_name }}</td>
+            <td style="font-size:12px;">{{ lv.hostel.name }}</td>
+            <td style="font-size:12px;">{{ lv.from_date }}</td>
+            <td style="font-size:12px;">{{ lv.to_date }}</td>
+            <td style="text-align:center;font-weight:700;">{{ lv.days }}</td>
+            <td style="font-size:12px;">{{ lv.destination|default:"—" }}</td>
+            <td>
+              {% if lv.status == 'Pending' %}
+                <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Pending</span>
+              {% elif lv.status == 'Approved' %}
+                <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Approved</span>
+              {% elif lv.status == 'Returned' %}
+                <span style="background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Returned</span>
+              {% else %}
+                <span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">Rejected</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if lv.status == 'Pending' %}
+                <a href="{% url 'hostel_leave_approve' lv.pk %}" class="pc-btn pc-btn-xs" style="background:#dcfce7;color:#166534;" onclick="return confirm('Approve this leave?')"><i class="ri-check-line"></i></a>
+                <a href="{% url 'hostel_leave_reject' lv.pk %}" class="pc-btn pc-btn-danger pc-btn-xs" onclick="return confirm('Reject this leave?')"><i class="ri-close-line"></i></a>
+              {% elif lv.status == 'Approved' %}
+                <a href="{% url 'hostel_leave_return' lv.pk %}" class="pc-btn pc-btn-xs" style="background:#dbeafe;color:#1d4ed8;" onclick="return confirm('Mark as returned?')"><i class="ri-login-box-line"></i> Return</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:60px;text-align:center;color:var(--text-sm);">
+        <i class="ri-calendar-check-line" style="font-size:48px;opacity:.3;"></i>
+        <div style="margin-top:12px;">No leave applications found.</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

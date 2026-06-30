@@ -53,6 +53,7 @@ urlpatterns = [
     path('jacobreports/',include('jacobreports.urls')),
     path('qbank/',include('qbank.urls')),
     path('transport/', include('transport.urls')),
+    path('hostel/', include('hostel.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

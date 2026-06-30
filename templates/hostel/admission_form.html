@@ -1,0 +1,137 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'hostel_dashboard' %}">Hostel</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'hostel_admission_list' %}">Admissions</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+
+    <div class="row g-3">
+      <!-- Student & Allocation -->
+      <div class="col-lg-6">
+        <div class="pc-card h-100">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-user-line me-2" style="color:var(--accent);"></i>Student &amp; Bed Allocation</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Student <span class="pc-required">*</span></label>
+                  {{ form.student }}
+                  {% if form.student.errors %}<div class="field-error">{{ form.student.errors.0 }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Hostel <span class="pc-required">*</span></label>
+                  {{ form.hostel }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Block</label>
+                  {{ form.block }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Floor</label>
+                  {{ form.floor }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Room <span class="pc-required">*</span></label>
+                  {{ form.room }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Bed <span class="pc-required">*</span></label>
+                  {{ form.bed }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Admission Date <span class="pc-required">*</span></label>
+                  {{ form.admission_date }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Academic Year <span class="pc-required">*</span></label>
+                  {{ form.ac_year }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Status</label>
+                  {{ form.status }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact & Medical -->
+      <div class="col-lg-6">
+        <div class="pc-card h-100">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-first-aid-kit-line me-2" style="color:#d97706;"></i>Emergency &amp; Medical Info</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Emergency Contact</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-phone-line"></i>{{ form.emergency_contact }}</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Parent Contact</label>
+                  <div class="pc-input-group"><i class="pc-input-icon ri-phone-line"></i>{{ form.parent_contact }}</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Medical Notes</label>
+                  {{ form.medical_notes }}
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Remarks</label>
+                  {{ form.remarks }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'hostel_admission_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Admission</button>
+    </div>
+  </form>
+
+</div>
+{% include 'hostel/_form_styles.html' %}
+{% endblock %}
