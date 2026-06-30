@@ -19,24 +19,33 @@
     {% csrf_token %}
     {{ form.sch }}
     <div class="pc-card">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-user-add-line me-2" style="color:var(--accent);"></i>Allocation Details</div>
+      </div>
       <div class="pc-card-body">
         <div class="row g-3">
           <div class="col-12">
             <div class="pc-form-group">
-              <label class="pc-label">Student <span style="color:var(--rose);">*</span></label>
-              {{ form.student }}
+              <label class="pc-label">Student <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-user-line"></i>
+                {{ form.student }}
+              </div>
+              {% if form.student.errors %}<div class="field-error">{{ form.student.errors.0 }}</div>{% endif %}
             </div>
           </div>
           <div class="col-sm-6">
             <div class="pc-form-group">
-              <label class="pc-label">Route <span style="color:var(--rose);">*</span></label>
+              <label class="pc-label">Route <span class="pc-required">*</span></label>
               {{ form.route }}
+              {% if form.route.errors %}<div class="field-error">{{ form.route.errors.0 }}</div>{% endif %}
             </div>
           </div>
           <div class="col-sm-6">
             <div class="pc-form-group">
-              <label class="pc-label">Stop <span style="color:var(--rose);">*</span></label>
+              <label class="pc-label">Stop <span class="pc-required">*</span></label>
               {{ form.stop }}
+              {% if form.stop.errors %}<div class="field-error">{{ form.stop.errors.0 }}</div>{% endif %}
             </div>
           </div>
           <div class="col-sm-6">
@@ -54,7 +63,10 @@
           <div class="col-sm-6">
             <div class="pc-form-group">
               <label class="pc-label">Active</label>
-              {{ form.is_active }}
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+                {{ form.is_active }}
+                <span style="font-size:13px;color:var(--text-md);">Currently active allocation</span>
+              </div>
             </div>
           </div>
         </div>
@@ -68,7 +80,6 @@
 </div>
 
 <script>
-// Auto-filter stops when route changes
 document.getElementById('id_route').addEventListener('change', function () {
   const routeId = this.value;
   const stopSel = document.getElementById('id_stop');
@@ -86,4 +97,5 @@ document.getElementById('id_route').addEventListener('change', function () {
     });
 });
 </script>
+{% include 'transport/_form_styles.html' %}
 {% endblock %}

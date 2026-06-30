@@ -1,0 +1,74 @@
+<style>
+/* Transport forms — match project-wide input style */
+.transport-form input[type="text"],
+.transport-form input[type="number"],
+.transport-form input[type="date"],
+.transport-form input[type="time"],
+.transport-form input[type="email"],
+.transport-form input[type="tel"],
+.transport-form select,
+.transport-form textarea,
+/* also target outside .transport-form for pages that don't wrap */
+input[type="text"], input[type="number"], input[type="date"],
+input[type="time"], input[type="email"], input[type="tel"],
+select, textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
+input[type="time"]:focus, input[type="email"]:focus, input[type="tel"]:focus,
+select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+input::placeholder, textarea::placeholder { color: var(--muted); }
+
+select {
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+textarea { resize: vertical; min-height: 80px; }
+
+/* icon-prefixed inputs */
+.pc-input-group input[type="text"],
+.pc-input-group input[type="number"],
+.pc-input-group input[type="date"],
+.pc-input-group input[type="time"],
+.pc-input-group input[type="email"],
+.pc-input-group input[type="tel"] {
+  padding-left: 38px;
+}
+
+.pc-required { color: var(--rose); margin-left: 2px; font-weight: 700; }
+
+.field-error {
+  color: var(--rose);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* checkbox styling */
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+</style>

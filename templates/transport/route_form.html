@@ -19,18 +19,29 @@
     {% csrf_token %}
     {{ form.sch }}
     <div class="pc-card">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-road-map-line me-2" style="color:var(--accent);"></i>Route Details</div>
+      </div>
       <div class="pc-card-body">
         <div class="row g-3">
           <div class="col-sm-8">
             <div class="pc-form-group">
-              <label class="pc-label">Route Name <span style="color:var(--rose);">*</span></label>
-              {{ form.route_name }}
+              <label class="pc-label">Route Name <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-road-map-line"></i>
+                {{ form.route_name }}
+              </div>
+              {% if form.route_name.errors %}<div class="field-error">{{ form.route_name.errors.0 }}</div>{% endif %}
             </div>
           </div>
           <div class="col-sm-4">
             <div class="pc-form-group">
-              <label class="pc-label">Route Code <span style="color:var(--rose);">*</span></label>
-              {{ form.route_code }}
+              <label class="pc-label">Route Code <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-hashtag"></i>
+                {{ form.route_code }}
+              </div>
+              {% if form.route_code.errors %}<div class="field-error">{{ form.route_code.errors.0 }}</div>{% endif %}
             </div>
           </div>
           <div class="col-sm-6">
@@ -48,13 +59,19 @@
           <div class="col-sm-6">
             <div class="pc-form-group">
               <label class="pc-label">Total Distance (km)</label>
-              {{ form.total_distance }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-route-line"></i>
+                {{ form.total_distance }}
+              </div>
             </div>
           </div>
           <div class="col-sm-6">
             <div class="pc-form-group">
-              <label class="pc-label">Status</label>
-              {{ form.is_active }}
+              <label class="pc-label">Active</label>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+                {{ form.is_active }}
+                <span style="font-size:13px;color:var(--text-md);">Mark as active route</span>
+              </div>
             </div>
           </div>
         </div>
@@ -62,8 +79,9 @@
     </div>
     <div class="pc-card-footer mt-3">
       <a href="{% url 'route_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
-      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Route</button>
     </div>
   </form>
 </div>
+{% include 'transport/_form_styles.html' %}
 {% endblock %}

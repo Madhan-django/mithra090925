@@ -1,6 +1,6 @@
 {% extends 'panel/index.html' %}
 {% block content %}
-<div class="col-lg-12">
+<div class="col-lg-9">
 
   <div class="pc-page-header mb-3">
     <div class="pc-page-header-left">
@@ -19,17 +19,93 @@
     {% csrf_token %}
     {{ form.sch }}
     <div class="pc-card">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-steering-line me-2" style="color:var(--accent);"></i>Driver Details</div>
+      </div>
       <div class="pc-card-body">
         <div class="row g-3">
-          {% for f in form.name form.employee_id form.mobile form.emergency_contact form.aadhaar form.blood_group form.license_number form.license_expiry form.assigned_vehicle form.status %}
           <div class="col-sm-6">
             <div class="pc-form-group">
-              <label class="pc-label">{{ f.label }}</label>
-              {{ f }}
-              {% if f.errors %}<div style="color:var(--rose);font-size:11px;margin-top:3px;">{{ f.errors.0 }}</div>{% endif %}
+              <label class="pc-label">Name <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-user-line"></i>
+                {{ form.name }}
+              </div>
+              {% if form.name.errors %}<div class="field-error">{{ form.name.errors.0 }}</div>{% endif %}
             </div>
           </div>
-          {% endfor %}
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Employee ID</label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-id-card-line"></i>
+                {{ form.employee_id }}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Mobile <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-phone-line"></i>
+                {{ form.mobile }}
+              </div>
+              {% if form.mobile.errors %}<div class="field-error">{{ form.mobile.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Emergency Contact</label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-phone-fill"></i>
+                {{ form.emergency_contact }}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Aadhaar Number</label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-shield-keyhole-line"></i>
+                {{ form.aadhaar }}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Blood Group</label>
+              {{ form.blood_group }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">License Number <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-file-certificate-line"></i>
+                {{ form.license_number }}
+              </div>
+              {% if form.license_number.errors %}<div class="field-error">{{ form.license_number.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">License Expiry <span class="pc-required">*</span></label>
+              {{ form.license_expiry }}
+              {% if form.license_expiry.errors %}<div class="field-error">{{ form.license_expiry.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Assigned Vehicle</label>
+              {{ form.assigned_vehicle }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status</label>
+              {{ form.status }}
+            </div>
+          </div>
           <div class="col-12">
             <div class="pc-form-group">
               <label class="pc-label">Address</label>
@@ -42,9 +118,10 @@
 
     <div class="pc-card-footer mt-3">
       <a href="{% url 'driver_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
-      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Driver</button>
     </div>
   </form>
 
 </div>
+{% include 'transport/_form_styles.html' %}
 {% endblock %}

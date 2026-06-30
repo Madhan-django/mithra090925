@@ -5,8 +5,6 @@
   <div class="pc-page-header mb-3">
     <div class="pc-page-header-left">
       <nav class="pc-breadcrumb">
-        <a href="{% url 'home_dashboard' %}">Dashboard</a>
-        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
         <a href="{% url 'transport_dashboard' %}">Transport</a>
         <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
         <a href="{% url 'vehicle_list' %}">Vehicles</a>
@@ -31,19 +29,60 @@
           </div>
           <div class="pc-card-body">
             <div class="row g-3">
-              {% for f in form.vehicle_number form.vehicle_name form.vehicle_type form.capacity form.fuel_type form.status %}
               <div class="col-sm-6">
                 <div class="pc-form-group">
-                  <label class="pc-label">{{ f.label }}</label>
-                  {{ f }}
-                  {% if f.errors %}<div style="color:var(--rose);font-size:11px;margin-top:3px;">{{ f.errors.0 }}</div>{% endif %}
+                  <label class="pc-label">Vehicle Number <span class="pc-required">*</span></label>
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-hashtag"></i>
+                    {{ form.vehicle_number }}
+                  </div>
+                  {% if form.vehicle_number.errors %}<div class="field-error">{{ form.vehicle_number.errors.0 }}</div>{% endif %}
                 </div>
               </div>
-              {% endfor %}
               <div class="col-sm-6">
                 <div class="pc-form-group">
-                  <label class="pc-label">GPS Device ID</label>
-                  {{ form.gps_device_id }}
+                  <label class="pc-label">Vehicle Name <span class="pc-required">*</span></label>
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-bus-2-line"></i>
+                    {{ form.vehicle_name }}
+                  </div>
+                  {% if form.vehicle_name.errors %}<div class="field-error">{{ form.vehicle_name.errors.0 }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Vehicle Type</label>
+                  {{ form.vehicle_type }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Capacity (seats)</label>
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-group-line"></i>
+                    {{ form.capacity }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Fuel Type</label>
+                  {{ form.fuel_type }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Status</label>
+                  {{ form.status }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">GPS Device ID / IMEI</label>
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-map-pin-2-line"></i>
+                    {{ form.gps_device_id }}
+                  </div>
                 </div>
               </div>
               <div class="col-sm-6">
@@ -57,7 +96,7 @@
         </div>
       </div>
 
-      <!-- Technical -->
+      <!-- Technical Details -->
       <div class="col-lg-6">
         <div class="pc-card h-100">
           <div class="pc-card-header">
@@ -68,19 +107,28 @@
               <div class="col-sm-6">
                 <div class="pc-form-group">
                   <label class="pc-label">RC Number</label>
-                  {{ form.rc_number }}
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-file-text-line"></i>
+                    {{ form.rc_number }}
+                  </div>
                 </div>
               </div>
               <div class="col-sm-6">
                 <div class="pc-form-group">
                   <label class="pc-label">Chassis Number</label>
-                  {{ form.chassis_number }}
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-tools-line"></i>
+                    {{ form.chassis_number }}
+                  </div>
                 </div>
               </div>
-              <div class="col-sm-12">
+              <div class="col-12">
                 <div class="pc-form-group">
                   <label class="pc-label">Engine Number</label>
-                  {{ form.engine_number }}
+                  <div class="pc-input-group">
+                    <i class="pc-input-icon ri-settings-4-line"></i>
+                    {{ form.engine_number }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -88,7 +136,7 @@
         </div>
       </div>
 
-      <!-- Documents -->
+      <!-- Document Expiry -->
       <div class="col-12">
         <div class="pc-card">
           <div class="pc-card-header">
@@ -129,9 +177,10 @@
 
     <div class="pc-card-footer mt-3">
       <a href="{% url 'vehicle_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
-      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Vehicle</button>
     </div>
   </form>
 
 </div>
+{% include 'transport/_form_styles.html' %}
 {% endblock %}

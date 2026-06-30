@@ -20,48 +20,73 @@
   <form method="POST">
     {% csrf_token %}
     <div class="pc-card">
+      <div class="pc-card-header">
+        <div class="pc-card-title"><i class="ri-map-pin-line me-2" style="color:var(--accent);"></i>Stop Details</div>
+      </div>
       <div class="pc-card-body">
         <div class="row g-3">
           <div class="col-sm-8">
             <div class="pc-form-group">
-              <label class="pc-label">Stop Name <span style="color:var(--rose);">*</span></label>
-              {{ form.stop_name }}
+              <label class="pc-label">Stop Name <span class="pc-required">*</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-map-pin-line"></i>
+                {{ form.stop_name }}
+              </div>
+              {% if form.stop_name.errors %}<div class="field-error">{{ form.stop_name.errors.0 }}</div>{% endif %}
             </div>
           </div>
           <div class="col-sm-4">
             <div class="pc-form-group">
               <label class="pc-label">Sequence</label>
-              {{ form.sequence }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-sort-asc"></i>
+                {{ form.sequence }}
+              </div>
             </div>
           </div>
           <div class="col-sm-6">
             <div class="pc-form-group">
               <label class="pc-label">Area</label>
-              {{ form.area }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-community-line"></i>
+                {{ form.area }}
+              </div>
             </div>
           </div>
           <div class="col-sm-6">
             <div class="pc-form-group">
               <label class="pc-label">Landmark</label>
-              {{ form.landmark }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-flag-line"></i>
+                {{ form.landmark }}
+              </div>
             </div>
           </div>
           <div class="col-sm-4">
             <div class="pc-form-group">
               <label class="pc-label">Pickup Time</label>
-              {{ form.pickup_time }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-time-line"></i>
+                {{ form.pickup_time }}
+              </div>
             </div>
           </div>
           <div class="col-sm-4">
             <div class="pc-form-group">
               <label class="pc-label">Drop Time</label>
-              {{ form.drop_time }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-time-line"></i>
+                {{ form.drop_time }}
+              </div>
             </div>
           </div>
           <div class="col-sm-4">
             <div class="pc-form-group">
               <label class="pc-label">Monthly Fee (₹)</label>
-              {{ form.monthly_fee }}
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-money-rupee-circle-line"></i>
+                {{ form.monthly_fee }}
+              </div>
             </div>
           </div>
         </div>
@@ -69,8 +94,9 @@
     </div>
     <div class="pc-card-footer mt-3">
       <a href="{% url 'stop_list' route.pk %}" class="pc-btn pc-btn-outline">Cancel</a>
-      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Stop</button>
     </div>
   </form>
 </div>
+{% include 'transport/_form_styles.html' %}
 {% endblock %}
