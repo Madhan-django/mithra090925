@@ -2,9 +2,79 @@
 {% block content %}
 
 <style>
-.qf-option-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
-.qf-panel { display:none; }
-.qf-panel.active { display:block; }
+/* ── Question Type Tiles ── */
+.qf-type-tiles { display: flex; gap: 8px; flex-wrap: wrap; }
+.qf-type-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; padding: 11px 14px; border: 2px solid var(--border);
+  border-radius: var(--r); cursor: pointer; font-size: 11px; font-weight: 700;
+  color: var(--text-sm); background: var(--surface); transition: all var(--t);
+  min-width: 72px; text-align: center; user-select: none;
+}
+.qf-type-tile i { font-size: 22px; }
+.qf-type-tile:hover {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-lt); transform: translateY(-1px); box-shadow: var(--sh-xs);
+}
+.qf-type-tile.selected {
+  border-color: var(--accent); background: var(--accent-lt);
+  color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  transform: translateY(-1px);
+}
+
+/* ── Option Rows ── */
+.qf-option-row {
+  display: flex; gap: 10px; align-items: center; margin-bottom: 8px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 10px 14px;
+  transition: border-color var(--t), background var(--t);
+}
+.qf-option-row:has(input[type=radio]:checked) {
+  border-color: #86efac; background: #f0fdf4;
+}
+.qf-option-row input[type=radio] {
+  width: 16px; height: 16px; accent-color: #22c55e; flex-shrink: 0;
+}
+.qf-option-row input[type=text] {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: 13.5px; color: var(--text);
+}
+.qf-option-letter {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--surface);
+  border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: var(--text-sm); flex-shrink: 0;
+  transition: background var(--t), border-color var(--t), color var(--t);
+}
+.qf-option-row:has(input[type=radio]:checked) .qf-option-letter {
+  background: #dcfce7; border-color: #86efac; color: #15803d;
+}
+
+/* ── Panels ── */
+.qf-panel { display: none; }
+.qf-panel.active { display: block; }
+
+/* ── Match Rows ── */
+.qf-match-row {
+  display: flex; gap: 10px; align-items: center;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 10px 12px; margin-bottom: 8px;
+  transition: border-color var(--t);
+}
+.qf-match-row:hover { border-color: var(--border-dark); }
+.qf-match-row input[type=text] {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: 13px; color: var(--text);
+}
+.qf-match-sep { color: var(--accent); font-size: 20px; font-weight: 900; flex-shrink: 0; }
+
+/* ── Edit indicator ── */
+.qf-edit-banner {
+  background: linear-gradient(90deg, var(--accent-lt) 0%, transparent 100%);
+  border: 1px solid var(--accent-mid);
+  border-radius: var(--r); padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; font-size: 13px; color: var(--accent); font-weight: 600;
+}
 </style>
 
 <div class="col-lg-12">
@@ -16,185 +86,293 @@
         <span class="pc-breadcrumb-sep">›</span>
         <a href="{% url 'question_list' %}">Question Bank</a>
         <span class="pc-breadcrumb-sep">›</span>
-        <span>Edit Question</span>
+        <a href="{% url 'view_question' q.pk %}">Question #{{ q.pk }}</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Edit</span>
       </nav>
-      <h1 class="pc-page-title">Edit Question #{{ q.pk }}</h1>
+      <h1 class="pc-page-title">
+        Edit Question
+        <span style="font-size:16px;color:var(--text-sm);font-weight:500;">#{{ q.pk }}</span>
+      </h1>
+      <p class="pc-page-sub">{{ q.cls.name }} · {{ q.subject.subject_name }}{% if q.chapter %} · {{ q.chapter.name }}{% endif %}</p>
     </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'view_question' q.pk %}" class="pc-btn pc-btn-outline">
+        <i class="ri-eye-line"></i> View
+      </a>
+    </div>
+  </div>
+
+  <div class="qf-edit-banner">
+    <i class="ri-edit-line" style="font-size:18px;flex-shrink:0;"></i>
+    You are editing Question #{{ q.pk }}. Changes will take effect immediately after saving.
   </div>
 
   <form method="POST" enctype="multipart/form-data" id="qform">
     {% csrf_token %}
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
 
+      <!-- ── Left Column ── -->
       <div>
+
+        <!-- Classification -->
         <div class="pc-card" style="margin-bottom:16px;">
-          <div class="pc-card-header"><p class="pc-card-title">Question Details</p></div>
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-folder-info-line" style="color:var(--accent);margin-right:6px;"></i>Classification
+            </p>
+          </div>
           <div class="pc-card-body">
-            <div class="nb-form-grid" style="--cols:2;">
-              <div class="nb-field">
-                <label class="nb-label">Class</label>
-                <select class="nb-select" name="cls" id="cls_sel">
-                  {% for c in classes %}
-                  <option value="{{ c.id }}" {% if c.id == q.cls_id %}selected{% endif %}>{{ c.name }}</option>
-                  {% endfor %}
-                </select>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Class</label>
+                  <select class="pc-select" name="cls" id="cls_sel">
+                    {% for c in classes %}
+                    <option value="{{ c.id }}" {% if c.id == q.cls_id %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Subject</label>
-                <select class="nb-select" name="subject" id="subj_sel">
-                  {% for s in subj_list %}
-                  <option value="{{ s.id }}" {% if s.id == q.subject_id %}selected{% endif %}>{{ s.subject_name }}</option>
-                  {% endfor %}
-                </select>
+              <div class="col-md-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Subject</label>
+                  <select class="pc-select" name="subject" id="subj_sel">
+                    {% for s in subj_list %}
+                    <option value="{{ s.id }}" {% if s.id == q.subject_id %}selected{% endif %}>{{ s.subject_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Chapter</label>
-                <select class="nb-select" name="chapter" id="chapter_sel">
-                  <option value="">— No Chapter —</option>
-                  {% for ch in chapters %}
-                  <option value="{{ ch.id }}" {% if ch.id == q.chapter_id %}selected{% endif %}>{{ ch.name }}</option>
-                  {% endfor %}
-                </select>
+              <div class="col-md-6">
+                <div class="pc-form-group" style="margin-bottom:0;">
+                  <label class="pc-label">Chapter <span style="color:var(--text-sm);font-weight:400;">(optional)</span></label>
+                  <select class="pc-select" name="chapter" id="chapter_sel">
+                    <option value="">— No Chapter —</option>
+                    {% for ch in chapters %}
+                    <option value="{{ ch.id }}" {% if ch.id == q.chapter_id %}selected{% endif %}>{{ ch.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Tags</label>
-                <input type="text" class="nb-input" name="tags" value="{{ q.tags }}">
+              <div class="col-md-6">
+                <div class="pc-form-group" style="margin-bottom:0;">
+                  <label class="pc-label">Tags <span style="color:var(--text-sm);font-weight:400;">(space-separated)</span></label>
+                  <input type="text" class="pc-input" name="tags" value="{{ q.tags }}" placeholder="e.g. algebra chapter1">
+                </div>
               </div>
-            </div>
-            <div class="nb-field" style="margin-top:4px;">
-              <label class="nb-label">Question Text</label>
-              <textarea class="nb-textarea" name="question_text" rows="4" required>{{ q.question_text }}</textarea>
-            </div>
-            <div class="nb-field" style="margin-top:8px;">
-              <label class="nb-label">Image</label>
-              {% if q.image %}
-              <div style="margin-bottom:8px;">
-                <img src="{{ q.image.url }}" style="height:80px;border-radius:var(--r);border:1px solid var(--border);">
-              </div>
-              {% endif %}
-              <input type="file" class="nb-input" name="image" accept="image/*">
             </div>
           </div>
         </div>
 
-        <!-- MCQ -->
+        <!-- Question Text -->
+        <div class="pc-card" style="margin-bottom:16px;">
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-file-text-line" style="color:var(--accent);margin-right:6px;"></i>Question Content
+            </p>
+          </div>
+          <div class="pc-card-body">
+            <div class="pc-form-group">
+              <label class="pc-label">Question Text <span style="color:var(--rose)">*</span></label>
+              <textarea class="pc-textarea" name="question_text" rows="4" required
+                style="font-size:14px;line-height:1.7;">{{ q.question_text }}</textarea>
+            </div>
+            <div class="pc-form-group" style="margin-top:10px;">
+              <label class="pc-label">Diagram / Image</label>
+              {% if q.image %}
+              <div style="margin-bottom:10px;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:12px;">
+                <img src="{{ q.image.url }}" style="height:60px;border-radius:6px;border:1px solid var(--border);box-shadow:var(--sh-xs);">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;">Current image</div>
+                  <div style="font-size:11px;color:var(--text-sm);">Upload a new file to replace it</div>
+                </div>
+              </div>
+              {% endif %}
+              <input type="file" class="pc-input" name="image" accept="image/*">
+            </div>
+          </div>
+        </div>
+
+        <!-- MCQ Panel -->
         <div class="pc-card qf-panel" id="panel-MCQ" style="margin-bottom:16px;">
-          <div class="pc-card-header"><p class="pc-card-title">MCQ Options</p></div>
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-list-check-3" style="color:#7c3aed;margin-right:6px;"></i>MCQ Options
+            </p>
+            <span style="font-size:11px;color:var(--text-sm);">Radio button = correct answer</span>
+          </div>
           <div class="pc-card-body">
             {% for opt in options %}
             <div class="qf-option-row">
-              <input type="radio" name="correct_option" value="{{ forloop.counter0 }}"
-                {% if opt.is_correct %}checked{% endif %}
-                style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;">
-              <input type="text" class="nb-input" name="option_text[]" value="{{ opt.option_text }}">
+              <div class="qf-option-letter">
+                {% if forloop.counter == 1 %}A{% elif forloop.counter == 2 %}B{% elif forloop.counter == 3 %}C{% else %}D{% endif %}
+              </div>
+              <input type="radio" name="correct_option" value="{{ forloop.counter0 }}" {% if opt.is_correct %}checked{% endif %}>
+              <input type="text" name="option_text[]" value="{{ opt.option_text }}">
             </div>
             {% endfor %}
             {% with remaining=options|length %}
             {% if remaining < 4 %}
             {% for i in "1234"|slice:remaining %}
+            {% with idx=forloop.counter0|add:remaining %}
             <div class="qf-option-row">
-              <input type="radio" name="correct_option" value="{{ forloop.counter0|add:remaining }}"
-                style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;">
-              <input type="text" class="nb-input" name="option_text[]" placeholder="Option {{ forloop.counter|add:remaining }}">
+              <div class="qf-option-letter">
+                {% if idx == 1 %}B{% elif idx == 2 %}C{% elif idx == 3 %}D{% else %}D{% endif %}
+              </div>
+              <input type="radio" name="correct_option" value="{{ idx }}">
+              <input type="text" name="option_text[]" placeholder="Option {{ forloop.counter|add:remaining }}">
             </div>
+            {% endwith %}
             {% endfor %}
             {% endif %}
             {% endwith %}
           </div>
         </div>
 
-        <!-- True/False -->
+        <!-- True/False Panel -->
         <div class="pc-card qf-panel" id="panel-TF" style="margin-bottom:16px;">
-          <div class="pc-card-header"><p class="pc-card-title">True / False</p></div>
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-scales-3-line" style="color:#15803d;margin-right:6px;"></i>True / False
+            </p>
+          </div>
           <div class="pc-card-body">
-            <label class="nb-label">Correct Answer</label>
-            <div style="display:flex;gap:20px;margin-top:8px;">
+            <label class="pc-label" style="margin-bottom:12px;">Correct Answer</label>
+            <div style="display:flex;gap:14px;margin-top:8px;">
               {% for opt in options %}
-              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
-                <input type="radio" name="correct_tf" value="{{ opt.option_text }}"
-                  {% if opt.is_correct %}checked{% endif %} style="accent-color:var(--accent);">
+              <label style="display:flex;align-items:center;gap:12px;padding:14px 22px;border:2px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:600;flex:1;">
+                <input type="radio" name="correct_tf" value="{{ opt.option_text }}" {% if opt.is_correct %}checked{% endif %} style="accent-color:var(--accent);">
+                {% if opt.option_text == 'True' %}
+                <i class="ri-check-line" style="color:#15803d;font-size:20px;"></i>
+                {% else %}
+                <i class="ri-close-line" style="color:#e11d48;font-size:20px;"></i>
+                {% endif %}
                 {{ opt.option_text }}
               </label>
               {% empty %}
-              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
-                <input type="radio" name="correct_tf" value="True" checked style="accent-color:var(--accent);">
-                True
+              <label style="display:flex;align-items:center;gap:12px;padding:14px 22px;border:2px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:600;flex:1;">
+                <input type="radio" name="correct_tf" value="True" checked style="accent-color:#15803d;">
+                <i class="ri-check-line" style="color:#15803d;font-size:20px;"></i> True
               </label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
-                <input type="radio" name="correct_tf" value="False" style="accent-color:var(--accent);">
-                False
+              <label style="display:flex;align-items:center;gap:12px;padding:14px 22px;border:2px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:600;flex:1;">
+                <input type="radio" name="correct_tf" value="False" style="accent-color:#e11d48;">
+                <i class="ri-close-line" style="color:#e11d48;font-size:20px;"></i> False
               </label>
               {% endfor %}
             </div>
           </div>
         </div>
 
-        <!-- Answer -->
+        <!-- Answer Panel -->
         <div class="pc-card qf-panel" id="panel-ANSWER" style="margin-bottom:16px;">
-          <div class="pc-card-header"><p class="pc-card-title">Answer &amp; Explanation</p></div>
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-lightbulb-line" style="color:#d97706;margin-right:6px;"></i>Answer &amp; Explanation
+            </p>
+          </div>
           <div class="pc-card-body">
-            <div class="nb-field">
-              <label class="nb-label">Answer</label>
-              <textarea class="nb-textarea" name="answer_text" rows="3">{% if answer %}{{ answer.answer_text }}{% endif %}</textarea>
+            <div class="pc-form-group">
+              <label class="pc-label">Model Answer</label>
+              <textarea class="pc-textarea" name="answer_text" rows="3"
+                placeholder="Expected answer…">{% if answer %}{{ answer.answer_text }}{% endif %}</textarea>
             </div>
-            <div class="nb-field">
-              <label class="nb-label">Explanation</label>
-              <textarea class="nb-textarea" name="explanation" rows="2">{% if answer %}{{ answer.explanation }}{% endif %}</textarea>
+            <div class="pc-form-group" style="margin-top:12px;">
+              <label class="pc-label">Explanation <span style="color:var(--text-sm);font-weight:400;">(optional)</span></label>
+              <textarea class="pc-textarea" name="explanation" rows="2"
+                placeholder="Explain why this is correct…">{% if answer %}{{ answer.explanation }}{% endif %}</textarea>
             </div>
           </div>
         </div>
+
       </div>
 
-      <!-- Right -->
-      <div>
-        <div class="pc-card" style="margin-bottom:16px;">
-          <div class="pc-card-header"><p class="pc-card-title">Settings</p></div>
+      <!-- ── Right Column ── -->
+      <div style="position:sticky;top:80px;">
+        <div class="pc-card" style="margin-bottom:14px;">
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-settings-4-line" style="color:var(--accent);margin-right:6px;"></i>Question Settings
+            </p>
+          </div>
           <div class="pc-card-body">
-            <div class="nb-field">
-              <label class="nb-label">Question Type</label>
-              <select class="nb-select" name="question_type" id="qtype_sel">
-                <option value="MCQ" {% if q.question_type == 'MCQ' %}selected{% endif %}>Multiple Choice (MCQ)</option>
-                <option value="SHORT" {% if q.question_type == 'SHORT' %}selected{% endif %}>Short Answer</option>
-                <option value="LONG" {% if q.question_type == 'LONG' %}selected{% endif %}>Long Answer</option>
-                <option value="FILL" {% if q.question_type == 'FILL' %}selected{% endif %}>Fill in the Blank</option>
-                <option value="TF" {% if q.question_type == 'TF' %}selected{% endif %}>True / False</option>
-                <option value="MATCH" {% if q.question_type == 'MATCH' %}selected{% endif %}>Match the Following</option>
-              </select>
+
+            <div class="pc-form-group">
+              <label class="pc-label">Question Type <span style="color:var(--rose)">*</span></label>
+              <div class="qf-type-tiles" id="type-tiles">
+                <div class="qf-type-tile {% if q.question_type == 'MCQ' %}selected{% endif %}" data-val="MCQ" onclick="selectType('MCQ')">
+                  <i class="ri-list-check-3"></i>MCQ
+                </div>
+                <div class="qf-type-tile {% if q.question_type == 'SHORT' %}selected{% endif %}" data-val="SHORT" onclick="selectType('SHORT')">
+                  <i class="ri-edit-2-line"></i>Short
+                </div>
+                <div class="qf-type-tile {% if q.question_type == 'LONG' %}selected{% endif %}" data-val="LONG" onclick="selectType('LONG')">
+                  <i class="ri-file-text-line"></i>Long
+                </div>
+                <div class="qf-type-tile {% if q.question_type == 'FILL' %}selected{% endif %}" data-val="FILL" onclick="selectType('FILL')">
+                  <i class="ri-text-wrap"></i>Fill
+                </div>
+                <div class="qf-type-tile {% if q.question_type == 'TF' %}selected{% endif %}" data-val="TF" onclick="selectType('TF')">
+                  <i class="ri-scales-3-line"></i>T / F
+                </div>
+                <div class="qf-type-tile {% if q.question_type == 'MATCH' %}selected{% endif %}" data-val="MATCH" onclick="selectType('MATCH')">
+                  <i class="ri-arrow-left-right-line"></i>Match
+                </div>
+              </div>
+              <input type="hidden" name="question_type" id="qtype_hidden" value="{{ q.question_type }}">
             </div>
-            <div class="nb-field">
-              <label class="nb-label">Difficulty</label>
-              <select class="nb-select" name="difficulty">
-                <option value="EASY" {% if q.difficulty == 'EASY' %}selected{% endif %}>Easy</option>
+
+            <div class="pc-form-group">
+              <label class="pc-label">Difficulty Level</label>
+              <select class="pc-select" name="difficulty">
+                <option value="EASY"   {% if q.difficulty == 'EASY'   %}selected{% endif %}>Easy</option>
                 <option value="MEDIUM" {% if q.difficulty == 'MEDIUM' %}selected{% endif %}>Medium</option>
-                <option value="HARD" {% if q.difficulty == 'HARD' %}selected{% endif %}>Hard</option>
+                <option value="HARD"   {% if q.difficulty == 'HARD'   %}selected{% endif %}>Hard</option>
               </select>
             </div>
-            <div class="nb-field">
-              <label class="nb-label">Marks</label>
-              <input type="number" class="nb-input" name="marks" value="{{ q.marks }}" min="1" max="100">
+
+            <div class="pc-form-group">
+              <label class="pc-label">Marks</label>
+              <input type="number" class="pc-input" name="marks" value="{{ q.marks }}" min="1" max="100">
             </div>
-            <div class="nb-field" style="margin-top:12px;">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text);">
+
+            <div class="pc-form-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+              <label style="display:flex;align-items:center;gap:12px;cursor:pointer;
+                padding:12px 14px;background:var(--accent-lt);border-radius:var(--r);
+                border:1.5px solid var(--accent-mid);">
                 <input type="checkbox" name="is_approved" {% if q.is_approved %}checked{% endif %}
                   style="width:16px;height:16px;accent-color:var(--accent);">
-                Mark as Approved
+                <span>
+                  <span style="font-size:13px;font-weight:700;color:var(--accent);">Mark as Approved</span><br>
+                  <span style="font-size:11px;color:var(--text-sm);">Approved questions appear in the paper builder</span>
+                </span>
               </label>
             </div>
+
           </div>
         </div>
-        <button type="submit" class="pc-btn pc-btn-primary" style="width:100%;justify-content:center;padding:11px;">
+
+        <button type="submit" class="pc-btn pc-btn-primary"
+          style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-bottom:8px;">
           <i class="ri-save-line"></i> Update Question
         </button>
-        <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline"
-           style="width:100%;justify-content:center;padding:11px;margin-top:8px;">
-          Cancel
+        <a href="{% url 'view_question' q.pk %}" class="pc-btn pc-btn-outline"
+           style="width:100%;justify-content:center;padding:12px;">
+          <i class="ri-arrow-left-line"></i> Cancel
         </a>
+
       </div>
     </div>
   </form>
 </div>
 
 <script>
+function selectType(val) {
+  document.querySelectorAll('.qf-type-tile').forEach(t => t.classList.remove('selected'));
+  document.querySelector(`.qf-type-tile[data-val="${val}"]`)?.classList.add('selected');
+  document.getElementById('qtype_hidden').value = val;
+  showPanels(val);
+}
 function showPanels(qtype) {
   document.querySelectorAll('.qf-panel').forEach(p => p.classList.remove('active'));
   if (qtype === 'MCQ') {
@@ -202,12 +380,22 @@ function showPanels(qtype) {
     document.getElementById('panel-ANSWER').classList.add('active');
   } else if (qtype === 'TF') {
     document.getElementById('panel-TF').classList.add('active');
-  } else if (qtype !== 'MATCH') {
+  } else if (qtype === 'MATCH') {
+    // No answer panel for match
+  } else {
     document.getElementById('panel-ANSWER').classList.add('active');
   }
 }
-document.getElementById('qtype_sel').addEventListener('change', function() { showPanels(this.value); });
 showPanels('{{ q.question_type }}');
+
+document.getElementById('cls_sel').addEventListener('change', function() {
+  fetch(`{% url 'qbank_ajax_subjects' %}?class_id=${this.value}`)
+    .then(r => r.json()).then(data => {
+      const sel = document.getElementById('subj_sel');
+      sel.innerHTML = '<option value="">— Select Subject —</option>';
+      data.subjects.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`);
+    });
+});
 </script>
 
 {% endblock %}

@@ -71,6 +71,7 @@ def question_list(request):
     if search:
         qs = qs.filter(question_text__icontains=search)
 
+    all_qs = Question.objects.filter(school=sdata, academic_year=year)
     classes = sclass.objects.filter(school_name=sdata)
     return render(request, 'qbank/question_list.html', {
         'questions': qs,
@@ -82,6 +83,9 @@ def question_list(request):
         'filter_approved': approved,
         'search': search,
         'total': qs.count(),
+        'approved_count': all_qs.filter(is_approved=True).count(),
+        'pending_count': all_qs.filter(is_approved=False).count(),
+        'mcq_count': all_qs.filter(question_type='MCQ').count(),
     })
 
 
@@ -637,13 +641,13 @@ def paper_builder(request, pk):
     chapters = Chapter.objects.filter(school=sdata, subject=paper.subject)
 
     # Bank filter
-    ch_filter = request.GET.get('ch')
+    ch_filters = request.GET.getlist('ch')          # multi-chapter
     type_filter = request.GET.get('qt')
     diff_filter = request.GET.get('df')
     search = request.GET.get('bq', '').strip()
 
-    if ch_filter:
-        bank_qs = bank_qs.filter(chapter_id=ch_filter)
+    if ch_filters:
+        bank_qs = bank_qs.filter(chapter_id__in=ch_filters)
     if type_filter:
         bank_qs = bank_qs.filter(question_type=type_filter)
     if diff_filter:
@@ -666,7 +670,7 @@ def paper_builder(request, pk):
         'chapters': chapters,
         'used_count': used_count,
         'total_added_marks': total_added_marks,
-        'ch_filter': ch_filter or '',
+        'ch_filters': ch_filters,
         'type_filter': type_filter or '',
         'diff_filter': diff_filter or '',
         'search': search,
@@ -766,7 +770,7 @@ def auto_generate_paper(request, pk):
         num = int(item.get('num_questions', 0))
         qtype = item.get('question_type', '')
         difficulty = item.get('difficulty', '')
-        chapter_id = item.get('chapter_id') or None
+        chapter_ids = [c for c in item.get('chapter_ids', []) if c]
 
         try:
             sec = PaperSection.objects.get(pk=sec_id, paper=paper)
@@ -781,8 +785,8 @@ def auto_generate_paper(request, pk):
             qs = qs.filter(question_type=qtype)
         if difficulty:
             qs = qs.filter(difficulty=difficulty)
-        if chapter_id:
-            qs = qs.filter(chapter_id=chapter_id)
+        if chapter_ids:
+            qs = qs.filter(chapter_id__in=chapter_ids)
 
         pool = list(qs)
         selected = random.sample(pool, min(num, len(pool)))

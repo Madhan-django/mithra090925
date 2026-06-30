@@ -65,14 +65,9 @@
 .pb-add-sec-grid {
   display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;
 }
-.pb-add-sec-grid input, .pb-add-sec-grid select {
-  border: 1.5px solid var(--border-dark); border-radius: var(--r);
-  padding: 7px 10px; font-size:13px; color:var(--text); background:var(--surface);
-  outline: none; width: 100%;
-}
-.pb-add-sec-grid input:focus, .pb-add-sec-grid select:focus {
-  border-color: var(--accent);
-}
+.pb-add-sec-grid .pc-input,
+.pb-add-sec-grid .pc-select { padding: 7px 10px; font-size: 13px; }
+.pb-add-sec-grid .pc-select { padding-right: 34px; }
 
 /* ── Right panel: Question Bank ── */
 .pb-bank-wrap {
@@ -80,7 +75,7 @@
   top: 80px;
 }
 .pb-bank-header {
-  background: #1e293b;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #e2e8f0;
   padding: 13px 16px;
   border-radius: var(--r-xl) var(--r-xl) 0 0;
@@ -97,15 +92,49 @@
 .pb-bank-filters {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
-  display: flex; gap: 6px; flex-wrap: wrap; background: var(--surface2);
+  background: var(--surface2);
 }
-.pb-bank-filters select, .pb-bank-filters input[type=text] {
-  border: 1.5px solid var(--border-dark); border-radius: var(--r);
-  padding: 6px 10px; font-size: 12px; color: var(--text); background: var(--surface);
-  outline: none; flex: 1; min-width: 80px;
+
+/* ── Chapter pill checkboxes ── */
+.pb-ch-pills {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
 }
-.pb-bank-filters select:focus, .pb-bank-filters input:focus {
-  border-color: var(--accent);
+.pb-ch-pill {
+  display: flex; align-items: center;
+  cursor: pointer; user-select: none;
+}
+.pb-ch-pill input[type=checkbox] { display: none; }
+.pb-ch-pill-label {
+  font-size: 11px; font-weight: 600; border-radius: 20px; padding: 3px 10px;
+  background: var(--surface); border: 1.5px solid var(--border-dark);
+  color: var(--text-sm); transition: all 150ms; cursor: pointer; white-space: nowrap;
+}
+.pb-ch-pill input:checked + .pb-ch-pill-label {
+  background: var(--accent-lt); border-color: var(--accent-mid); color: var(--accent);
+  font-weight: 700;
+}
+.pb-ch-pills-empty { font-size:11px; color:var(--text-sm); font-style:italic; }
+
+.pb-bank-filter-row {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.pb-bank-filter-row .pc-select,
+.pb-bank-filter-row .pc-input { flex: 1; min-width: 80px; padding: 6px 10px; font-size: 12px; }
+.pb-bank-filter-row .pc-select { padding-right: 32px; }
+
+/* ── Active chapter chips indicator ── */
+.pb-ch-active-strip {
+  display: none; padding: 5px 12px 8px;
+  background: #ede9fe; border-bottom: 1px solid #c4b5fd;
+}
+.pb-ch-active-strip p {
+  font-size: 10.5px; font-weight: 700; color: #6d28d9; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 4px;
+}
+.pb-ch-active-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.pb-ch-active-chip {
+  font-size: 11px; background: var(--accent); color: #fff;
+  border-radius: 20px; padding: 2px 10px; font-weight: 600;
 }
 
 /* ── Target section selector ── */
@@ -116,9 +145,8 @@
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .pb-target label { font-size: 11px; font-weight:700; color: var(--accent); white-space: nowrap; }
-.pb-target select {
-  flex: 1; border: 1.5px solid var(--accent-mid); border-radius: var(--r);
-  padding: 6px 10px; font-size: 12px; color: var(--text); background: var(--surface); outline: none;
+.pb-target .pc-select {
+  flex: 1; border-color: var(--accent-mid); padding: 6px 10px; font-size: 12px; padding-right: 32px;
 }
 
 /* ── Bank question row ── */
@@ -146,17 +174,23 @@
 
 /* ── Stats bar ── */
 .pb-stats {
-  display: flex; gap: 12px; flex-wrap: wrap;
+  display: grid; grid-template-columns: repeat(5,1fr);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
-  padding: 12px 18px;
   margin-bottom: 16px;
   box-shadow: var(--sh-sm);
+  overflow: hidden;
 }
-.pb-stat { text-align: center; }
-.pb-stat-val { font-size: 22px; font-weight: 800; color: var(--accent); }
-.pb-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-sm); }
+.pb-stat {
+  text-align: center; padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  transition: background var(--t);
+}
+.pb-stat:last-child { border-right: none; }
+.pb-stat:hover { background: var(--surface2); }
+.pb-stat-val { font-size: 26px; font-weight: 900; color: var(--accent); line-height: 1; }
+.pb-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-sm); margin-top: 4px; }
 
 /* ── Auto-generate modal ── */
 .nb-modal { display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; }
@@ -165,7 +199,29 @@
 .nb-modal-box {
   position:relative; z-index:1; background:var(--surface);
   border-radius:var(--r-xl); box-shadow:0 20px 60px rgba(0,0,0,.2);
-  width:min(600px,95vw); max-height:80vh; overflow-y:auto; padding:24px;
+  width:min(660px,95vw); max-height:85vh; overflow-y:auto; padding:24px;
+}
+
+/* ── Modal chapter checkboxes ── */
+.as-ch-grid {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
+}
+.as-ch-item { display: flex; align-items: center; }
+.as-ch-item input[type=checkbox] { display: none; }
+.as-ch-lbl {
+  font-size: 11px; font-weight: 600; border-radius: 20px; padding: 3px 11px; cursor: pointer;
+  background: var(--surface); border: 1.5px solid var(--border-dark); color: var(--text-sm);
+  transition: all 150ms; white-space: nowrap;
+}
+.as-ch-item input:checked + .as-ch-lbl {
+  background: #ede9fe; border-color: #c4b5fd; color: #6d28d9; font-weight: 700;
+}
+
+/* ── Scope banner ── */
+.pb-scope-banner {
+  padding: 8px 12px; background: #fffbeb; border-bottom: 1px solid #fcd34d;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px; color: #92400e; display: none;
 }
 </style>
 
@@ -201,22 +257,24 @@
   <div class="pb-stats">
     <div class="pb-stat">
       <div class="pb-stat-val">{{ used_count }}</div>
-      <div class="pb-stat-lbl">Questions Added</div>
+      <div class="pb-stat-lbl">Questions</div>
     </div>
-    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
-      <div class="pb-stat-val">{{ total_added_marks }}</div>
-      <div class="pb-stat-lbl">Marks Assigned</div>
+    <div class="pb-stat">
+      <div class="pb-stat-val" style="{% if total_added_marks == paper.total_marks %}color:#059669{% elif total_added_marks > paper.total_marks %}color:#e11d48{% endif %}">
+        {{ total_added_marks }}
+      </div>
+      <div class="pb-stat-lbl">Marks Used</div>
     </div>
-    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
-      <div class="pb-stat-val">{{ paper.total_marks }}</div>
+    <div class="pb-stat">
+      <div class="pb-stat-val" style="color:var(--text-sm);">{{ paper.total_marks }}</div>
       <div class="pb-stat-lbl">Target Marks</div>
     </div>
-    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
-      <div class="pb-stat-val">{{ paper.duration_mins }}</div>
+    <div class="pb-stat">
+      <div class="pb-stat-val" style="color:var(--text-sm);">{{ paper.duration_mins }}</div>
       <div class="pb-stat-lbl">Minutes</div>
     </div>
-    <div class="pb-stat" style="border-left:1px solid var(--border);padding-left:12px;">
-      <div class="pb-stat-val">{{ sections|length }}</div>
+    <div class="pb-stat">
+      <div class="pb-stat-val" style="color:#7c3aed;">{{ sections|length }}</div>
       <div class="pb-stat-lbl">Sections</div>
     </div>
   </div>
@@ -235,16 +293,16 @@
           {% csrf_token %}
           <div class="pb-add-sec-grid">
             <div>
-              <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Section Name</label>
-              <input type="text" name="section_name" required placeholder="e.g. Section A – MCQ">
+              <label class="pc-label" style="margin-bottom:3px;">Section Name</label>
+              <input class="pc-input" type="text" name="section_name" required placeholder="e.g. Section A – MCQ">
             </div>
             <div>
-              <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Marks/Q</label>
-              <input type="number" name="marks_per_question" value="1" min="1">
+              <label class="pc-label" style="margin-bottom:3px;">Marks/Q</label>
+              <input class="pc-input" type="number" name="marks_per_question" value="1" min="1">
             </div>
             <div>
-              <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Attempt (opt)</label>
-              <input type="number" name="num_to_attempt" placeholder="All">
+              <label class="pc-label" style="margin-bottom:3px;">Attempt (opt)</label>
+              <input class="pc-input" type="number" name="num_to_attempt" placeholder="All">
             </div>
             <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 14px;">
               <i class="ri-add-line"></i> Add
@@ -329,7 +387,7 @@
         <!-- Target Section -->
         <div class="pb-target">
           <label><i class="ri-target-line"></i> Add to:</label>
-          <select id="target-section">
+          <select class="pc-select" id="target-section">
             {% if sections %}
             {% for sec in sections %}
             <option value="{{ sec.pk }}">{{ sec.section_name }}</option>
@@ -340,33 +398,58 @@
           </select>
         </div>
 
+        <!-- Active chapter scope indicator -->
+        <div class="pb-ch-active-strip" id="ch-active-strip">
+          <i class="ri-bookmark-3-fill" style="color:#7c3aed;font-size:14px;flex-shrink:0;"></i>
+          <div>
+            <p><i class="ri-filter-3-line"></i> Showing questions from selected lessons only</p>
+            <div class="pb-ch-active-chips" id="ch-active-chips"></div>
+          </div>
+        </div>
+
         <!-- Filters -->
-        <form method="GET" class="pb-bank-filters">
-          <input type="text" name="bq" value="{{ search }}" placeholder="Search…">
-          <select name="ch" onchange="this.form.submit()">
-            <option value="">All Chapters</option>
+        <form method="GET" class="pb-bank-filters" id="bank-filter-form">
+
+          <!-- Chapter pills (multi-select) -->
+          {% if chapters %}
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);margin-bottom:6px;letter-spacing:.6px;">
+            <i class="ri-bookmark-line"></i> Lessons / Chapters (pick any)
+          </p>
+          <div class="pb-ch-pills" id="ch-pills">
             {% for ch in chapters %}
-            <option value="{{ ch.pk }}" {% if ch_filter == ch.pk|stringformat:'s' %}selected{% endif %}>{{ ch.name }}</option>
+            <label class="pb-ch-pill">
+              <input type="checkbox" name="ch" value="{{ ch.pk }}"
+                {% if ch.pk|stringformat:'s' in ch_filters %}checked{% endif %}
+                onchange="updateActiveStrip(); document.getElementById('bank-filter-form').submit()">
+              <span class="pb-ch-pill-label">{{ ch.name }}</span>
+            </label>
             {% endfor %}
-          </select>
-          <select name="qt" onchange="this.form.submit()">
-            <option value="">All Types</option>
-            <option value="MCQ" {% if type_filter == 'MCQ' %}selected{% endif %}>MCQ</option>
-            <option value="SHORT" {% if type_filter == 'SHORT' %}selected{% endif %}>Short</option>
-            <option value="LONG" {% if type_filter == 'LONG' %}selected{% endif %}>Long</option>
-            <option value="FILL" {% if type_filter == 'FILL' %}selected{% endif %}>Fill</option>
-            <option value="TF" {% if type_filter == 'TF' %}selected{% endif %}>T/F</option>
-            <option value="MATCH" {% if type_filter == 'MATCH' %}selected{% endif %}>Match</option>
-          </select>
-          <select name="df" onchange="this.form.submit()">
-            <option value="">All Levels</option>
-            <option value="EASY" {% if diff_filter == 'EASY' %}selected{% endif %}>Easy</option>
-            <option value="MEDIUM" {% if diff_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
-            <option value="HARD" {% if diff_filter == 'HARD' %}selected{% endif %}>Hard</option>
-          </select>
-          <button type="submit" class="pc-btn pc-btn-primary" style="padding:6px 10px;font-size:12px;">
-            <i class="ri-search-line"></i>
-          </button>
+          </div>
+          {% else %}
+          <p class="pb-ch-pills-empty"><i class="ri-information-line"></i> No chapters defined for this subject.</p>
+          {% endif %}
+
+          <div class="pb-bank-filter-row" style="margin-top:6px;">
+            <input class="pc-input" type="text" name="bq" value="{{ search }}" placeholder="Search questions…">
+            <select class="pc-select" name="qt" onchange="this.form.submit()">
+              <option value="">All Types</option>
+              <option value="MCQ" {% if type_filter == 'MCQ' %}selected{% endif %}>MCQ</option>
+              <option value="SHORT" {% if type_filter == 'SHORT' %}selected{% endif %}>Short</option>
+              <option value="LONG" {% if type_filter == 'LONG' %}selected{% endif %}>Long</option>
+              <option value="FILL" {% if type_filter == 'FILL' %}selected{% endif %}>Fill</option>
+              <option value="TF" {% if type_filter == 'TF' %}selected{% endif %}>T/F</option>
+              <option value="MATCH" {% if type_filter == 'MATCH' %}selected{% endif %}>Match</option>
+            </select>
+            <select class="pc-select" name="df" onchange="this.form.submit()">
+              <option value="">All Levels</option>
+              <option value="EASY" {% if diff_filter == 'EASY' %}selected{% endif %}>Easy</option>
+              <option value="MEDIUM" {% if diff_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+              <option value="HARD" {% if diff_filter == 'HARD' %}selected{% endif %}>Hard</option>
+            </select>
+            <button type="submit" class="pc-btn pc-btn-primary" style="padding:6px 10px;font-size:12px;">
+              <i class="ri-search-line"></i>
+            </button>
+          </div>
         </form>
 
         <!-- Question rows -->
@@ -381,7 +464,7 @@
               <span>{{ q.get_difficulty_display }}</span>
               <span>&bull;</span>
               <span>{{ q.marks }}M</span>
-              {% if q.chapter %}<span>&bull;</span><span>{{ q.chapter.name }}</span>{% endif %}
+              {% if q.chapter %}<span>&bull;</span><span style="color:#7c3aed;">{{ q.chapter.name }}</span>{% endif %}
             </div>
           </div>
           {% if q.pk in used_ids %}
@@ -396,11 +479,17 @@
         {% endfor %}
         {% else %}
         <div style="padding:30px;text-align:center;color:var(--text-sm);font-size:13px;">
+          {% if ch_filters %}
+          <i class="ri-bookmark-3-line" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4;"></i>
+          No approved questions found in the selected lessons.<br>
+          <span style="font-size:11px;">Try selecting more chapters or adding questions to the bank.</span>
+          {% else %}
           No approved questions found for this class &amp; subject.
           <br><br>
           <a href="{% url 'add_question' %}" class="pc-btn pc-btn-outline pc-btn-sm">
             <i class="ri-add-line"></i> Add Questions
           </a>
+          {% endif %}
         </div>
         {% endif %}
 
@@ -415,7 +504,7 @@
 <div class="nb-modal" id="auto-modal">
   <div class="nb-modal-bg" onclick="closeAutoModal()"></div>
   <div class="nb-modal-box">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
       <h2 style="font-size:16px;font-weight:700;color:var(--text);">
         <i class="ri-magic-line" style="color:var(--accent);"></i> Auto-Generate Questions
       </h2>
@@ -423,9 +512,30 @@
         <i class="ri-close-line"></i>
       </button>
     </div>
-    <p style="font-size:13px;color:var(--text-sm);margin-bottom:18px;">
-      Set parameters for each section. The system will randomly pick approved questions from the bank.
+    <p style="font-size:13px;color:var(--text-sm);margin-bottom:14px;">
+      Set parameters for each section. Select specific lessons to restrict questions to those chapters only.
     </p>
+
+    <!-- Global chapter scope for auto-generate -->
+    {% if chapters %}
+    <div style="background:#ede9fe;border:1.5px solid #c4b5fd;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;">
+      <p style="font-size:11.5px;font-weight:700;color:#6d28d9;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i class="ri-bookmark-3-fill"></i> Which lessons are taught? (applies to all sections)
+      </p>
+      <div class="as-ch-grid" id="global-chapters">
+        {% for ch in chapters %}
+        <label class="as-ch-item">
+          <input type="checkbox" class="global-ch-cb" value="{{ ch.pk }}" data-name="{{ ch.name }}">
+          <span class="as-ch-lbl">{{ ch.name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <p style="font-size:11px;color:#7c3aed;margin-top:8px;display:flex;align-items:center;gap:4px;">
+        <i class="ri-information-line"></i>
+        Leave all unchecked to use questions from any chapter.
+      </p>
+    </div>
+    {% endif %}
 
     <div id="auto-sections">
       {% for sec in sections %}
@@ -434,38 +544,30 @@
           <i class="ri-layout-row-line" style="color:var(--accent);"></i> {{ sec.section_name }}
         </p>
         <input type="hidden" class="as-sec-id" value="{{ sec.pk }}">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
           <div>
-            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Questions to Add</label>
-            <input type="number" class="as-num nb-input" style="padding:6px 10px;font-size:12px;" value="5" min="0">
+            <label class="pc-label" style="margin-bottom:4px;">Questions to Add</label>
+            <input type="number" class="as-num pc-input" style="padding:7px 10px;font-size:13px;" value="5" min="0">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Type</label>
-            <select class="as-type" style="border:1.5px solid var(--border-dark);border-radius:var(--r);padding:6px 10px;font-size:12px;color:var(--text);background:var(--surface);outline:none;width:100%;">
+            <label class="pc-label" style="margin-bottom:4px;">Type</label>
+            <select class="as-type pc-select" style="padding:7px 10px;font-size:13px;padding-right:32px;">
               <option value="">Any</option>
               <option value="MCQ">MCQ</option>
               <option value="SHORT">Short</option>
               <option value="LONG">Long</option>
               <option value="FILL">Fill</option>
               <option value="TF">T/F</option>
+              <option value="MATCH">Match</option>
             </select>
           </div>
           <div>
-            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Difficulty</label>
-            <select class="as-diff" style="border:1.5px solid var(--border-dark);border-radius:var(--r);padding:6px 10px;font-size:12px;color:var(--text);background:var(--surface);outline:none;width:100%;">
+            <label class="pc-label" style="margin-bottom:4px;">Difficulty</label>
+            <select class="as-diff pc-select" style="padding:7px 10px;font-size:13px;padding-right:32px;">
               <option value="">Any</option>
               <option value="EASY">Easy</option>
               <option value="MEDIUM">Medium</option>
               <option value="HARD">Hard</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:10px;font-weight:700;color:var(--text-sm);display:block;margin-bottom:3px;">Chapter</label>
-            <select class="as-chapter" style="border:1.5px solid var(--border-dark);border-radius:var(--r);padding:6px 10px;font-size:12px;color:var(--text);background:var(--surface);outline:none;width:100%;">
-              <option value="">Any</option>
-              {% for ch in chapters %}
-              <option value="{{ ch.pk }}">{{ ch.name }}</option>
-              {% endfor %}
             </select>
           </div>
         </div>
@@ -494,6 +596,25 @@
 const PAPER_PK = {{ paper.pk }};
 const CSRF = '{{ csrf_token }}';
 
+// ── Active chapter strip (bank filter) ─────────────────────────────
+function updateActiveStrip() {
+  const checked = [...document.querySelectorAll('#ch-pills input:checked')];
+  const strip = document.getElementById('ch-active-strip');
+  const chips = document.getElementById('ch-active-chips');
+  if (checked.length) {
+    strip.style.display = 'flex';
+    chips.innerHTML = checked.map(cb => {
+      const lbl = cb.closest('.pb-ch-pill').querySelector('.pb-ch-pill-label').textContent.trim();
+      return `<span class="pb-ch-active-chip">${lbl}</span>`;
+    }).join('');
+  } else {
+    strip.style.display = 'none';
+  }
+}
+// Run on page load to restore state
+updateActiveStrip();
+
+// ── Question Bank: add/remove ──────────────────────────────────────
 function addQuestion(qid, btn) {
   const secId = document.getElementById('target-section').value;
   if (!secId) { alert('Please add a section first.'); return; }
@@ -512,11 +633,9 @@ function addQuestion(qid, btn) {
       btn.classList.add('used');
       document.getElementById(`bq-${qid}`)?.classList.add('used');
 
-      // Remove "no questions" placeholder
       const empty = document.getElementById(`sec-empty-${secId}`);
       if (empty) empty.remove();
 
-      // Count existing questions in section
       const qlist = document.getElementById(`sec-qlist-${secId}`);
       const cnt = qlist.querySelectorAll('.pb-q-row').length + 1;
 
@@ -535,7 +654,6 @@ function addQuestion(qid, btn) {
         </button>`;
       qlist.appendChild(div);
 
-      // Update badge
       const badge = document.getElementById(`sec-count-${secId}`);
       if (badge) badge.textContent = `${cnt} Q`;
     } else {
@@ -566,6 +684,7 @@ function removeQuestion(pqId, btn) {
   });
 }
 
+// ── Auto-generate modal ────────────────────────────────────────────
 function openAutoModal() { document.getElementById('auto-modal').classList.add('active'); }
 function closeAutoModal() { document.getElementById('auto-modal').classList.remove('active'); }
 
@@ -574,6 +693,9 @@ function runAutoGenerate() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ri-loader-4-line"></i> Generating…';
 
+  // Collect selected global chapters
+  const selectedChapterIds = [...document.querySelectorAll('.global-ch-cb:checked')].map(cb => cb.value);
+
   const sections = [];
   document.querySelectorAll('#auto-sections > div').forEach(row => {
     sections.push({
@@ -581,7 +703,7 @@ function runAutoGenerate() {
       num_questions: parseInt(row.querySelector('.as-num').value) || 0,
       question_type: row.querySelector('.as-type').value,
       difficulty: row.querySelector('.as-diff').value,
-      chapter_id: row.querySelector('.as-chapter').value || null,
+      chapter_ids: selectedChapterIds,   // same scope for all sections
     });
   });
 

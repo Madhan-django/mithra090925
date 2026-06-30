@@ -2,29 +2,81 @@
 {% block content %}
 
 <style>
+/* ── Section builder row ── */
 .bp-section-row {
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
   border-radius: var(--r);
-  padding: 14px 16px;
+  padding: 12px 16px;
   margin-bottom: 10px;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
   gap: 10px;
   align-items: center;
+  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+  position: relative;
 }
-.bp-section-row select, .bp-section-row input {
-  border: 1.5px solid var(--border-dark);
+.bp-section-row:hover {
+  border-color: var(--accent-mid);
+  box-shadow: var(--sh-xs);
+  background: #fafbff;
+}
+.bp-section-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: var(--r) 0 0 var(--r);
+  background: var(--accent);
+  opacity: 0; transition: opacity var(--t);
+}
+.bp-section-row:hover::before { opacity: 1; }
+
+.bp-section-row .pc-input,
+.bp-section-row .pc-select { padding: 7px 10px; font-size: 13px; }
+.bp-section-row .pc-select { padding-right: 34px; }
+.bp-col-header {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  color: var(--text-sm); letter-spacing: .7px;
+}
+.bp-remove-btn {
+  background: none; border: 1.5px solid #fca5a5; cursor: pointer;
+  color: #e11d48; font-size: 15px; padding: 6px 8px;
+  border-radius: var(--r-sm); transition: background var(--t), transform var(--t);
+}
+.bp-remove-btn:hover { background: #fff1f2; transform: scale(1.1); }
+
+/* ── Summary box ── */
+.bp-summary-box {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   border-radius: var(--r);
-  padding: 7px 10px;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--surface);
-  outline: none;
-  width: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #fff;
 }
-.bp-section-row select:focus, .bp-section-row input:focus {
-  border-color: var(--accent);
+.bp-summary-marks {
+  font-size: 40px; font-weight: 900; line-height: 1;
+}
+.bp-summary-label { font-size: 12px; opacity: .8; margin-top: 4px; font-weight: 600; }
+
+/* ── Section summary rows ── */
+.bp-sec-summary-row {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:12px; color:var(--text-md);
+  padding:8px 12px;
+  background:var(--surface2); border-radius:var(--r-sm);
+  border:1px solid var(--border);
+  transition: border-color var(--t);
+}
+.bp-sec-summary-row:hover { border-color: var(--accent-mid); }
+.bp-sec-summary-name { font-weight:600; }
+.bp-sec-summary-calc { color:var(--accent); font-weight:700; }
+
+/* ── Empty state ── */
+.bp-empty-state {
+  text-align:center; padding:32px 20px;
+  color:var(--text-sm); font-size:13px;
+  border:1.5px dashed var(--border);
+  border-radius:var(--r); background:var(--surface2);
 }
 </style>
 
@@ -40,6 +92,7 @@
         <span>Create Blueprint</span>
       </nav>
       <h1 class="pc-page-title">Create Exam Blueprint</h1>
+      <p class="pc-page-sub">Define the structure, sections, and mark distribution for your exam template.</p>
     </div>
   </div>
 
@@ -47,96 +100,138 @@
     {% csrf_token %}
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
 
+      <!-- Left -->
       <div>
+
+        <!-- Blueprint Info -->
         <div class="pc-card" style="margin-bottom:16px;">
-          <div class="pc-card-header"><p class="pc-card-title">Blueprint Info</p></div>
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-layout-line" style="color:var(--accent);margin-right:6px;"></i>Blueprint Info
+            </p>
+          </div>
           <div class="pc-card-body">
-            <div class="nb-form-grid" style="--cols:2;">
-              <div class="nb-field" style="grid-column:1/-1;">
-                <label class="nb-label">Blueprint Name</label>
-                <input type="text" class="nb-input" name="name" required placeholder="e.g. Class 10 Maths Final Exam">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Blueprint Name <span style="color:var(--rose)">*</span></label>
+                  <input type="text" class="pc-input" name="name" required
+                    placeholder="e.g. Class 10 Mathematics Final Exam"
+                    style="font-size:15px;font-weight:600;">
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Class</label>
-                <select class="nb-select" name="cls" id="cls_sel" required>
-                  <option value="">— Select Class —</option>
-                  {% for c in classes %}
-                  <option value="{{ c.id }}">{{ c.name }}</option>
-                  {% endfor %}
-                </select>
+              <div class="col-md-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+                  <select class="pc-select" name="cls" id="cls_sel" required>
+                    <option value="">— Select Class —</option>
+                    {% for c in classes %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Subject</label>
-                <select class="nb-select" name="subject" id="subj_sel" required>
-                  <option value="">— Select Subject —</option>
-                </select>
+              <div class="col-md-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Subject <span style="color:var(--rose)">*</span></label>
+                  <select class="pc-select" name="subject" id="subj_sel" required>
+                    <option value="">— Select Subject —</option>
+                  </select>
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Total Marks</label>
-                <input type="number" class="nb-input" name="total_marks" min="1" required>
+              <div class="col-md-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Total Marks <span style="color:var(--rose)">*</span></label>
+                  <input type="number" class="pc-input" name="total_marks" min="1" required placeholder="e.g. 100">
+                </div>
               </div>
-              <div class="nb-field">
-                <label class="nb-label">Duration (minutes)</label>
-                <input type="number" class="nb-input" name="duration_mins" value="180" min="1">
+              <div class="col-md-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Duration <span style="color:var(--text-sm);font-weight:400;">(minutes)</span></label>
+                  <input type="number" class="pc-input" name="duration_mins" value="180" min="1">
+                </div>
               </div>
-              <div class="nb-field" style="grid-column:1/-1;">
-                <label class="nb-label">Instructions</label>
-                <textarea class="nb-textarea" name="instructions" rows="3" placeholder="General exam instructions…"></textarea>
+              <div class="col-12">
+                <div class="pc-form-group" style="margin-bottom:0;">
+                  <label class="pc-label">General Instructions <span style="color:var(--text-sm);font-weight:400;">(optional)</span></label>
+                  <textarea class="pc-textarea" name="instructions" rows="3"
+                    placeholder="1. All questions are compulsory.&#10;2. Attempt all sections."></textarea>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Sections Builder -->
         <div class="pc-card">
           <div class="pc-card-header">
-            <p class="pc-card-title">Sections</p>
-            <button type="button" onclick="addRow()" class="pc-btn pc-btn-outline pc-btn-sm">
+            <p class="pc-card-title">
+              <i class="ri-layout-row-line" style="color:var(--accent);margin-right:6px;"></i>Sections
+              <span id="section-count-badge" style="display:none;font-size:11px;font-weight:700;background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-mid);border-radius:20px;padding:2px 10px;margin-left:8px;"></span>
+            </p>
+            <button type="button" onclick="addRow()" class="pc-btn pc-btn-primary pc-btn-sm">
               <i class="ri-add-line"></i> Add Section
             </button>
           </div>
           <div class="pc-card-body">
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:8px;padding:0 4px;">
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);">Section Name</span>
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);">Type</span>
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);">Marks/Q</span>
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);"># Questions</span>
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);"># Attempt</span>
+
+            <!-- Column Headers -->
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:8px;padding:0 2px;">
+              <span class="bp-col-header">Section Name</span>
+              <span class="bp-col-header">Type</span>
+              <span class="bp-col-header">Marks / Q</span>
+              <span class="bp-col-header"># Questions</span>
+              <span class="bp-col-header">Attempt (opt)</span>
               <span></span>
             </div>
-            <div id="sections-container">
-              <!-- rows added by JS -->
+
+            <div id="sections-container"></div>
+
+            <div id="no-sections" class="bp-empty-state">
+              <i class="ri-layout-row-line" style="font-size:36px;display:block;margin-bottom:10px;opacity:.35;"></i>
+              No sections added yet.<br>
+              Click <strong>Add Section</strong> above to start building the blueprint.
             </div>
-            <p id="no-sections" style="color:var(--text-sm);font-size:13px;padding:20px 0;text-align:center;">
-              No sections added yet. Click "Add Section" to start.
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Sidebar -->
+      <div style="position:sticky;top:80px;">
+
+        <!-- Live Summary -->
+        <div class="pc-card" style="margin-bottom:14px;">
+          <div class="pc-card-header">
+            <p class="pc-card-title">
+              <i class="ri-bar-chart-line" style="color:var(--accent);margin-right:6px;"></i>Live Summary
+            </p>
+          </div>
+          <div class="pc-card-body">
+            <div class="bp-summary-box" id="summary-box">
+              <div class="bp-summary-marks" id="calc-marks">0</div>
+              <div class="bp-summary-label">Calculated Marks</div>
+            </div>
+            <div id="section-summary" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
+            <p id="summary-hint" style="font-size:11px;color:var(--text-sm);margin-top:10px;text-align:center;">
+              <i class="ri-information-line"></i>
+              Fill in marks/Q and # questions to see the total.
             </p>
           </div>
         </div>
-      </div>
 
-      <div>
-        <div class="pc-card">
-          <div class="pc-card-header"><p class="pc-card-title">Summary</p></div>
-          <div class="pc-card-body">
-            <p style="font-size:13px;color:var(--text-sm);">Add sections and fill in question counts to see a summary here.</p>
-            <div id="bp-summary" style="margin-top:12px;display:none;">
-              <div style="padding:12px;background:var(--accent-lt);border:1px solid var(--accent-mid);border-radius:var(--r);text-align:center;">
-                <div style="font-size:28px;font-weight:800;color:var(--accent);" id="calc-marks">0</div>
-                <div style="font-size:12px;color:var(--text-sm);margin-top:2px;">Calculated Marks</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:16px;">
-          <button type="submit" class="pc-btn pc-btn-primary" style="width:100%;justify-content:center;padding:11px;">
-            <i class="ri-save-line"></i> Save Blueprint
-          </button>
-          <a href="{% url 'blueprint_list' %}" class="pc-btn pc-btn-outline"
-             style="width:100%;justify-content:center;padding:11px;margin-top:8px;">
-            Cancel
-          </a>
-        </div>
-      </div>
+        <!-- Save / Cancel -->
+        <button type="submit" class="pc-btn pc-btn-primary"
+          style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-bottom:8px;">
+          <i class="ri-save-line"></i> Save Blueprint
+        </button>
+        <a href="{% url 'blueprint_list' %}" class="pc-btn pc-btn-outline"
+           style="width:100%;justify-content:center;padding:12px;">
+          <i class="ri-arrow-left-line"></i> Cancel
+        </a>
 
+      </div>
     </div>
   </form>
 </div>
@@ -152,53 +247,80 @@ function addRow() {
   div.className = 'bp-section-row';
   div.id = `row-${rowCount}`;
   div.innerHTML = `
-    <input type="text" name="section_name[]" placeholder="Section A" required>
-    <select name="section_qtype[]">
+    <input class="pc-input" type="text" name="section_name[]" placeholder="e.g. Section A — MCQ" required>
+    <select class="pc-select" name="section_qtype[]">
       <option value="MCQ">MCQ</option>
       <option value="SHORT">Short</option>
       <option value="LONG">Long</option>
       <option value="FILL">Fill</option>
-      <option value="TF">T/F</option>
+      <option value="TF">T / F</option>
       <option value="MATCH">Match</option>
     </select>
-    <input type="number" name="marks_per_question[]" placeholder="Marks" min="1" oninput="recalc()" required>
-    <input type="number" name="num_questions[]" placeholder="Count" min="1" oninput="recalc()" required>
-    <input type="number" name="num_to_attempt[]" placeholder="Attempt (opt)">
-    <button type="button" onclick="removeRow('row-${rowCount}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:18px;padding:0 4px;">
+    <input class="pc-input" type="number" name="marks_per_question[]" placeholder="e.g. 2" min="1" oninput="recalc()" required>
+    <input class="pc-input" type="number" name="num_questions[]" placeholder="e.g. 10" min="1" oninput="recalc()" required>
+    <input class="pc-input" type="number" name="num_to_attempt[]" placeholder="All">
+    <button type="button" onclick="removeRow('row-${rowCount}')" class="bp-remove-btn" title="Remove section">
       <i class="ri-close-line"></i>
     </button>
   `;
   c.appendChild(div);
+  updateBadge();
+  recalc();
 }
 
 function removeRow(id) {
   document.getElementById(id).remove();
-  const rows = document.querySelectorAll('.bp-section-row');
-  if (rows.length === 0) document.getElementById('no-sections').style.display = 'block';
+  const hasRows = document.querySelectorAll('.bp-section-row').length;
+  if (!hasRows) document.getElementById('no-sections').style.display = 'block';
+  updateBadge();
   recalc();
 }
 
-function recalc() {
-  const mpqs = [...document.querySelectorAll('[name="marks_per_question[]"]')].map(i => parseInt(i.value)||0);
-  const nums = [...document.querySelectorAll('[name="num_questions[]"]')].map(i => parseInt(i.value)||0);
-  const total = mpqs.reduce((s, m, i) => s + m * nums[i], 0);
-  if (total > 0) {
-    document.getElementById('bp-summary').style.display = 'block';
-    document.getElementById('calc-marks').textContent = total;
+function updateBadge() {
+  const cnt = document.querySelectorAll('.bp-section-row').length;
+  const badge = document.getElementById('section-count-badge');
+  if (cnt > 0) {
+    badge.style.display = 'inline-block';
+    badge.textContent = `${cnt} section${cnt !== 1 ? 's' : ''}`;
+  } else {
+    badge.style.display = 'none';
   }
+}
+
+function recalc() {
+  const mpqs  = [...document.querySelectorAll('[name="marks_per_question[]"]')].map(i => parseInt(i.value)||0);
+  const nums  = [...document.querySelectorAll('[name="num_questions[]"]')].map(i => parseInt(i.value)||0);
+  const names = [...document.querySelectorAll('[name="section_name[]"]')].map(i => i.value || 'Section');
+  const total = mpqs.reduce((s, m, i) => s + m * nums[i], 0);
+
+  document.getElementById('calc-marks').textContent = total;
+
+  const summaryEl = document.getElementById('section-summary');
+  summaryEl.innerHTML = names.map((n, i) => {
+    const sub = mpqs[i] && nums[i]
+      ? `${nums[i]} × ${mpqs[i]}M = <strong>${nums[i]*mpqs[i]}M</strong>`
+      : '—';
+    return `<div class="bp-sec-summary-row">
+      <span class="bp-sec-summary-name">${n}</span>
+      <span class="bp-sec-summary-calc">${sub}</span>
+    </div>`;
+  }).join('');
+
+  const hint = document.getElementById('summary-hint');
+  if (total > 0) hint.style.display = 'none';
+  else hint.style.display = 'block';
 }
 
 document.getElementById('cls_sel').addEventListener('change', function() {
   fetch(`{% url 'qbank_ajax_subjects' %}?class_id=${this.value}`)
-    .then(r => r.json())
-    .then(data => {
+    .then(r => r.json()).then(data => {
       const sel = document.getElementById('subj_sel');
       sel.innerHTML = '<option value="">— Select Subject —</option>';
       data.subjects.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`);
     });
 });
 
-// Start with 3 default rows
+// Start with 3 rows
 addRow(); addRow(); addRow();
 </script>
 

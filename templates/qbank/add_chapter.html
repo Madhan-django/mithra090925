@@ -1,71 +1,159 @@
 {% extends 'panel/index.html' %}
 {% block content %}
 
-<div class="col-lg-6">
-  <div class="pc-page-header mb-3">
-    <div class="pc-page-header-left">
-      <nav class="pc-breadcrumb">
-        <a href="{% url 'home_dashboard' %}">Dashboard</a>
-        <span class="pc-breadcrumb-sep">›</span>
-        <a href="{% url 'chapter_list' %}">Chapters</a>
-        <span class="pc-breadcrumb-sep">›</span>
-        <span>Add Chapter</span>
-      </nav>
-      <h1 class="pc-page-title">Add Chapter</h1>
+<style>
+.ac-info-card {
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: var(--r-xl);
+  padding: 20px;
+}
+.ac-tip {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: #3730a3;
+  padding: 8px 0; border-bottom: 1px solid rgba(79,70,229,.1);
+}
+.ac-tip:last-child { border-bottom: none; padding-bottom: 0; }
+.ac-tip i { flex-shrink: 0; color: var(--accent); margin-top: 1px; font-size: 16px; }
+</style>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;max-width:900px;">
+
+  <!-- Form -->
+  <div>
+    <div class="pc-page-header mb-3">
+      <div class="pc-page-header-left">
+        <nav class="pc-breadcrumb">
+          <a href="{% url 'home_dashboard' %}">Dashboard</a>
+          <span class="pc-breadcrumb-sep">›</span>
+          <a href="{% url 'chapter_list' %}">Chapters</a>
+          <span class="pc-breadcrumb-sep">›</span>
+          <span>Add Chapter</span>
+        </nav>
+        <h1 class="pc-page-title">Add Chapter</h1>
+        <p class="pc-page-sub">Create a chapter to group questions by topic.</p>
+      </div>
+    </div>
+
+    <div class="pc-card">
+      <div class="pc-card-header">
+        <p class="pc-card-title">
+          <i class="ri-book-open-line" style="color:var(--accent);margin-right:6px;"></i>Chapter Details
+        </p>
+      </div>
+      <div class="pc-card-body">
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <div class="col-12">
+              <div class="pc-form-group">
+                <label class="pc-label">Class <span style="color:var(--rose)">*</span></label>
+                <select class="pc-select" name="cls" id="cls_sel" required>
+                  <option value="">— Select Class —</option>
+                  {% for c in classes %}
+                  <option value="{{ c.id }}">{{ c.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="pc-form-group">
+                <label class="pc-label">Subject <span style="color:var(--rose)">*</span></label>
+                <select class="pc-select" name="subject" id="subj_sel" required>
+                  <option value="">— Select Subject —</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="pc-form-group">
+                <label class="pc-label">Chapter Name <span style="color:var(--rose)">*</span></label>
+                <input type="text" class="pc-input" name="name" required
+                  placeholder="e.g. Chapter 1: Polynomials"
+                  style="font-size:14px;font-weight:500;">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="pc-form-group" style="margin-bottom:0;">
+                <label class="pc-label">Display Order</label>
+                <input type="number" class="pc-input" name="order" value="1" min="1" style="max-width:120px;">
+                <small style="font-size:11px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:4px;">
+                  <i class="ri-information-line"></i> Lower numbers appear first in chapter lists.
+                </small>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid var(--border);">
+            <button type="submit" class="pc-btn pc-btn-primary" style="flex:1;justify-content:center;padding:11px;font-size:14px;">
+              <i class="ri-save-line"></i> Save Chapter
+            </button>
+            <a href="{% url 'chapter_list' %}" class="pc-btn pc-btn-outline" style="flex:1;justify-content:center;padding:11px;">
+              <i class="ri-arrow-left-line"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
-  <div class="pc-card">
-    <div class="pc-card-header"><p class="pc-card-title">Chapter Details</p></div>
-    <div class="pc-card-body">
-      <form method="POST">
-        {% csrf_token %}
-        <div class="nb-field">
-          <label class="nb-label">Class</label>
-          <select class="nb-select" name="cls" id="cls_sel" required>
-            <option value="">— Select Class —</option>
-            {% for c in classes %}
-            <option value="{{ c.id }}">{{ c.name }}</option>
-            {% endfor %}
-          </select>
+  <!-- Info Panel -->
+  <div style="padding-top:80px;">
+    <div class="pc-card" style="margin-bottom:14px;">
+      <div class="pc-card-header">
+        <p class="pc-card-title">
+          <i class="ri-lightbulb-line" style="color:#d97706;margin-right:6px;"></i>Why use chapters?
+        </p>
+      </div>
+      <div class="pc-card-body" style="padding-bottom:4px;">
+        <div class="ac-tip">
+          <i class="ri-filter-3-line"></i>
+          Filter questions by chapter in the paper builder
         </div>
-        <div class="nb-field">
-          <label class="nb-label">Subject</label>
-          <select class="nb-select" name="subject" id="subj_sel" required>
-            <option value="">— Select Subject —</option>
-          </select>
+        <div class="ac-tip">
+          <i class="ri-file-add-line"></i>
+          Auto-generate chapter-wise test papers quickly
         </div>
-        <div class="nb-field">
-          <label class="nb-label">Chapter Name</label>
-          <input type="text" class="nb-input" name="name" required placeholder="e.g. Chapter 1: Polynomials">
+        <div class="ac-tip">
+          <i class="ri-bookmark-line"></i>
+          Assign questions to chapters when adding to the bank
         </div>
-        <div class="nb-field">
-          <label class="nb-label">Display Order</label>
-          <input type="number" class="nb-input" name="order" value="1" min="1">
+        <div class="ac-tip">
+          <i class="ri-layout-grid-line"></i>
+          Keep blueprints organised by syllabus structure
         </div>
-        <div style="display:flex;gap:10px;margin-top:16px;">
-          <button type="submit" class="pc-btn pc-btn-primary" style="flex:1;justify-content:center;">
-            <i class="ri-save-line"></i> Save Chapter
-          </button>
-          <a href="{% url 'chapter_list' %}" class="pc-btn pc-btn-outline" style="flex:1;justify-content:center;">
-            Cancel
-          </a>
+      </div>
+    </div>
+
+    <div class="pc-card" style="background:#f0fdf4;border-color:#86efac;">
+      <div class="pc-card-body" style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:38px;height:38px;background:#22c55e;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ri-information-line" style="color:#fff;font-size:18px;"></i>
         </div>
-      </form>
+        <div>
+          <p style="font-size:13px;font-weight:700;color:#15803d;margin-bottom:4px;">Pro Tip</p>
+          <p style="font-size:12px;color:#166534;line-height:1.6;">
+            Name chapters to match your syllabus — e.g. "Ch 1: Sets", "Ch 2: Relations". This makes searching and filtering much faster when building papers.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
+
 </div>
 
 <script>
 document.getElementById('cls_sel').addEventListener('change', function() {
   fetch(`{% url 'qbank_ajax_subjects' %}?class_id=${this.value}`)
-    .then(r => r.json())
-    .then(data => {
+    .then(r => r.json()).then(data => {
       const sel = document.getElementById('subj_sel');
       sel.innerHTML = '<option value="">— Select Subject —</option>';
-      data.subjects.forEach(s => {
-        sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
-      });
+      data.subjects.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`);
     });
 });
 </script>

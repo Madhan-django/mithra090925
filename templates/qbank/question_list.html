@@ -2,15 +2,12 @@
 {% block content %}
 
 <style>
-.qb-type-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  border-radius: 20px;
-  padding: 2px 9px;
-  border: 1px solid;
+/* ── Type & Difficulty Badges ── */
+.qb-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; border-radius: 20px;
+  padding: 3px 10px; border: 1px solid;
 }
 .qb-mcq    { color:#6d28d9; background:#ede9fe; border-color:#c4b5fd; }
 .qb-short  { color:#0369a1; background:#e0f2fe; border-color:#7dd3fc; }
@@ -21,38 +18,90 @@
 .qb-diff-easy   { color:#15803d; background:#dcfce7; border-color:#86efac; }
 .qb-diff-medium { color:#b45309; background:#fef3c7; border-color:#fcd34d; }
 .qb-diff-hard   { color:#b91c1c; background:#fee2e2; border-color:#fca5a5; }
-.qb-approved    { color:#059669; }
-.qb-pending     { color:#d97706; }
+
+/* ── Stat Cards ── */
+.qb-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+@media(max-width:700px){ .qb-stats { grid-template-columns:repeat(2,1fr); } }
+.qb-stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 18px 20px;
+  box-shadow: var(--sh-xs); display: flex; align-items: center; gap: 14px;
+  transition: box-shadow var(--t), transform var(--t);
+}
+.qb-stat-card:hover { box-shadow: var(--sh-sm); transform: translateY(-1px); }
+.qb-stat-icon {
+  width: 46px; height: 46px; border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.qb-stat-val { font-size: 26px; font-weight: 900; color: var(--text); line-height: 1; }
+.qb-stat-lbl { font-size: 11px; font-weight: 600; color: var(--text-sm); margin-top: 3px; }
+.qb-stat-bar {
+  height: 3px; border-radius: 99px;
+  background: var(--border); margin-top: 8px; overflow: hidden;
+}
+.qb-stat-bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+/* ── Filter Bar ── */
 .qb-filter-bar {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 14px 18px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  margin-bottom: 20px;
-  box-shadow: var(--sh-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 14px 18px;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+  margin-bottom: 16px; box-shadow: var(--sh-xs);
 }
-.qb-filter-bar select, .qb-filter-bar input[type=text] {
-  border: 1.5px solid var(--border-dark);
-  border-radius: var(--r);
-  padding: 7px 12px;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--surface);
-  outline: none;
-  min-width: 130px;
+.qb-filter-group { display: flex; flex-direction: column; gap: 4px; }
+.qb-filter-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  color: var(--text-sm); letter-spacing: .6px;
+  display: flex; align-items: center; gap: 4px;
 }
-.qb-filter-bar select:focus, .qb-filter-bar input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+.qb-filter-bar .pc-select,
+.qb-filter-bar .pc-input { min-width: 130px; padding: 8px 12px; font-size: 13px; }
+.qb-filter-bar .pc-select { padding-right: 36px; }
+
+/* ── Active filter chips ── */
+.qb-active-filters {
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+  padding: 0 2px; margin-bottom: 12px;
 }
+.qb-filter-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  background: var(--accent-lt); border: 1px solid var(--accent-mid);
+  border-radius: 20px; padding: 4px 12px;
+}
+.qb-filter-chip a { color: var(--accent); text-decoration: none; font-size: 14px; line-height: 1; }
+
+/* ── Table Enhancements ── */
+.qb-q-preview { font-size: 13.5px; color: var(--text); line-height: 1.5; font-weight: 500; }
+.qb-q-meta { margin-top: 4px; font-size: 11px; color: var(--text-sm); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.qb-q-meta-sep { color: var(--border-dark); }
+.qb-tag {
+  font-size: 10px; background: var(--accent-lt); color: var(--accent);
+  border: 1px solid var(--accent-mid); border-radius: 20px; padding: 1px 8px;
+}
+.qb-action-row { display: flex; gap: 5px; justify-content: center; align-items: center; }
+.qb-approved-icon { color: #059669; font-size: 18px; }
+.qb-pending-icon  { color: #d97706; font-size: 18px; }
+
+/* ── Row enter animation ── */
+@keyframes rowIn { from { opacity:0; transform:translateX(-4px); } to { opacity:1; transform:translateX(0); } }
+.pc-table tbody tr { animation: rowIn .2s ease both; }
+.pc-table tbody tr:nth-child(1)  { animation-delay: 30ms; }
+.pc-table tbody tr:nth-child(2)  { animation-delay: 60ms; }
+.pc-table tbody tr:nth-child(3)  { animation-delay: 90ms; }
+.pc-table tbody tr:nth-child(4)  { animation-delay: 110ms; }
+.pc-table tbody tr:nth-child(5)  { animation-delay: 130ms; }
+
+/* ── Highlighted row ── */
+.pc-table tbody tr:hover td { background: #f8f9ff; }
+.pc-table tbody tr td:first-child { border-left: 3px solid transparent; transition: border-color var(--t); }
+.pc-table tbody tr:hover td:first-child { border-left-color: var(--accent); }
 </style>
 
 <div class="col-lg-12">
 
+  <!-- Page Header -->
   <div class="pc-page-header mb-3">
     <div class="pc-page-header-left">
       <nav class="pc-breadcrumb">
@@ -61,9 +110,12 @@
         <span>Question Bank</span>
       </nav>
       <h1 class="pc-page-title">Question Bank</h1>
-      <p class="pc-page-sub">{{ total }} question{{ total|pluralize }} in the bank.</p>
+      <p class="pc-page-sub">Manage your question repository — create, filter, and organise questions.</p>
     </div>
     <div class="pc-page-header-right">
+      <a href="{% url 'chapter_list' %}" class="pc-btn pc-btn-outline">
+        <i class="ri-book-open-line"></i> Chapters
+      </a>
       <a href="{% url 'export_bank_excel' %}" class="pc-btn pc-btn-outline">
         <i class="ri-file-excel-line"></i> Export
       </a>
@@ -76,63 +128,147 @@
     </div>
   </div>
 
+  <!-- Stats Row -->
+  <div class="qb-stats">
+    <div class="qb-stat-card">
+      <div class="qb-stat-icon" style="background:#eef2ff;">
+        <i class="ri-question-line" style="color:#4f46e5;"></i>
+      </div>
+      <div style="flex:1;">
+        <div class="qb-stat-val">{{ total }}</div>
+        <div class="qb-stat-lbl">Total Questions</div>
+        <div class="qb-stat-bar">
+          <div class="qb-stat-bar-fill" style="width:100%;background:#4f46e5;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="qb-stat-card">
+      <div class="qb-stat-icon" style="background:#ecfdf5;">
+        <i class="ri-checkbox-circle-line" style="color:#059669;"></i>
+      </div>
+      <div style="flex:1;">
+        <div class="qb-stat-val" style="color:#059669;">{{ approved_count|default:0 }}</div>
+        <div class="qb-stat-lbl">Approved</div>
+        <div class="qb-stat-bar">
+          {% if total %}
+          <div class="qb-stat-bar-fill" style="width:{% widthratio approved_count|default:0 total 100 %}%;background:#059669;"></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="qb-stat-card">
+      <div class="qb-stat-icon" style="background:#fffbeb;">
+        <i class="ri-time-line" style="color:#d97706;"></i>
+      </div>
+      <div style="flex:1;">
+        <div class="qb-stat-val" style="color:#d97706;">{{ pending_count|default:0 }}</div>
+        <div class="qb-stat-lbl">Pending Review</div>
+        <div class="qb-stat-bar">
+          {% if total %}
+          <div class="qb-stat-bar-fill" style="width:{% widthratio pending_count|default:0 total 100 %}%;background:#d97706;"></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="qb-stat-card">
+      <div class="qb-stat-icon" style="background:#ede9fe;">
+        <i class="ri-list-check-3" style="color:#7c3aed;"></i>
+      </div>
+      <div style="flex:1;">
+        <div class="qb-stat-val" style="color:#7c3aed;">{{ mcq_count|default:0 }}</div>
+        <div class="qb-stat-lbl">MCQ Questions</div>
+        <div class="qb-stat-bar">
+          {% if total %}
+          <div class="qb-stat-bar-fill" style="width:{% widthratio mcq_count|default:0 total 100 %}%;background:#7c3aed;"></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Filter Bar -->
   <form method="GET">
     <div class="qb-filter-bar">
-      <div>
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Class</label>
-        <select name="cls" onchange="this.form.submit()">
+      <div class="qb-filter-group">
+        <span class="qb-filter-label"><i class="ri-government-line"></i> Class</span>
+        <select class="pc-select" name="cls" onchange="this.form.submit()">
           <option value="">All Classes</option>
           {% for c in classes %}
           <option value="{{ c.id }}" {% if filter_cls == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
           {% endfor %}
         </select>
       </div>
-      <div>
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Type</label>
-        <select name="qtype" onchange="this.form.submit()">
+      <div class="qb-filter-group">
+        <span class="qb-filter-label"><i class="ri-bookmark-line"></i> Type</span>
+        <select class="pc-select" name="qtype" onchange="this.form.submit()">
           <option value="">All Types</option>
-          <option value="MCQ" {% if filter_qtype == 'MCQ' %}selected{% endif %}>MCQ</option>
+          <option value="MCQ"   {% if filter_qtype == 'MCQ'   %}selected{% endif %}>MCQ</option>
           <option value="SHORT" {% if filter_qtype == 'SHORT' %}selected{% endif %}>Short Answer</option>
-          <option value="LONG" {% if filter_qtype == 'LONG' %}selected{% endif %}>Long Answer</option>
-          <option value="FILL" {% if filter_qtype == 'FILL' %}selected{% endif %}>Fill in Blank</option>
-          <option value="TF" {% if filter_qtype == 'TF' %}selected{% endif %}>True/False</option>
+          <option value="LONG"  {% if filter_qtype == 'LONG'  %}selected{% endif %}>Long Answer</option>
+          <option value="FILL"  {% if filter_qtype == 'FILL'  %}selected{% endif %}>Fill in Blank</option>
+          <option value="TF"    {% if filter_qtype == 'TF'    %}selected{% endif %}>True / False</option>
           <option value="MATCH" {% if filter_qtype == 'MATCH' %}selected{% endif %}>Match</option>
         </select>
       </div>
-      <div>
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Difficulty</label>
-        <select name="difficulty" onchange="this.form.submit()">
+      <div class="qb-filter-group">
+        <span class="qb-filter-label"><i class="ri-bar-chart-line"></i> Difficulty</span>
+        <select class="pc-select" name="difficulty" onchange="this.form.submit()">
           <option value="">All Levels</option>
-          <option value="EASY" {% if filter_difficulty == 'EASY' %}selected{% endif %}>Easy</option>
+          <option value="EASY"   {% if filter_difficulty == 'EASY'   %}selected{% endif %}>Easy</option>
           <option value="MEDIUM" {% if filter_difficulty == 'MEDIUM' %}selected{% endif %}>Medium</option>
-          <option value="HARD" {% if filter_difficulty == 'HARD' %}selected{% endif %}>Hard</option>
+          <option value="HARD"   {% if filter_difficulty == 'HARD'   %}selected{% endif %}>Hard</option>
         </select>
       </div>
-      <div>
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Status</label>
-        <select name="approved" onchange="this.form.submit()">
+      <div class="qb-filter-group">
+        <span class="qb-filter-label"><i class="ri-shield-check-line"></i> Status</span>
+        <select class="pc-select" name="approved" onchange="this.form.submit()">
           <option value="">All</option>
           <option value="1" {% if filter_approved == '1' %}selected{% endif %}>Approved</option>
           <option value="0" {% if filter_approved == '0' %}selected{% endif %}>Pending</option>
         </select>
       </div>
-      <div style="flex:1;min-width:180px;">
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-sm);display:block;margin-bottom:4px;">Search</label>
-        <input type="text" name="q" value="{{ search }}" placeholder="Search question text…">
+      <div class="qb-filter-group" style="flex:1;min-width:200px;">
+        <span class="qb-filter-label"><i class="ri-search-line"></i> Search</span>
+        <input class="pc-input" type="text" name="q" value="{{ search }}" placeholder="Search question text…">
       </div>
-      <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 16px;">
-        <i class="ri-search-line"></i>
-      </button>
-      {% if search or filter_cls or filter_qtype or filter_difficulty or filter_approved %}
-      <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline" style="padding:8px 14px;" title="Clear filters">
-        <i class="ri-close-line"></i>
-      </a>
-      {% endif %}
+      <div style="display:flex;gap:6px;">
+        <button type="submit" class="pc-btn pc-btn-primary" style="padding:8px 14px;" title="Search">
+          <i class="ri-search-line"></i>
+        </button>
+        {% if search or filter_cls or filter_qtype or filter_difficulty or filter_approved %}
+        <a href="{% url 'question_list' %}" class="pc-btn pc-btn-outline" style="padding:8px 12px;" title="Clear filters">
+          <i class="ri-close-line"></i>
+        </a>
+        {% endif %}
+      </div>
     </div>
   </form>
 
-  <!-- Table -->
+  <!-- Active Filter Chips -->
+  {% if search or filter_cls or filter_qtype or filter_difficulty or filter_approved %}
+  <div class="qb-active-filters">
+    <span style="font-size:11px;color:var(--text-sm);font-weight:700;">Active filters:</span>
+    {% if search %}
+    <span class="qb-filter-chip"><i class="ri-search-line"></i> "{{ search }}"</span>
+    {% endif %}
+    {% if filter_qtype %}
+    <span class="qb-filter-chip"><i class="ri-bookmark-line"></i> {{ filter_qtype }}</span>
+    {% endif %}
+    {% if filter_difficulty %}
+    <span class="qb-filter-chip"><i class="ri-bar-chart-line"></i> {{ filter_difficulty }}</span>
+    {% endif %}
+    {% if filter_approved == '1' %}
+    <span class="qb-filter-chip"><i class="ri-checkbox-circle-line"></i> Approved</span>
+    {% elif filter_approved == '0' %}
+    <span class="qb-filter-chip"><i class="ri-time-line"></i> Pending</span>
+    {% endif %}
+    <a href="{% url 'question_list' %}" style="font-size:11px;color:var(--text-sm);text-decoration:none;margin-left:4px;">
+      <i class="ri-close-line"></i> Clear all
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Question Table -->
   <div class="pc-card">
     <div class="pc-card-body" style="padding:0;">
       {% if questions %}
@@ -140,62 +276,76 @@
         <table class="pc-table">
           <thead>
             <tr>
-              <th style="width:50px;text-align:center;">#</th>
+              <th style="width:44px;text-align:center;">#</th>
               <th>Question</th>
-              <th style="text-align:center;">Type</th>
-              <th style="text-align:center;">Difficulty</th>
+              <th style="text-align:center;white-space:nowrap;">Type</th>
+              <th style="text-align:center;white-space:nowrap;">Difficulty</th>
               <th style="text-align:center;">Marks</th>
               <th style="text-align:center;">Status</th>
               <th style="text-align:center;">Used</th>
-              <th style="text-align:center;">Actions</th>
+              <th style="text-align:center;white-space:nowrap;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for q in questions %}
             <tr>
-              <td style="text-align:center;color:var(--muted);font-size:12px;">{{ forloop.counter }}</td>
+              <td style="text-align:center;color:var(--muted);font-size:12px;font-weight:600;">
+                {{ forloop.counter }}
+              </td>
               <td>
-                <div style="max-width:500px;">
-                  <div style="font-size:13.5px;color:var(--text);line-height:1.5;">
-                    {{ q.question_text|truncatechars:120 }}
-                  </div>
-                  <div style="margin-top:4px;font-size:11px;color:var(--text-sm);">
-                    {{ q.cls.name }} &bull; {{ q.subject.subject_name }}
-                    {% if q.chapter %}&bull; {{ q.chapter.name }}{% endif %}
-                    {% if q.tags %}&bull; <span style="color:var(--accent);">{{ q.tags }}</span>{% endif %}
+                <div style="max-width:480px;">
+                  <div class="qb-q-preview">{{ q.question_text|truncatechars:110 }}</div>
+                  <div class="qb-q-meta">
+                    <span>{{ q.cls.name }}</span>
+                    <span class="qb-q-meta-sep">·</span>
+                    <span>{{ q.subject.subject_name }}</span>
+                    {% if q.chapter %}
+                    <span class="qb-q-meta-sep">·</span>
+                    <span>{{ q.chapter.name }}</span>
+                    {% endif %}
+                    {% if q.tags %}
+                    {% for tag in q.tags.split %}
+                    <span class="qb-tag">{{ tag }}</span>
+                    {% endfor %}
+                    {% endif %}
                   </div>
                 </div>
               </td>
               <td style="text-align:center;">
-                <span class="qb-type-badge
-                  {% if q.question_type == 'MCQ' %}qb-mcq
-                  {% elif q.question_type == 'SHORT' %}qb-short
+                <span class="qb-badge
+                  {% if q.question_type == 'MCQ'   %}qb-mcq
+                  {% elif q.question_type == 'SHORT'%}qb-short
                   {% elif q.question_type == 'LONG' %}qb-long
                   {% elif q.question_type == 'FILL' %}qb-fill
-                  {% elif q.question_type == 'TF' %}qb-tf
-                  {% elif q.question_type == 'MATCH' %}qb-match{% endif %}">
+                  {% elif q.question_type == 'TF'   %}qb-tf
+                  {% elif q.question_type == 'MATCH'%}qb-match{% endif %}">
                   {{ q.question_type }}
                 </span>
               </td>
               <td style="text-align:center;">
-                <span class="qb-type-badge
-                  {% if q.difficulty == 'EASY' %}qb-diff-easy
-                  {% elif q.difficulty == 'MEDIUM' %}qb-diff-medium
+                <span class="qb-badge
+                  {% if q.difficulty == 'EASY'  %}qb-diff-easy
+                  {% elif q.difficulty == 'MEDIUM'%}qb-diff-medium
                   {% else %}qb-diff-hard{% endif %}">
                   {{ q.difficulty }}
                 </span>
               </td>
-              <td style="text-align:center;font-weight:700;color:var(--text);">{{ q.marks }}</td>
+              <td style="text-align:center;">
+                <span style="font-size:16px;font-weight:900;color:var(--accent);">{{ q.marks }}</span>
+                <div style="font-size:9px;color:var(--text-sm);font-weight:600;margin-top:1px;">mark{{ q.marks|pluralize }}</div>
+              </td>
               <td style="text-align:center;">
                 {% if q.is_approved %}
-                <span class="qb-approved" title="Approved"><i class="ri-checkbox-circle-fill" style="font-size:18px;"></i></span>
+                <span class="qb-approved-icon" title="Approved"><i class="ri-checkbox-circle-fill"></i></span>
                 {% else %}
-                <span class="qb-pending" title="Pending"><i class="ri-time-line" style="font-size:18px;"></i></span>
+                <span class="qb-pending-icon" title="Pending Approval"><i class="ri-time-line"></i></span>
                 {% endif %}
               </td>
-              <td style="text-align:center;font-size:12px;color:var(--text-sm);">{{ q.usage_count }}</td>
               <td style="text-align:center;">
-                <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
+                <span style="font-size:13px;color:var(--text-sm);font-weight:700;">{{ q.usage_count }}<span style="font-size:10px;">×</span></span>
+              </td>
+              <td>
+                <div class="qb-action-row">
                   <a href="{% url 'view_question' q.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="View">
                     <i class="ri-eye-line"></i>
                   </a>
@@ -207,8 +357,8 @@
                   </a>
                   <a href="{% url 'delete_question' q.pk %}"
                      class="pc-btn pc-btn-outline pc-btn-sm"
-                     style="color:#ef4444;border-color:#fca5a5;"
-                     onclick="return confirm('Delete this question?')" title="Delete">
+                     style="color:#e11d48;border-color:#fca5a5;"
+                     onclick="return confirm('Delete this question? This cannot be undone.')" title="Delete">
                     <i class="ri-delete-bin-line"></i>
                   </a>
                 </div>
@@ -219,15 +369,19 @@
         </table>
       </div>
       {% else %}
-      <div class="pc-empty" style="padding:60px 20px;">
-        <span class="pc-empty-icon"><i class="ri-question-line"></i></span>
+      <div class="pc-empty" style="padding:80px 20px;">
+        <span class="pc-empty-icon"><i class="ri-question-answer-line"></i></span>
         <p class="pc-empty-title">No questions found</p>
-        <p class="pc-empty-sub">
+        <p class="pc-empty-sub" style="margin-bottom:20px;">
           {% if search or filter_cls or filter_qtype %}
-            Try adjusting your filters or
+            Try adjusting your filters, or add a new question.
+          {% else %}
+            Start building your question bank.
           {% endif %}
-          <a href="{% url 'add_question' %}">add your first question</a>.
         </p>
+        <a href="{% url 'add_question' %}" class="pc-btn pc-btn-primary">
+          <i class="ri-add-line"></i> Add Question
+        </a>
       </div>
       {% endif %}
     </div>
