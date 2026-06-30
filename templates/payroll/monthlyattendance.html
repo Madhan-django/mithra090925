@@ -218,6 +218,23 @@
   border: 1px solid #fdba74; border-radius: 20px;
   font-size: 10px; font-weight: 800; padding: 2px 8px;
 }
+.late-exempted-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #f0fdf4; color: #15803d;
+  border: 1px solid #86efac; border-radius: 20px;
+  font-size: 10px; font-weight: 800; padding: 2px 8px;
+  text-decoration: line-through; opacity: .85;
+}
+.btn-exempt {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: none; border: 1px solid #fdba74; border-radius: 20px;
+  color: #c2410c; font-size: 9px; font-weight: 700;
+  padding: 1px 7px; cursor: pointer; margin-left: 4px;
+  transition: background 150ms, color 150ms;
+}
+.btn-exempt:hover { background: #fff7ed; }
+.btn-exempt.exempted { border-color: #86efac; color: #15803d; }
+.btn-exempt.exempted:hover { background: #dcfce7; }
 
 /* time inputs */
 .att-time {
@@ -278,6 +295,10 @@
       </a>
       <a href="{% url 'sync_attendance' %}" class="pc-btn pc-btn-outline pc-btn-sm">
         <i class="ri-refresh-line"></i> Sync Attendance
+      </a>
+      <a href="{% url 'monthly_attendance_excel' %}?month={{ month }}&year={{ year }}"
+         class="pc-btn pc-btn-success pc-btn-sm">
+        <i class="ri-file-excel-line"></i> Export Excel
       </a>
     </div>
   </div>
@@ -504,7 +525,20 @@
                       <i class="ri-checkbox-circle-line"></i> SAT
                     </span>
                   {% elif item.late %}
-                    <span class="late-badge"><i class="ri-time-line"></i> {{ item.late_minutes }}m</span>
+                    {% if item.late_exempted %}
+                      <span class="late-exempted-badge" title="Late exempted — not counted in LOP"><i class="ri-time-line"></i> {{ item.late_minutes }}m</span>
+                    {% else %}
+                      <span class="late-badge"><i class="ri-time-line"></i> {{ item.late_minutes }}m</span>
+                    {% endif %}
+                    {% if can_exempt_late and item.id %}
+                      <button type="button"
+                        class="btn-exempt {% if item.late_exempted %}exempted{% endif %}"
+                        data-id="{{ item.id }}"
+                        data-url="{% url 'toggle_late_exemption' item.id %}"
+                        title="{% if item.late_exempted %}Remove exemption{% else %}Exempt this late{% endif %}">
+                        {% if item.late_exempted %}<i class="ri-close-circle-line"></i>{% else %}<i class="ri-shield-check-line"></i>{% endif %}
+                      </button>
+                    {% endif %}
                   {% else %}
                     <span style="color:var(--muted);font-size:13px;">—</span>
                   {% endif %}
@@ -709,6 +743,42 @@ document.addEventListener("DOMContentLoaded", function () {
     sel.addEventListener("change", function() {
       applyColor(this);
       updateSummary();
+    });
+  });
+
+  /* ── late exemption toggle ── */
+  function getCsrf() {
+    const el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+
+  document.querySelectorAll(".btn-exempt").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      const url = btn.dataset.url;
+      fetch(url, {
+        method: "POST",
+        headers: { "X-CSRFToken": getCsrf(), "Content-Type": "application/json" }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        const lateBadge = btn.previousElementSibling;
+        const lateChip = document.getElementById("cnt-late");
+        if (data.exempted) {
+          lateBadge.className = "late-exempted-badge";
+          lateBadge.title = "Late exempted — not counted in LOP";
+          btn.className = "btn-exempt exempted";
+          btn.title = "Remove exemption";
+          btn.innerHTML = '<i class="ri-close-circle-line"></i>';
+          if (lateChip) lateChip.innerText = Math.max(0, parseInt(lateChip.innerText) - 1);
+        } else {
+          lateBadge.className = "late-badge";
+          lateBadge.title = "";
+          btn.className = "btn-exempt";
+          btn.title = "Exempt this late";
+          btn.innerHTML = '<i class="ri-shield-check-line"></i>';
+          if (lateChip) lateChip.innerText = parseInt(lateChip.innerText) + 1;
+        }
+      });
     });
   });
 

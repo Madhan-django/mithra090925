@@ -2406,6 +2406,314 @@ def Staff_Monthly_Attendance(request):
     return render(request, "payroll/monthlyattendance.html", context)
 
 
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def monthly_attendance_excel(request):
+    from openpyxl.styles import PatternFill
+    from openpyxl.utils import get_column_letter
+    from collections import defaultdict
+
+    sch_id = request.session.get('sch_id')
+    sdata  = get_object_or_404(school, pk=sch_id)
+
+    month = int(request.GET.get('month', date.today().month))
+    year  = int(request.GET.get('year',  date.today().year))
+
+    total_days     = calendar.monthrange(year, month)[1]
+    month_name_str = date(year, month, 1).strftime('%B')
+    today          = date.today()
+
+    try:
+        payroll_settings = sdata.payroll_settings
+    except PayrollSettings.DoesNotExist:
+        payroll_settings = None
+
+    staffs = (staff.objects
+              .filter(staff_school=sdata)
+              .select_related('shift', 'department')
+              .order_by('department__name', 'first_name'))
+
+    att_qs = (Attendance.objects
+              .filter(sch=sdata, date__year=year, date__month=month)
+              .select_related('staff'))
+
+    att_map = defaultdict(dict)
+    for rec in att_qs:
+        att_map[rec.staff_id][rec.date.day] = rec
+
+    # ── Styles ───────────────────────────────────────────────
+    HEADER_FILL  = PatternFill("solid", fgColor="1E293B")
+    DEPT_FILL    = PatternFill("solid", fgColor="2E75B6")
+    DAY_HDR_FILL = PatternFill("solid", fgColor="334155")
+    PRESENT_FILL = PatternFill("solid", fgColor="D1FAE5")
+    ABSENT_FILL  = PatternFill("solid", fgColor="FEE2E2")
+    LATE_FILL    = PatternFill("solid", fgColor="FEF9C3")
+    HALFDAY_FILL = PatternFill("solid", fgColor="DBEAFE")
+    OFF_FILL     = PatternFill("solid", fgColor="F1F5F9")
+    MIS_FILL     = PatternFill("solid", fgColor="FFEDD5")
+    FUTURE_FILL  = PatternFill("solid", fgColor="F8FAFC")
+    SUN_FILL     = PatternFill("solid", fgColor="FEF3C7")
+
+    WHITE_BOLD  = Font(name="Calibri", bold=True, color="FFFFFF", size=9)
+    TITLE_FONT  = Font(name="Calibri", bold=True, size=13, color="1E293B")
+    SUB_FONT    = Font(name="Calibri", bold=True, size=10, color="334155")
+    DATA_FONT   = Font(name="Calibri", size=8)
+    DATA_BOLD   = Font(name="Calibri", size=8, bold=True)
+    LATE_FONT   = Font(name="Calibri", size=8, bold=True, color="C2410C")
+    ABS_FONT    = Font(name="Calibri", size=8, bold=True, color="991B1B")
+
+    THIN        = Side(style="thin",   color="CBD5E1")
+    MED         = Side(style="medium", color="94A3B8")
+    THIN_BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+    MED_BORDER  = Border(left=MED,  right=MED,  top=MED,  bottom=MED)
+
+    CENTER = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    LEFT   = Alignment(horizontal="left",   vertical="center")
+
+    # fixed columns before day columns
+    FIXED_COLS = 3   # #  |  Staff Name  |  Shift
+    # summary columns after day columns
+    SUM_COLS   = 4   # Present | Absent | Late | Half Day
+    NUM_COLS   = FIXED_COLS + total_days + SUM_COLS
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"{month_name_str} {year}"
+
+    # ── Row 1: School name ───────────────────────────────────
+    ws.merge_cells(f"A1:{get_column_letter(NUM_COLS)}1")
+    t = ws['A1']
+    t.value     = sdata.name
+    t.font      = TITLE_FONT
+    t.alignment = CENTER
+    ws.row_dimensions[1].height = 22
+
+    # ── Row 2: Report subtitle ───────────────────────────────
+    ws.merge_cells(f"A2:{get_column_letter(NUM_COLS)}2")
+    s = ws['A2']
+    s.value     = f"Monthly Attendance Register  |  {month_name_str} {year}"
+    s.font      = SUB_FONT
+    s.alignment = CENTER
+    ws.row_dimensions[2].height = 16
+
+    # ── Row 3: blank ─────────────────────────────────────────
+    ws.row_dimensions[3].height = 6
+
+    # ── Row 4: Column headers ────────────────────────────────
+    HDR_ROW = 4
+
+    # fixed headers
+    for c, h in enumerate(["#", "Staff Name", "Shift"], 1):
+        cell = ws.cell(row=HDR_ROW, column=c, value=h)
+        cell.font = WHITE_BOLD; cell.fill = HEADER_FILL
+        cell.alignment = CENTER; cell.border = THIN_BORDER
+
+    # day headers  — e.g.  "1\nMon"
+    for day in range(1, total_days + 1):
+        col      = FIXED_COLS + day
+        d_date   = date(year, month, day)
+        day_name = d_date.strftime("%a")
+        is_sun   = (d_date.weekday() == 6)
+        is_sat   = (d_date.weekday() == 5)
+        fill     = PatternFill("solid", fgColor="DC2626") if is_sun else (
+                   PatternFill("solid", fgColor="EA580C") if is_sat else DAY_HDR_FILL)
+        cell = ws.cell(row=HDR_ROW, column=col, value=f"{day}\n{day_name}")
+        cell.font = WHITE_BOLD; cell.fill = fill
+        cell.alignment = CENTER; cell.border = THIN_BORDER
+        ws.column_dimensions[get_column_letter(col)].width = 11
+
+    # summary headers
+    for i, h in enumerate(["Present", "Absent", "Late", "Half Day"], 1):
+        col  = FIXED_COLS + total_days + i
+        cell = ws.cell(row=HDR_ROW, column=col, value=h)
+        cell.font = WHITE_BOLD; cell.fill = HEADER_FILL
+        cell.alignment = CENTER; cell.border = THIN_BORDER
+        ws.column_dimensions[get_column_letter(col)].width = 9
+
+    ws.row_dimensions[HDR_ROW].height = 28
+
+    # fixed column widths
+    ws.column_dimensions['A'].width = 5
+    ws.column_dimensions['B'].width = 24
+    ws.column_dimensions['C'].width = 14
+
+    # ── Data rows ────────────────────────────────────────────
+    row_num = HDR_ROW + 1
+    serial  = 0
+
+    dept_groups = defaultdict(list)
+    for stf in staffs:
+        dept_name = stf.department.name if stf.department else "No Department"
+        dept_groups[dept_name].append(stf)
+
+    for dept_name, dept_staff in dept_groups.items():
+
+        # Department heading row
+        ws.merge_cells(f"A{row_num}:{get_column_letter(NUM_COLS)}{row_num}")
+        dc = ws.cell(row=row_num, column=1, value=f"  {dept_name.upper()}")
+        dc.font      = Font(name="Calibri", bold=True, color="FFFFFF", size=10)
+        dc.fill      = DEPT_FILL
+        dc.alignment = LEFT
+        dc.border    = THIN_BORDER
+        ws.row_dimensions[row_num].height = 18
+        row_num += 1
+
+        for stf in dept_staff:
+            serial     += 1
+            stf_att     = att_map.get(stf.id, {})
+            shift       = stf.shift
+            shift_label = "—"
+            if shift and shift.start_time and shift.end_time:
+                si = f"{shift.start_time.hour}:{shift.start_time.minute:02d}"
+                so = f"{shift.end_time.hour}:{shift.end_time.minute:02d}"
+                shift_label = f"{si}-{so}"
+
+            # fixed cells
+            ws.cell(row=row_num, column=1, value=serial).font = DATA_FONT
+            ws.cell(row=row_num, column=1).alignment = CENTER
+            ws.cell(row=row_num, column=1).border    = THIN_BORDER
+
+            nc = ws.cell(row=row_num, column=2, value=f"{stf.first_name} {stf.last_name}")
+            nc.font = DATA_BOLD; nc.alignment = LEFT; nc.border = THIN_BORDER
+
+            sc = ws.cell(row=row_num, column=3, value=shift_label)
+            sc.font = DATA_FONT; sc.alignment = CENTER; sc.border = THIN_BORDER
+
+            # per-day cells
+            cnt_present = cnt_absent = cnt_late = cnt_half = 0
+
+            for day in range(1, total_days + 1):
+                col    = FIXED_COLS + day
+                d_date = date(year, month, day)
+                rec    = stf_att.get(day)
+
+                is_sun = (d_date.weekday() == 6)
+                is_sat = (d_date.weekday() == 5)
+
+                cell_val  = ""
+                cell_fill = FUTURE_FILL
+                cell_font = DATA_FONT
+
+                if rec:
+                    status = rec.status or ""
+                    is_late   = bool(rec.late) and not rec.late_exempted
+                    is_absent = status in ("ABSENT", "LOP")
+
+                    pi = timezone.localtime(rec.first_in).strftime("%H:%M")  if rec.first_in  else ""
+                    po = timezone.localtime(rec.last_out).strftime("%H:%M") if rec.last_out else ""
+
+                    if status in ("Weekly-OFF", "Special-OFF"):
+                        cell_val  = "W/Off" if status == "Weekly-OFF" else "Hol"
+                        cell_fill = OFF_FILL
+                        cell_font = DATA_FONT
+                    elif status == "CL":
+                        cell_val  = "CL"
+                        cell_fill = HALFDAY_FILL
+                        cnt_present += 1
+                    elif status == "ML":
+                        cell_val  = "ML"
+                        cell_fill = HALFDAY_FILL
+                        cnt_present += 1
+                    elif status == "PERMISSION":
+                        cell_val  = f"{pi}-{po}" if pi else "Perm"
+                        cell_fill = PRESENT_FILL
+                        cnt_present += 1
+                    elif status == "MIS_PUNCH":
+                        cell_val  = f"{pi}" if pi else "MIS"
+                        cell_fill = MIS_FILL
+                        cnt_present += 1
+                    elif status == "HALF_DAY":
+                        cell_val  = f"{pi}-{po}" if pi and po else "HALF"
+                        cell_fill = HALFDAY_FILL
+                        cell_font = DATA_FONT
+                        cnt_half  += 1
+                    elif is_absent:
+                        cell_val  = "A"
+                        cell_fill = ABSENT_FILL
+                        cell_font = ABS_FONT
+                        cnt_absent += 1
+                    else:
+                        # Present
+                        cell_val = f"{pi}-{po}" if pi and po else (pi or "P")
+                        if is_late:
+                            cell_fill = LATE_FILL
+                            cell_font = LATE_FONT
+                            cnt_late    += 1
+                            cnt_present += 1
+                        else:
+                            cell_fill = PRESENT_FILL if not (is_sun or is_sat) else OFF_FILL
+                            cell_font = DATA_FONT
+                            cnt_present += 1
+                else:
+                    if d_date > today:
+                        cell_fill = FUTURE_FILL
+                        cell_val  = ""
+                    elif is_sun:
+                        cell_fill = OFF_FILL
+                        cell_val  = "W/Off"
+                    elif is_sat and payroll_settings and payroll_settings.saturday_short_day:
+                        cell_fill = OFF_FILL
+                        cell_val  = "Sat"
+                    else:
+                        cell_val  = "A"
+                        cell_fill = ABSENT_FILL
+                        cell_font = ABS_FONT
+                        cnt_absent += 1
+
+                c_obj = ws.cell(row=row_num, column=col, value=cell_val)
+                c_obj.font      = cell_font
+                c_obj.fill      = cell_fill
+                c_obj.border    = THIN_BORDER
+                c_obj.alignment = CENTER
+
+            # summary cells
+            for i, val in enumerate([cnt_present, cnt_absent, cnt_late, cnt_half], 1):
+                col  = FIXED_COLS + total_days + i
+                fill = [PRESENT_FILL, ABSENT_FILL, LATE_FILL, HALFDAY_FILL][i - 1]
+                font = [DATA_BOLD, ABS_FONT, LATE_FONT, DATA_BOLD][i - 1]
+                c_obj = ws.cell(row=row_num, column=col, value=val if val else "")
+                c_obj.font = font; c_obj.fill = fill
+                c_obj.alignment = CENTER; c_obj.border = THIN_BORDER
+
+            ws.row_dimensions[row_num].height = 16
+            row_num += 1
+
+        row_num += 1  # gap between departments
+
+    # ── Legend row ───────────────────────────────────────────
+    row_num += 1
+    legend = [
+        ("Green = Present",    PRESENT_FILL),
+        ("Yellow = Late",      LATE_FILL),
+        ("Red = Absent",       ABSENT_FILL),
+        ("Blue = Half/CL/ML",  HALFDAY_FILL),
+        ("Orange = Mis Punch", MIS_FILL),
+        ("Grey = Off/Holiday", OFF_FILL),
+    ]
+    col = 1
+    for label, fill in legend:
+        c_obj = ws.cell(row=row_num, column=col, value=label)
+        c_obj.font = Font(name="Calibri", size=8, italic=True)
+        c_obj.fill = fill
+        c_obj.alignment = CENTER
+        c_obj.border = THIN_BORDER
+        col += 1
+
+    # ── Freeze panes after fixed columns + header ─────────────
+    ws.freeze_panes = f"{get_column_letter(FIXED_COLS + 1)}{HDR_ROW + 1}"
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename = f"Monthly_Attendance_{month_name_str}_{year}.xlsx"
+    response = HttpResponse(
+        output,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
 @allowed_users(allowed_roles=['superadmin', 'Admin'])
 def toggle_late_exemption(request, attendance_id):
     if request.method != "POST":
