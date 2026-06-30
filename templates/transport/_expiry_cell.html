@@ -1,0 +1,11 @@
+{% load humanize %}
+{% if expiry %}
+  {% now "Y-m-d" as today_str %}
+  <span style="font-family:var(--f-mono);font-size:11px;
+    {% if expiry|date:'Y-m-d' < today_str %}
+      color:#991b1b;font-weight:700;
+    {% endif %}
+  ">{{ expiry|date:"d M Y" }}</span>
+{% else %}
+  <span style="color:var(--muted);">—</span>
+{% endif %}

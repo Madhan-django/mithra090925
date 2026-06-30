@@ -1,0 +1,76 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-7">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'route_list' %}">Routes</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'stop_list' route.pk %}">{{ route.route_name }}</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="pc-card">
+      <div class="pc-card-body">
+        <div class="row g-3">
+          <div class="col-sm-8">
+            <div class="pc-form-group">
+              <label class="pc-label">Stop Name <span style="color:var(--rose);">*</span></label>
+              {{ form.stop_name }}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="pc-form-group">
+              <label class="pc-label">Sequence</label>
+              {{ form.sequence }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Area</label>
+              {{ form.area }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Landmark</label>
+              {{ form.landmark }}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="pc-form-group">
+              <label class="pc-label">Pickup Time</label>
+              {{ form.pickup_time }}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="pc-form-group">
+              <label class="pc-label">Drop Time</label>
+              {{ form.drop_time }}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="pc-form-group">
+              <label class="pc-label">Monthly Fee (₹)</label>
+              {{ form.monthly_fee }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'stop_list' route.pk %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

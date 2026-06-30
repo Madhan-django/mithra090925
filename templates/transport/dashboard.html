@@ -1,0 +1,124 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Transport</span>
+      </nav>
+      <div class="pc-page-title">Transport</div>
+      <div class="pc-page-sub">Fleet, routes, drivers and student allocation.</div>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="row g-3 mb-4">
+    {% with cards=True %}
+    <div class="col-6 col-md-3">
+      <a href="{% url 'vehicle_list' %}" class="text-decoration-none">
+        <div class="pc-card text-center p-3">
+          <div style="font-size:28px;font-weight:800;color:var(--accent);">{{ total_vehicles }}</div>
+          <div style="font-size:12px;color:var(--text-sm);margin-top:4px;">Total Vehicles</div>
+          <div style="font-size:11px;margin-top:6px;">
+            <span style="color:#16a34a;font-weight:700;">{{ active_vehicles }} Active</span>
+            {% if maintenance %}&nbsp;·&nbsp;<span style="color:#d97706;font-weight:700;">{{ maintenance }} Maintenance</span>{% endif %}
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'driver_list' %}" class="text-decoration-none">
+        <div class="pc-card text-center p-3">
+          <div style="font-size:28px;font-weight:800;color:#0891b2;">{{ total_drivers }}</div>
+          <div style="font-size:12px;color:var(--text-sm);margin-top:4px;">Drivers</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'route_list' %}" class="text-decoration-none">
+        <div class="pc-card text-center p-3">
+          <div style="font-size:28px;font-weight:800;color:#7c3aed;">{{ total_routes }}</div>
+          <div style="font-size:12px;color:var(--text-sm);margin-top:4px;">Routes</div>
+          <div style="font-size:11px;margin-top:6px;color:var(--text-sm);">{{ total_stops }} Stops</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'allocation_list' %}" class="text-decoration-none">
+        <div class="pc-card text-center p-3">
+          <div style="font-size:28px;font-weight:800;color:#059669;">{{ allocated_students }}</div>
+          <div style="font-size:12px;color:var(--text-sm);margin-top:4px;">Students Using Transport</div>
+        </div>
+      </a>
+    </div>
+    {% endwith %}
+  </div>
+
+  <!-- Quick links -->
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="pc-card">
+        <div class="pc-card-header">
+          <div class="pc-card-title"><i class="ri-links-line me-2" style="color:var(--accent);"></i>Quick Actions</div>
+        </div>
+        <div class="pc-card-body" style="display:flex;flex-wrap:wrap;gap:10px;">
+          <a href="{% url 'vehicle_add' %}"     class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-bus-line"></i> Add Vehicle</a>
+          <a href="{% url 'driver_add' %}"      class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-user-line"></i> Add Driver</a>
+          <a href="{% url 'route_add' %}"       class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-route-line"></i> Add Route</a>
+          <a href="{% url 'allocation_add' %}"  class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-user-add-line"></i> Allocate Student</a>
+          <a href="{% url 'vehicle_type_list' %}" class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-settings-3-line"></i> Vehicle Types</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document expiry alerts -->
+  {% if expiry_alerts %}
+  <div class="pc-card">
+    <div class="pc-card-header">
+      <div class="pc-card-title"><i class="ri-alarm-warning-line me-2" style="color:#d97706;"></i>Document / License Expiry Alerts</div>
+    </div>
+    <div class="pc-card-body" style="padding:0;">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th>Vehicle / Driver</th>
+            <th>Document</th>
+            <th>Expiry Date</th>
+            <th>Days Left</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in expiry_alerts %}
+          <tr>
+            <td>
+              {% if alert.vehicle %}
+                <i class="ri-bus-line" style="color:var(--accent);"></i> {{ alert.vehicle }}
+              {% else %}
+                <i class="ri-user-line" style="color:#0891b2;"></i> {{ alert.driver.name }}
+              {% endif %}
+            </td>
+            <td>{{ alert.doc }}</td>
+            <td>{{ alert.expiry|date:"d M Y" }}</td>
+            <td>
+              {% if alert.days_left < 0 %}
+                <span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">EXPIRED</span>
+              {% elif alert.days_left <= 7 %}
+                <span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">{{ alert.days_left }}d</span>
+              {% else %}
+                <span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">{{ alert.days_left }}d</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

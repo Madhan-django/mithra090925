@@ -1,0 +1,61 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-8">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Vehicle Types</span>
+      </nav>
+      <div class="pc-page-title">Vehicle Types</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-5">
+      <div class="pc-card">
+        <div class="pc-card-header">
+          <div class="pc-card-title">Add Type</div>
+        </div>
+        <div class="pc-card-body">
+          <form method="POST">
+            {% csrf_token %}
+            {{ form.sch }}
+            <div class="pc-form-group">
+              <label class="pc-label">Type Name <span style="color:var(--rose);">*</span></label>
+              {{ form.name }}
+            </div>
+            <button type="submit" class="pc-btn pc-btn-primary w-100 mt-2"><i class="ri-add-line"></i> Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-7">
+      <div class="pc-card">
+        <div class="pc-card-body" style="padding:0;">
+          <table class="pc-table">
+            <thead><tr><th>#</th><th>Type Name</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for t in data %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ t.name }}</td>
+                <td>
+                  <a href="{% url 'vehicle_type_delete' t.pk %}" class="pc-btn pc-btn-danger pc-btn-xs"
+                     onclick="return confirm('Delete {{ t.name }}?')"><i class="ri-delete-bin-line"></i></a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" style="text-align:center;color:var(--text-sm);padding:24px;">No types yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Live Map</span>
+      </nav>
+      <div class="pc-page-title">Live Vehicle Map</div>
+    </div>
+    <div class="pc-page-header-right" style="gap:8px;display:flex;align-items:center;">
+      <span id="last-updated" style="font-size:12px;color:var(--text-sm);"></span>
+      <a href="{% url 'gps_settings' %}" class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-settings-3-line"></i> GPS Settings</a>
+    </div>
+  </div>
+
+  {% if not gps_cfg.mappls_api_key %}
+  <div class="pc-card mb-3" style="border-left:4px solid var(--amber);">
+    <div class="pc-card-body" style="display:flex;align-items:center;gap:12px;">
+      <i class="ri-alert-line" style="font-size:22px;color:var(--amber);"></i>
+      <div>
+        <strong>Mappls API key not configured.</strong>
+        The map cannot load without it. <a href="{% url 'gps_settings' %}">Add it in GPS Settings →</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-3">
+
+    <!-- Vehicle sidebar -->
+    <div class="col-lg-3">
+      <div class="pc-card" style="height:calc(100vh - 200px);overflow-y:auto;">
+        <div class="pc-card-header">
+          <div class="pc-card-title">Vehicles</div>
+        </div>
+        <div class="pc-card-body" style="padding:0;">
+          <div id="vehicle-list">
+            {% for v in vehicles %}
+            <div class="vehicle-card" id="vc-{{ v.pk }}"
+                 onclick="focusVehicle({{ v.pk }})"
+                 style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-weight:700;font-size:13px;">{{ v.vehicle_name }}</div>
+                  <div style="font-family:var(--f-mono);font-size:11px;color:var(--text-sm);">{{ v.vehicle_number }}</div>
+                </div>
+                <div id="badge-{{ v.pk }}">
+                  <span style="background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:12px;font-size:11px;">No data</span>
+                </div>
+              </div>
+              <div id="speed-{{ v.pk }}" style="font-size:11px;color:var(--text-sm);margin-top:4px;"></div>
+            </div>
+            {% empty %}
+            <div style="padding:24px;text-align:center;color:var(--text-sm);font-size:13px;">No active vehicles.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="col-lg-9">
+      <div class="pc-card" style="height:calc(100vh - 200px);">
+        <div id="map" style="width:100%;height:100%;border-radius:var(--card-radius);"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% if gps_cfg.mappls_api_key %}
+<!-- Mappls Web Maps JS SDK -->
+<script src="https://apis.mappls.com/web-sdk/mappls-web-maps@latest/mappls-web-maps.js"></script>
+<script>
+const MAPPLS_TOKEN = "{{ gps_cfg.mappls_api_key }}";
+const GPS_URL      = "{% url 'gps_positions' %}";
+const POLL_INTERVAL = 30000; // 30 seconds
+
+let mapObj, markers = {}, mapReady = false;
+
+const mapplsObj = new mappls();
+mapplsObj.initialize(MAPPLS_TOKEN, { map: true, layer: 'vector' }, function () {
+  mapObj = mapplsObj.Map({
+    id: 'map',
+    properties: {
+      center: [20.5937, 78.9629],  // India center
+      zoom: 5,
+      zoomControl: true,
+    }
+  });
+  mapReady = true;
+  pollPositions();
+});
+
+function pollPositions() {
+  fetch(GPS_URL)
+    .then(r => r.json())
+    .then(data => {
+      const now = new Date();
+      document.getElementById('last-updated').textContent =
+        'Updated ' + now.toLocaleTimeString();
+
+      data.positions.forEach(p => {
+        updateVehicle(p);
+      });
+    })
+    .catch(() => {});
+  setTimeout(pollPositions, POLL_INTERVAL);
+}
+
+function updateVehicle(p) {
+  const latlng = [p.lat, p.lng];
+
+  // Update marker
+  if (markers[p.vehicle_id]) {
+    markers[p.vehicle_id].setPosition(latlng);
+  } else {
+    markers[p.vehicle_id] = new mapplsObj.Marker({
+      position: latlng,
+      map: mapObj,
+      title: p.vehicle_name,
+      popupHtml: `<b>${p.vehicle_name}</b><br>${p.vehicle_number}<br>Speed: ${p.speed} km/h`,
+    });
+  }
+
+  // Update sidebar badge
+  const badge = document.getElementById('badge-' + p.vehicle_id);
+  if (badge) {
+    const isMoving = p.speed > 2;
+    badge.innerHTML = `<span style="background:${isMoving ? '#dcfce7' : '#f1f5f9'};color:${isMoving ? '#166534' : '#64748b'};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;">${isMoving ? 'Moving' : 'Stopped'}</span>`;
+  }
+  const speedEl = document.getElementById('speed-' + p.vehicle_id);
+  if (speedEl) {
+    const ts = new Date(p.timestamp);
+    speedEl.textContent = `${p.speed} km/h · ${ts.toLocaleTimeString()}`;
+  }
+}
+
+function focusVehicle(vehicleId) {
+  if (!mapReady || !markers[vehicleId]) return;
+  const pos = markers[vehicleId].getPosition();
+  if (pos) {
+    mapObj.setCenter(pos);
+    mapObj.setZoom(15);
+  }
+  // highlight selected card
+  document.querySelectorAll('.vehicle-card').forEach(c => c.style.background = '');
+  const card = document.getElementById('vc-' + vehicleId);
+  if (card) card.style.background = 'var(--primary-light, #eff6ff)';
+}
+</script>
+{% else %}
+<div id="map" style="display:none;"></div>
+{% endif %}
+{% endblock %}

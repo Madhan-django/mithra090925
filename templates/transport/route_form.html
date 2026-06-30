@@ -1,0 +1,69 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-8">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'route_list' %}">Routes</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+    <div class="pc-card">
+      <div class="pc-card-body">
+        <div class="row g-3">
+          <div class="col-sm-8">
+            <div class="pc-form-group">
+              <label class="pc-label">Route Name <span style="color:var(--rose);">*</span></label>
+              {{ form.route_name }}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="pc-form-group">
+              <label class="pc-label">Route Code <span style="color:var(--rose);">*</span></label>
+              {{ form.route_code }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Assigned Vehicle</label>
+              {{ form.vehicle }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Assigned Driver</label>
+              {{ form.driver }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Total Distance (km)</label>
+              {{ form.total_distance }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Status</label>
+              {{ form.is_active }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'route_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

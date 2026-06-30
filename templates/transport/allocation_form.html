@@ -1,0 +1,89 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-7">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'allocation_list' %}">Allocations</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+    <div class="pc-card">
+      <div class="pc-card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Student <span style="color:var(--rose);">*</span></label>
+              {{ form.student }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Route <span style="color:var(--rose);">*</span></label>
+              {{ form.route }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Stop <span style="color:var(--rose);">*</span></label>
+              {{ form.stop }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Start Date</label>
+              {{ form.start_date }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">End Date <span style="font-size:11px;color:var(--text-sm);">(leave blank if ongoing)</span></label>
+              {{ form.end_date }}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">Active</label>
+              {{ form.is_active }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'allocation_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+    </div>
+  </form>
+</div>
+
+<script>
+// Auto-filter stops when route changes
+document.getElementById('id_route').addEventListener('change', function () {
+  const routeId = this.value;
+  const stopSel = document.getElementById('id_stop');
+  stopSel.innerHTML = '<option value="">---------</option>';
+  if (!routeId) return;
+  fetch(`/transport/ajax/stops/?route_id=${routeId}`)
+    .then(r => r.json())
+    .then(data => {
+      data.stops.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        stopSel.appendChild(opt);
+      });
+    });
+});
+</script>
+{% endblock %}

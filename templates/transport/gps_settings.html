@@ -1,0 +1,88 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-6">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>GPS Settings</span>
+      </nav>
+      <div class="pc-page-title">GPS Integration Settings</div>
+    </div>
+  </div>
+
+  <!-- Info card -->
+  <div class="pc-card mb-3" style="background:var(--primary-light,#eff6ff);border:none;">
+    <div class="pc-card-body">
+      <div style="font-weight:700;margin-bottom:6px;"><i class="ri-information-line"></i> How GPS Integration Works</div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:var(--text-md);">
+        <li>Any AIS-140 certified GPS device can send location data to this system.</li>
+        <li>Set the vehicle's <strong>GPS Device ID / IMEI</strong> in the vehicle record.</li>
+        <li>Configure your GPS device or Flespi gateway to HTTP POST to:<br>
+          <code style="background:#e0e7ff;padding:2px 6px;border-radius:4px;">{{ request.scheme }}://{{ request.get_host }}/transport/gps/push/</code></li>
+        <li>Payload format (JSON):<br>
+          <code style="background:#e0e7ff;padding:2px 6px;border-radius:4px;">{"device_id":"IMEI","lat":11.01,"lng":76.95,"speed":40,"heading":270,"timestamp":"2024-06-30T08:32:00Z"}</code></li>
+        <li>Mappls API key is required to display the live map.</li>
+      </ul>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="pc-card">
+      <div class="pc-card-header">
+        <div class="pc-card-title">Mappls (MapmyIndia) API Key</div>
+      </div>
+      <div class="pc-card-body">
+        <div class="pc-form-group">
+          <label class="pc-label">Mappls REST/JS API Key</label>
+          <input type="text" name="mappls_api_key" class="form-control"
+                 value="{{ cfg.mappls_api_key|default:'' }}"
+                 placeholder="Paste your Mappls token here">
+          <div style="font-size:11px;color:var(--text-sm);margin-top:4px;">
+            Get a free key at <strong>apis.mappls.com/console</strong> → Create New Project → Copy the token.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle GPS IDs quick reference -->
+    <div class="pc-card mt-3">
+      <div class="pc-card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="pc-card-title">Vehicle GPS Device IDs</div>
+        <a href="{% url 'vehicle_list' %}" class="pc-btn pc-btn-outline pc-btn-xs">Manage Vehicles</a>
+      </div>
+      <div class="pc-card-body" style="padding:0;">
+        <table class="pc-table">
+          <thead><tr><th>Vehicle</th><th>Number</th><th>GPS Device ID</th></tr></thead>
+          <tbody>
+            {% for v in vehicles %}
+            <tr>
+              <td style="font-weight:700;">{{ v.vehicle_name }}</td>
+              <td style="font-family:var(--f-mono);font-size:12px;">{{ v.vehicle_number }}</td>
+              <td>
+                {% if v.gps_device_id %}
+                  <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;">{{ v.gps_device_id }}</code>
+                {% else %}
+                  <span style="color:var(--rose);font-size:12px;"><i class="ri-close-circle-line"></i> Not set</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" style="text-align:center;color:var(--text-sm);padding:20px;">No vehicles added yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'transport_dashboard' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save Settings</button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

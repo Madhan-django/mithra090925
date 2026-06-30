@@ -1,0 +1,137 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'vehicle_list' %}">Vehicles</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+
+    <div class="row g-3">
+
+      <!-- Basic Info -->
+      <div class="col-lg-6">
+        <div class="pc-card h-100">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-bus-line me-2" style="color:var(--accent);"></i>Basic Info</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              {% for f in form.vehicle_number form.vehicle_name form.vehicle_type form.capacity form.fuel_type form.status %}
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">{{ f.label }}</label>
+                  {{ f }}
+                  {% if f.errors %}<div style="color:var(--rose);font-size:11px;margin-top:3px;">{{ f.errors.0 }}</div>{% endif %}
+                </div>
+              </div>
+              {% endfor %}
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">GPS Device ID</label>
+                  {{ form.gps_device_id }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Purchase Date</label>
+                  {{ form.purchase_date }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical -->
+      <div class="col-lg-6">
+        <div class="pc-card h-100">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-settings-3-line me-2" style="color:var(--accent);"></i>Technical Details</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">RC Number</label>
+                  {{ form.rc_number }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="pc-form-group">
+                  <label class="pc-label">Chassis Number</label>
+                  {{ form.chassis_number }}
+                </div>
+              </div>
+              <div class="col-sm-12">
+                <div class="pc-form-group">
+                  <label class="pc-label">Engine Number</label>
+                  {{ form.engine_number }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="col-12">
+        <div class="pc-card">
+          <div class="pc-card-header">
+            <div class="pc-card-title"><i class="ri-file-text-line me-2" style="color:#d97706;"></i>Document Expiry Dates</div>
+          </div>
+          <div class="pc-card-body">
+            <div class="row g-3">
+              <div class="col-sm-6 col-md-3">
+                <div class="pc-form-group">
+                  <label class="pc-label">Insurance Expiry</label>
+                  {{ form.insurance_expiry }}
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="pc-form-group">
+                  <label class="pc-label">Fitness Expiry</label>
+                  {{ form.fitness_expiry }}
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="pc-form-group">
+                  <label class="pc-label">Permit Expiry</label>
+                  {{ form.permit_expiry }}
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="pc-form-group">
+                  <label class="pc-label">Pollution Expiry</label>
+                  {{ form.pollution_expiry }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'vehicle_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

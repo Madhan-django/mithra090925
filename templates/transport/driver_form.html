@@ -1,0 +1,50 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-lg-12">
+
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'transport_dashboard' %}">Transport</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a href="{% url 'driver_list' %}">Drivers</a>
+        <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>{{ title }}</span>
+      </nav>
+      <div class="pc-page-title">{{ title }}</div>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.sch }}
+    <div class="pc-card">
+      <div class="pc-card-body">
+        <div class="row g-3">
+          {% for f in form.name form.employee_id form.mobile form.emergency_contact form.aadhaar form.blood_group form.license_number form.license_expiry form.assigned_vehicle form.status %}
+          <div class="col-sm-6">
+            <div class="pc-form-group">
+              <label class="pc-label">{{ f.label }}</label>
+              {{ f }}
+              {% if f.errors %}<div style="color:var(--rose);font-size:11px;margin-top:3px;">{{ f.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          <div class="col-12">
+            <div class="pc-form-group">
+              <label class="pc-label">Address</label>
+              {{ form.address }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pc-card-footer mt-3">
+      <a href="{% url 'driver_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      <button type="submit" class="pc-btn pc-btn-primary"><i class="ri-save-line"></i> Save</button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
