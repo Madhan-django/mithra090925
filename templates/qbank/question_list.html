@@ -46,15 +46,10 @@
 .qb-filter-bar {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r-xl); padding: 14px 18px;
-  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
   margin-bottom: 16px; box-shadow: var(--sh-xs);
 }
-.qb-filter-group { display: flex; flex-direction: column; gap: 4px; }
-.qb-filter-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  color: var(--text-sm); letter-spacing: .6px;
-  display: flex; align-items: center; gap: 4px;
-}
+.qb-filter-bar .pc-form-group { margin-bottom: 0; }
 .qb-filter-bar .pc-select,
 .qb-filter-bar .pc-input { min-width: 130px; padding: 8px 12px; font-size: 13px; }
 .qb-filter-bar .pc-select { padding-right: 36px; }
@@ -189,8 +184,8 @@
   <!-- Filter Bar -->
   <form method="GET">
     <div class="qb-filter-bar">
-      <div class="qb-filter-group">
-        <span class="qb-filter-label"><i class="ri-government-line"></i> Class</span>
+      <div class="pc-form-group">
+        <label class="pc-label"><i class="ri-government-line"></i> Class</label>
         <select class="pc-select" name="cls" onchange="this.form.submit()">
           <option value="">All Classes</option>
           {% for c in classes %}
@@ -198,8 +193,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="qb-filter-group">
-        <span class="qb-filter-label"><i class="ri-bookmark-line"></i> Type</span>
+      <div class="pc-form-group">
+        <label class="pc-label"><i class="ri-bookmark-line"></i> Type</label>
         <select class="pc-select" name="qtype" onchange="this.form.submit()">
           <option value="">All Types</option>
           <option value="MCQ"   {% if filter_qtype == 'MCQ'   %}selected{% endif %}>MCQ</option>
@@ -210,8 +205,8 @@
           <option value="MATCH" {% if filter_qtype == 'MATCH' %}selected{% endif %}>Match</option>
         </select>
       </div>
-      <div class="qb-filter-group">
-        <span class="qb-filter-label"><i class="ri-bar-chart-line"></i> Difficulty</span>
+      <div class="pc-form-group">
+        <label class="pc-label"><i class="ri-bar-chart-line"></i> Difficulty</label>
         <select class="pc-select" name="difficulty" onchange="this.form.submit()">
           <option value="">All Levels</option>
           <option value="EASY"   {% if filter_difficulty == 'EASY'   %}selected{% endif %}>Easy</option>
@@ -219,16 +214,16 @@
           <option value="HARD"   {% if filter_difficulty == 'HARD'   %}selected{% endif %}>Hard</option>
         </select>
       </div>
-      <div class="qb-filter-group">
-        <span class="qb-filter-label"><i class="ri-shield-check-line"></i> Status</span>
+      <div class="pc-form-group">
+        <label class="pc-label"><i class="ri-shield-check-line"></i> Status</label>
         <select class="pc-select" name="approved" onchange="this.form.submit()">
           <option value="">All</option>
           <option value="1" {% if filter_approved == '1' %}selected{% endif %}>Approved</option>
           <option value="0" {% if filter_approved == '0' %}selected{% endif %}>Pending</option>
         </select>
       </div>
-      <div class="qb-filter-group" style="flex:1;min-width:200px;">
-        <span class="qb-filter-label"><i class="ri-search-line"></i> Search</span>
+      <div class="pc-form-group" style="flex:1;min-width:200px;">
+        <label class="pc-label"><i class="ri-search-line"></i> Search</label>
         <input class="pc-input" type="text" name="q" value="{{ search }}" placeholder="Search question text…">
       </div>
       <div style="display:flex;gap:6px;">
