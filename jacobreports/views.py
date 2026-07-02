@@ -281,7 +281,13 @@ def add_incharge_report(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
     usr = request.user
-    stf = staff.objects.get(staff_user=usr)
+
+    is_superadmin = usr.groups.filter(name='superadmin').exists()
+
+    if is_superadmin:
+        staff_qs = staff.objects.filter(staff_school=sdata)
+    else:
+        staff_qs = staff.objects.filter(staff_user=usr)
 
     clone_id = request.GET.get('clone')
     initial_data = {}
@@ -292,6 +298,10 @@ def add_incharge_report(request):
             if field.name not in ['id', 'created_at', 'report_date']:
                 initial_data[field.name] = getattr(old, field.name)
         initial_data['report_date'] = date.today()
+    elif is_superadmin:
+        first_staff = staff_qs.first()
+        if first_staff:
+            initial_data['report_submitted_by'] = first_staff.pk
 
     if request.method == 'POST':
         form = InchargeReportForm(request.POST)
@@ -302,7 +312,7 @@ def add_incharge_report(request):
     else:
         form = InchargeReportForm(initial=initial_data)
         form.fields['school_name'].queryset = school.objects.filter(id=sch_id)
-        form.fields['report_submitted_by'].queryset = staff.objects.filter(staff_user=usr)
+        form.fields['report_submitted_by'].queryset = staff_qs
 
     return render(request, 'jacobreports/incharge_report_form.html', {'form': form, 'title': 'ADD INCHARGE REPORT'})
 
