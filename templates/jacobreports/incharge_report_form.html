@@ -1,0 +1,447 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+        <div class="card-header text-white"
+             style="background: linear-gradient(to right, #0d6efd, #0b5ed7); height:70px;">
+            <div class="card-title text-center mt-2">
+                <h5>
+                    <span class="badge bg-light text-dark">{{ title }}</span>
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- ===================================== -->
+                <!-- BASIC DETAILS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">BASIC DETAILS</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">School</label>
+                                {{ form.school_name }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Department</label>
+                                {{ form.department }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Report Date</label>
+                                {{ form.report_date }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Reporting Time</label>
+                                {{ form.reporting_time }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Submitted By</label>
+                                {{ form.report_submitted_by }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- MORNING SESSION -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">MORNING SESSION</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Late Comers [Teachers]</label>
+                                {{ form.late_comers_teachers }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Late Comers [Duty Teachers]</label>
+                                {{ form.late_comers_duty_teachers }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Absentees [Teachers]</label>
+                                {{ form.absentees_teachers }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Assembly Arrangements</label>
+                                {{ form.assembly_arrangements }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Class Teachers Morals</label>
+                                {{ form.class_teachers_morals }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Dispersing Time</label>
+                                {{ form.dispersing_time }}
+                            </div>
+
+                            <div class="col-md-2 mb-3 d-flex align-items-center gap-2 mt-4">
+                                {{ form.zero_hour_maintained }}
+                                <label class="form-check-label">Zero Hour Maintained</label>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- LUNCH BREAK -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">LUNCH BREAK</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-2 mb-3 d-flex align-items-center gap-2 mt-4">
+                                {{ form.ct_availability }}
+                                <label class="form-check-label">C/T Available</label>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Children Without Lunch</label>
+                                {{ form.children_without_lunch }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Lunch Atmosphere</label>
+                                {{ form.lunch_atmosphere }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Noise Level (if Noisy)</label>
+                                {{ form.noise_level }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- AFTERNOON SESSION -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">AFTERNOON SESSION</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cram Conducted</label>
+                                {{ form.cram_conducted }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Special Class</label>
+                                {{ form.special_class }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Activity Class</label>
+                                {{ form.activity_class }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Accident Details</label>
+                                {{ form.accident_details }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Incidents</label>
+                                {{ form.incidents }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pupils Detained &amp; Reason</label>
+                                {{ form.pupils_detained }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- STATUS DETAILS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">STATUS DETAILS</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-2 mb-3 d-flex align-items-center gap-2">
+                                {{ form.class_work_given }}
+                                <label class="form-check-label">Class Work Given</label>
+                            </div>
+
+                            <div class="col-md-2 mb-3 d-flex align-items-center gap-2">
+                                {{ form.homework_corrected }}
+                                <label class="form-check-label">Homework Corrected</label>
+                            </div>
+
+                            <div class="col-md-2 mb-3 d-flex align-items-center gap-2">
+                                {{ form.handbook_checked }}
+                                <label class="form-check-label">Handbook Checked</label>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Supervising Report</label>
+                                {{ form.supervising_report }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- PERIODS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">SESSIONS — PERIOD-WISE SUPERVISION</div>
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead style="background-color:#212529;color:white;">
+                                    <tr>
+                                        <th width="120">SESSION</th>
+                                        <th>PERIOD</th>
+                                        <th>DETAILS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td rowspan="4" class="text-center fw-bold align-middle bg-light">MORNING</td>
+                                        <td>1st Period</td>
+                                        <td>{{ form.period_1 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2nd Period</td>
+                                        <td>{{ form.period_2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3rd Period</td>
+                                        <td>{{ form.period_3 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4th Period</td>
+                                        <td>{{ form.period_4 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="4" class="text-center fw-bold align-middle bg-light">NOON</td>
+                                        <td>5th Period</td>
+                                        <td>{{ form.period_5 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>6th Period</td>
+                                        <td>{{ form.period_6 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>7th Period</td>
+                                        <td>{{ form.period_7 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>8th Period</td>
+                                        <td>{{ form.period_8 }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- CIRCULAR DETAILS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">CIRCULAR DETAILS</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Circular — Teachers</label>
+                                {{ form.circular_teachers }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Circular — Parents</label>
+                                {{ form.circular_parents }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Circular — Pupils</label>
+                                {{ form.circular_pupils }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- OCCURRENCES -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">OCCURRENCES</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Birthday</label>
+                                {{ form.birthday }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Competition / Field Trip</label>
+                                {{ form.competition_field_trip }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Celebration</label>
+                                {{ form.celebration }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Meeting Conducted</label>
+                                {{ form.meeting_conducted }}
+                            </div>
+
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Meeting Details</label>
+                                {{ form.meeting_details }}
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Demo Class</label>
+                                {{ form.demo_class }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- ROUNDS REPORT -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">ROUNDS REPORT</div>
+                    <div class="card-body">
+                        {{ form.rounds_report }}
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- STAFF PRAYER ATTENDANCE -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">STAFF PRAYER ATTENDANCE &amp; INSTRUCTIONS</div>
+                    <div class="card-body">
+                        {{ form.staff_prayer_attendance }}
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- SUGGESTIONS & GRIEVANCES -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">SUGGESTIONS &amp; GRIEVANCES</div>
+                    <div class="card-body">
+                        {{ form.suggestions_and_grievances }}
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- LATE EVENING CLASS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">LATE EVENING CLASS</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Standard</label>
+                                {{ form.late_evening_class_std }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Subject</label>
+                                {{ form.late_evening_class_subject }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Subject Teacher</label>
+                                {{ form.late_evening_class_teacher }}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">No. of Students</label>
+                                {{ form.late_evening_class_students }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- TOMORROW'S ASSIGNMENT -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">TOMORROW'S ASSIGNMENT / TO-DO LIST</div>
+                    <div class="card-body">
+                        {{ form.tomorrows_assignment }}
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- BUTTONS -->
+                <!-- ===================================== -->
+
+                <div class="text-center mb-4">
+                    <button type="submit" class="btn btn-primary px-5 shadow">
+                        SAVE REPORT
+                    </button>
+                    <a href="{% url 'incharge_report_list' %}" class="btn btn-danger px-5 shadow">
+                        CANCEL
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

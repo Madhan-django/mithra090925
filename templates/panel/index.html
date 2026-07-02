@@ -807,6 +807,7 @@
           </ul>
         </li>
 
+       {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
         <li class="menu-header"><span class="menu-header-text">Transport</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -845,7 +846,7 @@
             <li class="menu-item"><a href="{% url 'hostel_waiting_list' %}" class="menu-link"><div>Waiting List</div></a></li>
           </ul>
         </li>
-
+        {% endif %}
         {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
         <li class="menu-header"><span class="menu-header-text">Petty Cash</span></li>
         <li class="menu-item">
@@ -875,6 +876,7 @@
           </ul>
         </li>
 
+      {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
         <li class="menu-header"><span class="menu-header-text">Question Bank</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -889,6 +891,7 @@
             <li class="menu-item"><a href="{% url 'paper_list' %}" class="menu-link"><div>Question Papers</div></a></li>
           </ul>
         </li>
+      {% endif %}
 
         <li class="menu-header"><span class="menu-header-text">Library</span></li>
         <li class="menu-item">
@@ -967,6 +970,8 @@
           <ul class="menu-sub">
             <li class="menu-item"><a href="{% url 'reports_home' %}" class="menu-link"><div>Reports</div></a></li>
             <li class="menu-item"><a href="{% url 'automate_list' %}" class="menu-link"><div>Automate</div></a></li>
+            <li class="menu-item"><a href="{% url 'class_teacher_report_list' %}" class="menu-link"><div>Class Teacher Report</div></a></li>
+            <li class="menu-item"><a href="{% url 'incharge_report_list' %}" class="menu-link"><div>Incharge Daily Report</div></a></li>
           </ul>
         </li>
         {% endif %}

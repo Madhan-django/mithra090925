@@ -1,0 +1,174 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header text-white"
+             style="background: linear-gradient(to right, #0d6efd, #0b5ed7); height:70px;">
+            <div class="card-title text-center mt-2">
+                <h5>
+                    <span class="badge bg-light text-dark">
+                        INCHARGE DAILY REPORT LIST
+                    </span>
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <!-- TOP ACTIONS -->
+            <div class="row mb-4">
+
+                <div class="col-md-9">
+                    <form method="GET">
+                        <div class="row">
+
+                            <div class="col-md-3 mb-2">
+                                <input type="text"
+                                       name="search"
+                                       value="{{ search }}"
+                                       class="form-control"
+                                       placeholder="Search Staff / Department">
+                            </div>
+
+                            <div class="col-md-3 mb-2">
+                                <input type="date"
+                                       name="report_date"
+                                       value="{{ report_date }}"
+                                       class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-2">
+                                <select name="department" class="form-select">
+                                    <option value="">All Departments</option>
+                                    {% for val, label in department_choices %}
+                                    <option value="{{ val }}" {% if department == val %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-1 mb-2">
+                                <button type="submit" class="btn btn-dark w-100">GO</button>
+                            </div>
+
+                            <div class="col-md-2 mb-2">
+                                <a href="{% url 'incharge_report_list' %}" class="btn btn-secondary w-100">RESET</a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-3 text-end">
+                    <a href="{% url 'add_incharge_report' %}" class="btn btn-primary shadow">
+                        + ADD REPORT
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- MESSAGES -->
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- TABLE -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead style="background-color:#212529;color:white;">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Department</th>
+                            <th>Submitted By</th>
+                            <th>Reporting Time</th>
+                            <th>Absentees (Staff)</th>
+                            <th>Lunch Atmosphere</th>
+                            <th width="220">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for report in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ report.report_date }}</td>
+                            <td>{{ report.department }}</td>
+                            <td>{{ report.report_submitted_by }}</td>
+                            <td>{{ report.reporting_time }}</td>
+                            <td>{{ report.absentees_teachers|default:"Nil" }}</td>
+                            <td>
+                                {% if report.lunch_atmosphere == 'Calm' %}
+                                <span class="badge bg-success">Calm</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Noisy</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_incharge_report' report.id %}"
+                                   class="btn btn-warning btn-sm">EDIT</a>
+
+                                <a href="{% url 'add_incharge_report' %}?clone={{ report.id }}"
+                                   class="btn btn-info btn-sm text-white">CLONE</a>
+
+                                <a href="{% url 'delete_incharge_report' report.id %}"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Delete this incharge report?');">DELETE</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-danger">NO REPORTS FOUND</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

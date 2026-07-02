@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClassTeacherReport
+from .models import ClassTeacherReport, InchargeReport
 
 
 class ClassTeacherReportForm(forms.ModelForm):
@@ -292,4 +292,89 @@ class ClassTeacherReportForm(forms.ModelForm):
                 }
             ),
 
+        }
+
+
+class InchargeReportForm(forms.ModelForm):
+
+    class Meta:
+        model = InchargeReport
+        exclude = ['created_at']
+
+        widgets = {
+
+            # Basic Details
+            'school_name': forms.Select(attrs={'class': 'form-select'}),
+            'report_submitted_by': forms.Select(attrs={'class': 'form-select'}),
+            'reporting_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'report_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'department': forms.Select(attrs={'class': 'form-select'}),
+
+            # Morning Session
+            'late_comers_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'late_comers_duty_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'absentees_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'zero_hour_maintained': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'assembly_arrangements': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'class_teachers_morals': forms.Select(attrs={'class': 'form-select'}),
+            'dispersing_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+
+            # Lunch Break
+            'ct_availability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'children_without_lunch': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'lunch_atmosphere': forms.Select(attrs={'class': 'form-select'}),
+            'noise_level': forms.Select(attrs={'class': 'form-select'}),
+
+            # Afternoon Session
+            'cram_conducted': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'special_class': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'activity_class': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'accident_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'incidents': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'pupils_detained': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Status Details
+            'class_work_given': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'homework_corrected': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'handbook_checked': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'supervising_report': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+
+            # Periods
+            'period_1': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_2': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_3': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_4': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_5': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_6': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_7': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_8': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Circular
+            'circular_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'circular_parents': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'circular_pupils': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Occurrences
+            'birthday': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'competition_field_trip': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'celebration': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'meeting_conducted': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'meeting_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'demo_class': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Rounds & Prayer
+            'rounds_report': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'staff_prayer_attendance': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+
+            # Suggestions
+            'suggestions_and_grievances': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+
+            # Late Evening Class
+            'late_evening_class_std': forms.TextInput(attrs={'class': 'form-control'}),
+            'late_evening_class_subject': forms.TextInput(attrs={'class': 'form-control'}),
+            'late_evening_class_teacher': forms.TextInput(attrs={'class': 'form-control'}),
+            'late_evening_class_students': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+
+            # Tomorrow's Assignment
+            'tomorrows_assignment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
