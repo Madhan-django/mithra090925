@@ -1,0 +1,144 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'lesson_plan_list' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">{{ title }}</h4>
+      <small class="text-muted">{{ skool.name }}</small>
+    </div>
+  </div>
+
+  <form method="post" id="lp-form">
+    {% csrf_token %}
+
+    <!-- Basic Details -->
+    <div class="card mb-4">
+      <div class="card-header bg-dark text-white fw-semibold">Basic Details</div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">Teacher</label>
+            {{ form.teacher }}
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Date</label>
+            {{ form.date }}
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">Period No.</label>
+            {{ form.period_number }}
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            {{ form.status }}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Class</label>
+            {{ form.cls }}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Section</label>
+            {{ form.section }}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Subject</label>
+            {{ form.subject }}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson Content -->
+    <div class="card mb-4">
+      <div class="card-header bg-dark text-white fw-semibold">Lesson Content</div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-5">
+            <label class="form-label">Chapter</label>
+            {{ form.chapter }}
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label">Topic</label>
+            {{ form.topic }}
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">Teaching Method</label>
+            {{ form.teaching_method }}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Learning Objectives</label>
+            {{ form.objectives }}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Content / Notes</label>
+            {{ form.content_taught }}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="ri-save-line me-1"></i> Save Lesson Plan
+      </button>
+      <a href="{% url 'lesson_plan_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      {% if plan %}
+      <form method="post" action="{% url 'lesson_plan_delete' plan.pk %}" class="ms-auto"
+            onsubmit="return confirm('Delete this lesson plan?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+          <i class="ri-delete-bin-line me-1"></i> Delete
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+  </form>
+</div>
+
+<script>
+// Auto-filter sections when class changes
+document.getElementById('id_cls').addEventListener('change', function () {
+  const clsId = this.value;
+  if (!clsId) return;
+  fetch(`{% url 'lp_ajax_sections' %}?cls_id=${clsId}`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('id_section');
+      sel.innerHTML = '<option value="">---------</option>';
+      data.forEach(s => {
+        sel.innerHTML += `<option value="${s.id}">${s.section_name}</option>`;
+      });
+    });
+  fetch(`{% url 'lp_ajax_subjects' %}?cls_id=${clsId}`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('id_subject');
+      sel.innerHTML = '<option value="">---------</option>';
+      data.forEach(s => {
+        sel.innerHTML += `<option value="${s.id}">${s.subject_name}</option>`;
+      });
+    });
+});
+</script>
+{% endblock %}

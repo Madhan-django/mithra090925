@@ -1,0 +1,169 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0">Lesson Plans</h4>
+      <small class="text-muted">{{ skool.name }} | {{ year }}</small>
+    </div>
+    <a href="{% url 'lesson_plan_create' %}" class="btn btn-primary">
+      <i class="ri-add-line me-1"></i> Add Lesson Plan
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Class</label>
+          <select name="cls" class="form-select form-select-sm" id="filter_cls">
+            <option value="">All</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}" {% if selected_cls == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Section</label>
+          <select name="section" class="form-select form-select-sm">
+            <option value="">All</option>
+            {% for s in sections %}
+            <option value="{{ s.id }}" {% if selected_sec == s.id|stringformat:'s' %}selected{% endif %}>{{ s.class_sec_name.name }} – {{ s.section_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Subject</label>
+          <select name="subject" class="form-select form-select-sm">
+            <option value="">All</option>
+            {% for subj in all_subjects %}
+            <option value="{{ subj.id }}" {% if selected_subj == subj.id|stringformat:'s' %}selected{% endif %}>{{ subj.subject_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">From</label>
+          <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from|default:'' }}">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">To</label>
+          <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to|default:'' }}">
+        </div>
+
+        <div class="col-md-1">
+          <label class="form-label fw-semibold">Status</label>
+          <select name="status" class="form-select form-select-sm">
+            <option value="">All</option>
+            <option value="Planned" {% if status_filter == 'Planned' %}selected{% endif %}>Planned</option>
+            <option value="Taught" {% if status_filter == 'Taught' %}selected{% endif %}>Taught</option>
+            <option value="Skipped" {% if status_filter == 'Skipped' %}selected{% endif %}>Skipped</option>
+          </select>
+        </div>
+
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-secondary btn-sm w-100">Filter</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Date</th>
+              <th>Period</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Chapter / Topic</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Assignments</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for plan in plans %}
+            <tr>
+              <td>{{ plan.date|date:"d M Y" }}</td>
+              <td class="text-center">{{ plan.period_number }}</td>
+              <td>{{ plan.cls.name }}</td>
+              <td>{{ plan.section.section_name }}</td>
+              <td>{{ plan.subject.subject_name }}</td>
+              <td>
+                <div class="fw-semibold">{{ plan.topic }}</div>
+                <small class="text-muted">{{ plan.chapter }}</small>
+              </td>
+              <td><span class="badge bg-label-info">{{ plan.teaching_method }}</span></td>
+              <td>
+                {% if plan.status == 'Taught' %}
+                  <span class="badge bg-success">Taught</span>
+                {% elif plan.status == 'Skipped' %}
+                  <span class="badge bg-danger">Skipped</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Planned</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% with plan.assignments.all as asns %}
+                  {% if asns %}
+                    <span class="badge bg-label-primary">{{ asns|length }}</span>
+                    {% for a in asns %}
+                      {% if a.is_given and a.is_corrected %}
+                        <i class="ri-check-double-line text-success" title="Given & Corrected"></i>
+                      {% elif a.is_given %}
+                        <i class="ri-check-line text-primary" title="Given"></i>
+                      {% else %}
+                        <i class="ri-time-line text-warning" title="Not Given"></i>
+                      {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                {% endwith %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'lesson_plan_detail' plan.pk %}" class="btn btn-sm btn-outline-primary" title="View">
+                    <i class="ri-eye-line"></i>
+                  </a>
+                  <a href="{% url 'lesson_plan_edit' plan.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                    <i class="ri-edit-line"></i>
+                  </a>
+                  <a href="{% url 'lesson_plan_pdf' plan.pk %}" class="btn btn-sm btn-outline-danger" title="PDF" target="_blank">
+                    <i class="ri-file-pdf-line"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="10" class="text-center py-5 text-muted">
+                <i class="ri-book-open-line ri-2x mb-2 d-block"></i>
+                No lesson plans found. <a href="{% url 'lesson_plan_create' %}">Add one now.</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

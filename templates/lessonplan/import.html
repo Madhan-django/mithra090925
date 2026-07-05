@@ -1,0 +1,113 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'lesson_plan_list' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">Import Lesson Plans</h4>
+      <small class="text-muted">{{ skool.name }} | {{ year }}</small>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Instructions card -->
+    <div class="col-md-5">
+      <div class="card h-100">
+        <div class="card-header bg-dark text-white fw-semibold">
+          <i class="ri-information-line me-1"></i> Instructions
+        </div>
+        <div class="card-body">
+          <ol class="mb-4">
+            <li class="mb-2">Download the sample Excel file below.</li>
+            <li class="mb-2">Fill in your lesson plans — one row per plan.</li>
+            <li class="mb-2">
+              <strong>Required columns:</strong> Date, Class Name, Section Name, Subject Name, Topic.
+            </li>
+            <li class="mb-2">Class / Section / Subject names must <strong>exactly match</strong> what is in the system (case-insensitive).</li>
+            <li class="mb-2">
+              <strong>Teaching Method</strong> must be one of:<br>
+              <code>Lecture, Discussion, Activity, Demo, Review, Assessment, Group Work</code>
+            </li>
+            <li class="mb-2">
+              <strong>Status</strong> must be one of: <code>Planned, Taught, Skipped</code>
+            </li>
+            <li class="mb-2">Date format: <code>YYYY-MM-DD</code></li>
+            <li>Teacher name is optional — defaults to the currently logged-in staff.</li>
+          </ol>
+
+          <a href="{% url 'excel_sample_lesson' %}" class="btn btn-success w-100">
+            <i class="ri-file-excel-line me-2"></i> Download Sample Excel
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload card -->
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header bg-primary text-white fw-semibold">
+          <i class="ri-upload-cloud-2-line me-1"></i> Upload Excel File
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" id="import-form">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Select Excel file (.xlsx)</label>
+              <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls" required id="excel-input">
+              <div class="form-text">Only <code>.xlsx</code> files are supported.</div>
+            </div>
+
+            <!-- Preview area -->
+            <div id="file-preview" class="alert alert-light border d-none mb-4">
+              <i class="ri-file-excel-2-line text-success me-2"></i>
+              <span id="preview-name"></span>
+              <span class="text-muted ms-2" id="preview-size"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="import-btn">
+              <i class="ri-upload-cloud-line me-1"></i> Import Lesson Plans
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Django messages -->
+      {% if messages %}
+      <div class="mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.getElementById('excel-input').addEventListener('change', function () {
+  const file = this.files[0];
+  if (!file) return;
+  const preview = document.getElementById('file-preview');
+  document.getElementById('preview-name').textContent = file.name;
+  document.getElementById('preview-size').textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
+  preview.classList.remove('d-none');
+});
+
+document.getElementById('import-form').addEventListener('submit', function () {
+  const btn = document.getElementById('import-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Importing…';
+});
+</script>
+{% endblock %}

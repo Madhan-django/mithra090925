@@ -25,8 +25,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 FIREBASE_ACCOUNT = os.path.join(BASE_DIR,'firebase-adminsdk.json')
 
+# ─── Google Drive (Lesson Plan Notes) ─────────────────────────────────────────
+# 1. Go to console.cloud.google.com → IAM & Admin → Service Accounts
+# 2. Create a service account, download the JSON key, place it in the project root
+# 3. Share your Google Drive root folder with the service account email (Editor role)
+# 4. Copy the root folder ID from the Drive URL and paste it below
+GOOGLE_DRIVE_SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'drive-service-account.json')
+GOOGLE_DRIVE_ROOT_FOLDER_ID = os.getenv('GOOGLE_DRIVE_ROOT_FOLDER_ID', '0AMrjdX85tr1VUk9PVA')
+
 cred = credentials.Certificate(FIREBASE_ACCOUNT)
 firebase_admin.initialize_app(cred)
+
 
 
 env = environ.Env()
@@ -94,6 +103,7 @@ INSTALLED_APPS = [
     'qbank',
     'transport',
     'hostel',
+    'lessonplan',
 ]
 
 Q_CLUSTER = {
@@ -160,6 +170,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'institutions.context_processors.menu_permissions',
             ],
         },
     },

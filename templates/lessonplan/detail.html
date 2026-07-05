@@ -1,0 +1,258 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'lesson_plan_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+      <div>
+        <h4 class="fw-bold mb-0">{{ plan.topic }}</h4>
+        <small class="text-muted">
+          {{ plan.cls.name }} – {{ plan.section.section_name }} &nbsp;|&nbsp;
+          {{ plan.subject.subject_name }} &nbsp;|&nbsp;
+          {{ plan.date|date:"d M Y" }}, Period {{ plan.period_number }}
+        </small>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'lesson_plan_edit' plan.pk %}" class="btn btn-outline-secondary btn-sm">
+        <i class="ri-edit-line me-1"></i> Edit
+      </a>
+      <a href="{% url 'lesson_plan_pdf' plan.pk %}" class="btn btn-outline-danger btn-sm" target="_blank">
+        <i class="ri-file-pdf-line me-1"></i> PDF
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- LEFT: Plan details + Notes -->
+    <div class="col-md-5">
+
+      <!-- Lesson details card -->
+      <div class="card mb-4">
+        <div class="card-header bg-dark text-white fw-semibold">Lesson Details</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <span class="badge bg-label-info me-2">{{ plan.teaching_method }}</span>
+            {% if plan.status == 'Taught' %}
+              <span class="badge bg-success">Taught</span>
+            {% elif plan.status == 'Skipped' %}
+              <span class="badge bg-danger">Skipped</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Planned</span>
+            {% endif %}
+          </div>
+          <table class="table table-borderless table-sm mb-0">
+            <tr><th class="text-muted" style="width:40%">Teacher</th><td>{{ plan.teacher }}</td></tr>
+            <tr><th class="text-muted">Chapter</th><td>{{ plan.chapter }}</td></tr>
+            <tr><th class="text-muted">Topic</th><td>{{ plan.topic }}</td></tr>
+          </table>
+          {% if plan.objectives %}
+          <div class="mt-3">
+            <div class="fw-semibold mb-1 text-muted small text-uppercase">Learning Objectives</div>
+            <p class="mb-0" style="white-space:pre-line">{{ plan.objectives }}</p>
+          </div>
+          {% endif %}
+          {% if plan.content_taught %}
+          <div class="mt-3">
+            <div class="fw-semibold mb-1 text-muted small text-uppercase">Content / Notes</div>
+            <p class="mb-0" style="white-space:pre-line">{{ plan.content_taught }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Google Drive Notes -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             style="background:#1a73e8; color:#fff;">
+          <span class="fw-semibold">
+            <i class="ri-google-line me-1"></i> Drive Notes
+          </span>
+          <span class="badge bg-light text-dark">{{ notes|length }} file{{ notes|length|pluralize }}</span>
+        </div>
+
+        <!-- Upload form -->
+        <div class="card-body border-bottom pb-3">
+          <form method="post" action="{% url 'note_upload' plan.pk %}" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+            {% csrf_token %}
+            <input type="file" name="note_file" class="form-control form-control-sm" required
+                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.mp4,.txt">
+            <button type="submit" class="btn btn-sm btn-primary text-nowrap">
+              <i class="ri-upload-cloud-line me-1"></i> Upload
+            </button>
+          </form>
+          <small class="text-muted d-block mt-1">PDF, Word, PPT, Excel, Images accepted</small>
+        </div>
+
+        <!-- File list -->
+        <ul class="list-group list-group-flush">
+          {% for note in notes %}
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+              {% if 'pdf' in note.mime_type %}
+                <i class="ri-file-pdf-line text-danger ri-lg"></i>
+              {% elif 'image' in note.mime_type %}
+                <i class="ri-image-line text-success ri-lg"></i>
+              {% elif 'word' in note.mime_type or 'document' in note.mime_type %}
+                <i class="ri-file-word-line text-primary ri-lg"></i>
+              {% elif 'sheet' in note.mime_type or 'excel' in note.mime_type %}
+                <i class="ri-file-excel-line text-success ri-lg"></i>
+              {% elif 'presentation' in note.mime_type %}
+                <i class="ri-file-ppt-line text-warning ri-lg"></i>
+              {% else %}
+                <i class="ri-file-line ri-lg"></i>
+              {% endif %}
+              <div class="overflow-hidden">
+                <div class="text-truncate fw-semibold small" style="max-width:180px;" title="{{ note.file_name }}">
+                  {{ note.file_name }}
+                </div>
+                <small class="text-muted">{{ note.file_size_kb }} KB &middot; {{ note.uploaded_at|date:"d M Y" }}</small>
+              </div>
+            </div>
+            <div class="d-flex gap-1 flex-shrink-0">
+              <a href="{{ note.drive_view_url }}" target="_blank" class="btn btn-xs btn-outline-primary" title="Open in Drive">
+                <i class="ri-external-link-line"></i>
+              </a>
+              {% if note.drive_download_url %}
+              <a href="{{ note.drive_download_url }}" target="_blank" class="btn btn-xs btn-outline-secondary" title="Download">
+                <i class="ri-download-line"></i>
+              </a>
+              {% endif %}
+              <form method="post" action="{% url 'note_delete' note.pk %}"
+                    onsubmit="return confirm('Remove this file from Drive?');" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-xs btn-outline-danger" title="Delete">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </form>
+            </div>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-center text-muted py-4 small">
+            <i class="ri-cloud-off-line d-block ri-2x mb-1"></i>
+            No files uploaded yet.
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Assignments -->
+    <div class="col-md-7">
+
+      <!-- Add assignment -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white fw-semibold">Add Assignment</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <div class="row g-2">
+              <div class="col-md-5">
+                <label class="form-label fw-semibold small">Title</label>
+                {{ assign_form.title }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold small">Due Date</label>
+                {{ assign_form.due_date }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Description</label>
+                {{ assign_form.description }}
+              </div>
+            </div>
+            <div class="mt-3">
+              <button type="submit" name="add_assignment" class="btn btn-primary btn-sm">
+                <i class="ri-add-line me-1"></i> Add Assignment
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Assignment list -->
+      {% for asn in assignments %}
+      <div class="card mb-3" id="asn-{{ asn.pk }}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h6 class="fw-bold mb-0">{{ asn.title }}</h6>
+              <small class="text-muted">Due: {{ asn.due_date|date:"d M Y" }}</small>
+              {% if asn.description %}
+              <p class="mb-0 mt-1 small text-secondary">{{ asn.description }}</p>
+              {% endif %}
+            </div>
+            <form method="post" action="{% url 'assignment_delete' asn.pk %}"
+                  onsubmit="return confirm('Remove this assignment?');">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" title="Delete">
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </form>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+
+            <button class="btn btn-sm {% if asn.is_given %}btn-success{% else %}btn-outline-secondary{% endif %} toggle-btn"
+                    data-url="{% url 'toggle_given' asn.pk %}" title="Toggle given">
+              <i class="ri-check-line me-1"></i>
+              {% if asn.is_given %}Given ({{ asn.given_date|date:"d M" }}){% else %}Mark Given{% endif %}
+            </button>
+
+            <button class="btn btn-sm {% if asn.is_corrected %}btn-info{% else %}btn-outline-secondary{% endif %} toggle-btn"
+                    data-url="{% url 'toggle_corrected' asn.pk %}" title="Toggle corrected">
+              <i class="ri-check-double-line me-1"></i>
+              {% if asn.is_corrected %}Corrected ({{ asn.corrected_date|date:"d M" }}){% else %}Mark Corrected{% endif %}
+            </button>
+
+            <form method="post" action="{% url 'notify_parents_lesson' asn.pk %}" class="ms-auto">
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-sm {% if asn.notify_sent %}btn-outline-success{% else %}btn-outline-warning{% endif %}"
+                      onclick="return confirm('Send portion notification to parents?');">
+                <i class="ri-notification-3-line me-1"></i>
+                {% if asn.notify_sent %}
+                  Notified ({{ asn.notify_success_count }}/{{ asn.notify_total_count }})
+                {% else %}
+                  Notify Parents
+                {% endif %}
+              </button>
+            </form>
+
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center text-muted py-5">
+        <i class="ri-file-list-3-line ri-2x d-block mb-2"></i>
+        No assignments yet. Add one above.
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+.btn-xs { padding: 2px 6px; font-size: 12px; }
+</style>
+
+<script>
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    fetch(this.dataset.url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+    }).then(() => location.reload());
+  });
+});
+</script>
+{% endblock %}
