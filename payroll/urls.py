@@ -41,6 +41,7 @@ urlpatterns = [
 
     path('Staff_Monthly_Attendance', login_required(views.Staff_Monthly_Attendance), name='Staff_Monthly_Attendance'),
     path('monthly-attendance/export/', login_required(views.monthly_attendance_excel), name='monthly_attendance_excel'),
+    path('monthly-attendance/punch-register/', login_required(views.monthly_punch_register_excel), name='monthly_punch_register_excel'),
     path('toggle_late_exemption/<int:attendance_id>/', login_required(views.toggle_late_exemption), name='toggle_late_exemption'),
     path('attendance-register/', login_required(views.attendance_register), name='attendance_register'),
     path('delete_all_attendance',login_required(views.delete_all_attendance), name='delete_all_attendance'),

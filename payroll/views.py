@@ -582,216 +582,7 @@ def Del_Loan(request, loan_id):
     return redirect('loan_list')
 
 
-# @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
-# def daily_attendance_view(request):
-#     sch_id = request.session.get('sch_id')
-#     sdata = school.objects.get(pk=sch_id)
-#     yr = currentacademicyr.objects.get(school_name=sdata)
-#     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-#
-#     selected_date = request.GET.get('date')
-#
-#     pset = PayrollSettings.objects.get(school=sdata)
-#     grace_time = pset.grace_mins
-#
-#     attendance_list = []
-#
-#     if selected_date:
-#         date_obj = datetime.strptime(selected_date, "%Y-%m-%d").date()
-#
-#         start_dt = timezone.make_aware(datetime.combine(date_obj, time.min))
-#         end_dt = timezone.make_aware(datetime.combine(date_obj, time.max))
-#
-#         records = Attendance.objects.filter(
-#             date__range=(start_dt, end_dt)
-#         ).select_related('staff', 'staff__department', 'staff__shift')
-#
-#         for record in records:
-#
-#             local_in = timezone.localtime(record.first_in) if record.first_in else None
-#             local_out = timezone.localtime(record.last_out) if record.last_out else None
-#
-#             # Work hours
-#             if record.work_duration:
-#                 total_seconds = int(record.work_duration.total_seconds())
-#                 hours = total_seconds // 3600
-#                 minutes = (total_seconds % 3600) // 60
-#                 seconds = total_seconds % 60
-#                 work_hours = f"{hours:02}:{minutes:02}:{seconds:02}"
-#             else:
-#                 work_hours = ""
-#
-#             # -------- Late Check (Shift - Grace) --------
-#             is_late = False
-#
-#             if record.staff.shift and record.staff.shift.start_time and local_in:
-#
-#                 naive_shift_start = datetime.combine(date_obj, record.staff.shift.start_time)
-#
-#                 shift_start_dt = timezone.make_aware(
-#                     naive_shift_start,
-#                     timezone.get_current_timezone()
-#                 )
-#
-#                 # Actual shift for display
-#                 actual_shift_time = shift_start_dt - timedelta(minutes=grace_time)
-#
-#                 if local_in > actual_shift_time:
-#                     is_late = True
-#
-#             attendance_list.append({
-#                 "user_id": record.staff.BioCode,
-#                 "staff": f"{record.staff.first_name} {record.staff.last_name}",
-#                 "Designation": record.staff.desg or "",
-#                 "Department": record.staff.department.name if record.staff.department else "",
-#                 "in_time": local_in,
-#                 "out_time": local_out,
-#                 "work_hours": work_hours,
-#                 "late": is_late,
-#                 "mispunch": record.mis_punch,
-#                 "status": record.status,
-#                 "punch_count": record.punch_count
-#             })
-#
-#     return render(request, "payroll/dayattendance.html", {
-#         "attendance": attendance_list,
-#         "selected_date": selected_date,
-#         "skool": sdata,
-#         "year": year
-#     })
 
-
-# @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
-# def daily_attendance_view(request):
-#
-#     sch_id = request.session.get('sch_id')
-#     sdata = school.objects.get(pk=sch_id)
-#
-#     yr = currentacademicyr.objects.get(school_name=sdata)
-#     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-#
-#     selected_date = request.GET.get('date')
-#
-#     pset = PayrollSettings.objects.get(school=sdata)
-#     grace_time = pset.grace_mins
-#
-#     attendance_list = []
-#
-#     if selected_date:
-#
-#         date_obj = datetime.strptime(selected_date, "%Y-%m-%d").date()
-#
-#         table_name = f"DeviceLogs_{date_obj.month}_{date_obj.year}"
-#
-#         query = f"""
-#             SELECT
-#                 UserId,
-#                 MIN(CONVERT_TZ(LogDate, '+00:00', '+05:30')) AS in_time,
-#                 MAX(CONVERT_TZ(LogDate, '+00:00', '+05:30')) AS out_time,
-#                 COUNT(*) as punch_count
-#             FROM {table_name}
-#             WHERE DATE(CONVERT_TZ(LogDate, '+00:00', '+05:30')) = %s
-#             GROUP BY UserId
-#         """
-#
-#         try:
-#
-#             with connection.cursor() as cursor:
-#                 cursor.execute(query, [date_obj])
-#                 rows = cursor.fetchall()
-#
-#         except Exception as e:
-#             return HttpResponse(f"SQL Error: {str(e)}")
-#
-#         # -------- LOAD STAFF --------
-#         staff_map = {
-#             s.BioCode: s
-#             for s in staff.objects.select_related('shift','department').all()
-#         }
-#
-#         for row in rows:
-#
-#             user_id, in_time, out_time, punch_count = row
-#
-#             stf = staff_map.get(user_id)
-#
-#             if not stf:
-#                 continue
-#
-#             # ---------- FORMAT TIMES ----------
-#             if in_time:
-#                 in_time = timezone.make_aware(in_time, timezone.get_current_timezone())
-#
-#             if out_time:
-#                 out_time = timezone.make_aware(out_time, timezone.get_current_timezone())
-#
-#             local_in = in_time
-#             local_out = out_time
-#
-#             # ---------- WORK HOURS ----------
-#             work_hours = ""
-#
-#             if in_time and out_time:
-#
-#                 duration = out_time - in_time
-#                 total_seconds = int(duration.total_seconds())
-#
-#                 hours = total_seconds // 3600
-#                 minutes = (total_seconds % 3600) // 60
-#                 seconds = total_seconds % 60
-#
-#                 work_hours = f"{hours:02}:{minutes:02}:{seconds:02}"
-#
-#             # ---------- STATUS ----------
-#             status = "PRESENT"
-#             mispunch = False
-#             is_late = False
-#
-#             if punch_count == 1:
-#                 status = "MIS_PUNCH"
-#                 mispunch = True
-#
-#             # ---------- LATE CHECK ----------
-#             if stf.shift and stf.shift.start_time and local_in:
-#
-#                 shift_start = datetime.combine(date_obj, stf.shift.start_time)
-#
-#                 shift_dt = timezone.make_aware(
-#                     shift_start,
-#                     timezone.get_current_timezone()
-#                 )
-#
-#                 allowed_time = shift_dt - timedelta(minutes=grace_time)
-#
-#                 if local_in > allowed_time:
-#                     is_late = True
-#
-#             attendance_list.append({
-#
-#                 "user_id": user_id,
-#                 "staff": f"{stf.first_name} {stf.last_name}",
-#                 "Designation": stf.desg or "",
-#                 "Department": stf.department.name if stf.department else "",
-#
-#                 "in_time": local_in,
-#                 "out_time": local_out,
-#                 "work_hours": work_hours,
-#
-#                 "late": is_late,
-#                 "mispunch": mispunch,
-#                 "status": status,
-#                 "punch_count": punch_count
-#
-#             })
-#
-#     return render(request, "payroll/dayattendance.html", {
-#
-#         "attendance": attendance_list,
-#         "selected_date": selected_date,
-#         "skool": sdata,
-#         "year": year
-#
-#     })
 
 
 
@@ -821,22 +612,26 @@ def daily_attendance_view(request):
 
             table_name = f"DeviceLogs_{date_obj.month}_{date_obj.year}"
 
-            # -------- GET SCHOOL DEVICES --------
-            device_ids = list(
-                BioDevices.objects.filter(BioSchool=sdata).values_list('BioDeviceId', flat=True)
+            # -------- LOAD STAFF BY SCHOOL --------
+            # Load early so we can filter logs by BioCode (UserId) instead of device,
+            # capturing punches from all devices regardless of BioDevices registration.
+            staff_list = list(
+                staff.objects.select_related('shift', 'department').filter(staff_school=sdata).order_by('department')
             )
 
-            if not device_ids:
+            bio_codes = [s.BioCode for s in staff_list if s.BioCode]
+
+            if not bio_codes:
                 return render(request, "payroll/dayattendance.html", {
                     "attendance": [],
                     "selected_date": selected_date,
                     "skool": sdata,
                     "year": year,
-                    "error": "No devices registered for this school."
+                    "error": "No staff with biometric codes found for this school."
                 })
 
-            # -------- BUILD QUERY WITH DEVICE FILTER --------
-            placeholders = ', '.join(['%s'] * len(device_ids))
+            # -------- BUILD QUERY FILTERED BY STAFF BIOCODES --------
+            placeholders = ', '.join(['%s'] * len(bio_codes))
 
             query = f"""
                 SELECT
@@ -846,18 +641,13 @@ def daily_attendance_view(request):
                     COUNT(*) as punch_count
                 FROM {table_name}
                 WHERE DATE(CONVERT_TZ(LogDate, '+00:00', '+05:30')) = %s
-                  AND DeviceId IN ({placeholders})
+                  AND UserId IN ({placeholders})
                 GROUP BY UserId
             """
 
             with connection.cursor() as cursor:
-                cursor.execute(query, [date_obj, *device_ids])
+                cursor.execute(query, [date_obj, *bio_codes])
                 rows = cursor.fetchall()
-
-            # -------- LOAD STAFF BY SCHOOL --------
-            staff_list = list(
-                staff.objects.select_related('shift', 'department').filter(staff_school=sdata).order_by('department')
-            )
 
             # -------- MAP ROWS BY USER ID --------
             rows_map = {row[0]: row for row in rows}  # UserId -> row
@@ -965,14 +755,18 @@ def daily_attendance_excel(request):
     pset = PayrollSettings.objects.get(school=sdata)
     grace_time = pset.grace_mins
 
-    device_ids = list(
-        BioDevices.objects.filter(BioSchool=sdata).values_list('BioDeviceId', flat=True)
+    staff_list = list(
+        staff.objects.select_related('shift', 'department')
+        .filter(staff_school=sdata)
+        .order_by('department__name', 'first_name')
     )
 
-    if not device_ids:
-        return HttpResponse("No devices registered for this school.")
+    bio_codes = [s.BioCode for s in staff_list if s.BioCode]
 
-    placeholders = ', '.join(['%s'] * len(device_ids))
+    if not bio_codes:
+        return HttpResponse("No staff with biometric codes found for this school.")
+
+    placeholders = ', '.join(['%s'] * len(bio_codes))
     query = f"""
         SELECT
             UserId,
@@ -981,19 +775,13 @@ def daily_attendance_excel(request):
             COUNT(*) as punch_count
         FROM {table_name}
         WHERE DATE(CONVERT_TZ(LogDate, '+00:00', '+05:30')) = %s
-          AND DeviceId IN ({placeholders})
+          AND UserId IN ({placeholders})
         GROUP BY UserId
     """
 
     with connection.cursor() as cursor:
-        cursor.execute(query, [date_obj, *device_ids])
+        cursor.execute(query, [date_obj, *bio_codes])
         rows = cursor.fetchall()
-
-    staff_list = list(
-        staff.objects.select_related('shift', 'department')
-        .filter(staff_school=sdata)
-        .order_by('department__name', 'first_name')
-    )
 
     rows_map = {row[0]: row for row in rows}
 
@@ -1223,168 +1011,6 @@ def daily_attendance_excel(request):
 
 
 
-@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
-def daily_attendance_excelbak(request):
-
-    sch_id = request.session.get('sch_id')
-    sdata = school.objects.get(pk=sch_id)
-
-    selected_date = request.GET.get('date')
-
-    if not selected_date:
-        return HttpResponse("Please select a date")
-
-    date_obj = datetime.strptime(selected_date, "%Y-%m-%d").date()
-
-    table_name = f"DeviceLogs_{date_obj.month}_{date_obj.year}"
-
-    pset = PayrollSettings.objects.get(school=sdata)
-    grace_time = pset.grace_mins
-
-    query = f"""
-        SELECT
-            UserId,
-            MIN(CONVERT_TZ(LogDate, '+00:00', '+05:30')) AS in_time,
-            MAX(CONVERT_TZ(LogDate, '+00:00', '+05:30')) AS out_time,
-            COUNT(*) as punch_count
-        FROM {table_name}
-        WHERE DATE(CONVERT_TZ(LogDate, '+00:00', '+05:30')) = %s
-        GROUP BY UserId
-    """
-
-    with connection.cursor() as cursor:
-        cursor.execute(query, [date_obj])
-        rows = cursor.fetchall()
-
-    staff_map = {
-        s.BioCode: s
-        for s in staff.objects.select_related('shift','department').all()
-    }
-
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Daily Attendance"
-
-    # ---------- HEADER ----------
-    ws['A1'] = sdata.name
-    ws['A1'].font = Font(size=14, bold=True)
-
-    ws['A3'] = f"Date : {date_obj.strftime('%d-%m-%Y')}"
-    ws['A3'].font = Font(bold=True)
-
-    # ---------- COLUMN TITLES ----------
-    headers = [
-        "User ID",
-        "Staff Name",
-        "Designation",
-        "Department",
-        "In Time",
-        "Out Time",
-        "Work Hours",
-        "Punch Count",
-        "Late",
-        "Mis Punch",
-        "Status"
-    ]
-
-    row_num = 5
-
-    for col_num, header in enumerate(headers, 1):
-        cell = ws.cell(row=row_num, column=col_num)
-        cell.value = header
-        cell.font = Font(bold=True)
-
-    # ---------- DATA ----------
-    row_num += 1
-
-    for row in rows:
-
-        user_id, in_time, out_time, punch_count = row
-
-        stf = staff_map.get(user_id)
-
-        if not stf:
-            continue
-
-        if in_time:
-            in_time = timezone.make_aware(in_time, timezone.get_current_timezone())
-
-        if out_time:
-            out_time = timezone.make_aware(out_time, timezone.get_current_timezone())
-
-        # ---------- TIME FORMAT ----------
-        in_time_str = in_time.strftime("%H:%M:%S") if in_time else ""
-        out_time_str = out_time.strftime("%H:%M:%S") if out_time else ""
-
-        # ---------- WORK HOURS ----------
-        work_hours = ""
-
-        if in_time and out_time:
-
-            duration = out_time - in_time
-            total_seconds = int(duration.total_seconds())
-
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-
-            work_hours = f"{hours:02}:{minutes:02}:{seconds:02}"
-
-        # ---------- STATUS ----------
-        status = "PRESENT"
-        mispunch = False
-        is_late = False
-
-        if punch_count == 1:
-            status = "MIS_PUNCH"
-            mispunch = True
-
-        # ---------- LATE CHECK ----------
-        if stf.shift and stf.shift.start_time and in_time:
-
-            shift_start = datetime.combine(date_obj, stf.shift.start_time)
-
-            shift_dt = timezone.make_aware(
-                shift_start,
-                timezone.get_current_timezone()
-            )
-
-            allowed_time = shift_dt - timedelta(minutes=grace_time)
-
-            if in_time > allowed_time:
-                is_late = True
-
-        ws.cell(row=row_num, column=1).value = user_id
-        ws.cell(row=row_num, column=2).value = f"{stf.first_name} {stf.last_name}"
-        ws.cell(row=row_num, column=3).value = stf.desg or ""
-        ws.cell(row=row_num, column=4).value = stf.department.name if stf.department else ""
-
-        ws.cell(row=row_num, column=5).value = in_time_str
-        ws.cell(row=row_num, column=6).value = out_time_str
-        ws.cell(row=row_num, column=7).value = work_hours
-
-        ws.cell(row=row_num, column=8).value = punch_count
-        ws.cell(row=row_num, column=9).value = "YES" if is_late else ""
-        ws.cell(row=row_num, column=10).value = "TRUE" if mispunch else "FALSE"
-        ws.cell(row=row_num, column=11).value = status
-
-        row_num += 1
-
-    # ---------- AUTO COLUMN WIDTH ----------
-    for column_cells in ws.columns:
-        length = max(len(str(cell.value)) if cell.value else 0 for cell in column_cells)
-        ws.column_dimensions[column_cells[0].column_letter].width = length + 3
-
-    # ---------- DOWNLOAD RESPONSE ----------
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-
-    response['Content-Disposition'] = f'attachment; filename="Daily_Attendance_{selected_date}.xlsx"'
-
-    wb.save(response)
-
-    return response
 
 
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
@@ -2706,6 +2332,224 @@ def monthly_attendance_excel(request):
     output.seek(0)
 
     filename = f"Monthly_Attendance_{month_name_str}_{year}.xlsx"
+    response = HttpResponse(
+        output,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def monthly_punch_register_excel(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from collections import defaultdict
+
+    sch_id = request.session.get('sch_id')
+    sdata  = get_object_or_404(school, pk=sch_id)
+
+    month = int(request.GET.get('month', date.today().month))
+    year  = int(request.GET.get('year',  date.today().year))
+
+    total_days     = calendar.monthrange(year, month)[1]
+    month_name_str = date(year, month, 1).strftime('%B')
+    today          = date.today()
+
+    staff_list = list(
+        staff.objects.select_related('department')
+        .filter(staff_school=sdata)
+        .order_by('department__name', 'first_name')
+    )
+
+    att_qs = Attendance.objects.filter(
+        sch=sdata, date__year=year, date__month=month
+    ).select_related('staff')
+
+    att_map = defaultdict(dict)
+    for rec in att_qs:
+        att_map[rec.staff_id][rec.date.day] = rec
+
+    # ── Styles ────────────────────────────────────────────────
+    TITLE_FILL   = PatternFill("solid", fgColor="1E293B")
+    SUN_FILL     = PatternFill("solid", fgColor="DC2626")
+    SAT_FILL     = PatternFill("solid", fgColor="EA580C")
+    DAY_FILL     = PatternFill("solid", fgColor="334155")
+    PRESENT_FILL = PatternFill("solid", fgColor="D1FAE5")
+    ABSENT_FILL  = PatternFill("solid", fgColor="FEE2E2")
+    MISPUNCH_FILL= PatternFill("solid", fgColor="FFF2CC")
+    OFF_FILL     = PatternFill("solid", fgColor="F1F5F9")
+    EMPTY_FILL   = PatternFill("solid", fgColor="F8FAFC")
+
+    WHITE_BOLD = Font(name="Calibri", bold=True, color="FFFFFF", size=9)
+    TITLE_FONT = Font(name="Calibri", bold=True, size=13, color="1E293B")
+    SUB_FONT   = Font(name="Calibri", bold=True, size=10, color="334155")
+    DATA_FONT  = Font(name="Calibri", size=8)
+    NAME_FONT  = Font(name="Calibri", bold=True, size=8)
+    ABS_FONT   = Font(name="Calibri", size=8, bold=True, color="991B1B")
+    OFF_FONT   = Font(name="Calibri", size=8, italic=True, color="64748B")
+
+    THIN     = Side(style="thin",   color="CBD5E1")
+    THIN_BDR = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+
+    CENTER = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    LEFT   = Alignment(horizontal="left",   vertical="center")
+
+    # Layout: rows = staff, columns = dates
+    # Fixed cols: col1=S.No, col2=Staff Name, col3=Department
+    # Then for each day: 2 cols (IN, OUT)
+    FIXED_COLS = 3
+    total_cols = FIXED_COLS + total_days * 2
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"{month_name_str} {year}"
+
+    # ── Row 1: School name ────────────────────────────────────
+    ws.merge_cells(f"A1:{get_column_letter(total_cols)}1")
+    c = ws['A1']
+    c.value = sdata.name; c.font = TITLE_FONT; c.alignment = CENTER
+    ws.row_dimensions[1].height = 22
+
+    # ── Row 2: Report title ───────────────────────────────────
+    ws.merge_cells(f"A2:{get_column_letter(total_cols)}2")
+    c = ws['A2']
+    c.value = f"Monthly Punch Register  |  {month_name_str} {year}"
+    c.font = SUB_FONT; c.alignment = CENTER
+    ws.row_dimensions[2].height = 16
+
+    ws.row_dimensions[3].height = 6
+
+    # ── Row 4: Date headers (merged IN+OUT per day) ───────────
+    HDR1 = 4
+    for col_idx, label in enumerate(["#", "Staff Name", "Department"], 1):
+        c = ws.cell(row=HDR1, column=col_idx, value=label)
+        c.font = WHITE_BOLD; c.fill = TITLE_FILL
+        c.alignment = CENTER; c.border = THIN_BDR
+
+    for day in range(1, total_days + 1):
+        d_date   = date(year, month, day)
+        is_sun   = d_date.weekday() == 6
+        is_sat   = d_date.weekday() == 5
+        day_fill = SUN_FILL if is_sun else (SAT_FILL if is_sat else DAY_FILL)
+        col      = FIXED_COLS + (day - 1) * 2 + 1
+        ws.merge_cells(start_row=HDR1, start_column=col,
+                       end_row=HDR1,   end_column=col + 1)
+        c = ws.cell(row=HDR1, column=col,
+                    value=f"{d_date.strftime('%d %b')}\n{d_date.strftime('%a')}")
+        c.font = WHITE_BOLD; c.fill = day_fill
+        c.alignment = CENTER; c.border = THIN_BDR
+        ws.cell(row=HDR1, column=col + 1).border = THIN_BDR
+
+    ws.row_dimensions[HDR1].height = 30
+
+    # ── Row 5: IN / OUT sub-headers ───────────────────────────
+    HDR2 = 5
+    for col_idx in range(1, FIXED_COLS + 1):
+        c = ws.cell(row=HDR2, column=col_idx, value="")
+        c.fill = TITLE_FILL; c.border = THIN_BDR
+
+    for day in range(1, total_days + 1):
+        d_date   = date(year, month, day)
+        is_sun   = d_date.weekday() == 6
+        is_sat   = d_date.weekday() == 5
+        day_fill = SUN_FILL if is_sun else (SAT_FILL if is_sat else DAY_FILL)
+        col      = FIXED_COLS + (day - 1) * 2 + 1
+        for j, label in enumerate(["IN", "OUT"]):
+            c = ws.cell(row=HDR2, column=col + j, value=label)
+            c.font = WHITE_BOLD; c.fill = day_fill
+            c.alignment = CENTER; c.border = THIN_BDR
+
+    ws.row_dimensions[HDR2].height = 16
+
+    # ── Column widths ─────────────────────────────────────────
+    ws.column_dimensions['A'].width = 4
+    ws.column_dimensions['B'].width = 22
+    ws.column_dimensions['C'].width = 16
+    for day in range(1, total_days + 1):
+        col = FIXED_COLS + (day - 1) * 2 + 1
+        ws.column_dimensions[get_column_letter(col)].width     = 7
+        ws.column_dimensions[get_column_letter(col + 1)].width = 7
+
+    # ── Data rows: one per staff ──────────────────────────────
+    dept_colors = [
+        "1D4ED8", "0F766E", "7C3AED", "B45309", "0369A1",
+        "9D174D", "15803D", "7E22CE", "C2410C", "0E7490",
+    ]
+    seen_depts = {}
+
+    for serial, stf in enumerate(staff_list, 1):
+        row = HDR2 + serial
+
+        dname = stf.department.name if stf.department else "No Department"
+        if dname not in seen_depts:
+            seen_depts[dname] = dept_colors[len(seen_depts) % len(dept_colors)]
+        color = seen_depts[dname]
+        name_fill = PatternFill("solid", fgColor=color)
+
+        c = ws.cell(row=row, column=1, value=serial)
+        c.font = DATA_FONT; c.alignment = CENTER; c.border = THIN_BDR
+
+        c = ws.cell(row=row, column=2, value=f"{stf.first_name} {stf.last_name}")
+        c.font = NAME_FONT; c.fill = name_fill
+        c.alignment = LEFT; c.border = THIN_BDR
+        c.font = Font(name="Calibri", bold=True, size=8, color="FFFFFF")
+
+        c = ws.cell(row=row, column=3, value=dname)
+        c.font = DATA_FONT; c.alignment = LEFT; c.border = THIN_BDR
+
+        for day in range(1, total_days + 1):
+            d_date = date(year, month, day)
+            col    = FIXED_COLS + (day - 1) * 2 + 1
+            rec    = att_map.get(stf.id, {}).get(day)
+
+            is_sun = d_date.weekday() == 6
+            is_sat = d_date.weekday() == 5
+            is_off = is_sun or is_sat
+
+            if is_off:
+                in_val = out_val = "—"
+                fill   = OFF_FILL
+                font   = OFF_FONT
+            elif d_date > today:
+                in_val = out_val = ""
+                fill   = EMPTY_FILL
+                font   = DATA_FONT
+            elif rec:
+                status = rec.status or ""
+                if status in ("Weekly-OFF", "HOLIDAY", "Special-OFF"):
+                    in_val = "Off" if status != "HOLIDAY" else "Hol"
+                    out_val = ""
+                    fill = OFF_FILL; font = OFF_FONT
+                elif status in ("ABSENT", "LOP"):
+                    in_val = "A"; out_val = ""
+                    fill = ABSENT_FILL; font = ABS_FONT
+                else:
+                    in_val  = timezone.localtime(rec.first_in).strftime("%H:%M")  if rec.first_in  else ""
+                    out_val = timezone.localtime(rec.last_out).strftime("%H:%M") if rec.last_out else ""
+                    fill = MISPUNCH_FILL if (rec.mis_punch or not rec.last_out) else PRESENT_FILL
+                    font = DATA_FONT
+            else:
+                in_val = "A"; out_val = ""
+                fill = ABSENT_FILL; font = ABS_FONT
+
+            c = ws.cell(row=row, column=col,     value=in_val)
+            c.font = font; c.fill = fill; c.alignment = CENTER; c.border = THIN_BDR
+
+            c = ws.cell(row=row, column=col + 1, value=out_val)
+            c.font = font; c.fill = fill; c.alignment = CENTER; c.border = THIN_BDR
+
+        ws.row_dimensions[row].height = 15
+
+    # ── Freeze: staff name cols + header rows ─────────────────
+    ws.freeze_panes = f"D{HDR2 + 1}"
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename = f"Punch_Register_{month_name_str}_{year}.xlsx"
     response = HttpResponse(
         output,
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -4166,3 +4010,8 @@ def delete_all_attendance(request):
     data.delete()
     messages.success(request, "Successfully deleted all attendance")
     return redirect('Staff_Monthly_Attendance')
+
+
+
+
+
