@@ -289,3 +289,67 @@ def school_send_notification(rec_id):
         rec.status = 'FAILED'
         rec.save(update_fields=['status'])
         raise e   # let Django-Q log it
+
+
+def send_birthday_wishes(sch_id):
+    if isinstance(sch_id, list):
+        sch_id = sch_id[0]
+
+    from setup.models import birthday_wish_config
+    from staff.models import staff as Staff
+    from django.utils import timezone
+
+    try:
+        config = birthday_wish_config.objects.get(school_id=sch_id, is_active=True)
+    except birthday_wish_config.DoesNotExist:
+        return "No active birthday wish config"
+
+    today = timezone.localdate()
+    now = timezone.now()
+    school_obj = config.school
+
+    birthday_students = students.objects.filter(
+        school_student_id=sch_id,
+        dob_date__month=today.month,
+        dob_date__day=today.day,
+    )
+
+    system_staff = Staff.objects.filter(staff_school=school_obj).first()
+
+    success_count = 0
+    for student in birthday_students:
+        student_name = f"{student.first_name} {student.last_name}".strip()
+        personalized_msg = config.message.replace("{{student_name}}", student_name)
+
+        tokens = DeviceFCMToken.objects.filter(username=student.usernm)
+        for device in tokens:
+            try:
+                msg = messaging.Message(
+                    notification=messaging.Notification(
+                        title=config.title,
+                        body=personalized_msg,
+                    ),
+                    token=device.firecmToken,
+                )
+                messaging.send(msg)
+                success_count += 1
+            except Exception as e:
+                print(f"Birthday FCM error ({student.usernm}): {e}")
+
+        # Save to GeneralNotification so it appears in the app's Messages section
+        if system_staff:
+            gn = GeneralNotification.objects.create(
+                title=config.title,
+                message=personalized_msg,
+                create_date=now,
+                post_date=now,
+                created_by_id=system_staff,
+                is_read=False,
+                status='Active',
+                Notification_school=school_obj,
+                success_count=1,
+                total_count=1,
+            )
+            gn.post_to.add(student)
+
+    return f"Birthday wishes sent: {success_count}"
