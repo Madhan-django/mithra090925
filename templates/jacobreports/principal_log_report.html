@@ -1,0 +1,282 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+    /* ── filter card ── */
+    .filter-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    /* ── report area ── */
+    #report-area {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .report-school-header {
+        text-align: center;
+        border-bottom: 3px solid #212529;
+        padding-bottom: .75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-school-header h4 {
+        font-weight: 800;
+        margin-bottom: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .report-school-header .subtitle {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+
+    /* ── date section ── */
+    .date-section {
+        margin-bottom: 1.5rem;
+        break-inside: avoid;
+    }
+
+    .date-heading {
+        background: #212529;
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 6px 6px 0 0;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .date-heading .date-label {
+        color: #d4af37;
+        letter-spacing: .5px;
+    }
+
+    .date-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        font-size: 13.5px;
+    }
+
+    .date-table th {
+        background: #f1f3f5;
+        font-weight: 600;
+        padding: 6px 10px;
+        border: 1px solid #dee2e6;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: #495057;
+    }
+
+    .date-table td {
+        padding: 7px 10px;
+        border: 1px solid #dee2e6;
+        vertical-align: top;
+    }
+
+    .type-cell {
+        white-space: nowrap;
+        font-weight: 600;
+        color: #212529;
+        width: 170px;
+    }
+
+    .type-cell.first-in-group {
+        /* shown only on first row of a type group */
+    }
+
+    .type-cell.continuation {
+        /* subsequent rows in the same type */
+        color: transparent;
+        border-top-color: transparent;
+    }
+
+    /* ── status badges ── */
+    .s-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .s-closed   { background: #d1fae5; color: #065f46; }
+    .s-open     { background: #fef3c7; color: #92400e; }
+    .s-progress { background: #dbeafe; color: #1e3a8a; }
+    .s-issue    { background: #fee2e2; color: #991b1b; }
+
+    /* ── print ── */
+    @media print {
+        body * { visibility: hidden; }
+        #report-area, #report-area * { visibility: visible; }
+        #report-area { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0; }
+        .no-print { display: none !important; }
+        .date-section { break-inside: avoid; page-break-inside: avoid; }
+    }
+
+</style>
+
+<div class="container-fluid mt-4">
+
+    <!-- FILTER FORM (no-print) -->
+    <div class="filter-card no-print">
+        <form method="GET" class="row g-2 align-items-end">
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1">From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1">To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1">Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                    {% for val, label in status_choices %}
+                    <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-dark btn-sm w-100">
+                    <i class="ri-search-line"></i> Go
+                </button>
+            </div>
+
+            <div class="col-md-1">
+                <a href="{% url 'principal_log_report' %}" class="btn btn-secondary btn-sm w-100">Reset</a>
+            </div>
+
+            <div class="col-md-1 text-end">
+                <button type="button" class="btn btn-success btn-sm w-100" onclick="window.print()">
+                    <i class="ri-printer-line"></i> Print
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- REPORT AREA -->
+    <div id="report-area">
+
+        <!-- HEADER -->
+        <div class="report-school-header">
+            <h4>{{ sdata }}</h4>
+            <div class="subtitle">
+                Principal's Daily Report
+                {% if from_date or to_date %}
+                &mdash;
+                {% if from_date %}{{ from_date }}{% endif %}
+                {% if from_date and to_date %} to {% endif %}
+                {% if to_date %}{{ to_date }}{% endif %}
+                {% endif %}
+            </div>
+            {% if total_entries %}
+            <div class="subtitle">Total Entries: {{ total_entries }}</div>
+            {% endif %}
+        </div>
+
+        {% if report_data %}
+
+        {% for day in report_data %}
+        <div class="date-section">
+
+            <div class="date-heading">
+                <span class="date-label">{{ day.date|date:"l, d F Y" }}</span>
+            </div>
+
+            <table class="date-table">
+                <thead>
+                    <tr>
+                        <th style="width:170px;">Type</th>
+                        <th>Description</th>
+                        <th style="width:100px; text-align:center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for group in day.type_groups %}
+                    {% for entry in group.entries %}
+                    <tr>
+
+                        {% if forloop.first %}
+                        <td class="type-cell" rowspan="{{ group.entries|length }}">
+                            {{ group.type }}
+                        </td>
+                        {% endif %}
+
+                        <td>{{ entry.description }}</td>
+
+                        <td style="text-align:center;">
+                            {% if entry.status == 'Closed' %}
+                            <span class="s-badge s-closed">Closed</span>
+                            {% elif entry.status == 'Open' %}
+                            <span class="s-badge s-open">Open</span>
+                            {% elif entry.status == 'In-Progress' %}
+                            <span class="s-badge s-progress">In-Progress</span>
+                            {% else %}
+                            <span class="s-badge s-issue">Issue</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="ri-file-list-3-line" style="font-size:48px; opacity:.3;"></i>
+            <p class="mt-2">No entries found for the selected filters.</p>
+        </div>
+        {% endif %}
+
+        <!-- SIGNATURE AREA -->
+        {% if report_data %}
+        <div style="margin-top: 3rem; display: flex; justify-content: flex-end;">
+            <div style="text-align: center; min-width: 200px;">
+                <div style="border-top: 1px solid #212529; padding-top: 6px; font-size: 13px; font-weight: 600;">
+                    Principal's Signature
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- BACK LINK -->
+    <div class="mt-3 no-print">
+        <a href="{% url 'principal_log_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="ri-arrow-left-line"></i> Back to Log
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

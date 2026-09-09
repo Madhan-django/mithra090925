@@ -1,0 +1,94 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4" style="max-width: 800px;">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header text-white"
+             style="background: linear-gradient(120deg, #0b0c14 0%, #1a1d2b 100%); height:70px;">
+            <div class="d-flex align-items-center h-100">
+                <h5 class="mb-0 fw-bold text-white">
+                    <span style="color: var(--m-accent, #d4af37);">Principal's Daily Log</span>
+                    &mdash; {{ title }}
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+                {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">School</label>
+                        {{ form.school_name }}
+                        {% if form.school_name.errors %}
+                        <div class="text-danger small">{{ form.school_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Date</label>
+                        {{ form.entry_date }}
+                        {% if form.entry_date.errors %}
+                        <div class="text-danger small">{{ form.entry_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Type</label>
+                        {{ form.entry_type }}
+                        {% if form.entry_type.errors %}
+                        <div class="text-danger small">{{ form.entry_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Status</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div class="text-danger small">{{ form.status.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-3 justify-content-center mt-4">
+                    <button type="submit" class="btn btn-primary px-5 shadow">
+                        <i class="ri-save-line me-1"></i> Save
+                    </button>
+                    <a href="{% url 'principal_log_list' %}" class="btn btn-danger px-5 shadow">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

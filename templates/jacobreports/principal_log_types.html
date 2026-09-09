@@ -1,0 +1,119 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .types-header {
+        background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%);
+        border-radius: var(--m-radius-lg, 18px) var(--m-radius-lg, 18px) 0 0;
+    }
+    .types-header .eyebrow {
+        font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: var(--m-accent, #d4af37); font-weight: 700; margin-bottom: 2px;
+    }
+    .types-header h5 { margin: 0; font-weight: 700; font-size: 18px; color: #fff; }
+
+    .del-btn {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid #f7d3d3; background: #fff; color: #dc2626;
+        text-decoration: none; transition: all 0.18s; font-size: 14px;
+    }
+    .del-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+</style>
+
+<div class="container-fluid mt-4" style="max-width: 760px;">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header types-header d-flex align-items-center" style="height:76px;">
+            <div class="flex-grow-1">
+                <div class="eyebrow">{{ sdata }}</div>
+                <h5>Principal's Log &mdash; Entry Types</h5>
+            </div>
+            <a href="{% url 'principal_log_list' %}" class="btn btn-secondary btn-sm">
+                <i class="ri-arrow-left-line"></i> Back to Log
+            </a>
+        </div>
+
+        <div class="card-body">
+
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+                {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="row g-4">
+
+                <!-- ADD FORM -->
+                <div class="col-md-5">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-dark text-white">Add New Type</div>
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <label class="form-label fw-semibold">Type Name</label>
+                                <input type="text" name="type_name" class="form-control mb-3"
+                                       placeholder="e.g. Parent Meeting" maxlength="60" required>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="ri-add-line me-1"></i> Add Type
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TYPE LIST -->
+                <div class="col-md-7">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <span>Current Types</span>
+                            <span class="badge bg-secondary">{{ entry_types|length }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-bordered table-hover align-middle mb-0">
+                                <thead style="background:#f1f3f5;">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Type Name</th>
+                                        <th width="60" class="text-center">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for t in entry_types %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ t.name }}</td>
+                                        <td class="text-center">
+                                            <a href="{% url 'delete_principal_log_type' t.id %}"
+                                               class="del-btn"
+                                               title="Delete"
+                                               onclick="return confirm('Delete type \'{{ t.name }}\'? Existing entries using this type are not affected.');">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">No types yet.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

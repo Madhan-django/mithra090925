@@ -184,6 +184,13 @@ class ClassTeacherReport(models.Model):
         return self.boys_absentees + self.girls_absentees
 
     @property
+    def attendance_pct(self):
+        total = self.total_on_roll
+        if not total:
+            return 0
+        return round((self.total_present / total) * 100, 1)
+
+    @property
     def private_auto_total(self):
         return (
             self.private_auto_boys +
@@ -230,6 +237,62 @@ class ClassTeacherReport(models.Model):
             f"{self.section} - "
             f"{self.report_date}"
         )
+
+
+class ClassTeacherMapping(models.Model):
+    """Maps an incharge staff to the class teachers they supervise."""
+
+    school_name = models.ForeignKey(
+        school,
+        on_delete=models.CASCADE
+    )
+
+    incharge = models.ForeignKey(
+        staff,
+        on_delete=models.CASCADE,
+        related_name='supervised_teachers'
+    )
+
+    class_teacher = models.ForeignKey(
+        staff,
+        on_delete=models.CASCADE,
+        related_name='incharge_mappings'
+    )
+
+    class Meta:
+        unique_together = ('incharge', 'class_teacher')
+
+    def __str__(self):
+        return (
+            f"{self.incharge} → {self.class_teacher}"
+        )
+
+
+class InchargeMapping(models.Model):
+    """Maps a supervisor to the incharges they oversee."""
+
+    school_name = models.ForeignKey(
+        school,
+        on_delete=models.CASCADE
+    )
+
+    supervisor = models.ForeignKey(
+        staff,
+        on_delete=models.CASCADE,
+        related_name='supervised_incharges'
+    )
+
+    incharge = models.ForeignKey(
+        staff,
+        on_delete=models.CASCADE,
+        related_name='supervisor_mappings'
+    )
+
+    class Meta:
+        unique_together = ('supervisor', 'incharge')
+
+    def __str__(self):
+        return f"{self.supervisor} → {self.incharge}"
 
 
 class InchargeReport(models.Model):
@@ -355,18 +418,32 @@ class InchargeReport(models.Model):
     # PERIODS (MORNING)
     # =========================
 
+    period_1_time = models.CharField(max_length=20, blank=True, null=True)
     period_1 = models.TextField(blank=True, null=True)
+
+    period_2_time = models.CharField(max_length=20, blank=True, null=True)
     period_2 = models.TextField(blank=True, null=True)
+
+    period_3_time = models.CharField(max_length=20, blank=True, null=True)
     period_3 = models.TextField(blank=True, null=True)
+
+    period_4_time = models.CharField(max_length=20, blank=True, null=True)
     period_4 = models.TextField(blank=True, null=True)
 
     # =========================
     # PERIODS (NOON)
     # =========================
 
+    period_5_time = models.CharField(max_length=20, blank=True, null=True)
     period_5 = models.TextField(blank=True, null=True)
+
+    period_6_time = models.CharField(max_length=20, blank=True, null=True)
     period_6 = models.TextField(blank=True, null=True)
+
+    period_7_time = models.CharField(max_length=20, blank=True, null=True)
     period_7 = models.TextField(blank=True, null=True)
+
+    period_8_time = models.CharField(max_length=20, blank=True, null=True)
     period_8 = models.TextField(blank=True, null=True)
 
     # =========================
@@ -376,6 +453,7 @@ class InchargeReport(models.Model):
     circular_teachers = models.TextField(blank=True, null=True)
     circular_parents = models.TextField(blank=True, null=True)
     circular_pupils = models.TextField(blank=True, null=True)
+    circular_school = models.TextField(blank=True, null=True)
 
     # =========================
     # OCCURRENCES
@@ -410,10 +488,13 @@ class InchargeReport(models.Model):
     # LATE EVENING CLASS
     # =========================
 
-    late_evening_class_std = models.CharField(max_length=50, blank=True, null=True)
-    late_evening_class_subject = models.CharField(max_length=100, blank=True, null=True)
-    late_evening_class_teacher = models.CharField(max_length=100, blank=True, null=True)
-    late_evening_class_students = models.PositiveIntegerField(default=0)
+    late_evening_class = models.TextField(blank=True, null=True)
+
+    # =========================
+    # NOTE
+    # =========================
+
+    note = models.TextField(blank=True, null=True)
 
     # =========================
     # TOMORROW'S ASSIGNMENT
@@ -437,3 +518,96 @@ class InchargeReport(models.Model):
             f"{self.report_submitted_by} - "
             f"{self.report_date}"
         )
+
+
+class PrincipalLogEntryType(models.Model):
+    """Configurable entry types for the Principal's Daily Log."""
+
+    school_name = models.ForeignKey(
+        school,
+        on_delete=models.CASCADE
+    )
+
+    name = models.CharField(max_length=60)
+
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('school_name', 'name')
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+
+    # Default types seeded per school on first use
+    DEFAULT_TYPES = [
+        "Today's Schedule",
+        "Observations & Complaints",
+        "Suggestions & Grievances",
+        "Activities",
+        "Follow Up",
+        "Meeting Agenda",
+        "Incidents & Accidents",
+        "Resolution",
+    ]
+
+    @classmethod
+    def seed_defaults(cls, school_obj):
+        for i, name in enumerate(cls.DEFAULT_TYPES):
+            cls.objects.get_or_create(school_name=school_obj, name=name, defaults={'order': i})
+
+
+class PrincipalDailyLog(models.Model):
+
+    STATUS_CHOICES = [
+        ('Closed', 'Closed'),
+        ('Open', 'Open'),
+        ('In-Progress', 'In-Progress'),
+        ('Issue', 'Issue'),
+    ]
+
+    school_name = models.ForeignKey(
+        school,
+        on_delete=models.CASCADE
+    )
+
+    entry_date = models.DateField()
+
+    entry_type = models.CharField(max_length=60)
+
+    description = models.TextField()
+
+    status = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default='Closed'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-entry_date', 'entry_type', 'id']
+
+    def __str__(self):
+        return f"{self.entry_date} | {self.entry_type}"
+
+
+class PrincipalLogAccessMapping(models.Model):
+    """Staff members permitted to do CRUD on PrincipalDailyLog (beyond admin/superadmin)."""
+
+    school_name = models.ForeignKey(
+        school,
+        on_delete=models.CASCADE
+    )
+
+    staff_member = models.ForeignKey(
+        staff,
+        on_delete=models.CASCADE,
+        related_name='principal_log_access'
+    )
+
+    class Meta:
+        unique_together = ('school_name', 'staff_member')
+
+    def __str__(self):
+        return f"{self.school_name} → {self.staff_member}"

@@ -1,0 +1,126 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .access-header {
+        background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%);
+        border-radius: var(--m-radius-lg, 18px) var(--m-radius-lg, 18px) 0 0;
+    }
+    .access-header .eyebrow {
+        font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: var(--m-accent, #d4af37); font-weight: 700; margin-bottom: 2px;
+    }
+    .access-header h5 { margin: 0; font-weight: 700; font-size: 18px; color: #fff; }
+
+    .revoke-btn {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid #f7d3d3; background: #fff; color: #dc2626;
+        text-decoration: none; transition: all 0.18s; font-size: 14px;
+    }
+    .revoke-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+</style>
+
+<div class="container-fluid mt-4" style="max-width: 900px;">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header access-header d-flex align-items-center" style="height:76px;">
+            <div class="flex-grow-1">
+                <div class="eyebrow">{{ sdata }}</div>
+                <h5>Principal's Daily Log &mdash; Access Management</h5>
+            </div>
+            <a href="{% url 'principal_log_list' %}" class="btn btn-secondary btn-sm">
+                <i class="ri-arrow-left-line"></i> Back
+            </a>
+        </div>
+
+        <div class="card-body">
+
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+                {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="row g-4">
+
+                <!-- GRANT ACCESS FORM -->
+                <div class="col-md-5">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-header bg-dark text-white">Grant Access</div>
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <p class="text-muted small mb-2">
+                                    Hold <kbd>Ctrl</kbd> / <kbd>Cmd</kbd> to select multiple staff.
+                                </p>
+                                <label class="form-label fw-semibold">Staff Members</label>
+                                {{ form.staff_members }}
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="ri-user-add-line me-1"></i> Grant Access
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CURRENT ACCESS LIST -->
+                <div class="col-md-7">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-dark text-white">
+                            Staff with Access
+                            <span class="badge bg-secondary ms-2">{{ mappings|length }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-bordered table-hover align-middle mb-0">
+                                <thead style="background:#f1f3f5;">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Staff Name</th>
+                                        <th width="70" class="text-center">Revoke</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mapping in mappings %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ mapping.staff_member }}</td>
+                                        <td class="text-center">
+                                            <a href="{% url 'revoke_principal_log_access' mapping.id %}"
+                                               class="revoke-btn"
+                                               title="Revoke Access"
+                                               onclick="return confirm('Revoke access for {{ mapping.staff_member }}?');">
+                                                <i class="ri-user-unfollow-line"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            No staff granted access yet.<br>
+                                            <small>Only Admin &amp; Super Admin can currently do CRUD.</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

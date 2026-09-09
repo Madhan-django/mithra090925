@@ -1,0 +1,332 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+    .pl-header {
+        background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%);
+        border-radius: var(--m-radius-lg, 18px) var(--m-radius-lg, 18px) 0 0;
+    }
+
+    .pl-header .eyebrow {
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--m-accent, #d4af37);
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .pl-header h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 18px;
+        color: #fff;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--m-border, #e3e8f0);
+        background: #fff;
+        color: var(--m-text-2, #4b5563);
+        text-decoration: none;
+        transition: all 0.18s;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .action-btn:hover { transform: translateY(-1px); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .action-btn.edit:hover { border-color: #c98500; color: #c98500; }
+    .action-btn.delete { border-color: #f7d3d3; color: #dc2626; }
+    .action-btn.delete:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+    .badge-closed   { background: #198754; color: #fff; }
+    .badge-open     { background: #fd7e14; color: #fff; }
+    .badge-progress { background: #0d6efd; color: #fff; }
+    .badge-issue    { background: #dc3545; color: #fff; }
+
+    /* type management panel */
+    .type-panel {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+    }
+
+    .type-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 4px 10px 4px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #212529;
+    }
+
+    .type-pill .del-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: none;
+        background: #f1f1f1;
+        color: #dc2626;
+        cursor: pointer;
+        font-size: 11px;
+        line-height: 1;
+        transition: background .15s;
+        text-decoration: none;
+    }
+
+    .type-pill .del-btn:hover { background: #dc2626; color: #fff; }
+
+</style>
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header pl-header d-flex align-items-center" style="height:76px;">
+            <div class="flex-grow-1">
+                <div class="eyebrow">{{ sdata }}</div>
+                <h5>Principal's Daily Log</h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <!-- MESSAGES -->
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- FILTERS + ACTIONS -->
+            <div class="row mb-3 align-items-end">
+
+                <div class="col-md-9">
+                    <form method="GET">
+                        <div class="row g-2">
+
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted mb-1">Date</label>
+                                <input type="date" name="entry_date" value="{{ entry_date }}" class="form-control">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted mb-1">Type</label>
+                                <select name="entry_type" class="form-select">
+                                    <option value="">All Types</option>
+                                    {% for t in entry_types %}
+                                    <option value="{{ t.name }}" {% if entry_type == t.name %}selected{% endif %}>{{ t.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted mb-1">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="">All</option>
+                                    {% for val, label in status_choices %}
+                                    <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted mb-1">Search</label>
+                                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Keyword...">
+                            </div>
+
+                            <div class="col-md-1 d-flex align-items-end gap-1">
+                                <button type="submit" class="btn btn-dark w-100"><i class="ri-search-line"></i></button>
+                            </div>
+
+                            <div class="col-md-1 d-flex align-items-end">
+                                <a href="{% url 'principal_log_list' %}" class="btn btn-secondary w-100">Reset</a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-3 text-end d-flex gap-2 justify-content-end flex-wrap">
+                    {% if is_admin %}
+                    <a href="{% url 'manage_principal_log_access' %}" class="btn btn-secondary shadow-sm">
+                        <i class="ri-shield-user-line"></i> Access
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'principal_log_report' %}" class="btn btn-outline-dark shadow-sm">
+                        <i class="ri-printer-line"></i> Report
+                    </a>
+                    {% if can_crud %}
+                    <a href="{% url 'add_principal_log_entry' %}" class="btn btn-primary shadow-sm">
+                        <i class="ri-add-line"></i> Add Entry
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- ════════════════════════════════════
+                 ENTRY TYPES MANAGEMENT (inline)
+                 visible to anyone with can_crud
+            ════════════════════════════════════ -->
+            {% if can_crud %}
+            <div class="type-panel mb-4">
+
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-semibold" style="font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:#495057;">
+                        <i class="ri-price-tag-3-line me-1"></i> Entry Types
+                    </span>
+                    <button class="btn btn-sm btn-secondary" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#typeAddForm">
+                        <i class="ri-add-line"></i> Add Type
+                    </button>
+                </div>
+
+                <!-- existing types as pills -->
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    {% for t in entry_types %}
+                    <span class="type-pill">
+                        {{ t.name }}
+                        <a href="{% url 'delete_principal_log_type' t.id %}"
+                           class="del-btn"
+                           title="Remove"
+                           onclick="return confirm('Delete type \'{{ t.name }}\'? Existing entries with this type are not affected.');">
+                            &times;
+                        </a>
+                    </span>
+                    {% empty %}
+                    <span class="text-muted small">No types yet. Add one below.</span>
+                    {% endfor %}
+                </div>
+
+                <!-- collapsible add-type form -->
+                <div class="collapse" id="typeAddForm">
+                    <form method="POST" action="{% url 'add_principal_log_type' %}" class="d-flex gap-2 mt-2">
+                        {% csrf_token %}
+                        <input type="text" name="type_name" class="form-control form-control-sm"
+                               placeholder="e.g. Parent Meeting" maxlength="60" required
+                               style="max-width:280px;">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="ri-save-line"></i> Save
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+            {% endif %}
+
+            <!-- TABLE -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead style="background-color:#212529; color:white;">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th width="90">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="fw-semibold text-nowrap">{{ entry.entry_date|date:"d-M-y" }}</td>
+                            <td>
+                                <span class="badge bg-dark">{{ entry.entry_type }}</span>
+                            </td>
+                            <td>{{ entry.description }}</td>
+                            <td>
+                                {% if entry.status == 'Closed' %}
+                                <span class="badge badge-closed">Closed</span>
+                                {% elif entry.status == 'Open' %}
+                                <span class="badge badge-open">Open</span>
+                                {% elif entry.status == 'In-Progress' %}
+                                <span class="badge badge-progress">In-Progress</span>
+                                {% else %}
+                                <span class="badge badge-issue">Issue</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if can_crud %}
+                                <div class="action-group">
+                                    <a href="{% url 'edit_principal_log_entry' entry.id %}"
+                                       class="action-btn edit" title="Edit">
+                                        <i class="ri-pencil-line"></i>
+                                    </a>
+                                    <a href="{% url 'delete_principal_log_entry' entry.id %}"
+                                       class="action-btn delete" title="Delete"
+                                       onclick="return confirm('Delete this entry?');">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </a>
+                                </div>
+                                {% else %}
+                                <span class="text-muted small">View only</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-danger py-4">No entries found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&entry_date={{ entry_date }}&entry_type={{ entry_type }}&status={{ status }}&search={{ search }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&entry_date={{ entry_date }}&entry_type={{ entry_type }}&status={{ status }}&search={{ search }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&entry_date={{ entry_date }}&entry_type={{ entry_type }}&status={{ status }}&search={{ search }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
