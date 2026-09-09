@@ -62,7 +62,8 @@ def class_teacher_report_list(request):
         reports = reports.filter(
             Q(class_name__class_name__icontains=search) |
             Q(section__section__icontains=search) |
-            Q(report_submitted_by__staff_name__icontains=search)
+            Q(report_submitted_by__first_name__icontains=search) |
+            Q(report_submitted_by__last_name__icontains=search)
         )
 
     # =========================
@@ -531,7 +532,8 @@ def incharge_report_list(request):
 
     if search:
         reports = reports.filter(
-            Q(report_submitted_by__staff_name__icontains=search) |
+            Q(report_submitted_by__first_name__icontains=search) |
+            Q(report_submitted_by__last_name__icontains=search) |
             Q(department__icontains=search)
         )
 
@@ -1230,7 +1232,7 @@ def manage_principal_log_access(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
 
-    staff_qs = staff.objects.filter(staff_school=sdata).order_by('staff_name')
+    staff_qs = staff.objects.filter(staff_school=sdata).order_by('first_name')
 
     if request.method == 'POST':
         form = PrincipalLogAccessForm(request.POST)
@@ -1260,7 +1262,7 @@ def manage_principal_log_access(request):
 
     mappings = PrincipalLogAccessMapping.objects.filter(
         school_name=sdata
-    ).select_related('staff_member').order_by('staff_member__staff_name')
+    ).select_related('staff_member').order_by('staff_member__first_name')
 
     return render(request, 'jacobreports/principal_log_access.html', {
         'form': form,
