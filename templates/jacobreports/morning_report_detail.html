@@ -1,0 +1,282 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <!-- Page header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'morning_report_list' %}" class="btn btn-outline-secondary btn-sm px-2">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+      <div>
+        <h4 class="fw-bold mb-0" style="color:var(--m-text)">Morning Report</h4>
+        <small class="text-muted">{{ report.report_date|date:"d M Y" }}</small>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'edit_morning_report' report.id %}" class="btn btn-sm btn-outline-warning fw-semibold">
+        <i class="ri-pencil-line me-1"></i>Edit
+      </a>
+      <a href="{% url 'morning_report_pdf' report.id %}" class="btn btn-sm fw-semibold"
+         style="background:var(--m-accent,#d4af37);color:#000;border:none;border-radius:8px"
+         target="_blank">
+        <i class="ri-file-pdf-line me-1"></i>Download PDF
+      </a>
+    </div>
+  </div>
+
+  <div id="reportContent">
+
+    <!-- ============================= -->
+    <!-- BASIC DETAILS -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        BASIC DETAILS
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">School</div>
+            <div class="fw-semibold">{{ report.school_name }}</div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Date</div>
+            <div class="fw-semibold">{{ report.report_date|date:"d M Y" }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Report Submitted By</div>
+            <div class="fw-semibold">{{ report.report_submitted_by }}</div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Status</div>
+            <span class="badge"
+                  style="background:{% if report.overall_status == 'Closed' %}#d1fae5;color:#065f46{% elif report.overall_status == 'Open' %}#fef3c7;color:#92400e{% elif report.overall_status == 'Issue' %}#fee2e2;color:#991b1b{% else %}#dbeafe;color:#1e40af{% endif %};font-size:12px;padding:4px 10px">
+              {{ report.overall_status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- INCHARGES REPORTING TIME -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        INCHARGES REPORTING TIME
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+          <thead class="table-dark">
+            <tr><th>Role</th><th>Reporting Time</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Senior Vice Principal</td><td>{{ report.senior_vp_time|default:"-" }}</td></tr>
+            <tr><td>Hr. Sec. Vice Principal</td><td>{{ report.hr_sec_vp_time|default:"-" }}</td></tr>
+            <tr><td>High School Vice Principal</td><td>{{ report.high_school_vp_time|default:"-" }}</td></tr>
+            <tr><td>Primary Vice Principal</td><td>{{ report.primary_vp_time|default:"-" }}</td></tr>
+            <tr><td>Office Incharge Jr. Asst. 1</td><td>{{ report.office_incharge1_time|default:"-" }}</td></tr>
+            <tr><td>Office Incharge Jr. Asst. 2</td><td>{{ report.office_incharge2_time|default:"-" }}</td></tr>
+            <tr><td>Maintenance Incharge</td><td>{{ report.maintenance_incharge_time|default:"-" }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- SUBSTAFFS REPORTING TIME -->
+    <!-- ============================= -->
+    {% if report.substaffs.all %}
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        SUBSTAFFS REPORTING TIME
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+          <thead class="table-dark">
+            <tr><th>Name</th><th>Reporting Time</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for ss in report.substaffs.all %}
+            <tr>
+              <td>{{ ss.name }}</td>
+              <td>{{ ss.reporting_time|default:"-" }}</td>
+              <td>{{ ss.status }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ============================= -->
+    <!-- MORNING DUTY + OFFICE -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        MORNING DUTY & OFFICE
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+          <tbody>
+            <tr><td class="fw-semibold" style="width:40%">Morning Duty Teachers Attended</td><td>{{ report.morning_duty_attended|default:"-" }}</td></tr>
+            <tr><td class="fw-semibold">Morning Duty Teachers Not Attended</td><td>{{ report.morning_duty_not_attended|default:"-" }}</td></tr>
+            <tr><td class="fw-semibold">Office Opened</td><td>{{ report.office_opened_time|default:"-" }}</td></tr>
+            <tr><td class="fw-semibold">Complaints Received from Parents</td><td>{{ report.parent_complaints|default:"-" }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- TEACHING STAFF -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        TEACHING STAFF
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+          <tbody>
+            <tr><td class="fw-semibold" style="width:40%">No. Present</td><td>{{ report.teachers_present }}</td></tr>
+            <tr><td class="fw-semibold">No. Absent</td><td>{{ report.teachers_absent }}</td></tr>
+            <tr><td class="fw-semibold">Absentees (Teachers)</td><td>{{ report.absentees_teachers|default:"-" }}</td></tr>
+            <tr><td class="fw-semibold">Absentees (Non-Teaching)</td><td>{{ report.absentees_non_teaching|default:"-" }}</td></tr>
+            <tr><td class="fw-semibold">Late Comers (Teachers)</td><td>{{ report.late_comers_teachers|default:"-" }}</td></tr>
+            <tr><td class="fw-semibold">Late Comers (Spl. Class Duty)</td><td>{{ report.late_comers_spl_duty|default:"-" }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- LATE COMERS (PUPILS) + GENERAL -->
+    <!-- ============================= -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:var(--m-radius-lg)">
+          <div class="card-header fw-bold py-2 px-4 text-white"
+               style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+            LATE COMERS (PUPILS)
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+              <tbody>
+                <tr><td class="fw-semibold">Primary</td><td>{{ report.late_pupils_primary|default:"-" }}</td></tr>
+                <tr><td class="fw-semibold">High School</td><td>{{ report.late_pupils_high_school|default:"-" }}</td></tr>
+                <tr><td class="fw-semibold">Hr. Sec.</td><td>{{ report.late_pupils_hr_sec|default:"-" }}</td></tr>
+                <tr><td class="fw-semibold">Total</td><td><strong>{{ report.late_pupils_total|default:"-" }}</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:var(--m-radius-lg)">
+          <div class="card-header fw-bold py-2 px-4 text-white"
+               style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+            GENERAL
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+              <tbody>
+                <tr><td class="fw-semibold" style="width:50%">General Instruction By</td><td>{{ report.general_instruction_by|default:"-" }}</td></tr>
+                <tr><td class="fw-semibold">Zero Hour Maintained</td><td>{% if report.zero_hour_maintained %}Yes{% else %}No{% endif %}</td></tr>
+                <tr><td class="fw-semibold">Assembly Arrangement</td><td>{{ report.assembly_arrangement|default:"-" }}</td></tr>
+                <tr><td class="fw-semibold">Birthday Celebration</td><td>{{ report.birthday_celebration|default:"-" }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- ROLL CALL -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        ROLL CALL DETAILS
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+          <thead class="table-dark">
+            <tr><th>Section</th><th>Strength</th><th>Present</th><th>Absent</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fw-semibold">Primary</td>
+              <td>{{ report.rollcall_primary_total }}</td>
+              <td>{{ report.rollcall_primary_present }}</td>
+              <td>{{ report.rollcall_primary_absent }}</td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">High School</td>
+              <td>{{ report.rollcall_high_school_total }}</td>
+              <td>{{ report.rollcall_high_school_present }}</td>
+              <td>{{ report.rollcall_high_school_absent }}</td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">Hr. Sec.</td>
+              <td>{{ report.rollcall_hr_sec_total }}</td>
+              <td>{{ report.rollcall_hr_sec_present }}</td>
+              <td>{{ report.rollcall_hr_sec_absent }}</td>
+            </tr>
+            <tr class="table-secondary">
+              <td class="fw-bold">Total</td>
+              <td class="fw-bold">{{ report.rollcall_total_strength }}</td>
+              <td class="fw-bold">{{ report.rollcall_total_present }}</td>
+              <td class="fw-bold">{{ report.rollcall_total_absent }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- DEFAULTERS -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        DEFAULTERS
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0" style="font-size:13px">
+          <thead class="table-dark">
+            <tr>
+              <th>Uniform</th><th>Hair Cut</th><th>Nail Cut</th><th>Shoes</th>
+              <th>Socks</th><th>Tie</th><th>Belt</th><th>ID Card</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ report.defaulters_uniform|default:"-" }}</td>
+              <td>{{ report.defaulters_haircut|default:"-" }}</td>
+              <td>{{ report.defaulters_nailcut|default:"-" }}</td>
+              <td>{{ report.defaulters_shoes|default:"-" }}</td>
+              <td>{{ report.defaulters_socks|default:"-" }}</td>
+              <td>{{ report.defaulters_tie|default:"-" }}</td>
+              <td>{{ report.defaulters_belt|default:"-" }}</td>
+              <td>{{ report.defaulters_id_card|default:"-" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /reportContent -->
+
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Morning Report - {{ report.report_date }}</title>
+  <style>
+    @page { size: A4; margin: 15mm 12mm; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #111; }
+    h2 { text-align: center; font-size: 14px; margin: 0 0 2px; text-transform: uppercase; letter-spacing: 1px; }
+    .school-name { text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+    .meta { text-align: center; font-size: 10px; color: #555; margin-bottom: 12px; }
+    .section-title {
+      background: #1a1d2b; color: #fff; font-weight: bold;
+      font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+      padding: 4px 8px; margin-bottom: 0;
+    }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    th, td { border: 1px solid #ccc; padding: 4px 7px; font-size: 10px; }
+    th { background: #2d2d2d; color: #fff; font-weight: bold; text-align: left; }
+    .label-col { width: 42%; font-weight: bold; background: #f5f5f5; }
+    .total-row td { background: #e8e8e8; font-weight: bold; }
+    .divider { border: none; border-top: 1px solid #ddd; margin: 8px 0; }
+    .two-col { display: table; width: 100%; }
+    .col-half { display: table-cell; width: 50%; padding-right: 6px; vertical-align: top; }
+    .col-half:last-child { padding-right: 0; padding-left: 6px; }
+  </style>
+</head>
+<body>
+
+  <div class="school-name">{{ sdata }}</div>
+  <h2>Morning Report</h2>
+  <div class="meta">Date: {{ report.report_date|date:"d M Y" }} &nbsp;|&nbsp; Submitted by: {{ report.report_submitted_by }} &nbsp;|&nbsp; Status: {{ report.overall_status }}</div>
+  <hr class="divider">
+
+  <!-- INCHARGES REPORTING TIME -->
+  <div class="section-title">Incharges Reporting Time</div>
+  <table>
+    <tr><td class="label-col">Senior Vice Principal</td><td>{{ report.senior_vp_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">Hr. Sec. Vice Principal</td><td>{{ report.hr_sec_vp_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">High School Vice Principal</td><td>{{ report.high_school_vp_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">Primary Vice Principal</td><td>{{ report.primary_vp_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">Office Incharge Jr. Asst. 1</td><td>{{ report.office_incharge1_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">Office Incharge Jr. Asst. 2</td><td>{{ report.office_incharge2_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">Maintenance Incharge</td><td>{{ report.maintenance_incharge_time|default:"-" }}</td></tr>
+  </table>
+
+  <!-- SUBSTAFFS -->
+  {% if report.substaffs.all %}
+  <div class="section-title">Substaffs Reporting Time</div>
+  <table>
+    <tr><th>Name</th><th>Reporting Time</th><th>Status</th></tr>
+    {% for ss in report.substaffs.all %}
+    <tr>
+      <td>{{ ss.name }}</td>
+      <td>{{ ss.reporting_time|default:"-" }}</td>
+      <td>{{ ss.status }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <!-- MORNING DUTY + OFFICE -->
+  <div class="section-title">Morning Duty &amp; Office</div>
+  <table>
+    <tr><td class="label-col">Morning Duty Teachers Attended</td><td>{{ report.morning_duty_attended|default:"-" }}</td></tr>
+    <tr><td class="label-col">Morning Duty Teachers Not Attended</td><td>{{ report.morning_duty_not_attended|default:"-" }}</td></tr>
+    <tr><td class="label-col">Office Opened</td><td>{{ report.office_opened_time|default:"-" }}</td></tr>
+    <tr><td class="label-col">Complaints Received from Parents</td><td>{{ report.parent_complaints|default:"-" }}</td></tr>
+  </table>
+
+  <!-- TEACHING STAFF -->
+  <div class="section-title">Teaching Staff</div>
+  <table>
+    <tr><td class="label-col">No. Present</td><td>{{ report.teachers_present }}</td></tr>
+    <tr><td class="label-col">No. Absent</td><td>{{ report.teachers_absent }}</td></tr>
+    <tr><td class="label-col">Absentees (Teachers)</td><td>{{ report.absentees_teachers|default:"-" }}</td></tr>
+    <tr><td class="label-col">Absentees (Non-Teaching)</td><td>{{ report.absentees_non_teaching|default:"-" }}</td></tr>
+    <tr><td class="label-col">Late Comers (Teachers)</td><td>{{ report.late_comers_teachers|default:"-" }}</td></tr>
+    <tr><td class="label-col">Late Comers (Spl. Class Duty)</td><td>{{ report.late_comers_spl_duty|default:"-" }}</td></tr>
+  </table>
+
+  <!-- TWO COLUMN: LATE PUPILS + GENERAL -->
+  <div class="two-col">
+    <div class="col-half">
+      <div class="section-title">Late Comers (Pupils)</div>
+      <table>
+        <tr><td class="label-col">Primary</td><td>{{ report.late_pupils_primary|default:"-" }}</td></tr>
+        <tr><td class="label-col">High School</td><td>{{ report.late_pupils_high_school|default:"-" }}</td></tr>
+        <tr><td class="label-col">Hr. Sec.</td><td>{{ report.late_pupils_hr_sec|default:"-" }}</td></tr>
+        <tr><td class="label-col">Total</td><td><strong>{{ report.late_pupils_total|default:"-" }}</strong></td></tr>
+      </table>
+    </div>
+    <div class="col-half">
+      <div class="section-title">General</div>
+      <table>
+        <tr><td class="label-col">General Instruction By</td><td>{{ report.general_instruction_by|default:"-" }}</td></tr>
+        <tr><td class="label-col">Zero Hour Maintained</td><td>{% if report.zero_hour_maintained %}Yes{% else %}No{% endif %}</td></tr>
+        <tr><td class="label-col">Assembly Arrangement</td><td>{{ report.assembly_arrangement|default:"-" }}</td></tr>
+        <tr><td class="label-col">Birthday Celebration</td><td>{{ report.birthday_celebration|default:"-" }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ROLL CALL -->
+  <div class="section-title">Roll Call Details</div>
+  <table>
+    <tr><th>Section</th><th>Strength</th><th>Present</th><th>Absent</th></tr>
+    <tr><td>Primary</td><td>{{ report.rollcall_primary_total }}</td><td>{{ report.rollcall_primary_present }}</td><td>{{ report.rollcall_primary_absent }}</td></tr>
+    <tr><td>High School</td><td>{{ report.rollcall_high_school_total }}</td><td>{{ report.rollcall_high_school_present }}</td><td>{{ report.rollcall_high_school_absent }}</td></tr>
+    <tr><td>Hr. Sec.</td><td>{{ report.rollcall_hr_sec_total }}</td><td>{{ report.rollcall_hr_sec_present }}</td><td>{{ report.rollcall_hr_sec_absent }}</td></tr>
+    <tr class="total-row">
+      <td>Total</td>
+      <td>{{ report.rollcall_total_strength }}</td>
+      <td>{{ report.rollcall_total_present }}</td>
+      <td>{{ report.rollcall_total_absent }}</td>
+    </tr>
+  </table>
+
+  <!-- DEFAULTERS -->
+  <div class="section-title">Defaulters</div>
+  <table>
+    <tr>
+      <th>Uniform</th><th>Hair Cut</th><th>Nail Cut</th><th>Shoes</th>
+      <th>Socks</th><th>Tie</th><th>Belt</th><th>ID Card</th>
+    </tr>
+    <tr>
+      <td>{{ report.defaulters_uniform|default:"-" }}</td>
+      <td>{{ report.defaulters_haircut|default:"-" }}</td>
+      <td>{{ report.defaulters_nailcut|default:"-" }}</td>
+      <td>{{ report.defaulters_shoes|default:"-" }}</td>
+      <td>{{ report.defaulters_socks|default:"-" }}</td>
+      <td>{{ report.defaulters_tie|default:"-" }}</td>
+      <td>{{ report.defaulters_belt|default:"-" }}</td>
+      <td>{{ report.defaulters_id_card|default:"-" }}</td>
+    </tr>
+  </table>
+
+</body>
+</html>

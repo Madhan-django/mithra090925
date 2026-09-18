@@ -1,5 +1,6 @@
 <!doctype html>
 {% load static %}
+{% load custom_tags %}
 
 <html
   lang="en"
@@ -70,15 +71,15 @@
       --m-text-2:      #4b5563;
       --m-text-3:      #9ca3af;
 
-      --m-accent:      #2563eb;
-      --m-accent-2:    #1d4ed8;
-      --m-accent-glow: rgba(37,99,235,0.15);
+      --m-accent:      #d4af37;
+      --m-accent-2:    #b8930a;
+      --m-accent-glow: rgba(212,175,55,0.18);
 
-      --m-menu-bg:     #0f172a;
+      --m-menu-bg:     #0b0c14;
       --m-menu-text:   #94a3b8;
       --m-menu-active: #ffffff;
       --m-menu-hover:  rgba(255,255,255,0.06);
-      --m-menu-accent: #3b82f6;
+      --m-menu-accent: #d4af37;
       --m-menu-width:  256px;
 
       --m-nav-h:       64px;
@@ -109,6 +110,15 @@
       background: var(--m-menu-bg) !important;
       border-right: none !important;
       box-shadow: 4px 0 24px rgba(0,0,0,0.15) !important;
+      overflow: hidden !important;
+    }
+
+    #layout-menu::before {
+      content: "";
+      position: absolute; top: -80px; right: -80px;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0) 70%);
+      pointer-events: none; z-index: 0;
     }
 
     /* ── BRAND ── */
@@ -182,8 +192,9 @@
 
     .menu-inner > .menu-item.active > .menu-link,
     .menu-inner > .menu-item.open  > .menu-link {
-      background: rgba(59,130,246,0.15) !important;
+      background: linear-gradient(90deg, rgba(212,175,55,0.18), rgba(212,175,55,0.04)) !important;
       color: #fff !important;
+      box-shadow: inset 3px 0 0 var(--m-menu-accent) !important;
     }
 
     /* ══════════════════════════════════════
@@ -234,8 +245,8 @@
     }
 
     .menu-sub .menu-item.active .menu-link {
-      background: rgba(59,130,246,0.12) !important;
-      color: #fff !important;
+      background: linear-gradient(90deg, rgba(212,175,55,0.14), rgba(212,175,55,0.03)) !important;
+      color: var(--m-menu-accent) !important;
     }
 
     .menu-sub .menu-item.active .menu-link::before {
@@ -401,12 +412,13 @@
 
     .btn-primary {
       background: var(--m-accent) !important;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.3) !important;
+      color: #1a1208 !important;
+      box-shadow: 0 4px 12px rgba(212,175,55,0.35) !important;
     }
 
     .btn-primary:hover {
       background: var(--m-accent-2) !important;
-      box-shadow: 0 6px 18px rgba(37,99,235,0.35) !important;
+      box-shadow: 0 6px 18px rgba(212,175,55,0.42) !important;
     }
 
     .btn-secondary {
@@ -467,7 +479,7 @@
     }
 
     .table tbody tr:hover {
-      background: #f5f7ff !important;
+      background: #fdf9f0 !important;
     }
 
     /* ══════════════════════════════════════
@@ -580,8 +592,8 @@
     ══════════════════════════════════════ */
     .menu-inner-shadow {
       background: linear-gradient(
-        rgba(15,23,42,0) 0%,
-        rgba(15,23,42,0.8) 100%
+        rgba(11,12,20,0) 0%,
+        rgba(11,12,20,0.8) 100%
       ) !important;
     }
 
@@ -589,7 +601,7 @@
        OVERLAY
     ══════════════════════════════════════ */
     .layout-overlay {
-      background: rgba(15,23,42,0.5) !important;
+      background: rgba(11,12,20,0.5) !important;
       backdrop-filter: blur(2px) !important;
     }
 
@@ -640,7 +652,7 @@
           <img class="brand-logo" src="{% static 'images/mithran_erp_logo_gold.svg' %}" alt="mITHRAN">
           <!-- Text: visible only when sidebar is EXPANDED -->
           <span class="brand-label app-brand-text demo menu-text">
-            <span style="color:#f0ede6;">Mithran</span><span style="color:#c9a84c;">ERP</span>
+            <span style="color:#f0ede6;">Mithran</span><span style="color:#d4af37;">ERP</span>
           </span>
         </a>
      <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto"
@@ -672,7 +684,7 @@
           </a>
         </li>
 
-        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        {% if group_perm.configurations %}
         <li class="menu-header"><span class="menu-header-text">Settings</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -689,15 +701,24 @@
             <li class="menu-item"><a href="{% url 'listsec' %}" class="menu-link"><div>Section</div></a></li>
             <li class="menu-item"><a href="{% url 'listsubjects' %}" class="menu-link"><div>Subjects</div></a></li>
             <li class="menu-item"><a href="{% url 'homeworktime' %}" class="menu-link"><div>Homework Timing</div></a></li>
+            <li class="menu-item"><a href="{% url 'birthday_wish_config' %}" class="menu-link"><div>Birthday Wishes</div></a></li>
             <li class="menu-item"><a href="{% url 'schprofile_list' %}" class="menu-link"><div>Mobi Profile</div></a></li>
+            <li class="menu-item"><a href="{% url 'banner_list' %}" class="menu-link"><div>Mobile Banner</div></a></li>
             <li class="menu-item"><a href="{% url 'psettings' %}" class="menu-link"><div>Payroll Attendance</div></a></li>
             <li class="menu-item"><a href="{% url 'payu_config_view' %}" class="menu-link"><div>PayU -Online Payment</div></a></li>
             <li class="menu-item"><a href="{% url 'statutory_settings_list' %}" class="menu-link"><div>Payroll Statutory</div></a></li>
             <li class="menu-item"><a href="{% url 'add_admin' %}" class="menu-link"><div>Admin</div></a></li>
+            {% if request.user.groups.all.0.name == "superadmin" %}
+            <li class="menu-item"><a href="{% url 'menu_permissions_current' %}" class="menu-link"><div>School Menu Permissions</div></a></li>
+            {% if current_sch_id %}
+            <li class="menu-item"><a href="{% url 'group_permissions_list' current_sch_id %}" class="menu-link"><div>Group Permissions</div></a></li>
+            {% endif %}
+            {% endif %}
           </ul>
         </li>
         {% endif %}
 
+        {% if menu_perm.admission and group_perm.admission %}
         <li class="menu-header"><span class="menu-header-text">Admission</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -709,7 +730,9 @@
             <li class="menu-item"><a href="{% url 'followup_enquiry' %}" class="menu-link"><div>Follow up</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.students and group_perm.students %}
         <li class="menu-header"><span class="menu-header-text">Students</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -720,16 +743,35 @@
             <li class="menu-item"><a href="{% url 'students_list' %}" class="menu-link"><div>Student List</div></a></li>
             <li class="menu-item"><a href="{% url 'addattendance' %}" class="menu-link"><div>Mark Attendance</div></a></li>
             <li class="menu-item"><a href="{% url 'viewattendance' %}" class="menu-link"><div>Show Attendance</div></a></li>
-            {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+            {% if group_perm.students_authenticate %}
             <li class="menu-item"><a href="{% url 'students_login' %}" class="menu-link"><div>Authenticate</div></a></li>
             {% endif %}
-            {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" %}
+            {% if group_perm.students_promote %}
             <li class="menu-item"><a href="{% url 'students_promote' %}" class="menu-link"><div>Promotion</div></a></li>
+            {% endif %}
+            {% if group_perm.students_transfer %}
             <li class="menu-item"><a href="{% url 'student_transfer' %}" class="menu-link"><div>Transfer</div></a></li>
             {% endif %}
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.certificates and group_perm.certificates %}
+        <li class="menu-header"><span class="menu-header-text">Certificates</span></li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons ri-medal-line"></i>
+            <div>Certificates</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="{% url 'cert_generate' %}" class="menu-link"><div>Generate</div></a></li>
+            <li class="menu-item"><a href="{% url 'cert_issued_list' %}" class="menu-link"><div>Issued List</div></a></li>
+            <li class="menu-item"><a href="{% url 'cert_template_list' %}" class="menu-link"><div>Templates</div></a></li>
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if menu_perm.staffs and group_perm.staffs %}
         <li class="menu-header"><span class="menu-header-text">Staffs</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -741,7 +783,9 @@
             <li class="menu-item"><a href="{% url 'day_attendance' %}" class="menu-link"><div>Attendance</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.academics and group_perm.academics %}
         <li class="menu-header"><span class="menu-header-text">Academics</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -750,13 +794,25 @@
           </a>
           <ul class="menu-sub">
             <li class="menu-item"><a href="{% url 'homework' %}" class="menu-link"><div>Homework</div></a></li>
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div>Lesson Plan</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item"><a href="{% url 'lesson_plan_list' %}" class="menu-link"><div>All Plans</div></a></li>
+                <li class="menu-item"><a href="{% url 'lesson_plan_create' %}" class="menu-link"><div>Add Plan</div></a></li>
+                <li class="menu-item"><a href="{% url 'excel_import_lesson' %}" class="menu-link"><div>Import from Excel</div></a></li>
+              </ul>
+            </li>
             <li class="menu-item"><a href="{% url 'list_pushMessages' %}" class="menu-link"><div>Notification</div></a></li>
             <li class="menu-item"><a href="{% url 'academic_noticeboard' %}" class="menu-link"><div>Noticeboard</div></a></li>
             <li class="menu-item"><a href="{% url 'academic_events' %}" class="menu-link"><div>Events</div></a></li>
             <li class="menu-item"><a href="{% url 'grievance_list' %}" class="menu-link"><div>Grievance</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.timetable and group_perm.timetable %}
         <li class="menu-header"><span class="menu-header-text">Timetable</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -771,8 +827,9 @@
             <li class="menu-item"><a href="{% url 'view_timetable' %}" class="menu-link"><div>Timetable</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
-        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        {% if menu_perm.finance and group_perm.finance %}
         <li class="menu-header"><span class="menu-header-text">Finance</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -787,6 +844,7 @@
           </ul>
         </li>
         {% endif %}
+        {% if menu_perm.payroll and group_perm.payroll %}
 
         <li class="menu-header"><span class="menu-header-text">Payroll</span></li>
         <li class="menu-item">
@@ -806,8 +864,9 @@
             <li class="menu-item"><a href="{% url 'bank_statement' %}" class="menu-link"><div>Bank Statement</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
-       {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        {% if menu_perm.transport and group_perm.transport %}
         <li class="menu-header"><span class="menu-header-text">Transport</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -826,7 +885,9 @@
             <li class="menu-item"><a href="{% url 'vehicle_type_list' %}" class="menu-link"><div>Vehicle Types</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.hostel and group_perm.hostel %}
         <li class="menu-header"><span class="menu-header-text">Hostel</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -847,7 +908,8 @@
           </ul>
         </li>
         {% endif %}
-        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+
+        {% if menu_perm.petty_cash and group_perm.petty_cash %}
         <li class="menu-header"><span class="menu-header-text">Petty Cash</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -862,6 +924,7 @@
         </li>
         {% endif %}
 
+        {% if menu_perm.examination and group_perm.examination %}
         <li class="menu-header"><span class="menu-header-text">Examination</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -875,8 +938,9 @@
             <li class="menu-item"><a href="{% url 'admit_card_list' %}" class="menu-link"><div>AdmitCard</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
-      {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+      {% if menu_perm.question_bank and group_perm.question_bank %}
         <li class="menu-header"><span class="menu-header-text">Question Bank</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -893,6 +957,7 @@
         </li>
       {% endif %}
 
+        {% if menu_perm.library and group_perm.library %}
         <li class="menu-header"><span class="menu-header-text">Library</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -905,8 +970,9 @@
             <li class="menu-item"><a href="{% url 'library_cards' %}" class="menu-link"><div>Library Card</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
-        {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
+        {% if menu_perm.assets and group_perm.assets %}
         <li class="menu-header"><span class="menu-header-text">Assets</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -924,7 +990,9 @@
             <li class="menu-item"><a href="{% url 'spareslist' %}" class="menu-link"><div>Spares</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.inventory and group_perm.inventory %}
         <li class="menu-header"><span class="menu-header-text">Inventory</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -952,7 +1020,9 @@
             <li class="menu-item"><a href="{% url 'indbook_issued' %}" class="menu-link"><div>Single Receipt</div></a></li>
           </ul>
         </li>
+        {% endif %}
 
+        {% if menu_perm.visitors and group_perm.visitors %}
         <li class="menu-header"><span class="menu-header-text">Visitors</span></li>
         <li class="menu-item">
           <a href="{% url 'visitors_list' %}" class="menu-link">
@@ -960,7 +1030,9 @@
             <div>Visitors</div>
           </a>
         </li>
+        {% endif %}
 
+        {% if menu_perm.reports and group_perm.reports %}
         <li class="menu-header"><span class="menu-header-text">Reports</span></li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -970,8 +1042,36 @@
           <ul class="menu-sub">
             <li class="menu-item"><a href="{% url 'reports_home' %}" class="menu-link"><div>Reports</div></a></li>
             <li class="menu-item"><a href="{% url 'automate_list' %}" class="menu-link"><div>Automate</div></a></li>
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if menu_perm.jacob_reports and group_perm.jacob_reports %}
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+            <div>Jacob Reports</div>
+          </a>
+          <ul class="menu-sub">
             <li class="menu-item"><a href="{% url 'class_teacher_report_list' %}" class="menu-link"><div>Class Teacher Report</div></a></li>
             <li class="menu-item"><a href="{% url 'incharge_report_list' %}" class="menu-link"><div>Incharge Daily Report</div></a></li>
+            <li class="menu-item"><a href="{% url 'morning_report_list' %}" class="menu-link"><div>Morning Report</div></a></li>
+            {% if has_principal_log_access %}
+            <li class="menu-item"><a href="{% url 'principal_log_list' %}" class="menu-link"><div>Principal's Daily Log</div></a></li>
+            {% endif %}
+            {% with grp=request.user.groups.all.0.name %}
+            {% if grp == "superadmin" or grp == "Admin" %}
+            <li class="menu-item"><a href="{% url 'manage_principal_log_access' %}" class="menu-link"><div>Principal Log Access</div></a></li>
+            <li class="menu-item"><a href="{% url 'manage_principal_log_types' %}" class="menu-link"><div>Principal Log Types</div></a></li>
+            {% endif %}
+            {% endwith %}
+            {% with grp=request.user.groups.all.0.name %}
+            {% if grp == "superadmin" or grp == "Admin" or grp == "Accounts" %}
+            <li class="menu-item"><a href="{% url 'manage_class_teacher_mappings' %}" class="menu-link"><div>Class Teacher Mapping</div></a></li>
+            <li class="menu-item"><a href="{% url 'manage_incharge_mappings' %}" class="menu-link"><div>Incharge Mapping</div></a></li>
+            {% endif %}
+            {% endwith %}
+
           </ul>
         </li>
         {% endif %}
@@ -1048,6 +1148,7 @@
                 </li>
                 <li><div class="dropdown-divider my-1"></div></li>
                 <li><a class="dropdown-item" href="#"><i class="ri-user-3-line me-2"></i>My Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'staff_password_reset' %}"><i class="ri-lock-password-line me-2"></i>Change Password</a></li>
                 <li><div class="dropdown-divider my-1"></div></li>
                 <li>
                   <a class="dropdown-item" href="{% url 'logout_user' %}" style="color:#dc2626;">
@@ -1143,25 +1244,22 @@
 <script src="{% static 'dash/assets/js/app-calendar-events.js' %}"></script>
 <script src="{% static 'dash/assets/js/app-calendar.js' %}"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+{% block extra_js %}{% endblock %}
 <script>
   (function () {
-    const IDLE_MS = 5 * 60 * 1000; // 5 minutes
+    const IDLE_MS = 20 * 60 * 1000; // 20 minutes idle logout
     const LOGOUT_URL = "{% url 'logout_user' %}";
     let timer;
 
     function resetTimer() {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        window.location.href = LOGOUT_URL;
-      }, IDLE_MS);
+      timer = setTimeout(() => { window.location.href = LOGOUT_URL; }, IDLE_MS);
     }
 
-    // Reset on any of these activity signals
     ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt =>
       document.addEventListener(evt, resetTimer, { passive: true })
     );
 
-    // Start the timer on page load
     resetTimer();
   })();
 </script>

@@ -320,6 +320,13 @@ class InchargeReport(models.Model):
         ('Low', 'Low'),
     ]
 
+    STATUS_CHOICES = [
+        ('Closed', 'Closed'),
+        ('Open', 'Open'),
+        ('In-Progress', 'In-Progress'),
+        ('Issue', 'Issue'),
+    ]
+
     # =========================
     # BASIC DETAILS
     # =========================
@@ -349,6 +356,8 @@ class InchargeReport(models.Model):
 
     late_comers_teachers = models.TextField(blank=True, null=True)
 
+    late_comers_pupils = models.TextField(blank=True, null=True)
+
     late_comers_duty_teachers = models.TextField(blank=True, null=True)
 
     absentees_teachers = models.TextField(blank=True, null=True)
@@ -364,6 +373,16 @@ class InchargeReport(models.Model):
     )
 
     dispersing_time = models.TimeField(blank=True, null=True)
+
+    # =========================
+    # MORNING SPECIAL CLASS
+    # =========================
+
+    morning_spl_class_schedule = models.TextField(blank=True, null=True)
+
+    morning_spl_late_comers = models.TextField(blank=True, null=True)
+
+    duty_alteration = models.TextField(blank=True, null=True)
 
     # =========================
     # LUNCH BREAK
@@ -386,11 +405,21 @@ class InchargeReport(models.Model):
         null=True
     )
 
+    breakfast_count = models.PositiveIntegerField(default=0)
+
+    children_permission = models.TextField(blank=True, null=True)
+
+    pet_class_details = models.TextField(blank=True, null=True)
+
+    parent_intimation = models.TextField(blank=True, null=True)
+
     # =========================
     # AFTERNOON SESSION
     # =========================
 
     cram_conducted = models.TextField(blank=True, null=True)
+
+    cram_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
 
     special_class = models.TextField(blank=True, null=True)
 
@@ -399,6 +428,8 @@ class InchargeReport(models.Model):
     accident_details = models.TextField(blank=True, null=True)
 
     incidents = models.TextField(blank=True, null=True)
+
+    incident_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
 
     pupils_detained = models.TextField(blank=True, null=True)
 
@@ -411,6 +442,10 @@ class InchargeReport(models.Model):
     homework_corrected = models.BooleanField(default=False)
 
     handbook_checked = models.BooleanField(default=False)
+
+    handbook_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
+
+    homework_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
 
     supervising_report = models.TextField(blank=True, null=True)
 
@@ -495,6 +530,8 @@ class InchargeReport(models.Model):
     # =========================
 
     note = models.TextField(blank=True, null=True)
+
+    note_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
 
     # =========================
     # TOMORROW'S ASSIGNMENT
@@ -590,6 +627,134 @@ class PrincipalDailyLog(models.Model):
 
     def __str__(self):
         return f"{self.entry_date} | {self.entry_type}"
+
+
+class MorningReport(models.Model):
+
+    STATUS_CHOICES = [
+        ('Closed', 'Closed'),
+        ('Open', 'Open'),
+        ('In-Progress', 'In-Progress'),
+        ('Issue', 'Issue'),
+    ]
+
+    school_name = models.ForeignKey(school, on_delete=models.CASCADE)
+    report_date = models.DateField()
+    report_submitted_by = models.ForeignKey(staff, on_delete=models.CASCADE)
+    overall_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Closed')
+
+    # Incharges Reporting Time
+    senior_vp_time = models.CharField(max_length=10, blank=True, null=True)
+    hr_sec_vp_time = models.CharField(max_length=10, blank=True, null=True)
+    high_school_vp_time = models.CharField(max_length=10, blank=True, null=True)
+    primary_vp_time = models.CharField(max_length=10, blank=True, null=True)
+    office_incharge1_time = models.CharField(max_length=10, blank=True, null=True)
+    office_incharge2_time = models.CharField(max_length=10, blank=True, null=True)
+    maintenance_incharge_time = models.CharField(max_length=10, blank=True, null=True)
+
+    # Morning Duty Teachers
+    morning_duty_attended = models.CharField(max_length=20, blank=True, null=True)
+    morning_duty_not_attended = models.CharField(max_length=20, blank=True, null=True)
+
+    # Office
+    office_opened_time = models.CharField(max_length=10, blank=True, null=True)
+    parent_complaints = models.TextField(blank=True, null=True)
+
+    # Teaching Staff
+    teachers_present = models.PositiveIntegerField(default=0)
+    teachers_absent = models.PositiveIntegerField(default=0)
+    absentees_teachers = models.TextField(blank=True, null=True)
+    absentees_non_teaching = models.TextField(blank=True, null=True)
+    late_comers_teachers = models.TextField(blank=True, null=True)
+    late_comers_spl_duty = models.TextField(blank=True, null=True)
+
+    # Late Comers (Pupils)
+    late_pupils_primary = models.CharField(max_length=20, blank=True, null=True)
+    late_pupils_high_school = models.CharField(max_length=20, blank=True, null=True)
+    late_pupils_hr_sec = models.CharField(max_length=20, blank=True, null=True)
+    late_pupils_total = models.CharField(max_length=20, blank=True, null=True)
+
+    # General
+    general_instruction_by = models.TextField(blank=True, null=True)
+    zero_hour_maintained = models.BooleanField(default=False)
+    assembly_arrangement = models.TextField(blank=True, null=True)
+    birthday_celebration = models.TextField(blank=True, null=True)
+
+    # Roll Call
+    rollcall_primary_present = models.PositiveIntegerField(default=0)
+    rollcall_primary_total = models.PositiveIntegerField(default=0)
+    rollcall_primary_absent = models.PositiveIntegerField(default=0)
+    rollcall_high_school_present = models.PositiveIntegerField(default=0)
+    rollcall_high_school_total = models.PositiveIntegerField(default=0)
+    rollcall_high_school_absent = models.PositiveIntegerField(default=0)
+    rollcall_hr_sec_present = models.PositiveIntegerField(default=0)
+    rollcall_hr_sec_total = models.PositiveIntegerField(default=0)
+    rollcall_hr_sec_absent = models.PositiveIntegerField(default=0)
+
+    # Defaulters
+    defaulters_uniform = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_haircut = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_nailcut = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_shoes = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_socks = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_tie = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_belt = models.CharField(max_length=20, blank=True, null=True)
+    defaulters_id_card = models.CharField(max_length=20, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('school_name', 'report_date')
+        ordering = ['-report_date']
+
+    def __str__(self):
+        return f"Morning Report - {self.report_date}"
+
+    @property
+    def rollcall_total_present(self):
+        return (
+            self.rollcall_primary_present +
+            self.rollcall_high_school_present +
+            self.rollcall_hr_sec_present
+        )
+
+    @property
+    def rollcall_total_strength(self):
+        return (
+            self.rollcall_primary_total +
+            self.rollcall_high_school_total +
+            self.rollcall_hr_sec_total
+        )
+
+    @property
+    def rollcall_total_absent(self):
+        return (
+            self.rollcall_primary_absent +
+            self.rollcall_high_school_absent +
+            self.rollcall_hr_sec_absent
+        )
+
+
+class MorningReportSubstaff(models.Model):
+
+    STATUS_CHOICES = [
+        ('Closed', 'Closed'),
+        ('Open', 'Open'),
+        ('In-Progress', 'In-Progress'),
+        ('Issue', 'Issue'),
+    ]
+
+    report = models.ForeignKey(
+        MorningReport,
+        on_delete=models.CASCADE,
+        related_name='substaffs'
+    )
+    name = models.CharField(max_length=100)
+    reporting_time = models.CharField(max_length=10, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Closed')
+
+    def __str__(self):
+        return f"{self.name} - {self.reporting_time}"
 
 
 class PrincipalLogAccessMapping(models.Model):

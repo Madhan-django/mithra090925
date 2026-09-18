@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClassTeacherReport, InchargeReport
+from .models import ClassTeacherReport, InchargeReport, ClassTeacherMapping, InchargeMapping, PrincipalDailyLog, PrincipalLogAccessMapping, PrincipalLogEntryType, MorningReport, MorningReportSubstaff
 
 
 class ClassTeacherReportForm(forms.ModelForm):
@@ -312,6 +312,7 @@ class InchargeReportForm(forms.ModelForm):
 
             # Morning Session
             'late_comers_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'late_comers_pupils': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'late_comers_duty_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'absentees_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'zero_hour_maintained': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -319,40 +320,63 @@ class InchargeReportForm(forms.ModelForm):
             'class_teachers_morals': forms.Select(attrs={'class': 'form-select'}),
             'dispersing_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
 
+            # Morning Special Class
+            'morning_spl_class_schedule': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'morning_spl_late_comers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'duty_alteration': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
             # Lunch Break
             'ct_availability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'children_without_lunch': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
             'lunch_atmosphere': forms.Select(attrs={'class': 'form-select'}),
             'noise_level': forms.Select(attrs={'class': 'form-select'}),
 
+            'breakfast_count': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'children_permission': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'pet_class_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'parent_intimation': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
             # Afternoon Session
             'cram_conducted': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'cram_status': forms.Select(attrs={'class': 'form-select'}),
             'special_class': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'activity_class': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'accident_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'incidents': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'incident_status': forms.Select(attrs={'class': 'form-select'}),
             'pupils_detained': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
 
             # Status Details
             'class_work_given': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'homework_corrected': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'homework_status': forms.Select(attrs={'class': 'form-select'}),
             'handbook_checked': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'handbook_status': forms.Select(attrs={'class': 'form-select'}),
             'supervising_report': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
 
             # Periods
+            'period_1_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:00-8:45'}),
             'period_1': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_2_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:45-9:30'}),
             'period_2': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_3_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 9:30-10:15'}),
             'period_3': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_4_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 10:15-11:00'}),
             'period_4': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_5_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 12:00-12:45'}),
             'period_5': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_6_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 12:45-1:30'}),
             'period_6': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_7_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 1:30-2:15'}),
             'period_7': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'period_8_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 2:15-3:00'}),
             'period_8': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
 
             # Circular
             'circular_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'circular_parents': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'circular_pupils': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'circular_school': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
 
             # Occurrences
             'birthday': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
@@ -370,11 +394,168 @@ class InchargeReportForm(forms.ModelForm):
             'suggestions_and_grievances': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
 
             # Late Evening Class
-            'late_evening_class_std': forms.TextInput(attrs={'class': 'form-control'}),
-            'late_evening_class_subject': forms.TextInput(attrs={'class': 'form-control'}),
-            'late_evening_class_teacher': forms.TextInput(attrs={'class': 'form-control'}),
-            'late_evening_class_students': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'late_evening_class': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+
+            # Note
+            'note': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'note_status': forms.Select(attrs={'class': 'form-select'}),
 
             # Tomorrow's Assignment
             'tomorrows_assignment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+
+class ClassTeacherMappingForm(forms.Form):
+    from staff.models import staff as Staff
+
+    incharge = forms.ModelChoiceField(
+        queryset=Staff.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    class_teachers = forms.ModelMultipleChoiceField(
+        queryset=Staff.objects.none(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-select',
+            'id': 'id_class_teachers',
+        })
+    )
+
+
+class InchargeMappingForm(forms.Form):
+    from staff.models import staff as Staff
+
+    supervisor = forms.ModelChoiceField(
+        queryset=Staff.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    incharges = forms.ModelMultipleChoiceField(
+        queryset=Staff.objects.none(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-select',
+            'id': 'id_incharges',
+        })
+    )
+
+
+class PrincipalLogEntryForm(forms.ModelForm):
+
+    entry_type = forms.ChoiceField(
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    class Meta:
+        model = PrincipalDailyLog
+        exclude = ['created_at']
+        widgets = {
+            'school_name': forms.Select(attrs={'class': 'form-select'}),
+            'entry_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, school=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if school:
+            types = PrincipalLogEntryType.objects.filter(
+                school_name=school
+            ).values_list('name', 'name')
+            self.fields['entry_type'].choices = [('', '— Select Type —')] + list(types)
+        else:
+            self.fields['entry_type'].choices = [('', '— Select Type —')]
+
+
+class PrincipalLogAccessForm(forms.Form):
+    from staff.models import staff as Staff
+
+    staff_members = forms.ModelMultipleChoiceField(
+        queryset=Staff.objects.none(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-select',
+            'id': 'id_staff_members',
+            'size': '8',
+        }),
+        label='Select Staff'
+    )
+
+
+class MorningReportForm(forms.ModelForm):
+
+    class Meta:
+        model = MorningReport
+        exclude = ['created_at']
+        widgets = {
+            'school_name': forms.Select(attrs={'class': 'form-select'}),
+            'report_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'report_submitted_by': forms.Select(attrs={'class': 'form-select'}),
+            'overall_status': forms.Select(attrs={'class': 'form-select'}),
+
+            # Incharges
+            'senior_vp_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'hr_sec_vp_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'high_school_vp_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'primary_vp_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'office_incharge1_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'office_incharge2_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'maintenance_incharge_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+
+            # Morning Duty
+            'morning_duty_attended': forms.TextInput(attrs={'class': 'form-control'}),
+            'morning_duty_not_attended': forms.TextInput(attrs={'class': 'form-control'}),
+
+            # Office
+            'office_opened_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30'}),
+            'parent_complaints': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Teaching Staff
+            'teachers_present': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'teachers_absent': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'absentees_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'absentees_non_teaching': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'late_comers_teachers': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'late_comers_spl_duty': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Late Pupils
+            'late_pupils_primary': forms.TextInput(attrs={'class': 'form-control'}),
+            'late_pupils_high_school': forms.TextInput(attrs={'class': 'form-control'}),
+            'late_pupils_hr_sec': forms.TextInput(attrs={'class': 'form-control'}),
+            'late_pupils_total': forms.TextInput(attrs={'class': 'form-control'}),
+
+            # General
+            'general_instruction_by': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'zero_hour_maintained': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'assembly_arrangement': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'birthday_celebration': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+
+            # Roll Call
+            'rollcall_primary_present': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_primary_total': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_primary_absent': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_high_school_present': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_high_school_total': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_high_school_absent': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_hr_sec_present': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_hr_sec_total': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'rollcall_hr_sec_absent': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+
+            # Defaulters
+            'defaulters_uniform': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_haircut': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_nailcut': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_shoes': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_socks': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_tie': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_belt': forms.TextInput(attrs={'class': 'form-control'}),
+            'defaulters_id_card': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class MorningReportSubstaffForm(forms.ModelForm):
+    class Meta:
+        model = MorningReportSubstaff
+        fields = ['name', 'reporting_time', 'status']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Staff Name'}),
+            'reporting_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:30 or abs'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
         }

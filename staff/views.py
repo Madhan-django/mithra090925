@@ -234,7 +234,11 @@ def staff_update(request, staff_id):
         form.fields['shift'].queryset = sft
 
         if form.is_valid():
-            form.save()
+            staff_obj = form.save()
+
+            user = staff_obj.staff_user
+            user.email = staff_obj.email
+            user.save(update_fields=['email'])
 
             messages.success(
                 request,
@@ -707,19 +711,31 @@ def delete_homework(request,homework_id):
     messages.success(request,'Homework Deleted Successfully')
     return redirect('homework')
     
-@allowed_users(allowed_roles=['superadmin','Admin'])
+@allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def staff_password_reset(request):
     if request.method == 'POST':
         form = PasswordChangeForm(user=request.user, data=request.POST)
-        if form.is_valid():
+        new_username = request.POST.get('new_username', '').strip()
+
+        username_error = None
+        if new_username and new_username != request.user.username:
+            if User.objects.filter(username=new_username).exclude(pk=request.user.pk).exists():
+                username_error = 'This username is already taken.'
+
+        if form.is_valid() and not username_error:
             form.save()
-            messages.success(request,'Password Reset Successfully')
+            if new_username and new_username != request.user.username:
+                request.user.username = new_username
+                request.user.save(update_fields=['username'])
+            messages.success(request, 'Settings updated successfully')
             return redirect('/')
     else:
         form = PasswordChangeForm(user=request.user)
+        username_error = None
 
     context = {
-        'form': form
+        'form': form,
+        'username_error': username_error,
     }
     return render(request, 'staff/password_reset.html', context)
 

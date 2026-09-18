@@ -1,0 +1,388 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <!-- Page header -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'morning_report_list' %}" class="btn btn-outline-secondary btn-sm px-2">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0" style="color:var(--m-text)">{{ title }}</h4>
+      <small class="text-muted">Fill in all sections and save</small>
+    </div>
+  </div>
+
+  <form method="POST" id="mrForm">
+    {% csrf_token %}
+
+    <!-- ============================= -->
+    <!-- BASIC DETAILS -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        BASIC DETAILS
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">School</label>
+            {{ form.school_name }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold">Date</label>
+            {{ form.report_date }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Report Submitted By</label>
+            {{ form.report_submitted_by }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Overall Status</label>
+            {{ form.overall_status }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- INCHARGES REPORTING TIME -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        INCHARGES REPORTING TIME
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Senior Vice Principal</label>
+            {{ form.senior_vp_time }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Hr. Sec. Vice Principal</label>
+            {{ form.hr_sec_vp_time }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">High School Vice Principal</label>
+            {{ form.high_school_vp_time }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Primary Vice Principal</label>
+            {{ form.primary_vp_time }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Office Incharge Jr. Asst. 1</label>
+            {{ form.office_incharge1_time }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Office Incharge Jr. Asst. 2</label>
+            {{ form.office_incharge2_time }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Maintenance Incharge</label>
+            {{ form.maintenance_incharge_time }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- SUBSTAFFS REPORTING TIME -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white d-flex align-items-center justify-content-between"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        <span>SUBSTAFFS REPORTING TIME</span>
+        <button type="button" id="addSubstaffRow" class="btn btn-sm"
+                style="background:var(--m-accent);color:#000;border:none;border-radius:6px">
+          <i class="ri-add-line"></i> Add Row
+        </button>
+      </div>
+      <div class="card-body">
+        {{ formset.management_form }}
+        <div id="substaffRows">
+          {% for sf in formset %}
+          <div class="substaff-row row g-2 mb-2 align-items-center">
+            {% for hidden in sf.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="col-md-5">
+              <label class="form-label small fw-semibold">Name</label>
+              {{ sf.name }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Reporting Time</label>
+              {{ sf.reporting_time }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Status</label>
+              {{ sf.status }}
+            </div>
+            <div class="col-md-1 d-flex align-items-end pb-1">
+              {% if sf.instance.pk %}
+              <div class="form-check">
+                {{ sf.DELETE }}
+                <label class="form-check-label text-danger small" for="{{ sf.DELETE.id_for_label }}">Del</label>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- empty form template for JS cloning -->
+        <div id="emptySubstaffForm" style="display:none">
+          <div class="substaff-row row g-2 mb-2 align-items-center">
+            <div class="col-md-5">
+              <label class="form-label small fw-semibold">Name</label>
+              <input type="text" name="substaffs-__prefix__-name" class="form-control" placeholder="Staff Name">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Reporting Time</label>
+              <input type="text" name="substaffs-__prefix__-reporting_time" class="form-control" placeholder="e.g. 8:30 or abs">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Status</label>
+              <select name="substaffs-__prefix__-status" class="form-select">
+                <option value="Closed">Closed</option>
+                <option value="Open">Open</option>
+                <option value="In-Progress">In-Progress</option>
+                <option value="Issue">Issue</option>
+              </select>
+            </div>
+            <div class="col-md-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- MORNING DUTY + OFFICE -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        MORNING DUTY & OFFICE
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Morning Duty Teachers Attended</label>
+            {{ form.morning_duty_attended }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Morning Duty Not Attended</label>
+            {{ form.morning_duty_not_attended }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Office Opened Time</label>
+            {{ form.office_opened_time }}
+          </div>
+          <div class="col-md-12">
+            <label class="form-label small fw-semibold">Complaints Received from Parents</label>
+            {{ form.parent_complaints }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- TEACHING STAFF -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        TEACHING STAFF
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold">No. Present</label>
+            {{ form.teachers_present }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold">No. Absent</label>
+            {{ form.teachers_absent }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Absentees (Teachers)</label>
+            {{ form.absentees_teachers }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Absentees (Non-Teaching)</label>
+            {{ form.absentees_non_teaching }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Late Comers (Teachers)</label>
+            {{ form.late_comers_teachers }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Late Comers (Spl. Class Duty)</label>
+            {{ form.late_comers_spl_duty }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- LATE COMERS (PUPILS) -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        LATE COMERS (PUPILS)
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Primary</label>
+            {{ form.late_pupils_primary }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">High School</label>
+            {{ form.late_pupils_high_school }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Hr. Sec.</label>
+            {{ form.late_pupils_hr_sec }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Total</label>
+            {{ form.late_pupils_total }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- GENERAL -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        GENERAL
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">General Instruction Given By</label>
+            {{ form.general_instruction_by }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Assembly Arrangement</label>
+            {{ form.assembly_arrangement }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Birthday Celebration</label>
+            {{ form.birthday_celebration }}
+          </div>
+          <div class="col-md-6 d-flex align-items-center gap-3 pt-3">
+            <div class="form-check form-switch">
+              {{ form.zero_hour_maintained }}
+              <label class="form-check-label fw-semibold" for="{{ form.zero_hour_maintained.id_for_label }}">
+                Zero Hour Maintained
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- ROLL CALL -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        ROLL CALL DETAILS
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm" style="font-size:13px">
+            <thead class="table-dark">
+              <tr>
+                <th>Section</th>
+                <th>Strength (Total)</th>
+                <th>Present</th>
+                <th>Absent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-semibold align-middle">Primary</td>
+                <td>{{ form.rollcall_primary_total }}</td>
+                <td>{{ form.rollcall_primary_present }}</td>
+                <td>{{ form.rollcall_primary_absent }}</td>
+              </tr>
+              <tr>
+                <td class="fw-semibold align-middle">High School</td>
+                <td>{{ form.rollcall_high_school_total }}</td>
+                <td>{{ form.rollcall_high_school_present }}</td>
+                <td>{{ form.rollcall_high_school_absent }}</td>
+              </tr>
+              <tr>
+                <td class="fw-semibold align-middle">Hr. Sec.</td>
+                <td>{{ form.rollcall_hr_sec_total }}</td>
+                <td>{{ form.rollcall_hr_sec_present }}</td>
+                <td>{{ form.rollcall_hr_sec_absent }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- DEFAULTERS -->
+    <!-- ============================= -->
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:var(--m-radius-lg)">
+      <div class="card-header fw-bold py-2 px-4 text-white"
+           style="background:var(--m-menu-bg);border-radius:var(--m-radius-lg) var(--m-radius-lg) 0 0">
+        DEFAULTERS
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% for label, field in form|dictsort:"0" %}{% endfor %}
+          <div class="col-md-3"><label class="form-label small fw-semibold">Uniform</label>{{ form.defaulters_uniform }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">Hair Cut</label>{{ form.defaulters_haircut }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">Nail Cut</label>{{ form.defaulters_nailcut }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">Shoes</label>{{ form.defaulters_shoes }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">Socks</label>{{ form.defaulters_socks }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">Tie</label>{{ form.defaulters_tie }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">Belt</label>{{ form.defaulters_belt }}</div>
+          <div class="col-md-3"><label class="form-label small fw-semibold">ID Card</label>{{ form.defaulters_id_card }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save -->
+    <div class="d-flex gap-2 mb-5">
+      <button type="submit" class="btn fw-semibold px-4"
+              style="background:var(--m-accent,#d4af37);color:#000;border:none;border-radius:8px">
+        <i class="ri-save-line me-1"></i> Save Report
+      </button>
+      <a href="{% url 'morning_report_list' %}" class="btn btn-outline-secondary fw-semibold px-4"
+         style="border-radius:8px">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  (function () {
+    const totalFormsInput = document.querySelector('#id_substaffs-TOTAL_FORMS');
+    const container       = document.getElementById('substaffRows');
+    const emptyForm       = document.getElementById('emptySubstaffForm');
+
+    document.getElementById('addSubstaffRow').addEventListener('click', function () {
+      let total = parseInt(totalFormsInput.value);
+      const newRow = emptyForm.querySelector('.substaff-row').cloneNode(true);
+      newRow.innerHTML = newRow.innerHTML.replaceAll('__prefix__', total);
+      container.appendChild(newRow);
+      totalFormsInput.value = total + 1;
+    });
+  })();
+</script>
+{% endblock %}

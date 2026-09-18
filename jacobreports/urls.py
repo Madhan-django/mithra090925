@@ -261,4 +261,64 @@ urlpatterns = [
         name='revoke_principal_log_access'
     ),
 
+    # =========================================
+    # MORNING REPORT — LIST
+    # =========================================
+
+    path(
+        'morning-report/',
+        views.morning_report_list,
+        name='morning_report_list'
+    ),
+
+    # =========================================
+    # MORNING REPORT — ADD
+    # =========================================
+
+    path(
+        'morning-report/add/',
+        views.add_morning_report,
+        name='add_morning_report'
+    ),
+
+    # =========================================
+    # MORNING REPORT — EDIT
+    # =========================================
+
+    path(
+        'morning-report/edit/<int:report_id>/',
+        views.edit_morning_report,
+        name='edit_morning_report'
+    ),
+
+    # =========================================
+    # MORNING REPORT — DETAIL
+    # =========================================
+
+    path(
+        'morning-report/view/<int:report_id>/',
+        views.view_morning_report,
+        name='view_morning_report'
+    ),
+
+    # =========================================
+    # MORNING REPORT — DELETE
+    # =========================================
+
+    path(
+        'morning-report/delete/<int:report_id>/',
+        views.delete_morning_report,
+        name='delete_morning_report'
+    ),
+
+    # =========================================
+    # MORNING REPORT — PDF
+    # =========================================
+
+    path(
+        'morning-report/pdf/<int:report_id>/',
+        views.morning_report_pdf,
+        name='morning_report_pdf'
+    ),
+
 ]

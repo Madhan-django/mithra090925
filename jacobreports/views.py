@@ -1,16 +1,20 @@
+from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.http import HttpResponse
+from django.template.loader import get_template
 from datetime import date, timedelta
 import openpyxl
+from xhtml2pdf import pisa
 from openpyxl.styles import Font, PatternFill, Alignment
 from institutions.models import school
 from setup.models import academicyr,currentacademicyr,sclass,section
 from staff.models import staff
-from .models import ClassTeacherReport, InchargeReport, ClassTeacherMapping, InchargeMapping, PrincipalDailyLog, PrincipalLogAccessMapping, PrincipalLogEntryType
-from .forms import ClassTeacherReportForm, InchargeReportForm, ClassTeacherMappingForm, InchargeMappingForm, PrincipalLogEntryForm, PrincipalLogAccessForm
+from django.forms import inlineformset_factory
+from .models import ClassTeacherReport, InchargeReport, ClassTeacherMapping, InchargeMapping, PrincipalDailyLog, PrincipalLogAccessMapping, PrincipalLogEntryType, MorningReport, MorningReportSubstaff
+from .forms import ClassTeacherReportForm, InchargeReportForm, ClassTeacherMappingForm, InchargeMappingForm, PrincipalLogEntryForm, PrincipalLogAccessForm, MorningReportForm, MorningReportSubstaffForm
 
 
 # =========================================
@@ -703,6 +707,7 @@ def manage_class_teacher_mappings(request):
     context = {
         'form': form,
         'mappings': mappings,
+        'is_admin': True,
     }
 
     return render(request, 'jacobreports/class_teacher_mappings.html', context)
@@ -900,6 +905,7 @@ def manage_incharge_mappings(request):
     context = {
         'form': form,
         'mappings': mappings,
+        'is_admin': True,
     }
 
     return render(request, 'jacobreports/incharge_mappings.html', context)
@@ -1285,3 +1291,160 @@ def revoke_principal_log_access(request, mapping_id):
     mapping.delete()
     messages.success(request, 'Access revoked successfully.')
     return redirect('manage_principal_log_access')
+
+
+SubstaffFormSet = inlineformset_factory(
+    MorningReport,
+    MorningReportSubstaff,
+    form=MorningReportSubstaffForm,
+    extra=3,
+    can_delete=True,
+)
+
+
+# =========================================
+# MORNING REPORT — LIST
+# =========================================
+
+def morning_report_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+
+    reports = MorningReport.objects.filter(
+        school_name=sdata
+    ).select_related('report_submitted_by').order_by('-report_date')
+
+    paginator = Paginator(reports, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'jacobreports/morning_report_list.html', {
+        'reports': page_obj,
+        'sdata': sdata,
+    })
+
+
+# =========================================
+# MORNING REPORT — ADD
+# =========================================
+
+def add_morning_report(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+
+    if request.method == 'POST':
+        form = MorningReportForm(request.POST)
+        formset = SubstaffFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            report = form.save()
+            formset.instance = report
+            formset.save()
+            messages.success(request, 'Morning Report saved successfully.')
+            return redirect('morning_report_list')
+    else:
+        form = MorningReportForm(initial={'school_name': sdata})
+        formset = SubstaffFormSet()
+
+    form.fields['school_name'].queryset = school.objects.filter(pk=sch_id)
+    form.fields['report_submitted_by'].queryset = sdata.staff_set.filter(status='Active').order_by('first_name')
+
+    return render(request, 'jacobreports/morning_report_form.html', {
+        'form': form,
+        'formset': formset,
+        'sdata': sdata,
+        'title': 'Add Morning Report',
+        'is_edit': False,
+    })
+
+
+# =========================================
+# MORNING REPORT — EDIT
+# =========================================
+
+def edit_morning_report(request, report_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    report = get_object_or_404(MorningReport, id=report_id, school_name=sdata)
+
+    if request.method == 'POST':
+        form = MorningReportForm(request.POST, instance=report)
+        formset = SubstaffFormSet(request.POST, instance=report)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            messages.success(request, 'Morning Report updated successfully.')
+            return redirect('morning_report_list')
+    else:
+        form = MorningReportForm(instance=report)
+        formset = SubstaffFormSet(instance=report)
+
+    form.fields['school_name'].queryset = school.objects.filter(pk=sch_id)
+    form.fields['report_submitted_by'].queryset = sdata.staff_set.filter(status='Active').order_by('first_name')
+
+    return render(request, 'jacobreports/morning_report_form.html', {
+        'form': form,
+        'formset': formset,
+        'sdata': sdata,
+        'title': 'Edit Morning Report',
+        'is_edit': True,
+        'report': report,
+    })
+
+
+# =========================================
+# MORNING REPORT — DETAIL
+# =========================================
+
+def view_morning_report(request, report_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    report = get_object_or_404(
+        MorningReport.objects.prefetch_related('substaffs'),
+        id=report_id,
+        school_name=sdata
+    )
+
+    return render(request, 'jacobreports/morning_report_detail.html', {
+        'report': report,
+        'sdata': sdata,
+    })
+
+
+# =========================================
+# MORNING REPORT — DELETE
+# =========================================
+
+def delete_morning_report(request, report_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    report = get_object_or_404(MorningReport, id=report_id, school_name=sdata)
+
+    if request.method == 'POST':
+        report.delete()
+        messages.success(request, 'Morning Report deleted.')
+    return redirect('morning_report_list')
+
+
+# =========================================
+# MORNING REPORT — PDF
+# =========================================
+
+def morning_report_pdf(request, report_id):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    report = get_object_or_404(
+        MorningReport.objects.prefetch_related('substaffs'),
+        id=report_id,
+        school_name=sdata
+    )
+
+    template = get_template('jacobreports/morning_report_pdf.html')
+    html = template.render({'report': report, 'sdata': sdata})
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode('UTF-8')), result, encoding='UTF-8')
+    if pdf.err:
+        return HttpResponse('PDF generation error', status=500)
+    response = HttpResponse(result.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = (
+        f'inline; filename="MorningReport_{report.report_date}.pdf"'
+    )
+    return response

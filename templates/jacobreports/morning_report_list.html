@@ -1,0 +1,138 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .ctl-header {
+    background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%);
+    border-radius: var(--m-radius-lg, 18px) var(--m-radius-lg, 18px) 0 0;
+  }
+  .ctl-header .eyebrow {
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--m-accent, #d4af37); font-weight: 700; margin-bottom: 2px;
+  }
+  .ctl-header h5 { margin: 0; font-weight: 700; font-size: 18px; color: #fff; }
+  .action-btn {
+    width: 34px; height: 34px; border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--m-border, #e3e8f0); background: #fff;
+    color: var(--m-text-2, #4b5563); text-decoration: none;
+    transition: all 0.18s; font-size: 15px; flex-shrink: 0;
+  }
+  .action-btn:hover { transform: translateY(-1px); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .action-btn.view:hover  { border-color: var(--m-accent, #d4af37); color: var(--m-accent, #d4af37); }
+  .action-btn.edit:hover  { border-color: #c98500; color: #c98500; }
+  .action-btn.delete      { border-color: #f7d3d3; color: #dc2626; }
+  .action-btn.delete:hover{ background: #dc2626; color: #fff; border-color: #dc2626; }
+  .status-badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .status-closed     { background:#d1fae5; color:#065f46; }
+  .status-open       { background:#fef3c7; color:#92400e; }
+  .status-in-progress{ background:#dbeafe; color:#1e40af; }
+  .status-issue      { background:#fee2e2; color:#991b1b; }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <div class="card shadow-sm border-0" style="border-radius: var(--m-radius-lg, 18px)">
+
+    <!-- Header -->
+    <div class="card-header ctl-header d-flex align-items-center justify-content-between px-4 py-3">
+      <div>
+        <div class="eyebrow">Jacob Reports</div>
+        <h5>Morning Report</h5>
+      </div>
+      <a href="{% url 'add_morning_report' %}" class="btn btn-sm fw-semibold"
+         style="background:var(--m-accent,#d4af37);color:#000;border:none;border-radius:8px;padding:6px 16px">
+        <i class="ri-add-line me-1"></i> Add Report
+      </a>
+    </div>
+
+    <div class="card-body p-0">
+      {% if reports %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0" style="font-size:13px">
+          <thead style="background:var(--m-bg,#f8f9fa)">
+            <tr>
+              <th class="px-4 py-3">#</th>
+              <th class="py-3">Date</th>
+              <th class="py-3">Submitted By</th>
+              <th class="py-3">Teachers Present</th>
+              <th class="py-3">Roll Call Total</th>
+              <th class="py-3">Status</th>
+              <th class="py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in reports %}
+            <tr>
+              <td class="px-4 py-3 text-muted">{{ forloop.counter }}</td>
+              <td class="py-3 fw-semibold">{{ r.report_date|date:"d M Y" }}</td>
+              <td class="py-3">{{ r.report_submitted_by }}</td>
+              <td class="py-3">{{ r.teachers_present }} / {{ r.teachers_present|add:r.teachers_absent }}</td>
+              <td class="py-3">{{ r.rollcall_total_present }} / {{ r.rollcall_total_strength }}</td>
+              <td class="py-3">
+                <span class="status-badge status-{{ r.overall_status|lower|slugify }}">
+                  {{ r.overall_status }}
+                </span>
+              </td>
+              <td class="py-3">
+                <div class="d-flex gap-1">
+                  <a href="{% url 'view_morning_report' r.id %}" class="action-btn view" title="View">
+                    <i class="ri-eye-line"></i>
+                  </a>
+                  <a href="{% url 'edit_morning_report' r.id %}" class="action-btn edit" title="Edit">
+                    <i class="ri-pencil-line"></i>
+                  </a>
+                  <form method="post" action="{% url 'delete_morning_report' r.id %}"
+                        onsubmit="return confirm('Delete this report?')" style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn delete" title="Delete">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if reports.has_other_pages %}
+      <div class="d-flex justify-content-center py-3">
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% if reports.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ reports.previous_page_number }}">‹</a>
+            </li>
+            {% endif %}
+            {% for n in reports.paginator.page_range %}
+            <li class="page-item {% if n == reports.number %}active{% endif %}">
+              <a class="page-link" href="?page={{ n }}">{{ n }}</a>
+            </li>
+            {% endfor %}
+            {% if reports.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ reports.next_page_number }}">›</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="text-center py-5">
+        <i class="ri-file-list-3-line" style="font-size:48px;color:var(--m-border)"></i>
+        <p class="mt-2 text-muted">No morning reports yet.</p>
+        <a href="{% url 'add_morning_report' %}" class="btn btn-sm btn-primary">Add First Report</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
