@@ -6,12 +6,15 @@ from django.contrib import messages
 from authenticate.decorators import allowed_users
 from django.contrib.auth.models import User,Group
 from django.contrib.auth.hashers import make_password
-from .models import academicyr,currentacademicyr,sclass,section,subjects,receipt_template,homework_time
-from .forms import add_Acad_Form,set_current_yr,add_class,add_section,add_subjects,receipt_template_form,add_homeworktime_form
+from .models import academicyr,currentacademicyr,sclass,section,subjects,receipt_template,homework_time,birthday_wish_config,AppUpdate,StaffAnnouncement
+from .forms import add_Acad_Form,set_current_yr,add_class,add_section,add_subjects,receipt_template_form,add_homeworktime_form,birthday_wish_config_form,AppUpdateForm,StaffAnnouncementForm
 from fees.models import SchoolPayUConfig
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django_q.models import Schedule
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment
+from io import BytesIO
 
 # Create your views here.
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts'])
@@ -448,6 +451,70 @@ def test_delete(request):
     return HttpResponse("ok")
 
 
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def birthday_wish_config_view(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    try:
+        config = birthday_wish_config.objects.get(school=sdata)
+    except birthday_wish_config.DoesNotExist:
+        config = None
+    return render(request, 'setup/birthday_wish_config.html', {
+        'skool': sdata, 'year': year, 'config': config
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def add_birthday_wish_config(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    try:
+        existing = birthday_wish_config.objects.get(school=sdata)
+    except birthday_wish_config.DoesNotExist:
+        existing = None
+
+    if request.method == 'POST':
+        form = birthday_wish_config_form(request.POST, instance=existing)
+        if form.is_valid():
+            cfg = form.save()
+
+            today = timezone.now().date()
+            run_time = datetime.combine(today, cfg.time)
+            run_time = timezone.make_aware(run_time, timezone.get_current_timezone())
+            if run_time < timezone.now():
+                run_time += timedelta(days=1)
+
+            Schedule.objects.filter(
+                func='pushnotify.tasks.send_birthday_wishes',
+                name=f"Send Birthday Wishes Daily [{sdata.id}]"
+            ).delete()
+
+            if cfg.is_active:
+                Schedule.objects.create(
+                    func='pushnotify.tasks.send_birthday_wishes',
+                    schedule_type=Schedule.DAILY,
+                    next_run=run_time,
+                    args=[sdata.id],
+                    name=f"Send Birthday Wishes Daily [{sdata.id}]"
+                )
+
+            messages.success(request, "Birthday Wish Configuration Saved Successfully")
+            return redirect('birthday_wish_config')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = birthday_wish_config_form(instance=existing, initial={'school': sdata})
+
+    return render(request, 'setup/add_birthday_wish_config.html', {
+        'skool': sdata, 'year': year, 'form': form
+    })
+
+
 allowed_users(allowed_roles=['superadmin','Admin'])
 def copysubjects(request):
     sch_id = request.session['sch_id']
@@ -481,6 +548,99 @@ def copysubjects(request):
         messages.success(request, f"Subjects copied to {copyyear.acad_year} successfully.")
     return redirect('listsubjects')  # 👈 redirect back to subject list
 
+@allowed_users(allowed_roles=['superadmin'])
+def app_update_list(request):
+    updates = AppUpdate.objects.order_by('-date')
+    return render(request, 'setup/app_update_list.html', {'updates': updates})
+
+
+@allowed_users(allowed_roles=['superadmin'])
+def app_update_add(request):
+    if request.method == 'POST':
+        form = AppUpdateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Feature update added successfully.')
+            return redirect('app_update_list')
+    else:
+        form = AppUpdateForm()
+    return render(request, 'setup/app_update_form.html', {'form': form, 'edit': False})
+
+
+@allowed_users(allowed_roles=['superadmin'])
+def app_update_edit(request, pk):
+    update = AppUpdate.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = AppUpdateForm(request.POST, instance=update)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Feature update saved.')
+            return redirect('app_update_list')
+    else:
+        form = AppUpdateForm(instance=update)
+    return render(request, 'setup/app_update_form.html', {'form': form, 'edit': True, 'update': update})
+
+
+@allowed_users(allowed_roles=['superadmin'])
+def app_update_delete(request, pk):
+    AppUpdate.objects.filter(pk=pk).delete()
+    messages.success(request, 'Feature update deleted.')
+    return redirect('app_update_list')
+
+
+# ─── STAFF ANNOUNCEMENTS ─────────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def announcement_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    items = StaffAnnouncement.objects.filter(school=sdata)
+    return render(request, 'setup/announcement_list.html', {'items': items, 'skool': sdata})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def announcement_add(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    if request.method == 'POST':
+        form = StaffAnnouncementForm(request.POST)
+        if form.is_valid():
+            ann = form.save(commit=False)
+            ann.school = sdata
+            ann.posted_by = request.user
+            ann.save()
+            messages.success(request, 'Announcement posted successfully.')
+            return redirect('announcement_list')
+    else:
+        form = StaffAnnouncementForm()
+    return render(request, 'setup/announcement_form.html', {'form': form, 'edit': False, 'skool': sdata})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def announcement_edit(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    ann = StaffAnnouncement.objects.get(pk=pk, school=sdata)
+    if request.method == 'POST':
+        form = StaffAnnouncementForm(request.POST, instance=ann)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Announcement updated.')
+            return redirect('announcement_list')
+    else:
+        form = StaffAnnouncementForm(instance=ann)
+    return render(request, 'setup/announcement_form.html', {'form': form, 'edit': True, 'ann': ann, 'skool': sdata})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def announcement_delete(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    StaffAnnouncement.objects.filter(pk=pk, school=sdata).delete()
+    messages.success(request, 'Announcement deleted.')
+    return redirect('announcement_list')
+
+
 @allowed_users(allowed_roles=['superadmin', 'Admin'])
 def payu_config_view(request):
     sch_id = request.session['sch_id']
@@ -504,3 +664,189 @@ def payu_config_view(request):
         'config': config,
         'skool':  sdata,
     })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def download_subjects(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(school_name=sdata, acad_year=yr)
+    data = subjects.objects.filter(subject_school=sdata, subject_year=year).select_related('subject_class')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Subjects'
+
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(fill_type='solid', fgColor='1F3864')
+    center = Alignment(horizontal='center')
+
+    headers = ['Subject Name', 'Subject Code', 'Class']
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+
+    ws.column_dimensions['A'].width = 30
+    ws.column_dimensions['B'].width = 18
+    ws.column_dimensions['C'].width = 20
+
+    for row_num, sub in enumerate(data, 2):
+        ws.cell(row=row_num, column=1, value=sub.subject_name)
+        ws.cell(row=row_num, column=2, value=sub.subject_code)
+        ws.cell(row=row_num, column=3, value=sub.subject_class.name)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="subjects_{year.acad_year}.xlsx"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def download_subjects_sample(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Subjects'
+
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(fill_type='solid', fgColor='1F3864')
+    center = Alignment(horizontal='center')
+
+    headers = ['Subject Name', 'Subject Code', 'Class']
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+
+    ws.column_dimensions['A'].width = 30
+    ws.column_dimensions['B'].width = 18
+    ws.column_dimensions['C'].width = 20
+
+    sample_rows = [
+        ('Mathematics', 'MATH01', '1'),
+        ('Science', 'SCI01', '1'),
+        ('English', 'ENG01', '2'),
+        ('Tamil', 'TAM01', '2'),
+        ('Social Science', 'SOC01', '3'),
+    ]
+    for row_num, (name, code, cls) in enumerate(sample_rows, 2):
+        ws.cell(row=row_num, column=1, value=name)
+        ws.cell(row=row_num, column=2, value=code)
+        ws.cell(row=row_num, column=3, value=cls)
+
+    # Instructions sheet
+    ws2 = wb.create_sheet(title='Instructions')
+    ws2['A1'] = 'Instructions for uploading subjects:'
+    ws2['A1'].font = Font(bold=True)
+    notes = [
+        'Column A (Subject Name): Full name of the subject, e.g. Mathematics',
+        'Column B (Subject Code): Short code, e.g. MATH01',
+        'Column C (Class): Must exactly match a class name already configured in the system',
+        'Do not change the header row.',
+        'Delete sample rows and enter your own data.',
+    ]
+    for i, note in enumerate(notes, 2):
+        ws2['A' + str(i)] = note
+    ws2.column_dimensions['A'].width = 70
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="subjects_sample.xlsx"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def upload_subjects(request):
+    if request.method != 'POST':
+        return redirect('listsubjects')
+
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(school_name=sdata, acad_year=yr)
+
+    xlsx_file = request.FILES.get('subjects_file')
+    if not xlsx_file:
+        messages.error(request, 'Please select a file to upload.')
+        return redirect('listsubjects')
+
+    if not xlsx_file.name.endswith('.xlsx'):
+        messages.error(request, 'Only .xlsx files are supported.')
+        return redirect('listsubjects')
+
+    try:
+        wb = openpyxl.load_workbook(xlsx_file)
+        ws = wb.active
+    except Exception:
+        messages.error(request, 'Invalid Excel file.')
+        return redirect('listsubjects')
+
+    classes = {c.name.strip().lower(): c for c in sclass.objects.filter(school_name=sdata, acad_year=yr)}
+
+    created = 0
+    skipped = 0
+    errors = []
+
+    for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 2):
+        if not any(row):
+            continue
+
+        subject_name = str(row[0]).strip() if row[0] else ''
+        subject_code = str(row[1]).strip() if row[1] else ''
+        class_name   = str(row[2]).strip() if row[2] else ''
+
+        if not subject_name or not class_name:
+            errors.append(f'Row {row_num}: Subject Name and Class are required.')
+            skipped += 1
+            continue
+
+        cls_obj = classes.get(class_name.lower())
+        if not cls_obj:
+            errors.append(f'Row {row_num}: Class "{class_name}" not found.')
+            skipped += 1
+            continue
+
+        exists = subjects.objects.filter(
+            subject_name=subject_name,
+            subject_class=cls_obj,
+            subject_year=year,
+            subject_school=sdata
+        ).exists()
+
+        if exists:
+            skipped += 1
+            continue
+
+        subjects.objects.create(
+            subject_name=subject_name,
+            subject_code=subject_code,
+            subject_class=cls_obj,
+            subject_year=year,
+            subject_school=sdata
+        )
+        created += 1
+
+    if errors:
+        for e in errors[:5]:
+            messages.warning(request, e)
+
+    if created:
+        messages.success(request, f'{created} subject(s) imported successfully.')
+    if skipped:
+        messages.info(request, f'{skipped} row(s) skipped (duplicates or errors).')
+    return redirect('listsubjects')

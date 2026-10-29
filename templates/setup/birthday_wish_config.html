@@ -1,0 +1,207 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.pc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  backdrop-filter: blur(4px);
+  z-index: 1040;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.pc-modal-backdrop.show { display: flex; }
+.pc-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  width: 100%;
+  max-width: 420px;
+  margin: 16px;
+  animation: modalIn .22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.93) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.pc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.pc-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pc-modal-title i { color: var(--rose); font-size: 18px; }
+.pc-modal-close {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: background .15s, color .15s;
+}
+.pc-modal-close:hover { background: var(--rose-lt); color: var(--rose); }
+.pc-modal-body { padding: 20px 22px; }
+.pc-modal-body p { font-size: 13.5px; color: var(--text-md); line-height: 1.6; margin: 0; }
+.pc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-active { background: var(--green-lt, #d1fae5); color: var(--green, #059669); }
+.status-inactive { background: var(--surface2); color: var(--muted); }
+.time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-family: var(--f-mono);
+}
+.msg-preview {
+  font-size: 13px;
+  color: var(--text-md);
+  background: var(--surface2);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  line-height: 1.6;
+  max-width: 400px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Birthday Wish Configuration</span>
+    </div>
+    <div class="pc-page-title">Birthday Wish Configuration</div>
+    <div class="pc-page-sub">Manage automated birthday push notification settings</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'add_birthday_wish_config' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-settings-3-line"></i> {% if config %}Update Config{% else %}Add Config{% endif %}
+    </a>
+  </div>
+</div>
+
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-cake-2-line me-2" style="color:var(--accent);"></i>Birthday Wish Settings
+      </div>
+      <div class="pc-card-sub">Push notification sent daily to students on their birthday</div>
+    </div>
+    {% if config %}
+    <span class="status-badge {% if config.is_active %}status-active{% else %}status-inactive{% endif %}">
+      <i class="ri-{% if config.is_active %}check{% else %}close{% endif %}-circle-line"></i>
+      {% if config.is_active %}Active{% else %}Inactive{% endif %}
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="pc-card-body">
+    {% if config %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;">Notification Title</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);">{{ config.title }}</div>
+      </div>
+
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;">Send Time</div>
+        <span class="time-badge"><i class="ri-time-line"></i>{{ config.time }}</span>
+      </div>
+
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;">Status</div>
+        <span class="status-badge {% if config.is_active %}status-active{% else %}status-inactive{% endif %}">
+          {% if config.is_active %}Active — schedule running{% else %}Inactive — schedule paused{% endif %}
+        </span>
+      </div>
+
+      <div style="grid-column:1/-1;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;">Message Template</div>
+        <div class="msg-preview">{{ config.message }}</div>
+        <span style="font-size:11.5px;color:var(--muted);margin-top:6px;display:block;">
+          <i class="ri-information-line"></i> <code>{% templatetag openvariable %}student_name{% templatetag closevariable %}</code> will be replaced with each student's name at send time.
+        </span>
+      </div>
+
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);display:flex;gap:10px;">
+      <a href="{% url 'add_birthday_wish_config' %}" class="pc-btn pc-btn-primary">
+        <i class="ri-pencil-line"></i> Edit Configuration
+      </a>
+    </div>
+
+    {% else %}
+    <div class="pc-empty">
+      <i class="ri-cake-2-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No birthday wish configuration found</div>
+      <div class="pc-empty-sub">Add a configuration to start sending automated birthday wishes</div>
+      <a href="{% url 'add_birthday_wish_config' %}" class="pc-btn pc-btn-primary" style="margin-top:16px;">
+        <i class="ri-add-circle-line"></i> Add Configuration
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if config %}
+<div class="pc-card-flat" style="margin-top:20px;">
+  <div style="display:flex;gap:16px;align-items:start;">
+    <div style="flex-shrink:0;">
+      <div style="width:40px;height:40px;background:var(--accent-lt);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--accent);">
+        <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">How it works</div>
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-md);line-height:1.8;">
+        <li>Every day at <strong>{{ config.time }}</strong> the system checks for students whose birthday matches today's date.</li>
+        <li>A personalized push notification is sent to each birthday student's mobile app.</li>
+        <li>Use <code>{% templatetag openvariable %}student_name{% templatetag closevariable %}</code> in your message to address each student by name.</li>
+        <li>Toggle <em>Active</em> off to pause without deleting the configuration.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

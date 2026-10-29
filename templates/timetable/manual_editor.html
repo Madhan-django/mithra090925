@@ -1,0 +1,523 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+/* ── Layout ── */
+.editor-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.editor-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+}
+.editor-main { flex: 1; min-width: 0; }
+
+/* ── Sidebar ── */
+.sidebar-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sidebar-head-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--text-sm);
+}
+.sidebar-scroll {
+  overflow-y: auto;
+  padding: 10px 8px;
+  flex: 1;
+}
+
+/* ── Allocation cards ── */
+.alloc-card {
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 7px;
+  cursor: grab;
+  background: var(--surface2);
+  transition: border-color 150ms, transform 120ms, box-shadow 120ms;
+  user-select: none;
+}
+.alloc-card:last-child { margin-bottom: 0; }
+.alloc-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(79,70,229,.12);
+  transform: translateX(2px);
+}
+.alloc-card.dragging { opacity: .55; cursor: grabbing; }
+.alloc-card.done { border-color: #86efac; background: #f0fdf4; }
+.alloc-card.over  { border-color: #fca5a5; background: #fff1f2; }
+.alloc-subject {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alloc-teacher {
+  font-size: 11.5px;
+  color: var(--text-sm);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alloc-hours {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hours-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hours-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 300ms ease;
+}
+.hours-fill.full { background: #22c55e; }
+.hours-fill.over { background: #ef4444; }
+
+/* ── Timetable ── */
+.tt-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+}
+.tt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 560px;
+}
+.tt-table thead {
+  background: #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.tt-table thead th {
+  padding: 10px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: #94a3b8;
+  text-align: center;
+  border: none;
+  white-space: nowrap;
+}
+.tt-table thead th:first-child { text-align: left; padding-left: 16px; width: 95px; }
+.tt-table tbody tr { border-bottom: 1px solid var(--border); }
+.tt-table tbody tr:last-child { border-bottom: none; }
+.tt-table tbody td.day-label {
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface2);
+  border-right: 2px solid var(--border-dark);
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* ── Droppable cells ── */
+.drop-cell {
+  padding: 0;
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+  min-width: 106px;
+  height: 58px;
+  position: relative;
+  transition: background 120ms;
+}
+.drop-cell:last-child { border-right: none; }
+.drop-cell.no-slot { background: #f8fafc; }
+
+.drop-cell.drag-over {
+  background: rgba(79,70,229,.08);
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+.drop-cell.filled { background: #f0fdf4; }
+.drop-cell.filled:hover { background: #dcfce7; }
+
+/* Drop hint (empty cell) */
+.drop-hint {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d1d5db;
+  font-size: 18px;
+  transition: color 120ms;
+}
+.drop-cell.drag-over .drop-hint { color: var(--accent); }
+
+/* Filled cell content */
+.cell-inner {
+  padding: 6px 8px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  position: relative;
+  height: 100%;
+  justify-content: center;
+}
+.cell-subj {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 88px;
+}
+.cell-tchr {
+  font-size: 11px;
+  color: var(--text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 88px;
+}
+.cell-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fca5a5;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 150ms;
+  font-size: 11px;
+  color: #b91c1c;
+  padding: 0;
+  line-height: 1;
+}
+.drop-cell:hover .cell-del { opacity: 1; }
+
+/* ── Status toast ── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 10px 18px;
+  border-radius: var(--r-lg);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--sh-lg);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 250ms, transform 250ms;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.success { background: #22c55e; color: #fff; }
+#toast.error   { background: #ef4444; color: #fff; }
+#toast.info    { background: #3b82f6; color: #fff; }
+
+@media (max-width: 900px) {
+  .editor-layout { flex-direction: column; }
+  .editor-sidebar { width: 100%; position: static; max-height: 260px; }
+}
+</style>
+
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'view_timetable' %}">Timetable</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Manual Editor</span>
+      </nav>
+      <h1 class="pc-page-title">Manual Editor — {{ section.class_sec_name.name }} {{ section.section_name }}</h1>
+      <p class="pc-page-sub">Drag teacher-subject cards onto the grid cells. Changes save automatically.</p>
+    </div>
+    <div class="pc-page-header-right">
+      <a href="{% url 'view_section_timetable' %}?section={{ section.id }}" class="pc-btn pc-btn-outline">
+        <i class="ri-eye-line"></i> View
+      </a>
+      <a href="{% url 'view_timetable' %}" class="pc-btn pc-btn-secondary">
+        <i class="ri-arrow-left-line"></i> Back
+      </a>
+    </div>
+  </div>
+
+  <div class="editor-layout">
+
+    <!-- Sidebar: Allocations -->
+    <div class="editor-sidebar">
+      <div class="sidebar-head">
+        <span class="sidebar-head-title">Teacher-Subject Pairs</span>
+        <span class="pc-badge pc-badge-primary pc-badge-no-dot">{{ alloc_data|length }}</span>
+      </div>
+      <div class="sidebar-scroll">
+        {% for a in alloc_data %}
+        <div class="alloc-card {% if a.hours_remaining == 0 %}done{% elif a.hours_remaining < 0 %}over{% endif %}"
+          draggable="true"
+          id="acard-{{ a.id }}"
+          data-alloc-id="{{ a.id }}"
+          data-subject="{{ a.subject_name }}"
+          data-teacher="{{ a.teacher_name }}"
+        >
+          <div class="alloc-subject" title="{{ a.subject_name }}">{{ a.subject_name }}</div>
+          <div class="alloc-teacher">
+            <i class="ri-user-line"></i>
+            <span title="{{ a.teacher_name }}">{{ a.teacher_name }}</span>
+          </div>
+          <div class="alloc-hours">
+            <span id="asgn-{{ a.id }}">{{ a.hours_assigned }}</span>/{{ a.hours_total }} hrs
+            <div class="hours-bar">
+              <div class="hours-fill {% if a.hours_remaining == 0 %}full{% elif a.hours_remaining < 0 %}over{% endif %}"
+                id="bar-{{ a.id }}"
+                style="width:{% if a.hours_total > 0 %}{% widthratio a.hours_assigned a.hours_total 100 %}{% else %}0{% endif %}%">
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:20px;text-align:center;color:var(--text-sm);font-size:12.5px;">
+          No allocations set up for this section.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Main: Timetable Grid -->
+    <div class="editor-main">
+      <div class="tt-table-wrap">
+        <table class="tt-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              {% for p in periods %}<th>P{{ p }}</th>{% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in grid %}
+            <tr>
+              <td class="day-label">{{ row.day_label }}</td>
+              {% for cell in row.cells %}
+              {% if cell.timeslot_id %}
+              <td class="drop-cell {% if cell.entry %}filled{% endif %}"
+                data-ts="{{ cell.timeslot_id }}"
+                data-sec="{{ section.id }}"
+                data-alloc="{{ cell.allocation_id|default:'' }}"
+                ondragover="onDragOver(event)"
+                ondragleave="onDragLeave(event)"
+                ondrop="onDrop(event)"
+              >
+                {% if cell.entry %}
+                <div class="cell-inner">
+                  <span class="cell-subj" title="{{ cell.entry.subject.subject_name }}">{{ cell.entry.subject.subject_name }}</span>
+                  <span class="cell-tchr" title="{{ cell.entry.teacher.first_name }}">{{ cell.entry.teacher.first_name }}</span>
+                  <button class="cell-del" title="Clear this slot"
+                    onclick="clearCell(event, this, {{ cell.timeslot_id }}, {{ section.id }}, '{{ cell.allocation_id|default:'' }}')"
+                  >&#x2715;</button>
+                </div>
+                {% else %}
+                <div class="drop-hint"><i class="ri-add-circle-line"></i></div>
+                {% endif %}
+              </td>
+              {% else %}
+              <td class="drop-cell no-slot" title="No time slot for this day/period">
+                <div style="color:#e2e8f0;text-align:center;font-size:16px;">—</div>
+              </td>
+              {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SECTION_ID = {{ section.id }};
+const CSRF = '{{ csrf_token }}';
+const UPDATE_URL = '{% url "update_timetable_cell" %}';
+const CLEAR_URL  = '{% url "clear_timetable_cell" %}';
+
+// Build allocation hours lookup from Django context
+const allocHours = {
+  {% for a in alloc_data %}
+  {{ a.id }}: { assigned: {{ a.hours_assigned }}, total: {{ a.hours_total }} },
+  {% endfor %}
+};
+
+let draggingAllocId = null;
+
+// ── Drag start/end on sidebar cards ──
+document.querySelectorAll('.alloc-card').forEach(card => {
+  card.addEventListener('dragstart', e => {
+    draggingAllocId = card.dataset.allocId;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', draggingAllocId);
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+  });
+});
+
+// ── Cell drag events ──
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  e.currentTarget.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onDrop(e) {
+  e.preventDefault();
+  const cell = e.currentTarget;
+  cell.classList.remove('drag-over');
+  const allocId = draggingAllocId || e.dataTransfer.getData('text/plain');
+  if (!allocId) return;
+  const tsId = cell.dataset.ts;
+  assignCell(cell, tsId, SECTION_ID, allocId);
+}
+
+// ── Assign cell via AJAX ──
+function assignCell(cell, tsId, secId, allocId) {
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('timeslot_id', tsId);
+  fd.append('section_id', secId);
+  fd.append('allocation_id', allocId);
+
+  fetch(UPDATE_URL, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        const prevAllocId = cell.dataset.alloc || '';
+        if (prevAllocId && prevAllocId !== allocId) {
+          adjustHours(prevAllocId, -1);
+        }
+        adjustHours(allocId, cell.classList.contains('filled') ? 0 : 1);
+        cell.dataset.alloc = allocId;
+        cell.classList.add('filled');
+        cell.innerHTML = `
+          <div class="cell-inner">
+            <span class="cell-subj" title="${data.subject}">${data.subject}</span>
+            <span class="cell-tchr" title="${data.teacher}">${data.teacher}</span>
+            <button class="cell-del" title="Clear this slot"
+              onclick="clearCell(event, this, ${tsId}, ${secId}, '${allocId}')">&#x2715;</button>
+          </div>`;
+        showToast('Saved', 'success');
+      } else {
+        showToast(data.error || 'Error saving', 'error');
+      }
+    })
+    .catch(() => showToast('Network error', 'error'));
+}
+
+// ── Clear cell via AJAX ──
+function clearCell(e, btn, tsId, secId, allocId) {
+  e.stopPropagation();
+  const cell = btn.closest('.drop-cell');
+
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('timeslot_id', tsId);
+  fd.append('section_id', secId);
+
+  fetch(CLEAR_URL, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        if (allocId) adjustHours(allocId, -1);
+        cell.dataset.alloc = '';
+        cell.classList.remove('filled');
+        cell.innerHTML = '<div class="drop-hint"><i class="ri-add-circle-line"></i></div>';
+        showToast('Cleared', 'info');
+      } else {
+        showToast('Error clearing', 'error');
+      }
+    })
+    .catch(() => showToast('Network error', 'error'));
+}
+
+// ── Update sidebar hours counter & progress bar ──
+function adjustHours(allocId, delta) {
+  if (!allocId || !allocHours[allocId]) return;
+  allocHours[allocId].assigned += delta;
+  const a = allocHours[allocId];
+  const el = document.getElementById('asgn-' + allocId);
+  const bar = document.getElementById('bar-' + allocId);
+  const card = document.getElementById('acard-' + allocId);
+  if (el) el.textContent = a.assigned;
+  if (bar && a.total > 0) {
+    const pct = Math.min(100, Math.round((a.assigned / a.total) * 100));
+    bar.style.width = pct + '%';
+    bar.className = 'hours-fill' + (a.assigned >= a.total ? (a.assigned > a.total ? ' over' : ' full') : '');
+  }
+  if (card) {
+    card.classList.toggle('done', a.assigned >= a.total && a.assigned <= a.total);
+    card.classList.toggle('over', a.assigned > a.total);
+  }
+}
+
+// ── Toast notification ──
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = type; }, 2500);
+}
+</script>
+
+{% endblock %}

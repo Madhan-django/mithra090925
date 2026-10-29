@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'social_django',
     'rest_framework',
     'phonenumber_field',
     'multiforloop',
@@ -104,6 +105,7 @@ INSTALLED_APPS = [
     'transport',
     'hostel',
     'lessonplan',
+    'certificates',
 ]
 
 Q_CLUSTER = {
@@ -153,8 +155,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-   
-
+    'authenticate.middleware.GroupPermissionMiddleware',
 ]
 
 ROOT_URLCONF = 'mithran.urls'
@@ -171,6 +172,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'institutions.context_processors.menu_permissions',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -178,14 +181,42 @@ TEMPLATES = [
 
 LOGIN_URL = '/'
 
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('GOOGLE_OAUTH2_KEY', default='')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('GOOGLE_OAUTH2_SECRET', default='')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['openid', 'email', 'profile']
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/auth/social-complete/'
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/'
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',  # match existing Django user by email
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
 # Set the session engine to use database-backed sessions
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Set the session timeout (in seconds) to the desired idle time before logout
 # For example, to set a timeout of 30 minutes (1800 seconds)
 
-SESSION_COOKIE_AGE = 1200
+SESSION_COOKIE_AGE = 1800
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+CSRF_FAILURE_VIEW = 'authenticate.views.csrf_failure'
 
 
 WSGI_APPLICATION = 'mithran.wsgi.application'
@@ -201,7 +232,7 @@ WSGI_APPLICATION = 'mithran.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mithra220226',
+        'NAME': 'mithra281026',
         'USER': 'root',
         'PASSWORD':'MithranMithra@123',
         'HOST': 'localhost',  # or your MySQL host IP address

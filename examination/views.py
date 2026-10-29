@@ -9,11 +9,12 @@ from setup.models import academicyr,currentacademicyr,subjects,sclass,section
 from admission.models import students
 
 from .utils import render_to_pdf
+from .models import GradeScale
 from django.db.models import Avg
 from django.conf import settings
 from django.http import JsonResponse
 import openpyxl
-from openpyxl.styles import Font
+from openpyxl.styles import Font, PatternFill, Alignment
 from io import BytesIO
 import os
 # Create your views here.
@@ -297,6 +298,41 @@ def generate_admit_card(request,exam_id):
     admt = admit_card.objects.filter(exam_label=exam_data)
     return render(request,'exams/generate_admitcard.html',context={'data':admt,'skool':sdata,'year':year,'secs':secs,'exam_id':exam_id})
 
+
+# @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+# def update_formset(request, exam_det_id, exam_label_id):
+#     sch_id = request.session['sch_id']
+#     sdata = school.objects.get(pk=sch_id)
+#     yr = currentacademicyr.objects.get(school_name=sdata)
+#     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+#     test = admit_card.objects.get(pk=exam_det_id)
+#     subjdata = exam_result.objects.filter(adm_card=test)
+#     # Use your custom form (exam_resultform) in the formset
+#     MyModelFormSet = modelformset_factory(
+#         exam_result,
+#         form=exam_resultform,
+#         extra=0
+#     )
+#
+#     formset = MyModelFormSet(
+#         request.POST or None,
+#         queryset=exam_result.objects.filter(adm_card__examno=test, adm_card__exam_label=test.exam_label)
+#     )
+#     for index, form in enumerate(formset):
+#         if index < subjdata.count():  # Ensures subjdata doesn't exceed the formset length
+#             form.subb = subjdata[index].exam_sub
+#
+#     if request.method == 'POST':
+#
+#         if formset.is_valid():
+#             formset.save()
+#             messages.success(request, 'Mark update successful')
+#         else:
+#             messages.error(request, 'Invalid form')
+#
+#     return render(request, 'exams/update_formset.html',
+#                   {'formset': formset, 'data': test, 'skool': sdata, 'year': year, 'subjdata': subjdata})
+
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def update_formset(request,exam_det_id,exam_label_id):
     sch_id = request.session['sch_id']
@@ -321,14 +357,16 @@ def update_formset(request,exam_det_id,exam_label_id):
             form.subb = subjdata[index].exam_sub
     
     if request.method == 'POST':
-        
+
         if formset.is_valid():
             formset.save()
             messages.success(request, 'Mark update successful')
         else:
             messages.error(request, 'Invalid form')
 
-    return render(request, 'exams/update_formset.html', {'formset': formset, 'data': test, 'skool': sdata, 'year': year,'subjdata':subjdata})
+    zipped_data = list(zip(formset.forms, subjdata))
+    show_grades = GradeScale.objects.filter(school=sdata).exists()
+    return render(request, 'exams/update_formset.html', {'formset': formset, 'data': test, 'skool': sdata, 'year': year, 'subjdata': subjdata, 'zipped_data': zipped_data, 'show_grades': show_grades})
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def exam_result_view(request):
@@ -339,6 +377,9 @@ def exam_result_view(request):
     data = admit_card.objects.all()
     clsdata = sclass.objects.filter(acad_year=yr, school_name=sdata)
     return render(request,'exams/exam_result.html',context={'data':data,'clsdata':clsdata,'skool':sdata,'year':year})
+
+
+
 
 
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
@@ -356,7 +397,8 @@ def exam_result_print(request,admit_id):
         'data':data,
         'skool':sdata,
         'adm_data':adm_data,
-        'tot':tot
+        'tot':tot,
+        'show_grades': GradeScale.objects.filter(school=sdata).exists(),
     }
     pdf = render_to_pdf('exams/print_exam_result.html',edata)
     return HttpResponse(pdf, content_type='application/pdf')
@@ -410,6 +452,7 @@ def sectionwise_admitcard(request,sec_id,exam_id):
                   context={'data': admt, 'skool': sdata, 'year': year,'secs':secs,'exam_id':exam_id})
 
 
+
 @allowed_users(allowed_roles=['superadmin','Admin','Accounts','Teacher'])
 def bulk_print_result(request):
     sch_id = request.session['sch_id']
@@ -438,20 +481,22 @@ def bulk_print_result(request):
                 data = exam_result.objects.filter(adm_card__exam_label__exam_class=cls, adm_card__exam_stu=stud,adm_card__exam_label__exam_year=year)
                 average_marks_by_subject = data.values('exam_sub__exam_subjects').annotate(
                     avg_marks=Avg('obtained_marks'))
+                marks_totals = {}
+                max_marks_totals = {}
                 for lxm in exm:
                     fst = lxm.exam_groupby
-                    marks_totals = {}
                     if lxm.exam_groupby == fst:
                         for sb in subexmp:
                             tot = 0
                             for dt in data:
-
                                 if sb.exam_subjects.subject_name == dt.exam_sub.exam_subjects.subject_name:
                                     try:
                                         tot = dt.obtained_marks + tot
                                     except:
-                                        tot=tot
+                                        tot = tot
                             marks_totals[sb.exam_subjects] = tot
+                            subj_obj = sb.exam_subjects
+                            max_marks_totals[subj_obj] = max_marks_totals.get(subj_obj, 0) + sb.max_marks
 
                 # Access the subject name and average marks in the QuerySet
                 for subject_data in average_marks_by_subject:
@@ -463,13 +508,15 @@ def bulk_print_result(request):
                     'data': data,
                     'stud': stud,
                     'exm': exm,
-                    'grp':grp,
+                    'grp': grp,
                     'subj': subj,
                     'skool': sdata,
                     'aavg': average_marks_by_subject,
                     'photourl': media_path,
                     'skoollogo': skoollogo,
                     'totalmarks': marks_totals,
+                    'max_marks_totals': max_marks_totals,
+                    'show_grades': GradeScale.objects.filter(school=sdata).exists(),
                 })
 
             # Generate the PDF using data for all students
@@ -881,4 +928,482 @@ def student_wise_analysispdf(request):
         error_message = f"An error occurred: {str(e)}"
         return HttpResponse(error_message, status=500)
 
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def download_exams(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = exams.objects.filter(exam_school=sdata, exam_year=year).select_related('exam_class', 'exm_grp').order_by('-exam_start_date')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Exams'
+
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(fill_type='solid', fgColor='1F3864')
+    center = Alignment(horizontal='center')
+
+    headers = ['Exam Title', 'Exam Code', 'Centre', 'Class', 'Subject Count', 'Group', 'Start Date', 'End Date', 'Remark']
+    col_widths = [30, 18, 20, 15, 14, 20, 14, 14, 15]
+    for col, (h, w) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+        ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = w
+
+    for row_num, ex in enumerate(data, 2):
+        ws.cell(row=row_num, column=1, value=ex.exam_title)
+        ws.cell(row=row_num, column=2, value=ex.exam_code)
+        ws.cell(row=row_num, column=3, value=ex.exam_centre)
+        ws.cell(row=row_num, column=4, value=ex.exam_class.name)
+        ws.cell(row=row_num, column=5, value=ex.exam_Sub_count)
+        ws.cell(row=row_num, column=6, value=ex.exm_grp.exm_group if ex.exm_grp else '')
+        ws.cell(row=row_num, column=7, value=ex.exam_start_date.strftime('%Y-%m-%d') if ex.exam_start_date else '')
+        ws.cell(row=row_num, column=8, value=ex.exam_end_date.strftime('%Y-%m-%d') if ex.exam_end_date else '')
+        ws.cell(row=row_num, column=9, value=ex.remark)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="exams_{year.acad_year}.xlsx"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def download_exams_sample(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Exams'
+
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(fill_type='solid', fgColor='1F3864')
+    center = Alignment(horizontal='center')
+
+    headers = ['Exam Title', 'Exam Code', 'Centre', 'Class', 'Subject Count', 'Group', 'Start Date', 'End Date', 'Remark']
+    col_widths = [30, 18, 20, 15, 14, 20, 14, 14, 15]
+    for col, (h, w) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+        ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = w
+
+    sample_rows = [
+        ('Term 1 Exam', 'T1-2024', 'Main Hall', '1', 5, 'Term 1', '2024-06-01', '2024-06-10', 'Pass'),
+        ('Term 2 Exam', 'T2-2024', 'Main Hall', '2', 6, 'Term 2', '2024-10-01', '2024-10-10', 'Pass'),
+        ('Annual Exam',  'ANN-2024', 'Main Hall', '3', 7, 'Annual',  '2025-02-01', '2025-02-15', 'Pass'),
+    ]
+    for row_num, row in enumerate(sample_rows, 2):
+        for col, val in enumerate(row, 1):
+            ws.cell(row=row_num, column=col, value=val)
+
+    ws2 = wb.create_sheet(title='Instructions')
+    ws2['A1'] = 'Instructions for uploading exams:'
+    ws2['A1'].font = Font(bold=True)
+    notes = [
+        'Exam Title     : Full name of the exam, e.g. Term 1 Exam',
+        'Exam Code      : Short code, e.g. T1-2024',
+        'Centre         : Exam centre name',
+        'Class          : Must exactly match a class name configured in the system',
+        'Subject Count  : Number of subjects (integer)',
+        'Group          : Must exactly match an exam group name configured in the system (or leave blank)',
+        'Start Date     : Format YYYY-MM-DD, e.g. 2024-06-01',
+        'End Date       : Format YYYY-MM-DD, e.g. 2024-06-10',
+        'Remark         : e.g. Pass / Fail (short text)',
+        'Do not change the header row. Delete sample rows and enter your own data.',
+    ]
+    for i, note in enumerate(notes, 2):
+        ws2['A' + str(i)] = note
+    ws2.column_dimensions['A'].width = 70
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="exams_sample.xlsx"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def upload_exams(request):
+    if request.method != 'POST':
+        return redirect('examlist')
+
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(school_name=sdata, acad_year=yr)
+
+    xlsx_file = request.FILES.get('exams_file')
+    if not xlsx_file:
+        messages.error(request, 'Please select a file to upload.')
+        return redirect('examlist')
+
+    if not xlsx_file.name.endswith('.xlsx'):
+        messages.error(request, 'Only .xlsx files are supported.')
+        return redirect('examlist')
+
+    try:
+        wb = openpyxl.load_workbook(xlsx_file)
+        ws = wb.active
+    except Exception:
+        messages.error(request, 'Invalid Excel file.')
+        return redirect('examlist')
+
+    classes = {c.name.strip().lower(): c for c in sclass.objects.filter(school_name=sdata, acad_year=yr)}
+    groups  = {g.exm_group.strip().lower(): g for g in exam_group.objects.filter(exam_group_school=sdata)}
+
+    created = 0
+    skipped = 0
+    errors  = []
+
+    from datetime import date as date_type
+    import datetime
+
+    for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 2):
+        if not any(row):
+            continue
+
+        exam_title_val  = str(row[0]).strip() if row[0] else ''
+        exam_code_val   = str(row[1]).strip() if row[1] else ''
+        exam_centre_val = str(row[2]).strip() if row[2] else ''
+        class_name_val  = str(row[3]).strip() if row[3] else ''
+        sub_count_val   = row[4]
+        group_name_val  = str(row[5]).strip() if row[5] else ''
+        start_date_val  = row[6]
+        end_date_val    = row[7]
+        remark_val      = str(row[8]).strip() if row[8] else 'Pass'
+
+        if not exam_title_val or not class_name_val:
+            errors.append(f'Row {row_num}: Exam Title and Class are required.')
+            skipped += 1
+            continue
+
+        cls_obj = classes.get(class_name_val.lower())
+        if not cls_obj:
+            errors.append(f'Row {row_num}: Class "{class_name_val}" not found.')
+            skipped += 1
+            continue
+
+        grp_obj = groups.get(group_name_val.lower()) if group_name_val else None
+
+        try:
+            sub_count = int(sub_count_val) if sub_count_val is not None else 0
+        except (ValueError, TypeError):
+            sub_count = 0
+
+        def parse_date(val):
+            if isinstance(val, (date_type, datetime.datetime)):
+                return val if isinstance(val, date_type) else val.date()
+            try:
+                return datetime.datetime.strptime(str(val).strip(), '%Y-%m-%d').date()
+            except Exception:
+                return None
+
+        start_date = parse_date(start_date_val)
+        end_date   = parse_date(end_date_val)
+
+        if not start_date or not end_date:
+            errors.append(f'Row {row_num}: Invalid date format. Use YYYY-MM-DD.')
+            skipped += 1
+            continue
+
+        exists = exams.objects.filter(
+            exam_title=exam_title_val,
+            exam_class=cls_obj,
+            exam_year=year,
+            exam_school=sdata
+        ).exists()
+
+        if exists:
+            skipped += 1
+            continue
+
+        exams.objects.create(
+            exam_title=exam_title_val,
+            exam_code=exam_code_val,
+            exam_centre=exam_centre_val,
+            exam_class=cls_obj,
+            exam_Sub_count=sub_count,
+            exm_grp=grp_obj,
+            exam_start_date=start_date,
+            exam_end_date=end_date,
+            exam_year=year,
+            exam_school=sdata,
+            remark=remark_val,
+        )
+        created += 1
+
+    if errors:
+        for e in errors[:5]:
+            messages.warning(request, e)
+    if created:
+        messages.success(request, f'{created} exam(s) imported successfully.')
+    if skipped:
+        messages.info(request, f'{skipped} row(s) skipped (duplicates or errors).')
+    return redirect('examlist')
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def download_exam_subjects(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+    data = exam_subjectmap.objects.filter(
+        exname__exam_school=sdata, exname__exam_year=year
+    ).select_related('exname', 'exam_subjects').order_by('exname__exam_title', 'paper_date')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Exam Subjects'
+
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(fill_type='solid', fgColor='1F3864')
+    center = Alignment(horizontal='center')
+
+    headers = ['Exam Title', 'Class', 'Subject Name', 'Subject Type', 'Paper Code',
+               'Paper Date', 'Start Time', 'End Time', 'Room No', 'Max Marks']
+    col_widths = [30, 15, 25, 15, 12, 14, 12, 12, 12, 12]
+    for col, (h, w) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+        ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = w
+
+    for row_num, esm in enumerate(data, 2):
+        ws.cell(row=row_num, column=1, value=esm.exname.exam_title)
+        ws.cell(row=row_num, column=2, value=esm.exname.exam_class.name)
+        ws.cell(row=row_num, column=3, value=esm.exam_subjects.subject_name)
+        ws.cell(row=row_num, column=4, value=esm.exam_subject_type)
+        ws.cell(row=row_num, column=5, value=esm.paper_code)
+        ws.cell(row=row_num, column=6, value=esm.paper_date.strftime('%Y-%m-%d') if esm.paper_date else '')
+        ws.cell(row=row_num, column=7, value=esm.start_time.strftime('%H:%M') if esm.start_time else '')
+        ws.cell(row=row_num, column=8, value=esm.end_time.strftime('%H:%M') if esm.end_time else '')
+        ws.cell(row=row_num, column=9, value=esm.room_no)
+        ws.cell(row=row_num, column=10, value=esm.max_marks)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="exam_subjects_{year.acad_year}.xlsx"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def download_exam_subjects_sample(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Exam Subjects'
+
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(fill_type='solid', fgColor='1F3864')
+    center = Alignment(horizontal='center')
+
+    headers = ['Exam Title', 'Class', 'Subject Name', 'Subject Type', 'Paper Code',
+               'Paper Date', 'Start Time', 'End Time', 'Room No', 'Max Marks']
+    col_widths = [30, 15, 25, 15, 12, 14, 12, 12, 12, 12]
+    for col, (h, w) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+        ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = w
+
+    sample_rows = [
+        ('Term 1 Exam', '1', 'Mathematics', 'Theory', 'MAT-01', '2024-06-01', '09:00', '12:00', 'Room 1', 100),
+        ('Term 1 Exam', '1', 'Science',     'Theory', 'SCI-01', '2024-06-02', '09:00', '12:00', 'Room 2', 100),
+        ('Term 2 Exam', '2', 'English',     'Theory', 'ENG-01', '2024-10-01', '09:00', '11:00', 'Room 1', 80),
+    ]
+    for row_num, row in enumerate(sample_rows, 2):
+        for col, val in enumerate(row, 1):
+            ws.cell(row=row_num, column=col, value=val)
+
+    ws2 = wb.create_sheet(title='Instructions')
+    ws2['A1'] = 'Instructions for uploading exam subjects:'
+    ws2['A1'].font = Font(bold=True)
+    notes = [
+        'Exam Title   : Must exactly match an exam title configured in the system for the current year',
+        'Class        : Must exactly match the class name of that exam',
+        'Subject Name : Must exactly match a subject name configured for that class and year',
+        'Subject Type : e.g. Theory, Practical, etc.',
+        'Paper Code   : Short code for the paper, e.g. MAT-01',
+        'Paper Date   : Format YYYY-MM-DD, e.g. 2024-06-01',
+        'Start Time   : Format HH:MM (24-hour), e.g. 09:00',
+        'End Time     : Format HH:MM (24-hour), e.g. 12:00',
+        'Room No      : Room or hall number',
+        'Max Marks    : Maximum marks (integer)',
+        'Do not change the header row. Delete sample rows and enter your own data.',
+    ]
+    for i, note in enumerate(notes, 2):
+        ws2['A' + str(i)] = note
+    ws2.column_dimensions['A'].width = 75
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="exam_subjects_sample.xlsx"'
+    return response
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts', 'Teacher'])
+def upload_exam_subjects(request):
+    if request.method != 'POST':
+        return redirect('exams_subject')
+
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(school_name=sdata, acad_year=yr)
+
+    xlsx_file = request.FILES.get('exam_subjects_file')
+    if not xlsx_file:
+        messages.error(request, 'Please select a file to upload.')
+        return redirect('exams_subject')
+
+    if not xlsx_file.name.endswith('.xlsx'):
+        messages.error(request, 'Only .xlsx files are supported.')
+        return redirect('exams_subject')
+
+    try:
+        wb = openpyxl.load_workbook(xlsx_file)
+        ws = wb.active
+    except Exception:
+        messages.error(request, 'Invalid Excel file.')
+        return redirect('exams_subject')
+
+    exam_map = {
+        (e.exam_title.strip().lower(), e.exam_class.name.strip().lower()): e
+        for e in exams.objects.filter(exam_school=sdata, exam_year=year).select_related('exam_class')
+    }
+    subj_map = {
+        (s.subject_name.strip().lower(), s.subject_class.name.strip().lower()): s
+        for s in subjects.objects.filter(subject_school=sdata, subject_year=year).select_related('subject_class')
+    }
+
+    import datetime
+
+    def parse_date(val):
+        if isinstance(val, (datetime.date, datetime.datetime)):
+            return val if isinstance(val, datetime.date) else val.date()
+        try:
+            return datetime.datetime.strptime(str(val).strip(), '%Y-%m-%d').date()
+        except Exception:
+            return None
+
+    def parse_time(val):
+        if isinstance(val, datetime.time):
+            return val
+        try:
+            return datetime.datetime.strptime(str(val).strip(), '%H:%M').time()
+        except Exception:
+            return None
+
+    created = 0
+    skipped = 0
+    errors = []
+
+    for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 2):
+        if not any(row):
+            continue
+
+        exam_title_val  = str(row[0]).strip() if row[0] else ''
+        class_name_val  = str(row[1]).strip() if row[1] else ''
+        subj_name_val   = str(row[2]).strip() if row[2] else ''
+        subj_type_val   = str(row[3]).strip() if row[3] else ''
+        paper_code_val  = str(row[4]).strip() if row[4] else ''
+        paper_date_val  = row[5]
+        start_time_val  = row[6]
+        end_time_val    = row[7]
+        room_no_val     = str(row[8]).strip() if row[8] else ''
+        max_marks_val   = row[9]
+
+        if not exam_title_val or not class_name_val or not subj_name_val:
+            errors.append(f'Row {row_num}: Exam Title, Class and Subject Name are required.')
+            skipped += 1
+            continue
+
+        exam_obj = exam_map.get((exam_title_val.lower(), class_name_val.lower()))
+        if not exam_obj:
+            errors.append(f'Row {row_num}: Exam "{exam_title_val}" in class "{class_name_val}" not found.')
+            skipped += 1
+            continue
+
+        subj_obj = subj_map.get((subj_name_val.lower(), class_name_val.lower()))
+        if not subj_obj:
+            errors.append(f'Row {row_num}: Subject "{subj_name_val}" for class "{class_name_val}" not found.')
+            skipped += 1
+            continue
+
+        paper_date = parse_date(paper_date_val)
+        start_time = parse_time(start_time_val)
+        end_time   = parse_time(end_time_val)
+
+        if not paper_date:
+            errors.append(f'Row {row_num}: Invalid Paper Date. Use YYYY-MM-DD.')
+            skipped += 1
+            continue
+        if not start_time or not end_time:
+            errors.append(f'Row {row_num}: Invalid time format. Use HH:MM (e.g. 09:00).')
+            skipped += 1
+            continue
+
+        try:
+            max_marks = int(max_marks_val) if max_marks_val is not None else 0
+        except (ValueError, TypeError):
+            max_marks = 0
+
+        exists = exam_subjectmap.objects.filter(
+            exname=exam_obj,
+            exam_subjects=subj_obj,
+        ).exists()
+
+        if exists:
+            skipped += 1
+            continue
+
+        exam_subjectmap.objects.create(
+            exname=exam_obj,
+            exam_subjects=subj_obj,
+            exam_subject_type=subj_type_val,
+            paper_code=paper_code_val,
+            paper_date=paper_date,
+            start_time=start_time,
+            end_time=end_time,
+            room_no=room_no_val,
+            max_marks=max_marks,
+        )
+        created += 1
+
+    if errors:
+        for e in errors[:5]:
+            messages.warning(request, e)
+    if created:
+        messages.success(request, f'{created} exam subject(s) imported successfully.')
+    if skipped:
+        messages.info(request, f'{skipped} row(s) skipped (duplicates or errors).')
+    return redirect('exams_subject')
 

@@ -29,6 +29,12 @@ urlpatterns = [
     path('sectionwise_admitcard/<sec_id>/<exam_id>', login_required(views.sectionwise_admitcard), name='sectionwise_admitcard'),
     path('student_wise_analysis',login_required(views.student_wise_analysispdf),name='student_wise_analysis'),
     path('class_wise_analysis',login_required(views.class_wise_analysis),name='class_wise_analysis'),
+    path('download_exams', login_required(views.download_exams), name='download_exams'),
+    path('download_exams_sample', login_required(views.download_exams_sample), name='download_exams_sample'),
+    path('upload_exams', login_required(views.upload_exams), name='upload_exams'),
+    path('download_exam_subjects', login_required(views.download_exam_subjects), name='download_exam_subjects'),
+    path('download_exam_subjects_sample', login_required(views.download_exam_subjects_sample), name='download_exam_subjects_sample'),
+    path('upload_exam_subjects', login_required(views.upload_exam_subjects), name='upload_exam_subjects'),
 
 
 

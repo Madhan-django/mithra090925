@@ -1,0 +1,63 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'lesson_plan_detail' topic.lesson_plan.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">Edit Topic</h4>
+      <small class="text-muted">{{ topic.lesson_plan.chapter }}</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-dark text-white fw-semibold">Topic Details</div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Topic Name</label>
+            {{ form.topic }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Date</label>
+            {{ form.date }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Periods Required</label>
+            {{ form.periods_required }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Teaching Method</label>
+            {{ form.teaching_method }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Status</label>
+            {{ form.status }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Learning Objectives</label>
+            {{ form.objectives }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Content / Notes</label>
+            {{ form.content_taught }}
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="ri-save-line me-1"></i> Save Topic
+          </button>
+          <a href="{% url 'lesson_plan_detail' topic.lesson_plan.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

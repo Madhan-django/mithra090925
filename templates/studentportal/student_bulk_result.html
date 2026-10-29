@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  {% load static %}
+  {% load static exam_tags %}
   <title>Receipt</title>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
@@ -6124,39 +6124,40 @@ line-height: 1.2;
 
                 <td><h4>Subjects</h4></td>
                 {% for ex in student_info.exm %}
-                    
+
                     <td>{{ ex }}</td>
-                  
+
                 {% endfor %}
-               
+
                 <td><h4>Total</h4></td>
-               
+                {% if student_info.show_grades %}<td><h4>Grade</h4></td>{% endif %}
+
               </tr>
-               
+
               {% for sub in student_info.subj %}
                 <tr>
                   <td>{{ sub.subject_name }}</td>
                {% for ex in student_info.exm %}
                   {% for dt in student_info.data %}
-                    
+
                     {% if student_info.stud == dt.adm_card.exam_stu and sub == dt.exam_sub.exam_subjects %}
                       {% if ex.exam_title == dt.adm_card.exam_label.exam_title %}
                       {% if dt.obtained_marks == None %}
                        <td>AB</td>
                       {% else %}
-                            
-                       
                       <td>{{ dt.obtained_marks }}</td>
-                       
                       {% endif %}
                       {% endif %}
                     {% endif %}
-                      
+
                   {% endfor %}
                   {% endfor %}
                    {% for subject, total_marks in student_info.totalmarks.items %}
                                {% if subject == sub %}
                              <td>{{ total_marks }}</td>
+                             {% if student_info.show_grades %}
+                             <td><strong>{% get_grade total_marks student_info.max_marks_totals|get_item:subject student_info.skool.id %}</strong></td>
+                             {% endif %}
                                {% endif %}
                           {% endfor %}
 

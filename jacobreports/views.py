@@ -1345,7 +1345,7 @@ def add_morning_report(request):
         formset = SubstaffFormSet()
 
     form.fields['school_name'].queryset = school.objects.filter(pk=sch_id)
-    form.fields['report_submitted_by'].queryset = sdata.staff_set.filter(status='Active').order_by('first_name')
+    form.fields['report_submitted_by'].queryset = staff.objects.filter(staff_school=sdata, status='Active').order_by('first_name')
 
     return render(request, 'jacobreports/morning_report_form.html', {
         'form': form,
@@ -1378,7 +1378,7 @@ def edit_morning_report(request, report_id):
         formset = SubstaffFormSet(instance=report)
 
     form.fields['school_name'].queryset = school.objects.filter(pk=sch_id)
-    form.fields['report_submitted_by'].queryset = sdata.staff_set.filter(status='Active').order_by('first_name')
+    form.fields['report_submitted_by'].queryset = staff.objects.filter(staff_school=sdata, status='Active').order_by('first_name')
 
     return render(request, 'jacobreports/morning_report_form.html', {
         'form': form,

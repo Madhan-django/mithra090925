@@ -76,3 +76,18 @@ class exam_result(models.Model):
     def __str__(self):
         return self.adm_card.exam_stu.first_name
 
+
+class GradeScale(models.Model):
+    school = models.ForeignKey(school, on_delete=models.CASCADE)
+    min_percent = models.DecimalField(max_digits=5, decimal_places=2)
+    max_percent = models.DecimalField(max_digits=5, decimal_places=2)
+    grade = models.CharField(max_length=5)
+    grade_point = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
+    remark = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        ordering = ['-min_percent']
+
+    def __str__(self):
+        return f"{self.grade} ({self.min_percent}-{self.max_percent}%)"
+

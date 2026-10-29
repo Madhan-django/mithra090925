@@ -1,0 +1,506 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <!-- HEADER -->
+        <div class="card-header text-white d-flex align-items-center justify-content-between"
+             style="background: linear-gradient(to right, #0d6efd, #0b5ed7); height:70px;">
+            <a href="{% url 'incharge_report_list' %}" class="btn btn-sm btn-light">← Back</a>
+            <h5 class="mb-0">
+                <span class="badge bg-light text-dark">INCHARGE DAILY REPORT</span>
+            </h5>
+            <div class="d-flex gap-2">
+                <a href="{% url 'edit_incharge_report' report.id %}" class="btn btn-sm btn-warning">EDIT</a>
+                <a href="{% url 'add_incharge_report' %}?clone={{ report.id }}" class="btn btn-sm btn-info text-white">CLONE</a>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            <!-- ========================= -->
+            <!-- BASIC DETAILS -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">BASIC DETAILS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">School</div>
+                            <div class="fw-semibold">{{ report.school_name }}</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Department</div>
+                            <div class="fw-semibold">{{ report.department }}</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Date</div>
+                            <div class="fw-semibold">{{ report.report_date }}</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Reporting Time</div>
+                            <div class="fw-semibold">{{ report.reporting_time }}</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Submitted By</div>
+                            <div class="fw-semibold">{{ report.report_submitted_by }}</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- MORNING SESSION -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">MORNING SESSION</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Zero Hour Maintained</div>
+                            {% if report.zero_hour_maintained %}
+                                <span class="badge bg-success">Yes</span>
+                            {% else %}
+                                <span class="badge bg-danger">No</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Class Teachers Morals</div>
+                            <span class="badge {% if report.class_teachers_morals == 'Given' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {{ report.class_teachers_morals }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Dispersing Time</div>
+                            <div>{{ report.dispersing_time|default:"—" }}</div>
+                        </div>
+
+                        {% if report.late_comers_teachers %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Late Comers (Teachers)</div>
+                            <div>{{ report.late_comers_teachers }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.late_comers_duty_teachers %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Late Comers (Duty Teachers)</div>
+                            <div>{{ report.late_comers_duty_teachers }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.absentees_teachers %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Absentee Teachers</div>
+                            <div class="text-danger">{{ report.absentees_teachers }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.assembly_arrangements %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Assembly Arrangements</div>
+                            <div>{{ report.assembly_arrangements }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- LUNCH BREAK -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">LUNCH BREAK</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">CT Availability</div>
+                            {% if report.ct_availability %}
+                                <span class="badge bg-success">Available</span>
+                            {% else %}
+                                <span class="badge bg-danger">Not Available</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Children Without Lunch</div>
+                            <div class="fw-semibold {% if report.children_without_lunch > 0 %}text-danger{% endif %}">
+                                {{ report.children_without_lunch }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Lunch Atmosphere</div>
+                            <span class="badge {% if report.lunch_atmosphere == 'Calm' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {{ report.lunch_atmosphere }}
+                            </span>
+                        </div>
+
+                        {% if report.noise_level %}
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Noise Level</div>
+                            <span class="badge {% if report.noise_level == 'Low' %}bg-success{% elif report.noise_level == 'Moderate' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ report.noise_level }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- AFTERNOON SESSION -->
+            <!-- ========================= -->
+
+            {% if report.cram_conducted or report.special_class or report.activity_class or report.accident_details or report.incidents or report.pupils_detained %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">AFTERNOON SESSION</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.cram_conducted %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Cram Conducted</div>
+                            <div>{{ report.cram_conducted }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.special_class %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Special Class</div>
+                            <div>{{ report.special_class }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.activity_class %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Activity Class</div>
+                            <div>{{ report.activity_class }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.accident_details %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Accident Details</div>
+                            <div class="text-danger">{{ report.accident_details }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.incidents %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Incidents</div>
+                            <div>{{ report.incidents }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.pupils_detained %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Pupils Detained</div>
+                            <div>{{ report.pupils_detained }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ========================= -->
+            <!-- STATUS DETAILS -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">STATUS DETAILS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Class Work Given</div>
+                            {% if report.class_work_given %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Homework Corrected</div>
+                            {% if report.homework_corrected %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Handbook Checked</div>
+                            {% if report.handbook_checked %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}
+                        </div>
+
+                        {% if report.supervising_report %}
+                        <div class="col-12">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Supervising Report</div>
+                            <div>{{ report.supervising_report }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- PERIODS -->
+            <!-- ========================= -->
+
+            {% with periods=report %}
+            {% if periods.period_1 or periods.period_2 or periods.period_3 or periods.period_4 or periods.period_5 or periods.period_6 or periods.period_7 or periods.period_8 %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">PERIODS</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0">
+                            <thead style="background:#f8fafc;">
+                                <tr>
+                                    <th width="80">Period</th>
+                                    <th width="130">Time</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if periods.period_1 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">1</td>
+                                    <td class="text-muted">{{ periods.period_1_time|default:"—" }}</td>
+                                    <td>{{ periods.period_1 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_2 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">2</td>
+                                    <td class="text-muted">{{ periods.period_2_time|default:"—" }}</td>
+                                    <td>{{ periods.period_2 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_3 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">3</td>
+                                    <td class="text-muted">{{ periods.period_3_time|default:"—" }}</td>
+                                    <td>{{ periods.period_3 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_4 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">4</td>
+                                    <td class="text-muted">{{ periods.period_4_time|default:"—" }}</td>
+                                    <td>{{ periods.period_4 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_5 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">5</td>
+                                    <td class="text-muted">{{ periods.period_5_time|default:"—" }}</td>
+                                    <td>{{ periods.period_5 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_6 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">6</td>
+                                    <td class="text-muted">{{ periods.period_6_time|default:"—" }}</td>
+                                    <td>{{ periods.period_6 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_7 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">7</td>
+                                    <td class="text-muted">{{ periods.period_7_time|default:"—" }}</td>
+                                    <td>{{ periods.period_7 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if periods.period_8 %}
+                                <tr>
+                                    <td class="fw-semibold text-center">8</td>
+                                    <td class="text-muted">{{ periods.period_8_time|default:"—" }}</td>
+                                    <td>{{ periods.period_8 }}</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- ========================= -->
+            <!-- CIRCULARS -->
+            <!-- ========================= -->
+
+            {% if report.circular_teachers or report.circular_parents or report.circular_pupils or report.circular_school %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">CIRCULAR DETAILS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.circular_teachers %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Teachers Circular</div>
+                            <div>{{ report.circular_teachers }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.circular_parents %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Parents Circular</div>
+                            <div>{{ report.circular_parents }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.circular_pupils %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Pupils Circular</div>
+                            <div>{{ report.circular_pupils }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.circular_school %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">School Circular</div>
+                            <div>{{ report.circular_school }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ========================= -->
+            <!-- OCCURRENCES -->
+            <!-- ========================= -->
+
+            {% if report.birthday or report.competition_field_trip or report.celebration or report.meeting_conducted or report.meeting_details or report.demo_class %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">OCCURRENCES</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.birthday %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Birthday</div>
+                            <div>{{ report.birthday }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.competition_field_trip %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Competition / Field Trip</div>
+                            <div>{{ report.competition_field_trip }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.celebration %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Celebration</div>
+                            <div>{{ report.celebration }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.meeting_conducted %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Meeting Conducted</div>
+                            <div>{{ report.meeting_conducted }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.meeting_details %}
+                        <div class="col-md-8">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Meeting Details</div>
+                            <div>{{ report.meeting_details }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.demo_class %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Demo Class</div>
+                            <div>{{ report.demo_class }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ========================= -->
+            <!-- ROUNDS / PRAYER / MISC -->
+            <!-- ========================= -->
+
+            {% if report.rounds_report or report.staff_prayer_attendance or report.suggestions_and_grievances or report.late_evening_class or report.note or report.tomorrows_assignment %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">ADDITIONAL DETAILS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.rounds_report %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Rounds Report</div>
+                            <div>{{ report.rounds_report }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.staff_prayer_attendance %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Staff Prayer Attendance</div>
+                            <div>{{ report.staff_prayer_attendance }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.late_evening_class %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Late Evening Class</div>
+                            <div>{{ report.late_evening_class }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.suggestions_and_grievances %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Suggestions & Grievances</div>
+                            <div>{{ report.suggestions_and_grievances }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.note %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Note</div>
+                            <div>{{ report.note }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.tomorrows_assignment %}
+                        <div class="col-12">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Tomorrow's Assignment</div>
+                            <div>{{ report.tomorrows_assignment }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

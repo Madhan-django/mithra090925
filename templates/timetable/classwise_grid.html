@@ -216,6 +216,9 @@
         {{ group.section.class_sec_name.name }} — {{ group.section.section_name }}
       </div>
       <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <a href="{% url 'drag_drop_editor' group.section.id %}" class="pc-btn pc-btn-secondary pc-btn-sm">
+          <i class="ri-edit-line"></i> Edit Manually
+        </a>
         <a href="{% url 'export_pdf' group.section.id %}" class="pc-btn pc-btn-outline pc-btn-sm">
           <i class="ri-file-pdf-line"></i> PDF
         </a>

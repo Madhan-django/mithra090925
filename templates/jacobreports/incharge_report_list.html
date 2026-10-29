@@ -3,18 +3,73 @@
 
 {% block content %}
 
+<style>
+
+    .ctl-header{
+        background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%);
+        border-radius: var(--m-radius-lg, 18px) var(--m-radius-lg, 18px) 0 0;
+    }
+
+    .ctl-header .eyebrow{
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--m-accent, #d4af37);
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .ctl-header h5{
+        margin: 0;
+        font-weight: 700;
+        font-size: 18px;
+        color: #fff;
+    }
+
+    .action-group{
+        display: flex;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .action-btn{
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--m-border, #e3e8f0);
+        background: #fff;
+        color: var(--m-text-2, #4b5563);
+        text-decoration: none;
+        transition: all 0.18s;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .action-btn:hover{
+        transform: translateY(-1px);
+        box-shadow: var(--m-shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
+    }
+
+    .action-btn.view:hover{ border-color: var(--m-accent, #d4af37); color: var(--m-accent-2, #b8930a); }
+    .action-btn.edit:hover{ border-color: #c98500; color: #c98500; }
+    .action-btn.clone:hover{ border-color: #0ea5b7; color: #0ea5b7; }
+    .action-btn.delete{ border-color: #f7d3d3; color: #dc2626; }
+    .action-btn.delete:hover{ background: #dc2626; color: #fff; border-color: #dc2626; }
+
+</style>
+
 <div class="container-fluid mt-4">
 
     <div class="card shadow-lg border-0 rounded-4">
 
-        <div class="card-header text-white"
-             style="background: linear-gradient(to right, #0d6efd, #0b5ed7); height:70px;">
-            <div class="card-title text-center mt-2">
-                <h5>
-                    <span class="badge bg-light text-dark">
-                        INCHARGE DAILY REPORT LIST
-                    </span>
-                </h5>
+        <div class="card-header ctl-header d-flex align-items-center"
+             style="height:76px;">
+            <div>
+                <div class="eyebrow">{{ sdata }}</div>
+                <h5>Incharge Daily Report List</h5>
             </div>
         </div>
 
@@ -54,11 +109,15 @@
                             </div>
 
                             <div class="col-md-1 mb-2">
-                                <button type="submit" class="btn btn-dark w-100">GO</button>
+                                <button type="submit" class="btn btn-dark w-100">
+                                    <i class="ri-search-line"></i> Go
+                                </button>
                             </div>
 
                             <div class="col-md-2 mb-2">
-                                <a href="{% url 'incharge_report_list' %}" class="btn btn-secondary w-100">RESET</a>
+                                <a href="{% url 'incharge_report_list' %}" class="btn btn-secondary w-100">
+                                    Reset
+                                </a>
                             </div>
 
                         </div>
@@ -66,9 +125,17 @@
                 </div>
 
                 <div class="col-md-3 text-end">
-                    <a href="{% url 'add_incharge_report' %}" class="btn btn-primary shadow">
-                        + ADD REPORT
+
+                    {% if is_admin %}
+                    <a href="{% url 'manage_incharge_mappings' %}" class="btn btn-secondary shadow-sm me-2">
+                        <i class="ri-links-line"></i> Mappings
                     </a>
+                    {% endif %}
+
+                    <a href="{% url 'add_incharge_report' %}" class="btn btn-primary shadow-sm">
+                        <i class="ri-add-line"></i> Add Report
+                    </a>
+
                 </div>
 
             </div>
@@ -96,7 +163,7 @@
                             <th>Reporting Time</th>
                             <th>Absentees (Staff)</th>
                             <th>Lunch Atmosphere</th>
-                            <th width="220">Actions</th>
+                            <th width="160">Actions</th>
                         </tr>
                     </thead>
 
@@ -117,20 +184,39 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{% url 'edit_incharge_report' report.id %}"
-                                   class="btn btn-warning btn-sm">EDIT</a>
+                                <div class="action-group">
 
-                                <a href="{% url 'add_incharge_report' %}?clone={{ report.id }}"
-                                   class="btn btn-info btn-sm text-white">CLONE</a>
+                                    <a href="{% url 'view_incharge_report' report.id %}"
+                                       class="action-btn view"
+                                       title="View">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
 
-                                <a href="{% url 'delete_incharge_report' report.id %}"
-                                   class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Delete this incharge report?');">DELETE</a>
+                                    <a href="{% url 'edit_incharge_report' report.id %}"
+                                       class="action-btn edit"
+                                       title="Edit">
+                                        <i class="ri-pencil-line"></i>
+                                    </a>
+
+                                    <a href="{% url 'add_incharge_report' %}?clone={{ report.id }}"
+                                       class="action-btn clone"
+                                       title="Clone">
+                                        <i class="ri-file-copy-line"></i>
+                                    </a>
+
+                                    <a href="{% url 'delete_incharge_report' report.id %}"
+                                       class="action-btn delete"
+                                       title="Delete"
+                                       onclick="return confirm('Delete this incharge report?');">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </a>
+
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" class="text-center text-danger">NO REPORTS FOUND</td>
+                            <td colspan="8" class="text-center text-danger">No reports found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

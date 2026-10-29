@@ -32,6 +32,13 @@ urlpatterns = [
     path('delete_reservation/<pk>',login_required(views.delete_reservation),name='delete_reservation'),
     path('free-teachers/', login_required(views.free_teachers_grid), name='free_teachers_grid'),
     path('free-teachers/export/', login_required(views.export_free_teachers_excel), name='export_free_teachers_excel'),
+    # Generate preview & confirm
+    path('preview/', login_required(views.preview_timetable), name='preview_timetable'),
+    path('confirm-save/', login_required(views.confirm_save_timetable), name='confirm_save_timetable'),
+    # Manual drag-and-drop editor
+    path('editor/<int:section_id>/', login_required(views.drag_drop_editor), name='drag_drop_editor'),
+    path('ajax/update-cell/', login_required(views.update_timetable_cell), name='update_timetable_cell'),
+    path('ajax/clear-cell/', login_required(views.clear_timetable_cell), name='clear_timetable_cell'),
 
 ]
 

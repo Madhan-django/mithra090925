@@ -209,10 +209,15 @@
           <span class="tt-section-dot"></span>
           {{ group.section.class_sec_name.name }} — {{ group.section.section_name }}
         </div>
-        <span class="pc-badge pc-badge-primary pc-badge-no-dot">
-          <i class="ri-time-line" style="font-size:11px;"></i>
-          {{ group.grid|length }} Period{{ group.grid|length|pluralize }}
-        </span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <a href="{% url 'drag_drop_editor' group.section.id %}" class="pc-btn pc-btn-outline pc-btn-sm">
+            <i class="ri-edit-line"></i> Edit
+          </a>
+          <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+            <i class="ri-time-line" style="font-size:11px;"></i>
+            {{ group.grid|length }} Period{{ group.grid|length|pluralize }}
+          </span>
+        </div>
       </div>
 
       <div class="tt-table-wrap">

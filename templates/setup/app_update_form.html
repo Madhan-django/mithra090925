@@ -1,0 +1,148 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.wn-preview-box {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface2, #f6f5f1); border-radius: 12px;
+  padding: 14px 16px; margin-top: 8px;
+}
+.wn-preview-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  background: #e8f7e6; color: #0ca30c;
+  transition: background .2s, color .2s;
+}
+.wn-preview-label { font-size: 12.5px; color: var(--muted, #8b8c99); }
+.wn-preview-name  { font-size: 13.5px; font-weight: 600; color: var(--text, #14151c); margin-top: 2px; }
+
+.badge-option {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 20px; cursor: pointer;
+  border: 2px solid transparent; font-size: 13px; font-weight: 600;
+  transition: .15s;
+}
+.badge-option input { display: none; }
+.badge-option.new-opt      { background: #e8f7e6; color: #0ca30c; }
+.badge-option.improved-opt { background: #e8f0fc; color: #2a78d6; }
+.badge-option.fixed-opt    { background: #fdf1de; color: #c98500; }
+.badge-option.new-opt.selected      { border-color: #0ca30c; }
+.badge-option.improved-opt.selected { border-color: #2a78d6; }
+.badge-option.fixed-opt.selected    { border-color: #c98500; }
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'app_update_list' %}">What's New</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{% if edit %}Edit{% else %}Add{% endif %} Update</span>
+    </div>
+    <div class="pc-page-title">{% if edit %}Edit Feature Update{% else %}Add Feature Update{% endif %}</div>
+    <div class="pc-page-sub">This will appear on the staff dashboard What's New card</div>
+  </div>
+</div>
+
+<div class="pc-card" style="max-width:640px;">
+  <div class="pc-card-body">
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Title -->
+      <div class="mb-4">
+        <label class="pc-label">Feature Title</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.title.errors }}</div>{% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <label class="pc-label">Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}<div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.description.errors }}</div>{% endif %}
+      </div>
+
+      <!-- Badge — styled radio -->
+      <div class="mb-4">
+        <label class="pc-label">Badge</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;" id="badge-group">
+          {% for val, label in form.badge.field.choices %}
+          <label class="badge-option {% if val == 'New' %}new-opt{% elif val == 'Improved' %}improved-opt{% else %}fixed-opt{% endif %}{% if form.badge.value == val or not form.badge.value and val == 'New' %} selected{% endif %}"
+                 data-val="{{ val }}">
+            <input type="radio" name="badge" value="{{ val }}" {% if form.badge.value == val %}checked{% elif not form.badge.value and val == 'New' %}checked{% endif %}>
+            <i class="{% if val == 'New' %}ri-star-line{% elif val == 'Improved' %}ri-tools-line{% else %}ri-bug-line{% endif %}"></i>
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="mb-4">
+        <label class="pc-label">Date</label>
+        {{ form.date }}
+        {% if form.date.errors %}<div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.date.errors }}</div>{% endif %}
+      </div>
+
+      <!-- Icon -->
+      <div class="mb-4">
+        <label class="pc-label">Icon <span style="font-size:11px;color:var(--muted);font-weight:400;">— Remix icon class e.g. <code>ri-star-line</code></span></label>
+        {{ form.icon }}
+        <div class="wn-preview-box" id="icon-preview-box">
+          <div class="wn-preview-icon" id="icon-preview-el">
+            <i id="icon-preview-i" class="{{ form.icon.value|default:'ri-star-line' }}"></i>
+          </div>
+          <div>
+            <div class="wn-preview-label">Icon preview</div>
+            <div class="wn-preview-name" id="icon-preview-name">{{ form.icon.value|default:'ri-star-line' }}</div>
+          </div>
+        </div>
+        {% if form.icon.errors %}<div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.icon.errors }}</div>{% endif %}
+      </div>
+
+      <!-- Active -->
+      <div class="mb-4">
+        <div style="display:flex;align-items:center;gap:10px;">
+          {{ form.is_active }}
+          <label class="pc-label" style="margin:0;">Show on dashboard</label>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Uncheck to hide without deleting.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;padding-top:8px;border-top:1px solid var(--border);">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> {% if edit %}Save Changes{% else %}Add Feature{% endif %}
+        </button>
+        <a href="{% url 'app_update_list' %}" class="pc-btn pc-btn-outline">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+/* Live icon preview */
+var iconInput = document.getElementById('icon-input');
+var previewI  = document.getElementById('icon-preview-i');
+var previewNm = document.getElementById('icon-preview-name');
+if (iconInput) {
+  iconInput.addEventListener('input', function () {
+    var val = this.value.trim() || 'ri-star-line';
+    previewI.className = val;
+    previewNm.textContent = val;
+  });
+}
+
+/* Badge radio styling */
+var opts = document.querySelectorAll('#badge-group .badge-option');
+opts.forEach(function (opt) {
+  opt.addEventListener('click', function () {
+    opts.forEach(function (o) { o.classList.remove('selected'); });
+    this.classList.add('selected');
+    this.querySelector('input').checked = true;
+  });
+});
+</script>
+
+{% endblock %}

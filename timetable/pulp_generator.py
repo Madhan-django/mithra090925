@@ -197,13 +197,18 @@ def build_model(allocations, timeslots, reserved_slots, allow_adaptive=False):
 
 
 # ------------------- Generate Timetable -------------------
-def generate_timetable_with_pulp(sch_id):
+def generate_timetable_with_pulp(sch_id, save=True):
+    """
+    Generate the timetable using PuLP.
+    Returns (message, conflicts, assignments).
+    If save=False, DB is not modified and assignments is a list of dicts.
+    """
     try:
         sdata = school.objects.get(pk=sch_id)
         yr = currentacademicyr.objects.get(school_name=sdata)
         year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     except Exception as e:
-        return f"❌ Error fetching school/academic year: {str(e)}", []
+        return f"❌ Error fetching school/academic year: {str(e)}", [], []
 
     allocations = list(
         TeachingAllocation.objects.filter(teacher_school=sdata).select_related(
@@ -231,23 +236,33 @@ def generate_timetable_with_pulp(sch_id):
 
     if LpStatus[status] != "Optimal":
         return (
-            f"❌ Timetable could not be generated even with adaptive reservations. Problems:\n"
-            + "\n".join(problematic_allocations),
+            f"❌ Timetable could not be generated even with adaptive reservations.",
             problematic_allocations,
+            [],
         )
 
-    # Save generated timetable
-    Timetable.objects.filter(timetable_school=sdata).delete()
+    # Collect assignments
+    assignments = []
     for a in allocations:
         for ts in timeslots:
             val = alloc_vars[(a.id, ts.id)].value()
             if val is not None and val >= 0.99:
-                Timetable.objects.create(
-                    section=a.section,
-                    subject=a.subject,
-                    teacher=a.teacher,
-                    timeslot=ts,
-                    timetable_school=sdata,
-                )
+                assignments.append({
+                    'section_id': a.section_id,
+                    'subject_id': a.subject_id,
+                    'teacher_id': a.teacher_id,
+                    'timeslot_id': ts.id,
+                })
 
-    return "✅ Timetable generated successfully with all constraints!", []
+    if save:
+        Timetable.objects.filter(timetable_school=sdata).delete()
+        for asgn in assignments:
+            Timetable.objects.create(
+                section_id=asgn['section_id'],
+                subject_id=asgn['subject_id'],
+                teacher_id=asgn['teacher_id'],
+                timeslot_id=asgn['timeslot_id'],
+                timetable_school=sdata,
+            )
+
+    return "✅ Timetable generated successfully with all constraints!", [], assignments

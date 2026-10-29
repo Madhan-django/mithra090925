@@ -1,0 +1,92 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'listvideo' %}">Video Gallery</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Edit</span>
+    </div>
+    <div class="pc-page-title">Edit Video</div>
+    <div class="pc-page-sub">Update the YouTube video details</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'listvideo' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-video-line me-2" style="color:var(--accent);"></i>Video Details</div>
+        <div class="pc-card-sub">Update the YouTube video information</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Title <span style="color:var(--rose);">*</span></label>
+        {{ form.VTitle }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Description</label>
+        {{ form.Vdesc }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">YouTube URL <span style="color:var(--rose);">*</span></label>
+        {{ form.Vlink }}
+        <small style="font-size:11px;color:var(--muted);">Paste the full YouTube video link (e.g. https://youtu.be/...)</small>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="pc-form-group">
+          <label class="pc-label">Event Date <span style="color:var(--rose);">*</span></label>
+          {{ form.Vdate }}
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">Status</label>
+          {{ form.status }}
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Thumbnail <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+        {{ form.VThumbnail }}
+        <small style="font-size:11px;color:var(--muted);">Upload a new image to replace the current thumbnail</small>
+      </div>
+
+      {{ form.Vpostdate }}
+      {{ form.Vschool }}
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:28px;">
+    <div class="pc-card-body">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Update Video
+        </button>
+        <a href="{% url 'listvideo' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}

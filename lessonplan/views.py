@@ -1,6 +1,6 @@
 from io import BytesIO
 import mimetypes
-from datetime import date as dt_date
+from datetime import date as dt_date, datetime as dt_datetime
 
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
@@ -14,14 +14,17 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 
 from institutions.models import school
-from setup.models import currentacademicyr, sclass, section, subjects, academicyr
+from setup.models import currentacademicyr, sclass, section, subjects
 from staff.models import staff
 from admission.models import students
 from mobi.models import DeviceFCMToken
 from firebase_admin import messaging
 
-from .models import LessonPlan, LessonPlanAssignment, LessonPlanNote
-from .forms import LessonPlanForm, LessonPlanAssignmentForm
+from .models import (
+    LessonPlan, LessonPlanTopic, LessonPlanAssignment, LessonPlanNote,
+    TEACHING_METHODS, PLAN_STATUS,
+)
+from .forms import LessonPlanForm, LessonPlanTopicForm, LessonPlanAssignmentForm
 from . import drive_utils
 
 
@@ -46,41 +49,32 @@ def _current_staff(request):
 def lesson_plan_list(request):
     sdata, year = _school_and_year(request)
 
-    plans = LessonPlan.objects.filter(school=sdata, acad_yr=year).select_related(
+    plans   = LessonPlan.objects.filter(school=sdata, acad_yr=year).select_related(
         'teacher', 'subject', 'cls', 'section'
-    )
+    ).prefetch_related('topics')
 
-    cls_id       = request.GET.get('cls')
-    sec_id       = request.GET.get('section')
-    subj_id      = request.GET.get('subject')
-    date_from    = request.GET.get('date_from')
-    date_to      = request.GET.get('date_to')
-    status_filter = request.GET.get('status')
+    cls_id  = request.GET.get('cls')
+    sec_id  = request.GET.get('section')
+    subj_id = request.GET.get('subject')
 
-    if cls_id:        plans = plans.filter(cls_id=cls_id)
-    if sec_id:        plans = plans.filter(section_id=sec_id)
-    if subj_id:       plans = plans.filter(subject_id=subj_id)
-    if date_from:     plans = plans.filter(date__gte=date_from)
-    if date_to:       plans = plans.filter(date__lte=date_to)
-    if status_filter: plans = plans.filter(status=status_filter)
+    if cls_id:  plans = plans.filter(cls_id=cls_id)
+    if sec_id:  plans = plans.filter(section_id=sec_id)
+    if subj_id: plans = plans.filter(subject_id=subj_id)
 
     classes      = sclass.objects.filter(school_name=sdata, acad_year=year)
     sections     = section.objects.filter(school_name=sdata, acad_year=year)
     all_subjects = subjects.objects.filter(subject_school=sdata)
 
     return render(request, 'lessonplan/list.html', {
-        'plans': plans,
-        'classes': classes,
-        'sections': sections,
+        'plans':        plans,
+        'classes':      classes,
+        'sections':     sections,
         'all_subjects': all_subjects,
-        'skool': sdata,
-        'year': year,
-        'selected_cls': cls_id,
-        'selected_sec': sec_id,
+        'skool':        sdata,
+        'year':         year,
+        'selected_cls':  cls_id,
+        'selected_sec':  sec_id,
         'selected_subj': subj_id,
-        'date_from': date_from,
-        'date_to': date_to,
-        'status_filter': status_filter,
     })
 
 
@@ -146,25 +140,40 @@ def lesson_plan_edit(request, pk):
 def lesson_plan_detail(request, pk):
     sdata, year = _school_and_year(request)
     plan        = get_object_or_404(LessonPlan, pk=pk, school=sdata)
+    topics      = plan.topics.all()
     assignments = plan.assignments.all()
     notes       = plan.notes.all().order_by('-uploaded_at')
+    topic_form  = LessonPlanTopicForm()
     assign_form = LessonPlanAssignmentForm()
-    if request.method == 'POST' and 'add_assignment' in request.POST:
-        assign_form = LessonPlanAssignmentForm(request.POST)
-        if assign_form.is_valid():
-            asn = assign_form.save(commit=False)
-            asn.lesson_plan = plan
-            asn.save()
-            messages.success(request, 'Assignment added.')
-            return redirect('lesson_plan_detail', pk=pk)
+
+    if request.method == 'POST':
+        if 'add_topic' in request.POST:
+            topic_form = LessonPlanTopicForm(request.POST)
+            if topic_form.is_valid():
+                t = topic_form.save(commit=False)
+                t.lesson_plan = plan
+                t.save()
+                messages.success(request, 'Topic added.')
+                return redirect('lesson_plan_detail', pk=pk)
+
+        elif 'add_assignment' in request.POST:
+            assign_form = LessonPlanAssignmentForm(request.POST)
+            if assign_form.is_valid():
+                asn = assign_form.save(commit=False)
+                asn.lesson_plan = plan
+                asn.save()
+                messages.success(request, 'Assignment added.')
+                return redirect('lesson_plan_detail', pk=pk)
 
     return render(request, 'lessonplan/detail.html', {
-        'plan': plan,
+        'plan':        plan,
+        'topics':      topics,
         'assignments': assignments,
-        'notes': notes,
+        'notes':       notes,
+        'topic_form':  topic_form,
         'assign_form': assign_form,
-        'skool': sdata,
-        'year': year,
+        'skool':       sdata,
+        'year':        year,
     })
 
 
@@ -181,11 +190,41 @@ def lesson_plan_delete(request, pk):
     return redirect('lesson_plan_list')
 
 
+# ─── topic edit / delete ───────────────────────────────────────────────────────
+
+def topic_edit(request, pk):
+    sdata, year = _school_and_year(request)
+    topic   = get_object_or_404(LessonPlanTopic, pk=pk, lesson_plan__school=sdata)
+    plan_pk = topic.lesson_plan_id
+    if request.method == 'POST':
+        form = LessonPlanTopicForm(request.POST, instance=topic)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Topic updated.')
+            return redirect('lesson_plan_detail', pk=plan_pk)
+    else:
+        form = LessonPlanTopicForm(instance=topic)
+    return render(request, 'lessonplan/topic_form.html', {
+        'form': form, 'topic': topic, 'skool': sdata,
+    })
+
+
+@require_POST
+def topic_delete(request, pk):
+    sdata, _ = _school_and_year(request)
+    topic   = get_object_or_404(LessonPlanTopic, pk=pk, lesson_plan__school=sdata)
+    plan_pk = topic.lesson_plan_id
+    topic.delete()
+    messages.success(request, 'Topic removed.')
+    return redirect('lesson_plan_detail', pk=plan_pk)
+
+
 # ─── assignment toggles (AJAX) ─────────────────────────────────────────────────
 
 @require_POST
 def toggle_given(request, pk):
-    asn = get_object_or_404(LessonPlanAssignment, pk=pk)
+    sdata, _ = _school_and_year(request)
+    asn = get_object_or_404(LessonPlanAssignment, pk=pk, lesson_plan__school=sdata)
     asn.is_given   = not asn.is_given
     asn.given_date = timezone.now().date() if asn.is_given else None
     asn.save(update_fields=['is_given', 'given_date'])
@@ -194,7 +233,8 @@ def toggle_given(request, pk):
 
 @require_POST
 def toggle_corrected(request, pk):
-    asn = get_object_or_404(LessonPlanAssignment, pk=pk)
+    sdata, _ = _school_and_year(request)
+    asn = get_object_or_404(LessonPlanAssignment, pk=pk, lesson_plan__school=sdata)
     asn.is_corrected   = not asn.is_corrected
     asn.corrected_date = timezone.now().date() if asn.is_corrected else None
     asn.save(update_fields=['is_corrected', 'corrected_date'])
@@ -203,7 +243,8 @@ def toggle_corrected(request, pk):
 
 @require_POST
 def assignment_delete(request, pk):
-    asn     = get_object_or_404(LessonPlanAssignment, pk=pk)
+    sdata, _ = _school_and_year(request)
+    asn     = get_object_or_404(LessonPlanAssignment, pk=pk, lesson_plan__school=sdata)
     plan_pk = asn.lesson_plan_id
     asn.delete()
     messages.success(request, 'Assignment removed.')
@@ -214,15 +255,15 @@ def assignment_delete(request, pk):
 
 @require_POST
 def notify_parents(request, pk):
-    asn   = get_object_or_404(LessonPlanAssignment, pk=pk)
+    sdata, _ = _school_and_year(request)
+    asn   = get_object_or_404(LessonPlanAssignment, pk=pk, lesson_plan__school=sdata)
     plan  = asn.lesson_plan
-    sdata = plan.school
 
-    title = f"Portion: {plan.subject} – {plan.topic}"
+    title = f"Portion: {plan.subject} – {plan.chapter}"
     body  = (
         f"Class: {plan.cls} {plan.section} | "
-        f"Chapter: {plan.chapter} | Topic: {plan.topic}. "
-        f"Assignment due: {asn.due_date.strftime('%d-%m-%Y')}."
+        f"Chapter: {plan.chapter} | Assignment: {asn.title}. "
+        f"Due: {asn.due_date.strftime('%d-%m-%Y')}."
     )
 
     studs   = students.objects.filter(class_name=plan.cls, secs=plan.section, school_student=sdata)
@@ -257,13 +298,18 @@ def lesson_plan_pdf(request, pk):
     plan     = get_object_or_404(LessonPlan, pk=pk, school=sdata)
 
     template = get_template('lessonplan/pdf_template.html')
-    html     = template.render({'plan': plan, 'assignments': plan.assignments.all(), 'skool': sdata})
-    result   = BytesIO()
-    pdf      = pisa.pisaDocument(BytesIO(html.encode('UTF-8')), result, encoding='UTF-8')
+    html     = template.render({
+        'plan': plan,
+        'topics': plan.topics.all(),
+        'assignments': plan.assignments.all(),
+        'skool': sdata,
+    })
+    result = BytesIO()
+    pdf    = pisa.pisaDocument(BytesIO(html.encode('UTF-8')), result, encoding='UTF-8')
     if pdf.err:
         return HttpResponse('PDF generation error', status=500)
     response = HttpResponse(result.getvalue(), content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="LessonPlan_{plan.cls}_{plan.section}_{plan.date}.pdf"'
+    response['Content-Disposition'] = f'inline; filename="LessonPlan_{plan.cls}_{plan.section}_{plan.chapter}.pdf"'
     return response
 
 
@@ -313,7 +359,8 @@ def note_upload(request, plan_pk):
 
 @require_POST
 def note_delete(request, pk):
-    note    = get_object_or_404(LessonPlanNote, pk=pk)
+    sdata, _ = _school_and_year(request)
+    note    = get_object_or_404(LessonPlanNote, pk=pk, lesson_plan__school=sdata)
     plan_pk = note.lesson_plan_id
     drive_utils.delete_note(note.drive_file_id)
     note.delete()
@@ -329,9 +376,9 @@ def excel_sample(request):
     ws.title = 'Lesson Plans'
 
     headers = [
-        'Date (YYYY-MM-DD)', 'Period No', 'Class Name', 'Section Name',
-        'Subject Name', 'Teacher (First Last)', 'Chapter', 'Topic',
-        'Objectives', 'Content/Notes', 'Teaching Method', 'Status',
+        'Class Name', 'Section Name', 'Subject Name', 'Teacher (First Last)',
+        'Chapter', 'Topic', 'Date (YYYY-MM-DD)', 'Periods Required',
+        'Teaching Method', 'Status', 'Objectives', 'Content/Notes',
     ]
     header_fill = PatternFill('solid', fgColor='1F3864')
     header_font = Font(bold=True, color='FFFFFF')
@@ -345,11 +392,11 @@ def excel_sample(request):
 
     # Instructions row
     instructions = [
-        '2025-07-05', '1', 'Class 1', 'A',
-        'Mathematics', 'John Smith', 'Chapter 1', 'Introduction to Algebra',
-        'Understand variables', 'Covered basics of equations',
+        'Class 1', 'A', 'Mathematics', 'John Smith',
+        'Chapter 1 – Algebra', 'Introduction to Algebra', '2025-07-05', '2',
         'Lecture',  # choices: Lecture/Discussion/Activity/Demo/Review/Assessment/Group Work
         'Planned',  # choices: Planned/Taught/Skipped
+        'Understand variables', 'Covered basics of equations',
     ]
     note_font = Font(italic=True, color='555555')
     for col, val in enumerate(instructions, 1):
@@ -388,36 +435,35 @@ def excel_import(request):
         messages.error(request, 'Invalid Excel file.')
         return redirect('excel_import_lesson')
 
-    acad_yr_obj = academicyr.objects.get(acad_year=year, school_name=sdata)
-
-    created = 0
+    created_topics = 0
+    created_plans  = 0
     skipped = 0
     errors  = []
 
-    VALID_METHODS  = {m[0] for m in [('Lecture',''),('Discussion',''),('Activity',''),
-                                      ('Demo',''),('Review',''),('Assessment',''),('Group Work','')]}
-    VALID_STATUSES = {'Planned', 'Taught', 'Skipped'}
+    VALID_METHODS  = {m[0] for m in TEACHING_METHODS}
+    VALID_STATUSES = {s[0] for s in PLAN_STATUS}
 
     for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
         if not any(row):
             continue
 
-        raw_date, period, cls_name, sec_name, subj_name, teacher_name, \
-            chapter, topic, objectives, content, method, status = (list(row) + [None]*12)[:12]
+        cls_name, sec_name, subj_name, teacher_name, chapter, topic, \
+            raw_date, periods, method, status, objectives, content = (list(row) + [None]*12)[:12]
 
         # Required fields
-        if not all([raw_date, cls_name, sec_name, subj_name, topic]):
-            errors.append(f"Row {row_idx}: missing required fields (Date, Class, Section, Subject, Topic).")
+        if not all([cls_name, sec_name, subj_name, chapter, topic, raw_date]):
+            errors.append(f"Row {row_idx}: missing required fields (Class, Section, Subject, Chapter, Topic, Date).")
             skipped += 1
             continue
 
         # Parse date
         try:
-            if isinstance(raw_date, dt_date):
+            if isinstance(raw_date, dt_datetime):
+                plan_date = raw_date.date()
+            elif isinstance(raw_date, dt_date):
                 plan_date = raw_date
             else:
-                from datetime import datetime
-                plan_date = datetime.strptime(str(raw_date).strip(), '%Y-%m-%d').date()
+                plan_date = dt_datetime.strptime(str(raw_date).strip(), '%Y-%m-%d').date()
         except ValueError:
             errors.append(f"Row {row_idx}: invalid date '{raw_date}' — use YYYY-MM-DD.")
             skipped += 1
@@ -467,6 +513,11 @@ def excel_import(request):
             if qs.exists():
                 teacher_obj = qs.first()
 
+        if teacher_obj is None:
+            errors.append(f"Row {row_idx}: teacher '{teacher_name or ''}' not found and current user has no staff profile.")
+            skipped += 1
+            continue
+
         method_val = str(method).strip() if method else 'Lecture'
         if method_val not in VALID_METHODS:
             method_val = 'Lecture'
@@ -475,26 +526,40 @@ def excel_import(request):
         if status_val not in VALID_STATUSES:
             status_val = 'Planned'
 
-        LessonPlan.objects.create(
-            school         = sdata,
-            teacher        = teacher_obj,
-            subject        = subj_obj,
-            cls            = cls_obj,
-            section        = sec_obj,
-            acad_yr        = year,
-            date           = plan_date,
-            period_number  = int(period) if period else 1,
-            chapter        = str(chapter or '').strip(),
-            topic          = str(topic).strip(),
-            objectives     = str(objectives or '').strip(),
-            content_taught = str(content or '').strip(),
-            teaching_method= method_val,
-            status         = status_val,
-        )
-        created += 1
+        try:
+            periods_val = max(1, int(periods)) if periods else 1
+        except (TypeError, ValueError):
+            periods_val = 1
 
-    if created:
-        messages.success(request, f'{created} lesson plan(s) imported successfully.')
+        plan, plan_created = LessonPlan.objects.get_or_create(
+            school   = sdata,
+            acad_yr  = year,
+            cls      = cls_obj,
+            section  = sec_obj,
+            subject  = subj_obj,
+            chapter  = str(chapter).strip(),
+            defaults = {'teacher': teacher_obj},
+        )
+        if plan_created:
+            created_plans += 1
+
+        LessonPlanTopic.objects.create(
+            lesson_plan      = plan,
+            topic            = str(topic).strip(),
+            date             = plan_date,
+            periods_required = periods_val,
+            teaching_method  = method_val,
+            status           = status_val,
+            objectives       = str(objectives or '').strip(),
+            content_taught   = str(content or '').strip(),
+        )
+        created_topics += 1
+
+    if created_topics:
+        messages.success(
+            request,
+            f'{created_topics} topic(s) imported ({created_plans} new chapter plan(s) created).'
+        )
     if errors:
         for e in errors[:10]:
             messages.warning(request, e)
@@ -507,12 +572,24 @@ def excel_import(request):
 # ─── AJAX helpers ──────────────────────────────────────────────────────────────
 
 def ajax_load_sections(request):
-    cls_id   = request.GET.get('cls_id')
-    sections = section.objects.filter(class_sec_name_id=cls_id).values('id', 'section_name')
-    return JsonResponse(list(sections), safe=False)
+    cls_id = request.GET.get('cls_id')
+    sch_id = request.session.get('sch_id')
+    secs   = section.objects.filter(
+        class_sec_name_id=cls_id,
+        school_name_id=sch_id,
+    ).values('id', 'section_name')
+    return JsonResponse(list(secs), safe=False)
 
 
 def ajax_load_subjects(request):
     cls_id = request.GET.get('cls_id')
-    subjs  = subjects.objects.filter(subject_class_id=cls_id).values('id', 'subject_name')
-    return JsonResponse(list(subjs), safe=False)
+    sch_id = request.session.get('sch_id')
+    try:
+        sdata   = school.objects.get(pk=sch_id)
+        curr_yr = currentacademicyr.objects.get(school_name=sdata).current_year
+    except Exception:
+        curr_yr = None
+    qs = subjects.objects.filter(subject_class_id=cls_id, subject_school_id=sch_id)
+    if curr_yr:
+        qs = qs.filter(subject_year=curr_yr)
+    return JsonResponse(list(qs.values('id', 'subject_name')), safe=False)

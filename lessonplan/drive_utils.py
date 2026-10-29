@@ -107,6 +107,73 @@ def upload_note(file_obj, filename, mime_type, school_name, class_name, subject_
     return file_id, info.get('webViewLink', ''), info.get('webContentLink', '')
 
 
+def upload_gallery_photo(file_obj, filename, mime_type, school_name, album_name='Gallery'):
+    """
+    Upload a photo to Drive under School/Gallery/<album>.
+    Returns (file_id, view_url).
+    """
+    service = _get_service()
+    root_id = settings.GOOGLE_DRIVE_ROOT_FOLDER_ID
+
+    school_folder  = _get_or_create_folder(service, school_name, root_id)
+    gallery_folder = _get_or_create_folder(service, 'Gallery', school_folder)
+    album_folder   = _get_or_create_folder(service, album_name or 'General', gallery_folder)
+
+    file_obj.seek(0)
+    media = MediaIoBaseUpload(
+        io.BytesIO(file_obj.read()),
+        mimetype=mime_type,
+        resumable=True,
+    )
+    uploaded = service.files().create(
+        body={'name': filename, 'parents': [album_folder]},
+        media_body=media,
+        fields='id',
+        supportsAllDrives=True,
+    ).execute()
+    file_id = uploaded['id']
+
+    service.permissions().create(
+        fileId=file_id,
+        body={'type': 'anyone', 'role': 'reader'},
+        supportsAllDrives=True,
+    ).execute()
+
+    info = service.files().get(
+        fileId=file_id,
+        fields='webViewLink',
+        supportsAllDrives=True,
+    ).execute()
+
+    return file_id, info.get('webViewLink', '')
+
+
+def list_folder_images(folder_id):
+    """
+    List all image files directly inside a Drive folder (sorted by name).
+    The folder must be shared 'Anyone with the link' or shared with the service account.
+    Returns [{'id': ..., 'name': ...}, ...].
+    """
+    service = _get_service()
+    images = []
+    page_token = None
+    while True:
+        res = service.files().list(
+            q=f"'{folder_id}' in parents and mimeType contains 'image/' and trashed=false",
+            fields='nextPageToken, files(id, name)',
+            orderBy='name',
+            pageSize=1000,
+            pageToken=page_token,
+            supportsAllDrives=True,
+            includeItemsFromAllDrives=True,
+        ).execute()
+        images.extend(res.get('files', []))
+        page_token = res.get('nextPageToken')
+        if not page_token:
+            break
+    return images
+
+
 def delete_note(file_id):
     """Move a Drive file to trash (silent on error)."""
     try:

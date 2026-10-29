@@ -29,7 +29,8 @@ class AutomateFunc(models.Model):
         ('summarys', 'Summary'),
         ('Grievance_Report','Grievance_Report'),
         ('Grievance_over_Due','Grievance_over_Due'),
-        ('Morning_Attendance_Alert','Morning_Attendance_Alert')
+        ('Morning_Attendance_Alert','Morning_Attendance_Alert'),
+        ('Consolidated_Teacher_Report', 'Consolidated Teacher Report'),
     ]
 
     SEND_TYPES = [

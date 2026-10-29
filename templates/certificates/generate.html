@@ -1,0 +1,197 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0">Generate Certificate</h4>
+      <small class="text-muted">{{ skool.name }}</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'cert_issued_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="ri-history-line me-1"></i> Issued Certificates
+      </a>
+      <a href="{% url 'cert_template_list' %}" class="btn btn-outline-primary btn-sm">
+        <i class="ri-file-upload-line me-1"></i> Manage Templates
+      </a>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+      {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-4">
+
+    <!-- Left: Generate form -->
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="ri-file-text-line me-2"></i>Certificate Details</h6>
+        </div>
+        <div class="card-body">
+          <form method="post" id="generateForm">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Template <span class="text-danger">*</span></label>
+              <select name="template_id" id="templateSelect" class="form-select" required>
+                <option value="">— Select a template —</option>
+                {% for t in templates %}
+                <option value="{{ t.id }}" {% if request.GET.template == t.id|stringformat:'s' %}selected{% endif %}>
+                  {{ t.name }} ({{ t.get_cert_type_display }})
+                </option>
+                {% endfor %}
+              </select>
+              {% if not templates %}
+              <div class="form-text text-warning">
+                No templates uploaded yet. <a href="{% url 'cert_template_list' %}">Upload one first →</a>
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
+              <select name="student_id" id="studentSelect" class="form-select" required>
+                <option value="">— Search student —</option>
+                {% for s in all_students %}
+                <option value="{{ s.id }}">{{ s.first_name }} {{ s.last_name }} | Adm: {{ s.admn_no }} | {{ s.class_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Issue Date</label>
+              <input type="date" name="issue_date" class="form-control" value="{{ today }}">
+            </div>
+
+            <!-- Custom variables section (loaded via AJAX) -->
+            <div id="customVarsSection" class="d-none">
+              <hr>
+              <h6 class="text-muted mb-3">
+                <i class="ri-settings-3-line me-1"></i>
+                Custom Fields (from your template)
+              </h6>
+              <div id="customVarsFields"></div>
+            </div>
+
+            <div class="mt-4">
+              <button type="submit" class="btn btn-success w-100" id="downloadBtn">
+                <i class="ri-download-2-line me-1"></i> Generate &amp; Download (.docx)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Variable reference -->
+    <div class="col-lg-5" id="varref">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="ri-code-box-line me-2"></i>Available Placeholders</h6>
+        </div>
+        <div class="card-body p-0">
+          <p class="text-muted small px-3 pt-3 mb-2">
+            Use these in your DOCX template as {% verbatim %}<code>{{variable_name}}</code>{% endverbatim %}
+          </p>
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr><th>Placeholder</th><th>Description</th></tr>
+              </thead>
+              {% verbatim %}<tbody class="small">
+                <tr><td><code>{{student_name}}</code></td><td>Full name</td></tr>
+                <tr><td><code>{{first_name}}</code></td><td>First name</td></tr>
+                <tr><td><code>{{last_name}}</code></td><td>Last name</td></tr>
+                <tr><td><code>{{father_name}}</code></td><td>Father's name</td></tr>
+                <tr><td><code>{{mother_name}}</code></td><td>Mother's name</td></tr>
+                <tr><td><code>{{father_occupation}}</code></td><td>Father's occupation</td></tr>
+                <tr><td><code>{{mother_occupation}}</code></td><td>Mother's occupation</td></tr>
+                <tr><td><code>{{gender}}</code></td><td>Male / Female</td></tr>
+                <tr><td><code>{{gender_he_she}}</code></td><td>He / She</td></tr>
+                <tr><td><code>{{gender_his_her}}</code></td><td>His / Her</td></tr>
+                <tr><td><code>{{dob}}</code></td><td>Date of birth (15 August 2004)</td></tr>
+                <tr><td><code>{{dob_words}}</code></td><td>DOB in words</td></tr>
+                <tr><td><code>{{age}}</code></td><td>Age in years</td></tr>
+                <tr><td><code>{{class_name}}</code></td><td>Class (e.g. 10)</td></tr>
+                <tr><td><code>{{section}}</code></td><td>Section (e.g. A)</td></tr>
+                <tr><td><code>{{class_section}}</code></td><td>10 – A</td></tr>
+                <tr><td><code>{{admission_no}}</code></td><td>Admission number</td></tr>
+                <tr><td><code>{{roll_no}}</code></td><td>Roll number</td></tr>
+                <tr><td><code>{{religion}}</code></td><td>Religion</td></tr>
+                <tr><td><code>{{caste}}</code></td><td>Caste</td></tr>
+                <tr><td><code>{{blood_group}}</code></td><td>Blood group</td></tr>
+                <tr><td><code>{{address}}</code></td><td>Student address</td></tr>
+                <tr><td><code>{{academic_year}}</code></td><td>Current academic year</td></tr>
+                <tr><td><code>{{school_name}}</code></td><td>School name</td></tr>
+                <tr><td><code>{{school_address}}</code></td><td>School address</td></tr>
+                <tr><td><code>{{school_phone}}</code></td><td>School phone</td></tr>
+                <tr><td><code>{{school_email}}</code></td><td>School email</td></tr>
+                <tr><td><code>{{issue_date}}</code></td><td>Certificate issue date</td></tr>
+                <tr><td><code>{{cert_number}}</code></td><td>Auto-generated cert no.</td></tr>
+                <tr><td><code>{{tc_date}}</code></td><td>TC date (if set)</td></tr>
+              </tbody>{% endverbatim %}
+            </table>
+          </div>
+          <div class="px-3 py-2 text-muted small">
+            Any other {% verbatim %}<code>{{variable}}</code>{% endverbatim %} in your template will show as an extra input field when you select the template above.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% verbatim %}<script>
+document.getElementById('templateSelect').addEventListener('change', function () {
+  const templateId = this.value;
+  const section    = document.getElementById('customVarsSection');
+  const fields     = document.getElementById('customVarsFields');
+
+  if (!templateId) {
+    section.classList.add('d-none');
+    fields.innerHTML = '';
+    return;
+  }
+
+  fetch(`/certificates/template/${templateId}/vars/`)
+    .then(r => r.json())
+    .then(data => {
+      fields.innerHTML = '';
+      if (data.custom_vars && data.custom_vars.length > 0) {
+        data.custom_vars.forEach(varName => {
+          const label = varName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          fields.innerHTML += `
+            <div class="mb-3">
+              <label class="form-label fw-semibold">${label}</label>
+              <input type="text" name="extra_${varName}" class="form-control"
+                     placeholder="Value for {{${varName}}}">
+            </div>`;
+        });
+        section.classList.remove('d-none');
+      } else {
+        section.classList.add('d-none');
+      }
+    });
+});
+
+// Auto-trigger if template pre-selected via URL param
+window.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('templateSelect');
+  if (sel.value) sel.dispatchEvent(new Event('change'));
+
+  // Initialize select2 for student picker if available
+  if (typeof $.fn !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
+    $('#studentSelect').select2({ placeholder: 'Search student...' });
+  }
+});
+</script>{% endverbatim %}
+{% endblock %}

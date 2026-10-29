@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse,redirect
-from .models import SchoolProfile
-from .forms import SchoolProfileForm
+from .models import SchoolProfile, Banner, PhotoGallery, VideoGallery, GalleryPhoto
+VideoGalleryModel = VideoGallery  # alias kept for existing API views
+from .forms import SchoolProfileForm, BannerForm, GalleryPhotoForm, PhotoGalleryForm, VideoGalleryForm
 from authenticate.decorators import allowed_users
 from students.models import attendancegen
 from staff.models import temp_homework
@@ -10,8 +11,11 @@ from .serializers import (
     MonthlyAttendanceSerializer, indfeeserializer, noticeboardserializer,
     eventsserializer, DeviceFcmSerializer, MessageSerializer,staffserializer,
     ExamSerializer, attendserialier, VideoSerializer, schoolserializer,SchoolProfileSerializer,sclassserializer,
-    sectionserializer,subjectserializer,MessageSerializer
+    sectionserializer,subjectserializer,MessageSerializer,GrievanceSerializer,BannerSerializer,
+    TimetableSerializer, PhotoGallerySerializer, VideoGallerySerializer
 )
+from timetable.models import Timetable
+from grievance.models import Grievance
 from admission.models import students
 from institutions.models import school
 from setup.models import currentacademicyr, academicyr, sclass, subjects,section
@@ -30,12 +34,16 @@ from django.db.models import Avg, Sum
 from academic.models import noticeboard, events
 from .models import DeviceFCMToken
 from pushnotify.models import GeneralNotification, SectionwiseNotification
-from datetime import time, datetime, timedelta
-from django.utils.timezone import localtime
+from datetime import time, datetime, timedelta, date
+from django.db.models import Q
+from django.utils.timezone import localtime, localdate
 from django_q.models import Schedule
 from django.utils import timezone
 import calendar
 import os
+import re
+import hashlib
+from django.core.cache import cache
 
 # Create your views here.
 
@@ -89,7 +97,7 @@ class studentsapi(APIView):
             ).count() if student.class_name and student.secs else 0
 
             # ✅ Fees Status — fixed both bugs
-            fee_sts = addindfee.objects.filter(student_name=student)
+            fee_sts = addindfee.objects.filter(stud_name=student)
             if not fee_sts.exists():
                 fee_status = 'No Fees'        # ✅ handles empty case
             elif fee_sts.filter(status='Unpaid').exists():
@@ -160,7 +168,7 @@ class homeworkapis(APIView):
 
                 return Response(serializer.data)
 
-            except homewk.DoesNotExist:
+            except students.DoesNotExist:
                 return Response({"detail": "Student/homework not found"})
 
 
@@ -175,12 +183,12 @@ class homeworkapi(APIView):
             try:
                 student = students.objects.get(usernm=username)
 
-                seven_days_ago = timezone.now() - timedelta(days=7)
+                seven_days_ago = date.today() - timedelta(days=7)
 
                 homewk = homework.objects.filter(
                     hclass=student.class_name,
                     secs=student.secs,
-                    created_at__gte=seven_days_ago  # 👈 your date field here
+                    homework_date__gte=seven_days_ago
                 ).order_by('-id')
 
                 serializer = homeworkserializer(homewk, many=True)
@@ -224,7 +232,7 @@ class noticeboardApi(APIView):
 
         try:
             # Assuming you want to filter students by the provided username
-            student = students.objects.get(usernm='2026151999')
+            student = students.objects.get(usernm=username)
             notice = noticeboard.objects.filter(notice_school=student.school_student).order_by('-notice_date')
             serializer = noticeboardserializer(notice, many=True)
 
@@ -337,7 +345,7 @@ class CalendarAbsenteesApi(APIView):
     def get(self, request):
         username = request.query_params.get('username')
         student = students.objects.get(usernm=username)
-        attend = attendance.objects.filter(student_name=student)
+        attend = attendance.objects.filter(student_name=student, status='Absent')
         serializer =attendserialier(attend,many=True)
         json_data = serializer.data
         return Response(json_data)
@@ -419,19 +427,179 @@ class ResultDownload(APIView):
             return HttpResponse("Failed to generate PDF.", status=500)
 
 
-class VideoGallery(APIView):
+class PhotoGalleryView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-
-    def get(self,request):
+    def get(self, request):
         username = request.query_params.get('username')
-        stud = students.objects.get(usernm=username)
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+        try:
+            stud = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
         sdata = school.objects.get(name=stud.school_student)
-        yr = currentacademicyr.objects.get(school_name=sdata)
-        year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-        videos = Video.objects.filter(Vschool=sdata)
-        serializer = VideoSerializer(videos,many=True)
+        photos = PhotoGallery.objects.filter(Pschool=sdata, status='active')
+        serializer = PhotoGallerySerializer(photos, many=True)
+        data = list(serializer.data)
+
+        # Photos added from Gallery Manage (GalleryPhoto) — same shape as PhotoGallery
+        school_data = schoolserializer(sdata).data
+        for gp in GalleryPhoto.objects.filter(school=sdata, is_active=True):
+            data.append({
+                'id': f'g{gp.id}',
+                'PTitle': gp.title,
+                'PThumbnail': '',
+                'Plink': gp.view_url,
+                'Pdesc': gp.album,
+                'Pdate': None,
+                'Ppostdate': gp.created_at.date().isoformat() if gp.created_at else None,
+                'Pschool': school_data,
+                'status': 'active',
+            })
+
+        # No thumbnail (Drive folder / website album / image link) → first image as cover
+        for item in data:
+            if not item.get('PThumbnail'):
+                try:
+                    imgs = _album_images(item.get('Plink') or '')
+                    if imgs:
+                        item['PThumbnail'] = imgs[0]['thumb']
+                except Exception as e:
+                    print(f"Gallery cover error for {item.get('Plink')}: {e}")
+        return Response(data)
+
+
+# ── Photo album slideshow (Drive folder / website album page) ─────────────
+
+DRIVE_FOLDER_RE = re.compile(r'drive\.google\.com/drive/(?:u/\d+/)?folders/([a-zA-Z0-9_-]+)')
+DRIVE_FILE_RE = re.compile(r'drive\.google\.com/(?:file/d/|open\?id=|uc\?(?:export=\w+&)?id=)([a-zA-Z0-9_-]+)')
+IMAGE_URL_RE = re.compile(r'\.(?:jpe?g|png|gif|webp|bmp)(?:\?.*)?$', re.IGNORECASE)
+
+
+def _drive_folder_id(link):
+    m = DRIVE_FOLDER_RE.search(link or '')
+    return m.group(1) if m else None
+
+
+def _drive_file_id(link):
+    m = DRIVE_FILE_RE.search(link or '')
+    return m.group(1) if m else None
+
+
+def _is_image_url(link):
+    return bool(IMAGE_URL_RE.search((link or '').strip()))
+
+
+def _drive_thumb(file_id, size):
+    return f'https://drive.google.com/thumbnail?id={file_id}&sz=w{size}'
+
+
+def _album_img(img_id, name, thumb, full):
+    return {'id': img_id, 'name': name, 'thumb': thumb, 'full': full}
+
+
+def _album_images(link):
+    """
+    All photos for a gallery link (cached 10 minutes):
+      Drive folder            → every image in the folder
+      Drive file / image URL  → that one image
+      Website album page /
+      web folder listing      → every album image on that page
+    Returns [] when nothing is found. Raises only on Drive API errors.
+    """
+    link = (link or '').strip()
+    if not link:
+        return []
+    key = 'gallery_album_' + hashlib.md5(link.encode('utf-8')).hexdigest()
+    images = cache.get(key)
+    if images is not None:
+        return images
+
+    folder_id = _drive_folder_id(link)
+    file_id = _drive_file_id(link)
+    if folder_id:
+        from lessonplan.drive_utils import list_folder_images
+        images = [
+            _album_img(f['id'], f.get('name', ''), _drive_thumb(f['id'], 400), _drive_thumb(f['id'], 2048))
+            for f in list_folder_images(folder_id)
+        ]
+    elif file_id:
+        images = [_album_img(file_id, '', _drive_thumb(file_id, 400), _drive_thumb(file_id, 2048))]
+    elif _is_image_url(link) or not link.startswith('http'):
+        images = [_album_img(link, '', link, link)]
+    else:
+        from .web_album import fetch_album_images
+        images = [
+            _album_img(u, u.rsplit('/', 1)[-1].split('?')[0], u, u)
+            for u in fetch_album_images(link)
+        ]
+
+    # empty result cached only 2 minutes so a temporarily-down website is retried soon
+    cache.set(key, images, 600 if images else 120)
+    return images
+
+
+class PhotoAlbumView(APIView):
+    """
+    GET /mobi/photos/album/?username=<usernm>&id=<photo id from /mobi/photos/>
+    Returns {"title": ..., "images": [{"id","name","thumb","full"}, ...]}
+    If no images can be found: {"title": ..., "images": [], "web_url": <link>} → app opens browser
+    id = number  → PhotoGallery
+    id = g<num>  → GalleryPhoto (Gallery Manage)
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        photo_id = request.query_params.get('id', '')
+        if not username or not photo_id:
+            return Response({'error': 'username and id required'}, status=400)
+        try:
+            stud = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
+        sdata = school.objects.get(name=stud.school_student)
+
+        title, link = '', ''
+        if photo_id.startswith('g') and photo_id[1:].isdigit():
+            gp = GalleryPhoto.objects.filter(pk=int(photo_id[1:]), school=sdata, is_active=True).first()
+            if gp:
+                title, link = gp.title, gp.view_url
+        elif photo_id.isdigit():
+            pg = PhotoGallery.objects.filter(pk=int(photo_id), Pschool=sdata, status='active').first()
+            if pg:
+                title, link = pg.PTitle, pg.Plink
+        if not link:
+            return Response({'error': 'Album not found'}, status=404)
+
+        try:
+            images = _album_images(link)
+        except Exception as e:
+            return Response({'error': f'Could not read album: {e}'}, status=502)
+
+        if images:
+            return Response({'title': title, 'images': images})
+        return Response({'title': title, 'images': [], 'web_url': link})
+
+
+class VideoGalleryView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+        try:
+            stud = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
+        sdata = school.objects.get(name=stud.school_student)
+        videos = VideoGalleryModel.objects.filter(Vschool=sdata, status='active')
+        serializer = VideoGallerySerializer(videos, many=True)
         return Response(serializer.data)
 
 
@@ -511,8 +679,10 @@ class SchoolProfileApi(APIView):
         sdata = school.objects.get(name=stud.school_student)
         yr = currentacademicyr.objects.get(school_name=sdata)
         year = academicyr.objects.get(acad_year=yr, school_name=sdata)
-        schprof = SchoolProfile.objects.get(school_name=sdata)
-        serializer = SchoolProfileSerializer(schprof, many=True)
+        schprof = SchoolProfile.objects.filter(school_name=sdata).first()
+        if not schprof:
+            return Response({"detail": "School profile not found"}, status=404)
+        serializer = SchoolProfileSerializer(schprof)
         return Response(serializer.data)
 
 
@@ -741,6 +911,67 @@ class TeacherHomeworkAddAPI(APIView):
             return Response({'error': str(e)}, status=500)
 
 
+class GrievanceAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk=None):
+        username = request.query_params.get('username')
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+        try:
+            student = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
+
+        if pk:
+            try:
+                grievance = Grievance.objects.get(pk=pk, stud_name=student)
+                return Response(GrievanceSerializer(grievance).data)
+            except Grievance.DoesNotExist:
+                return Response({'error': 'Grievance not found'}, status=404)
+
+        grievances = Grievance.objects.filter(stud_name=student).order_by('-complaint_date')
+        return Response(GrievanceSerializer(grievances, many=True).data)
+
+    def post(self, request):
+        username = request.query_params.get('username')
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+        try:
+            student = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
+
+        area   = request.data.get('area_of_complaint')
+        detail = request.data.get('detail')
+        mobile = request.data.get('mobile')
+
+        if not area or not detail or not mobile:
+            return Response({'error': 'area_of_complaint, detail and mobile are required'}, status=400)
+
+        sdata = school.objects.get(name=student.school_student)
+        yr    = currentacademicyr.objects.get(school_name=sdata)
+        year  = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+        grievance = Grievance.objects.create(
+            stud_name=student,
+            gschool=sdata,
+            gclass=student.class_name,
+            gsec=student.secs,
+            ac_year=year,
+            area_of_complaint=area,
+            aoc_other=request.data.get('aoc_other'),
+            detail=detail,
+            mobile=mobile,
+            complaint_date=timezone.now(),
+            complaint_status='Open',
+            complaint_received='APP',
+            act_intimation_to_person='APP',
+        )
+        return Response(GrievanceSerializer(grievance).data, status=201)
+
+
 
 
 class GeneralNotificationAPI(APIView):
@@ -821,3 +1052,275 @@ class GeneralNotificationAPI(APIView):
             import traceback
             traceback.print_exc()
             return Response({'error': str(e)}, status=500)
+
+# ── Banner API ──────────────────────────────────────────────────────────────
+
+class BannerAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+        try:
+            student = students.objects.get(usernm=username)
+            sdata = school.objects.get(name=student.school_student)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
+        except school.DoesNotExist:
+            return Response({'error': 'School not found'}, status=404)
+
+        today = date.today()
+        banners = Banner.objects.filter(
+            school_name=sdata,
+            is_active=True,
+        ).filter(
+            Q(start_date__isnull=True) | Q(start_date__lte=today)
+        ).filter(
+            Q(end_date__isnull=True) | Q(end_date__gte=today)
+        )
+        serializer = BannerSerializer(banners, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+# ── Banner Admin CRUD ───────────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def banner_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    banners = Banner.objects.filter(school_name=sdata)
+    return render(request, 'mobi/banner_list.html', {'skool': sdata, 'banners': banners})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def banner_add(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES)
+        if form.is_valid():
+            banner = form.save(commit=False)
+            banner.school_name = sdata
+            banner.save()
+            return redirect('banner_list')
+    else:
+        form = BannerForm()
+    return render(request, 'mobi/banner_add.html', {'skool': sdata, 'form': form})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def banner_edit(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    banner = Banner.objects.get(pk=pk, school_name=sdata)
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES, instance=banner)
+        if form.is_valid():
+            form.save()
+            return redirect('banner_list')
+    else:
+        form = BannerForm(instance=banner)
+    return render(request, 'mobi/banner_edit.html', {'skool': sdata, 'form': form, 'banner': banner})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def banner_delete(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    Banner.objects.filter(pk=pk, school_name=sdata).delete()
+    return redirect('banner_list')
+
+
+class TimetableAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+        try:
+            student = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)
+
+        if not student.class_name or not student.secs:
+            return Response({'error': 'Student has no class/section assigned'}, status=400)
+
+        entries = Timetable.objects.filter(
+            section=student.secs,
+            timetable_school=student.school_student,
+        ).select_related('timeslot', 'subject', 'teacher').order_by(
+            'timeslot__day', 'timeslot__period_number'
+        )
+        serializer = TimetableSerializer(entries, many=True)
+        return Response(serializer.data)
+
+
+# ── Gallery Admin CRUD ──────────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def gallery_list(request):
+    from django.contrib import messages as msg
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    photos = GalleryPhoto.objects.filter(school=sdata)
+    albums = photos.values_list('album', flat=True).distinct()
+    return render(request, 'mobi/gallery_list.html', {
+        'skool': sdata, 'photos': photos, 'albums': [a for a in albums if a]
+    })
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def gallery_add(request):
+    from django.contrib import messages as msg
+    from lessonplan.drive_utils import upload_gallery_photo
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    if request.method == 'POST':
+        form = GalleryPhotoForm(request.POST, request.FILES)
+        if form.is_valid():
+            add_type = request.POST.get('_add_type', 'upload')
+            title    = form.cleaned_data['title']
+            album    = form.cleaned_data.get('album', '')
+            is_active = form.cleaned_data.get('is_active', True)
+            drive_file_id = ''
+            view_url = ''
+            if add_type == 'upload' and form.cleaned_data.get('photo'):
+                photo_file = form.cleaned_data['photo']
+                try:
+                    drive_file_id, view_url = upload_gallery_photo(
+                        photo_file,
+                        photo_file.name,
+                        photo_file.content_type,
+                        sdata.name,
+                        album or 'General',
+                    )
+                except Exception as e:
+                    msg.error(request, f'Drive upload failed: {e}')
+                    return render(request, 'mobi/gallery_add.html', {'skool': sdata, 'form': form})
+            else:
+                view_url = form.cleaned_data.get('link_url', '')
+            GalleryPhoto.objects.create(
+                title=title, album=album, drive_file_id=drive_file_id,
+                view_url=view_url, is_active=is_active, school=sdata
+            )
+            msg.success(request, 'Photo added to gallery.')
+            return redirect('gallery_list')
+    else:
+        form = GalleryPhotoForm()
+    return render(request, 'mobi/gallery_add.html', {'skool': sdata, 'form': form})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def gallery_delete(request, pk):
+    from lessonplan.drive_utils import delete_note
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    photo = GalleryPhoto.objects.filter(pk=pk, school=sdata).first()
+    if photo:
+        if photo.drive_file_id:
+            delete_note(photo.drive_file_id)
+        photo.delete()
+    return redirect('gallery_list')
+
+
+# ── Photo Gallery Admin CRUD ────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def photo_gallery_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    photos = PhotoGallery.objects.filter(Pschool=sdata)
+    return render(request, 'mobi/photo_gallery_list.html', {'skool': sdata, 'photos': photos})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def photo_gallery_add(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    if request.method == 'POST':
+        form = PhotoGalleryForm(request.POST)
+        if form.is_valid():
+            photo = form.save(commit=False)
+            photo.Pschool = sdata
+            photo.save()
+            return redirect('photo_gallery_list')
+    else:
+        form = PhotoGalleryForm()
+    return render(request, 'mobi/photo_gallery_form.html', {'skool': sdata, 'form': form, 'action': 'Add'})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def photo_gallery_edit(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    photo = PhotoGallery.objects.get(pk=pk, Pschool=sdata)
+    if request.method == 'POST':
+        form = PhotoGalleryForm(request.POST, instance=photo)
+        if form.is_valid():
+            form.save()
+            return redirect('photo_gallery_list')
+    else:
+        form = PhotoGalleryForm(instance=photo)
+    return render(request, 'mobi/photo_gallery_form.html', {'skool': sdata, 'form': form, 'action': 'Edit', 'obj': photo})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def photo_gallery_delete(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    PhotoGallery.objects.filter(pk=pk, Pschool=sdata).delete()
+    return redirect('photo_gallery_list')
+
+
+# ── Video Gallery Admin CRUD ────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def video_gallery_list(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    videos = VideoGallery.objects.filter(Vschool=sdata)
+    return render(request, 'mobi/video_gallery_list.html', {'skool': sdata, 'videos': videos})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def video_gallery_add(request):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    if request.method == 'POST':
+        form = VideoGalleryForm(request.POST)
+        if form.is_valid():
+            video = form.save(commit=False)
+            video.Vschool = sdata
+            video.save()
+            return redirect('video_gallery_list')
+    else:
+        form = VideoGalleryForm()
+    return render(request, 'mobi/video_gallery_form.html', {'skool': sdata, 'form': form, 'action': 'Add'})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def video_gallery_edit(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    video = VideoGallery.objects.get(pk=pk, Vschool=sdata)
+    if request.method == 'POST':
+        form = VideoGalleryForm(request.POST, instance=video)
+        if form.is_valid():
+            form.save()
+            return redirect('video_gallery_list')
+    else:
+        form = VideoGalleryForm(instance=video)
+    return render(request, 'mobi/video_gallery_form.html', {'skool': sdata, 'form': form, 'action': 'Edit', 'obj': video})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
+def video_gallery_delete(request, pk):
+    sch_id = request.session['sch_id']
+    sdata = school.objects.get(pk=sch_id)
+    VideoGallery.objects.filter(pk=pk, Vschool=sdata).delete()
+    return redirect('video_gallery_list')
+

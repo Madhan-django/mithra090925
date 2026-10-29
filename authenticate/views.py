@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect,HttpResponse
 from django.contrib import messages
 from .forms import CreateUserForm
 from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth.decorators import login_required
 from global_login_required import login_not_required
 from django.contrib.auth.models import User
 from .decorators import unauthenticated_user,allowed_users
@@ -11,6 +12,11 @@ from staff.models import staff
 from institutions.models import school
 
 # Create your views here.
+
+@login_not_required
+def csrf_failure(request, reason=''):
+    messages.error(request, 'Your session has expired. Please log in again.')
+    return redirect('/')
 
 @login_not_required
 def login_user(request):
@@ -49,7 +55,18 @@ def login_user(request):
         else:
             messages.info(request, 'Username OR Password Incorrect')
 
-    return render(request,'authenticate/login.html')
+    try:
+        schools = school.objects.filter(isactive=True)
+        sch_obj = schools.first() if schools.count() == 1 else None
+        school_name = sch_obj.name if sch_obj else None
+        school_logo = sch_obj.logo.url if sch_obj and sch_obj.logo else None
+    except Exception:
+        school_name = None
+        school_logo = None
+    return render(request, 'authenticate/login.html', {
+        'school_name': school_name,
+        'school_logo': school_logo,
+    })
 
 
 def register_user(request):
@@ -70,3 +87,4 @@ def adminpanel(request):
 
 def Googleverify(request):
     return render(request,'GoogleVerify/googledf18bd0e30039b75.html')
+

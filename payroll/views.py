@@ -694,12 +694,17 @@ def daily_attendance_view(request):
                         mispunch = True
 
                     # ---------- LATE CHECK ----------
-                    if stf.shift and stf.shift.start_time and local_in:
-                        shift_start = datetime.combine(date_obj, stf.shift.start_time)
-                        shift_dt = timezone.make_aware(shift_start, timezone.get_current_timezone())
-                        allowed_time = shift_dt + timedelta(minutes=grace_time)
+                    if local_in:
+                        if stf.shift and stf.shift.start_time:
+                            shift_time = stf.shift.start_time
+                        else:
+                            shift_time = datetime.strptime("09:00:00", "%H:%M:%S").time()
 
-                        if local_in > allowed_time:
+                        shift_start = datetime.combine(date_obj, shift_time)
+                        grace_datetime = shift_start + timedelta(minutes=grace_time)
+
+                        naive_in = local_in.replace(tzinfo=None) if timezone.is_aware(local_in) else local_in
+                        if naive_in > grace_datetime:
                             is_late = True
 
                 else:
@@ -1320,11 +1325,14 @@ GRACE_MINUTES = 0  # Change to 10 if you want grace time
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
 def sync_attendance_from_device(request):
 
+    sch_id = request.session.get('sch_id')
+    sdata = get_object_or_404(school, pk=sch_id)
+
     today = now().date()
     yesterday = today - timedelta(days=1)
 
-    # Get last synced attendance date
-    last_record = Attendance.objects.order_by('-date').first()
+    # Get last synced attendance date for this school
+    last_record = Attendance.objects.filter(sch=sdata).order_by('-date').first()
 
     if last_record:
         start_date = last_record.date
@@ -1337,6 +1345,13 @@ def sync_attendance_from_device(request):
         return redirect('day_attendance')
 
     current_date = start_date
+
+    # Build school-specific BioCode map to avoid cross-school BioCode collisions
+    staff_map = {
+        s.BioCode: s
+        for s in staff.objects.select_related('shift').filter(staff_school=sdata)
+        if s.BioCode
+    }
 
     while current_date <= yesterday:
 
@@ -1366,9 +1381,8 @@ def sync_attendance_from_device(request):
 
             user_id, in_time, out_time, punch_count = row
 
-            try:
-                stf = staff.objects.select_related('shift').get(BioCode=user_id)
-            except staff.DoesNotExist:
+            stf = staff_map.get(user_id)
+            if not stf:
                 continue
 
             # Skip manual attendance
@@ -1438,6 +1452,9 @@ def sync_attendance_from_device(request):
 @allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
 def force_sync_attendance_from_device(request):
     try:
+        sch_id = request.session.get('sch_id')
+        sdata = get_object_or_404(school, pk=sch_id)
+
         today = now().date()
 
         # Last 3 months
@@ -1445,10 +1462,11 @@ def force_sync_attendance_from_device(request):
 
         current_date = start_date
 
-        # -------- LOAD STAFF ONCE (MAJOR SPEED BOOST) --------
+        # Filter by school so duplicate BioCodes across schools don't overwrite each other
         staff_map = {
             s.BioCode: s
-            for s in staff.objects.select_related('shift').all()
+            for s in staff.objects.select_related('shift').filter(staff_school=sdata)
+            if s.BioCode
         }
 
         while current_date <= today:

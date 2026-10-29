@@ -1,0 +1,103 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Banners</span>
+    </div>
+    <div class="pc-page-title">Mobile App Banners</div>
+    <div class="pc-page-sub">Banners displayed as a slideshow in the student mobile app</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'banner_add' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> Add Banner
+    </a>
+  </div>
+</div>
+
+{% if banners %}
+<div class="pc-card">
+  <div class="pc-card-body" style="padding:0;">
+    <table class="pc-table" style="width:100%;">
+      <thead>
+        <tr>
+          <th style="width:56px;">#</th>
+          <th>Preview</th>
+          <th>Title</th>
+          <th>Order</th>
+          <th>Active</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in banners %}
+        <tr>
+          <td style="color:var(--muted);font-size:12px;">{{ b.id }}</td>
+          <td>
+            <img src="{{ b.image.url }}" style="height:48px;width:80px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);">
+          </td>
+          <td>
+            <div style="font-weight:600;color:var(--text);font-size:13.5px;">{{ b.title }}</div>
+            {% if b.link_url %}
+            <div style="font-size:11px;color:var(--accent);margin-top:2px;overflow:hidden;text-overflow:ellipsis;max-width:220px;white-space:nowrap;">
+              <i class="ri-link"></i> {{ b.link_url }}
+            </div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="pc-badge pc-badge-info pc-badge-no-dot">{{ b.display_order }}</span>
+          </td>
+          <td>
+            {% if b.is_active %}
+            <span class="pc-badge pc-badge-success pc-badge-no-dot">Active</span>
+            {% else %}
+            <span class="pc-badge pc-badge-danger pc-badge-no-dot">Inactive</span>
+            {% endif %}
+          </td>
+          <td style="font-size:12px;color:var(--muted);">{{ b.start_date|default:"—" }}</td>
+          <td style="font-size:12px;color:var(--muted);">{{ b.end_date|default:"—" }}</td>
+          <td>
+            <div style="display:flex;gap:8px;">
+              <a href="{% url 'banner_edit' b.pk %}" class="pc-btn pc-btn-outline pc-btn-sm">
+                <i class="ri-edit-line"></i>
+              </a>
+              <a href="{% url 'banner_delete' b.pk %}"
+                 onclick="return confirm('Delete this banner?')"
+                 class="pc-btn pc-btn-danger pc-btn-sm">
+                <i class="ri-delete-bin-line"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+
+<div class="pc-card">
+  <div class="pc-card-body">
+    <div class="pc-empty">
+      <i class="ri-image-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No banners yet</div>
+      <div class="pc-empty-sub">Add banners to show a slideshow in the mobile app home screen</div>
+      <a href="{% url 'banner_add' %}" class="pc-btn pc-btn-primary" style="margin-top:16px;">
+        <i class="ri-add-line"></i> Add First Banner
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

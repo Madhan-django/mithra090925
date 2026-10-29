@@ -1,0 +1,166 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.wn-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 20px;
+}
+.wn-new      { background: #e8f7e6; color: #0ca30c; }
+.wn-improved { background: #e8f0fc; color: #2a78d6; }
+.wn-fixed    { background: #fdf1de; color: #c98500; }
+
+.wn-icon-preview {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 17px;
+}
+.wn-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.wn-row:last-child { border-bottom: none; }
+.wn-meta  { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.wn-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.wn-desc  { font-size: 12.5px; color: var(--text-md); margin-top: 2px; line-height: 1.45; }
+.wn-actions { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
+
+.del-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.45); backdrop-filter: blur(4px);
+  z-index: 1040; display: none; align-items: center; justify-content: center;
+}
+.del-modal-backdrop.show { display: flex; }
+.del-modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); box-shadow: var(--sh-lg);
+  width: 100%; max-width: 380px; margin: 16px;
+  animation: modalIn .2s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.93) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.del-modal-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); }
+.del-modal-title  { font-size: 15px; font-weight: 700; color: var(--text); display:flex; align-items:center; gap:8px; }
+.del-modal-title i { color: var(--rose, #e53e3e); font-size: 18px; }
+.del-modal-body   { padding: 16px 22px; font-size: 13.5px; color: var(--text-md); line-height: 1.6; }
+.del-modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 22px 18px; border-top: 1px solid var(--border); }
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>What's New</span>
+    </div>
+    <div class="pc-page-title">What's New — Feature Updates</div>
+    <div class="pc-page-sub">Manage the updates shown on the staff dashboard</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'app_update_add' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-circle-line"></i> Add Feature
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert" style="margin-bottom:16px;">
+    {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title"><i class="ri-sparkling-2-line me-2" style="color:var(--accent);"></i>Feature Updates</div>
+      <div class="pc-card-sub">{{ updates.count }} update{{ updates.count|pluralize }} · shown newest first</div>
+    </div>
+  </div>
+  <div class="pc-card-body">
+
+    {% if updates %}
+      {% for upd in updates %}
+      <div class="wn-row">
+
+        <div class="wn-icon-preview" style="
+          {% if upd.badge == 'New' %}background:#e8f7e6;color:#0ca30c;
+          {% elif upd.badge == 'Improved' %}background:#e8f0fc;color:#2a78d6;
+          {% else %}background:#fdf1de;color:#c98500;{% endif %}">
+          <i class="{{ upd.icon }}"></i>
+        </div>
+
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="wn-title">{{ upd.title }}</span>
+            <span class="wn-badge {% if upd.badge == 'New' %}wn-new{% elif upd.badge == 'Improved' %}wn-improved{% else %}wn-fixed{% endif %}">{{ upd.badge }}</span>
+            {% if not upd.is_active %}
+            <span class="wn-badge" style="background:#f1f1ee;color:#8b8c99;">Hidden</span>
+            {% endif %}
+          </div>
+          <div class="wn-desc">{{ upd.description }}</div>
+          <div class="wn-meta"><i class="ri-calendar-line me-1"></i>{{ upd.date }} &nbsp;·&nbsp; <i class="ri-icon-class me-1"></i><code>{{ upd.icon }}</code></div>
+        </div>
+
+        <div class="wn-actions">
+          <a href="{% url 'app_update_edit' upd.pk %}" class="pc-btn pc-btn-outline" style="padding:5px 12px;font-size:12px;">
+            <i class="ri-pencil-line"></i> Edit
+          </a>
+          <button class="pc-btn" style="padding:5px 12px;font-size:12px;background:#fceaea;color:#d03b3b;border:1px solid #f5c6c6;"
+            onclick="openDel({{ upd.pk }}, '{{ upd.title|escapejs }}')">
+            <i class="ri-delete-bin-line"></i> Delete
+          </button>
+        </div>
+
+      </div>
+      {% endfor %}
+
+    {% else %}
+    <div class="pc-empty">
+      <i class="ri-sparkling-2-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No feature updates yet</div>
+      <div class="pc-empty-sub">Add your first update to display it on the dashboard</div>
+      <a href="{% url 'app_update_add' %}" class="pc-btn pc-btn-primary" style="margin-top:16px;">
+        <i class="ri-add-circle-line"></i> Add Feature
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="del-modal-backdrop" id="delModal">
+  <div class="del-modal">
+    <div class="del-modal-header">
+      <div class="del-modal-title"><i class="ri-delete-bin-line"></i> Delete Update</div>
+    </div>
+    <div class="del-modal-body">
+      Are you sure you want to delete <strong id="delTitle"></strong>? This cannot be undone.
+    </div>
+    <div class="del-modal-footer">
+      <button class="pc-btn pc-btn-outline" onclick="closeDel()">Cancel</button>
+      <form id="delForm" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn" style="background:#d03b3b;color:#fff;border:none;">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDel(pk, title) {
+  document.getElementById('delTitle').textContent = title;
+  document.getElementById('delForm').action = '/setup/whats-new/' + pk + '/delete/';
+  document.getElementById('delModal').classList.add('show');
+}
+function closeDel() {
+  document.getElementById('delModal').classList.remove('show');
+}
+document.getElementById('delModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDel();
+});
+</script>
+
+{% endblock %}

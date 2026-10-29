@@ -10,8 +10,10 @@ from academic.models import noticeboard,events
 from examination.models import exam_subjectmap,exams
 from setup.models import subjects
 from pushnotify.models import GeneralNotification
-from .models import DeviceFCMToken,SchoolProfile
+from .models import DeviceFCMToken, SchoolProfile, Banner, PhotoGallery, VideoGallery
+from timetable.models import Timetable
 from mobiplayer.models import Video
+from grievance.models import Grievance
 
 
 class schoolserializer(serializers.ModelSerializer):
@@ -77,8 +79,8 @@ class attendanceserializer(serializers.ModelSerializer):
 
 class MonthlyAttendanceSerializer(serializers.Serializer):
     month = serializers.CharField()
-
     attendance_data = serializers.IntegerField()
+    absent = serializers.IntegerField()
 
 
 class feesserializer(serializers.ModelSerializer):
@@ -119,7 +121,7 @@ class DeviceFcmSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeneralNotification
-        fields = '__all__'
+        fields = ['title', 'message', 'create_date']
 
 class subjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -148,10 +150,69 @@ class VideoSerializer(serializers.ModelSerializer):
         model = Video
         fields = '__all__'
 
+class _SchoolNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = school
+        fields = ['id', 'name']
+
 class SchoolProfileSerializer(serializers.ModelSerializer):
+    school_name = _SchoolNameSerializer()
+
     class Meta:
         model = SchoolProfile
         fields = '__all__'
+
+
+class BannerSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+
+    class Meta:
+        model = Banner
+        fields = ['id', 'title', 'image', 'link_url', 'display_order']
+
+
+class GrievanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grievance
+        fields = [
+            'id', 'area_of_complaint', 'aoc_other', 'detail', 'mobile',
+            'complaint_date', 'complaint_status', 'action_date',
+            'principal_remark', 'concern_person_remark', 'act_details',
+            'concern_person_name', 'no_action_taken'
+        ]
+        read_only_fields = [
+            'id', 'complaint_date', 'complaint_status', 'action_date',
+            'principal_remark', 'concern_person_remark', 'act_details',
+            'concern_person_name', 'no_action_taken'
+        ]
+
+
+class TimetableSerializer(serializers.Serializer):
+    day = serializers.CharField(source='timeslot.day')
+    period_number = serializers.IntegerField(source='timeslot.period_number')
+    subject_name = serializers.CharField(source='subject.subject_name')
+    subject_code = serializers.CharField(source='subject.subject_code')
+    teacher_name = serializers.SerializerMethodField()
+
+    def get_teacher_name(self, obj):
+        return f"{obj.teacher.first_name} {obj.teacher.last_name}".strip()
+
+
+
+class PhotoGallerySerializer(serializers.ModelSerializer):
+    Pschool = schoolserializer(read_only=True)
+
+    class Meta:
+        model  = PhotoGallery
+        fields = ['id', 'PTitle', 'PThumbnail', 'Plink', 'Pdesc', 'Pdate', 'Ppostdate', 'Pschool', 'status']
+
+
+class VideoGallerySerializer(serializers.ModelSerializer):
+    Vschool = schoolserializer(read_only=True)
+
+    class Meta:
+        model  = VideoGallery
+        fields = ['id', 'VTitle', 'VThumbnail', 'Vlink', 'Vdesc', 'Vdate', 'Vpostdate', 'Vschool', 'status']
 
 
 class StudentAttendanceSerializer(serializers.ModelSerializer):

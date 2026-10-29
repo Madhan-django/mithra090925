@@ -1,9 +1,10 @@
 import logging
-from django.shortcuts import render,redirect,get_object_or_404
+from collections import defaultdict
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from institutions.models import school
-from .forms import TeachingAllocationForm,EditTeachingAllocationForm,ReservedSlotForm
-from setup.models import section,subjects,academicyr,currentacademicyr,sclass,section
+from .forms import TeachingAllocationForm, EditTeachingAllocationForm, ReservedSlotForm
+from setup.models import section, subjects, academicyr, currentacademicyr, sclass
 from staff.models import staff
 from .models import Timetable, TimeSlot, TeachingAllocation, ReservedSlot
 from .pulp_generator import generate_timetable_with_pulp
@@ -19,18 +20,250 @@ logger = logging.getLogger(__name__)
 
 
 def generate_timetable(request):
+    """Generate timetable (no DB write), store preview in session, redirect to confirm page."""
     sch_id = request.session['sch_id']
-    result_message, conflicts = generate_timetable_with_pulp(sch_id)
+    result_message, conflicts, assignments = generate_timetable_with_pulp(sch_id, save=False)
 
     if conflicts:
-        # Show detailed problems in messages
-        messages.error(request, f"❌ Timetable generation failed. Problems:\n" + "\n".join(conflicts))
-    elif "successfully" in result_message.lower():
-        messages.success(request, "✅ Timetable Generated Successfully!")
-    else:
-        messages.error(request, f"❌ Timetable generation failed: {result_message}")
+        for c in conflicts:
+            messages.error(request, c)
+        messages.error(request, "❌ Timetable generation failed.")
+        return redirect('view_timetable')
 
+    if not assignments:
+        messages.error(request, f"❌ {result_message}")
+        return redirect('view_timetable')
+
+    request.session['tt_preview'] = assignments
+    request.session.modified = True
+    return redirect('preview_timetable')
+
+
+def preview_timetable(request):
+    """Show generated timetable preview from session before saving."""
+    sch_id = request.session.get('sch_id')
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    assignments = request.session.get('tt_preview', [])
+    if not assignments:
+        messages.error(request, "No pending timetable preview. Please generate first.")
+        return redirect('view_timetable')
+
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+    section_ids = list({a['section_id'] for a in assignments})
+    subject_ids = list({a['subject_id'] for a in assignments})
+    teacher_ids = list({a['teacher_id'] for a in assignments})
+    timeslot_ids = list({a['timeslot_id'] for a in assignments})
+
+    sections_map = {s.id: s for s in section.objects.filter(id__in=section_ids)}
+    subjects_map = {s.id: s for s in subjects.objects.filter(id__in=subject_ids)}
+    teachers_map = {t.id: t for t in staff.objects.filter(id__in=teacher_ids)}
+    timeslots_map = {ts.id: ts for ts in TimeSlot.objects.filter(id__in=timeslot_ids)}
+
+    section_assignments = defaultdict(list)
+    for a in assignments:
+        ts = timeslots_map.get(a['timeslot_id'])
+        if ts:
+            section_assignments[a['section_id']].append({
+                'day': ts.day,
+                'period': ts.period_number,
+                'subject': subjects_map.get(a['subject_id']),
+                'teacher': teachers_map.get(a['teacher_id']),
+            })
+
+    section_timetables = []
+    for sec_id, entries in section_assignments.items():
+        sec = sections_map.get(sec_id)
+        if not sec:
+            continue
+        entry_map = {(e['day'], e['period']): e for e in entries}
+        period_set = sorted({e['period'] for e in entries})
+        grid = []
+        for period in period_set:
+            row = []
+            for day in days:
+                match = entry_map.get((day, period))
+                if match and match['subject'] and match['teacher']:
+                    row.append(f"{match['subject'].subject_name}<br><small>{match['teacher'].first_name}</small>")
+                else:
+                    row.append('—')
+            grid.append({'period': period, 'cells': row})
+        section_timetables.append({'section': sec, 'days': days, 'grid': grid})
+
+    return render(request, 'timetable/timetable_preview.html', {
+        'section_timetables': section_timetables,
+        'entry_count': len(assignments),
+        'skool': sdata,
+        'year': year,
+    })
+
+
+def confirm_save_timetable(request):
+    """Import the previewed timetable into the database."""
+    if request.method != 'POST':
+        return redirect('preview_timetable')
+
+    sch_id = request.session.get('sch_id')
+    sdata = school.objects.get(pk=sch_id)
+
+    assignments = request.session.pop('tt_preview', None)
+    if not assignments:
+        messages.error(request, "No pending timetable to import.")
+        return redirect('view_timetable')
+
+    Timetable.objects.filter(timetable_school=sdata).delete()
+    for asgn in assignments:
+        Timetable.objects.create(
+            section_id=asgn['section_id'],
+            subject_id=asgn['subject_id'],
+            teacher_id=asgn['teacher_id'],
+            timeslot_id=asgn['timeslot_id'],
+            timetable_school=sdata,
+        )
+
+    messages.success(request, f"✅ Timetable imported and saved successfully! ({len(assignments)} entries)")
     return redirect('view_timetable')
+
+
+def drag_drop_editor(request, section_id):
+    """Drag-and-drop manual timetable editor for a specific section."""
+    sch_id = request.session.get('sch_id')
+    sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
+
+    try:
+        sec = section.objects.get(id=section_id, school_name=sdata)
+    except section.DoesNotExist:
+        messages.error(request, "Section not found.")
+        return redirect('view_timetable')
+
+    DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    DAY_LABELS = {
+        'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday',
+        'Thu': 'Thursday', 'Fri': 'Friday', 'Sat': 'Saturday',
+    }
+
+    timeslots = list(TimeSlot.objects.filter(period_school=sdata))
+    active_days = sorted({ts.day for ts in timeslots}, key=lambda d: DAYS.index(d) if d in DAYS else 99)
+    periods = sorted({ts.period_number for ts in timeslots})
+    ts_by_day_period = {(ts.day, ts.period_number): ts for ts in timeslots}
+
+    entries = list(Timetable.objects.filter(section=sec, timetable_school=sdata).select_related(
+        'timeslot', 'subject', 'teacher'
+    ))
+    entry_by_tsid = {e.timeslot_id: e for e in entries}
+
+    allocations = list(TeachingAllocation.objects.filter(
+        section=sec, teacher_school=sdata
+    ).select_related('teacher', 'subject'))
+    alloc_by_ts = {(a.teacher_id, a.subject_id): a for a in allocations}
+
+    assigned_per_alloc = defaultdict(int)
+    for e in entries:
+        a = alloc_by_ts.get((e.teacher_id, e.subject_id))
+        if a:
+            assigned_per_alloc[a.id] += 1
+
+    grid = []
+    for day in active_days:
+        cells = []
+        for period in periods:
+            ts = ts_by_day_period.get((day, period))
+            if ts:
+                entry = entry_by_tsid.get(ts.id)
+                alloc = alloc_by_ts.get((entry.teacher_id, entry.subject_id)) if entry else None
+                cells.append({
+                    'timeslot_id': ts.id,
+                    'period': period,
+                    'entry': entry,
+                    'allocation_id': alloc.id if alloc else None,
+                })
+            else:
+                cells.append({'timeslot_id': None, 'period': period, 'entry': None, 'allocation_id': None})
+        grid.append({'day': day, 'day_label': DAY_LABELS.get(day, day), 'cells': cells})
+
+    alloc_data = []
+    for a in allocations:
+        assigned = assigned_per_alloc[a.id]
+        alloc_data.append({
+            'id': a.id,
+            'teacher_name': f"{a.teacher.first_name} {a.teacher.last_name}".strip(),
+            'subject_name': a.subject.subject_name,
+            'hours_total': a.hours_per_week,
+            'hours_assigned': assigned,
+            'hours_remaining': a.hours_per_week - assigned,
+        })
+
+    return render(request, 'timetable/manual_editor.html', {
+        'section': sec,
+        'grid': grid,
+        'periods': periods,
+        'alloc_data': alloc_data,
+        'skool': sdata,
+        'year': year,
+    })
+
+
+def update_timetable_cell(request):
+    """AJAX: Assign an allocation to a timeslot for a section."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    sch_id = request.session.get('sch_id')
+    sdata = school.objects.get(pk=sch_id)
+
+    try:
+        ts = TimeSlot.objects.get(id=request.POST.get('timeslot_id'), period_school=sdata)
+        sec = section.objects.get(id=request.POST.get('section_id'), school_name=sdata)
+        alloc = TeachingAllocation.objects.get(id=request.POST.get('allocation_id'), teacher_school=sdata)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+    conflict = Timetable.objects.filter(
+        teacher=alloc.teacher, timeslot=ts, timetable_school=sdata
+    ).exclude(section=sec).select_related('subject', 'section__class_sec_name').first()
+    if conflict:
+        return JsonResponse({
+            'error': (
+                f"{alloc.teacher.first_name} is already teaching "
+                f"{conflict.subject.subject_name} in "
+                f"{conflict.section.class_sec_name.name}-{conflict.section.section_name} "
+                f"at this slot"
+            )
+        }, status=409)
+
+    Timetable.objects.update_or_create(
+        section=sec, timeslot=ts, timetable_school=sdata,
+        defaults={'subject': alloc.subject, 'teacher': alloc.teacher},
+    )
+
+    return JsonResponse({
+        'success': True,
+        'subject': alloc.subject.subject_name,
+        'teacher': alloc.teacher.first_name,
+        'allocation_id': alloc.id,
+    })
+
+
+def clear_timetable_cell(request):
+    """AJAX: Remove the assignment for a timeslot in a section."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    sch_id = request.session.get('sch_id')
+    sdata = school.objects.get(pk=sch_id)
+
+    deleted, _ = Timetable.objects.filter(
+        timeslot_id=request.POST.get('timeslot_id'),
+        section_id=request.POST.get('section_id'),
+        timetable_school=sdata,
+    ).delete()
+
+    return JsonResponse({'success': True, 'deleted': deleted})
 
 def view_timetable(request):
     sch_id = request.session['sch_id']

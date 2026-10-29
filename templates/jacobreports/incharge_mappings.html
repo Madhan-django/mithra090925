@@ -1,0 +1,196 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+        <div class="card-header text-white"
+             style="background: linear-gradient(to right, #0d6efd, #0b5ed7); height:70px;">
+            <div class="card-title text-center mt-2">
+                <h5>
+                    <span class="badge bg-light text-dark">
+                        INCHARGE MAPPING
+                    </span>
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="row g-4">
+
+                <!-- ADD MAPPING FORM -->
+                <div class="col-md-4">
+
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                        <div class="card-header bg-dark text-white rounded-top-4">
+                            ADD MAPPING
+                        </div>
+
+                        <div class="card-body">
+
+                            <form method="POST">
+                                {% csrf_token %}
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Supervisor</label>
+                                    {% if is_admin %}
+                                        {{ form.supervisor }}
+                                        {% if form.supervisor.errors %}
+                                        <div class="text-danger small mt-1">{{ form.supervisor.errors }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <input type="text"
+                                               class="form-control"
+                                               value="{{ current_staff }}"
+                                               disabled>
+                                        <input type="hidden"
+                                               name="supervisor"
+                                               value="{{ current_staff.pk }}">
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Incharges</label>
+                                    {{ form.incharges }}
+                                    {% if form.incharges.errors %}
+                                    <div class="text-danger small mt-1">{{ form.incharges.errors }}</div>
+                                    {% endif %}
+                                    <div class="text-muted small mt-1">Search and select one or more incharges</div>
+                                </div>
+
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        ADD MAPPING
+                                    </button>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- MAPPING TABLE -->
+                <div class="col-md-8">
+
+                    <div class="card border-0 shadow-sm rounded-4">
+
+                        <div class="card-header bg-dark text-white rounded-top-4 d-flex justify-content-between align-items-center">
+                            <span>EXISTING MAPPINGS</span>
+                            <span class="badge bg-light text-dark">{{ mappings.count }} total</span>
+                        </div>
+
+                        <div class="card-body p-0">
+
+                            <div class="table-responsive">
+
+                                <table class="table table-bordered table-hover align-middle mb-0">
+
+                                    <thead style="background-color:#212529;color:white;">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Supervisor</th>
+                                            <th>Incharge</th>
+                                            <th width="100">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        {% regroup mappings by supervisor as supervisor_groups %}
+
+                                        {% for group in supervisor_groups %}
+
+                                        {% for mapping in group.list %}
+                                        <tr>
+
+                                            {% if forloop.first %}
+                                            <td rowspan="{{ group.list|length }}"
+                                                class="fw-bold text-primary align-middle text-center"
+                                                style="background:#f0f5ff;">
+                                                {{ forloop.parentloop.counter }}
+                                            </td>
+                                            <td rowspan="{{ group.list|length }}"
+                                                class="fw-semibold align-middle"
+                                                style="background:#f0f5ff;">
+                                                {{ group.grouper }}
+                                            </td>
+                                            {% endif %}
+
+                                            <td>{{ mapping.incharge }}</td>
+
+                                            <td>
+                                                <a href="{% url 'delete_incharge_mapping' mapping.id %}"
+                                                   class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('Remove this mapping?');">
+                                                    REMOVE
+                                                </a>
+                                            </td>
+
+                                        </tr>
+                                        {% endfor %}
+
+                                        {% empty %}
+
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">
+                                                No mappings configured yet.
+                                            </td>
+                                        </tr>
+
+                                        {% endfor %}
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.addEventListener('load', function () {
+    jQuery('#id_supervisor').select2({
+        placeholder: 'Search supervisor...',
+        allowClear: true,
+        width: '100%',
+    });
+    jQuery('#id_incharges').select2({
+        placeholder: 'Search and select incharges...',
+        allowClear: true,
+        width: '100%',
+    });
+});
+</script>
+{% endblock %}

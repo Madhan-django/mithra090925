@@ -787,8 +787,8 @@ def receipt_summary(request,feeind_id):
     yr = currentacademicyr.objects.get(school_name=sdata)
     year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     data = fee_reciept.objects.filter(reciept_inv=feeind_id)
-    stud = fee_reciept.objects.filter(reciept_inv=feeind_id).first()
-    stud_name = stud.reciept_inv.stud_name
+    invoice = addindfee.objects.filter(pk=feeind_id).first()
+    stud_name = invoice.stud_name if invoice else None
     return render(request,'fee/reciept_summary.html',context={'data': data, 'skool': sdata,'year':year,'stud_name':stud_name})
 
 

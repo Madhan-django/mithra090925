@@ -154,3 +154,37 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# Media uploads
+media/
+
+# Google OAuth / service account credentials
+client_secret_*.json
+
+# Backup and temp files
+_backup_*/
+mobi/tmp/
+mobi2/
+mobi/views.py.bak_*
+*.save.*
+*.save
+mithran_erp_comparison.html
+design-reference/
+
+# Reference/comparison screenshots
+camu_login.png
+myclassboard_login.png
+neverskip_home.png
+login_bg_desktop.png
+login_bg_mobile.png
+login_desktop_new.png
+login_final.png
+login_final_mobile.png
+login_medium_1024.png
+login_mobile_375.png
+login_mobile_375_v2.png
+login_mobile_new.png
+login_mobile_v3.png
+login_tablet_768.png
+login_tablet_768_v2.png
+login_tablet_v3.png

@@ -265,9 +265,11 @@
                   <a href="{% url 'staff_update' staff.id %}">
                     <i class="ti ti-pencil"></i> Edit
                   </a>
+                  {% if staff.staff_user %}
                   <a href="{% url 'reset_password' staff.staff_user %}">
                     <i class="ti ti-key"></i> Reset Password
                   </a>
+                  {% endif %}
                   {% if request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Admin" %}
                   <div class="drop-divider"></div>
                   <a href="{% url 'staff_delete' staff.id %}" class="delete-item">

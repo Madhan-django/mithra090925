@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  {% load static %}
+  {% load static exam_tags %}
   <title>Receipt</title>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
@@ -6139,27 +6139,28 @@ line-height: 1.2;
                          {% for grp in extitle %}
                             {% if exgrp == grp.exmgrp %}
                               <td><h6>{{grp.exm_title}}</h6></td>
-                            {% endif %}                  
-                         
+                            {% endif %}
+
                           {% endfor %}
-                               
-                      
-                  
+
+
+
                                       <td><h6>Total</h6></td>
-                        
+                                      {% if show_grades %}<td><h6>Grade</h6></td>{% endif %}
+
                     {% endfor %}
-                    
+
                  </tr>
       <tr>
- 
+
 {% for sub in subj %}
         <td>{{sub.subject_name}}</td>
      {% for grp in exgroup %}
-        
+
        {% for dt in data %}
-               
+
           {% if sub.subject_name == dt.exam_sub.exam_subjects.subject_name %}
-                      
+
              {% if grp == dt.adm_card.exam_label.exm_grp.exm_group %}
                  {% for ex in exm %}
                    {% if ex.published == 'True' %}
@@ -6175,24 +6176,23 @@ line-height: 1.2;
              {% endif %}
           {% endif %}
          {% endfor %}
-           
+
                 {% for subtot in totalmarks %}
-                         
+
                   {% if  subtot.exm_group.exm_group == grp and subtot.exam_subjects.subject_name == sub.subject_name %}
-                       
-                        <td>  {{subtot.total_marks}}</td>
-                                 
-                  {% endif %}            
-                          
-                {% endfor %}           
-            
+                        <td>{{subtot.total_marks}}</td>
+                        {% if show_grades %}<td><strong>{% get_grade subtot.total_marks subtot.total_max skool.id %}</strong></td>{% endif %}
+                  {% endif %}
+
+                {% endfor %}
+
             {% endfor %}
 
 
 
-              
+
          </tr>
-       
+
  {% endfor %}
                  
 

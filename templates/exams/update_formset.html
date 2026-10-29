@@ -1,4 +1,5 @@
 {% extends 'panel/index.html' %}
+{% load exam_tags %}
 {% block content %}
 
 <style>
@@ -268,23 +269,35 @@
             <thead>
               <tr>
                 <th style="text-align:left; padding-left:18px;">Subject</th>
+                <th>Max Marks</th>
                 <th>Mark</th>
+                {% if show_grades %}<th>Grade</th>{% endif %}
                 <th>Remark</th>
               </tr>
             </thead>
             <tbody>
-              {% for form in formset %}
+              {% for form, result in zipped_data %}
               <tr>
                 <td style="text-align:left; padding-left:18px; font-weight:600; color:var(--text);">
                   <div class="pc-form-group" style="margin-bottom:0;">{{ form.subb }}</div>
                 </td>
+                <td style="text-align:center; color:var(--text-md);">
+                  {{ result.exam_sub.max_marks }}
+                </td>
                 <td>
-                  <div class="pc-form-group" style="margin-bottom:0;" style="max-width:120px; margin:0 auto;">
+                  <div class="pc-form-group" style="margin-bottom:0; max-width:120px; margin:0 auto;">
                     {{ form.obtained_marks }}
                   </div>
                 </td>
+                {% if show_grades %}
+                <td style="text-align:center;">
+                  <span style="font-weight:700; font-size:14px; color:var(--accent);">
+                    {% get_grade result.obtained_marks result.exam_sub.max_marks skool.id %}
+                  </span>
+                </td>
+                {% endif %}
                 <td>
-                  <div class="pc-form-group" style="margin-bottom:0;" style="max-width:200px; margin:0 auto;">
+                  <div class="pc-form-group" style="margin-bottom:0; max-width:200px; margin:0 auto;">
                     {{ form.remark }}
                   </div>
                 </td>

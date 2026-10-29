@@ -1,0 +1,87 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Announcements</span>
+    </div>
+    <div class="pc-page-title">Staff Announcements</div>
+    <div class="pc-page-sub">Messages visible to all staff on the dashboard</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'announcement_add' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> New Announcement
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+  <div class="pc-alert pc-alert-{% if msg.tags == 'success' %}success{% else %}danger{% endif %}" style="margin-bottom:16px;">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+{% if items %}
+<div class="pc-card">
+  <div class="pc-card-body" style="padding:0;">
+    <table class="pc-table" style="width:100%;">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Body</th>
+          <th>Posted By</th>
+          <th>Date</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ann in items %}
+        <tr>
+          <td style="font-weight:600;">{{ ann.title }}</td>
+          <td style="max-width:300px;font-size:12px;color:var(--muted);">{{ ann.body|truncatechars:80 }}</td>
+          <td style="font-size:12px;">{{ ann.posted_by.get_full_name|default:ann.posted_by.username }}</td>
+          <td style="font-size:12px;">{{ ann.created_at|date:"d M Y" }}</td>
+          <td style="font-size:12px;">{{ ann.expires_on|default:"—" }}</td>
+          <td>
+            {% if ann.is_active %}
+            <span class="pc-badge pc-badge-success pc-badge-no-dot">Active</span>
+            {% else %}
+            <span class="pc-badge pc-badge-danger pc-badge-no-dot">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:8px;">
+              <a href="{% url 'announcement_edit' ann.pk %}" class="pc-btn pc-btn-outline pc-btn-sm"><i class="ri-edit-line"></i></a>
+              <a href="{% url 'announcement_delete' ann.pk %}"
+                 onclick="return confirm('Delete this announcement?')"
+                 class="pc-btn pc-btn-danger pc-btn-sm"><i class="ri-delete-bin-line"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="pc-card">
+  <div class="pc-card-body">
+    <div class="pc-empty">
+      <i class="ri-megaphone-line pc-empty-icon"></i>
+      <div class="pc-empty-title">No announcements yet</div>
+      <div class="pc-empty-sub">Post a message for all staff to see on their dashboard</div>
+      <a href="{% url 'announcement_add' %}" class="pc-btn pc-btn-primary" style="margin-top:16px;">
+        <i class="ri-add-line"></i> New Announcement
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

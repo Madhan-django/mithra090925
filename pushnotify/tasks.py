@@ -319,6 +319,7 @@ def send_birthday_wishes(sch_id):
     success_count = 0
     for student in birthday_students:
         student_name = f"{student.first_name} {student.last_name}".strip()
+        personalized_title = config.title.replace("{{student_name}}", student_name)
         personalized_msg = config.message.replace("{{student_name}}", student_name)
 
         tokens = DeviceFCMToken.objects.filter(username=student.usernm)
@@ -326,7 +327,7 @@ def send_birthday_wishes(sch_id):
             try:
                 msg = messaging.Message(
                     notification=messaging.Notification(
-                        title=config.title,
+                        title=personalized_title,
                         body=personalized_msg,
                     ),
                     token=device.firecmToken,
@@ -339,7 +340,7 @@ def send_birthday_wishes(sch_id):
         # Save to GeneralNotification so it appears in the app's Messages section
         if system_staff:
             gn = GeneralNotification.objects.create(
-                title=config.title,
+                title=personalized_title,
                 message=personalized_msg,
                 create_date=now,
                 post_date=now,

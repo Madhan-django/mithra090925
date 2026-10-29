@@ -1,0 +1,216 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+
+<style>
+.pc-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+}
+.pc-help-text {
+  font-size: 12px;
+  color: var(--text-sm);
+  margin-top: 6px;
+  display: block;
+  line-height: 1.5;
+}
+.pc-required { color: var(--rose); margin-left: 3px; font-weight: 700; }
+
+#id_title,
+#id_message,
+#id_time,
+input[type="text"],
+input[type="time"] {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  padding: 9px 13px 9px 38px;
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+textarea#id_message {
+  padding: 10px 13px;
+  resize: vertical;
+  min-height: 100px;
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-dark);
+  border-radius: var(--r);
+  font-family: var(--f-sans);
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+#id_title:focus, #id_message:focus, #id_time:focus,
+input[type="text"]:focus, input[type="time"]:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.errorlist { list-style: none; padding: 0; margin: 8px 0 0 0; }
+.errorlist li {
+  background: var(--rose-lt);
+  color: var(--rose);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border-left: 3px solid var(--rose);
+}
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+}
+.toggle-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.toggle-sub { font-size: 12px; color: var(--muted); }
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="#">Home</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'birthday_wish_config' %}">Birthday Wish Config</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{% if form.instance.pk %}Edit{% else %}Add{% endif %}</span>
+    </div>
+    <div class="pc-page-title">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Birthday Wish Configuration</div>
+    <div class="pc-page-sub">Configure automated birthday push notifications for students</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'birthday_wish_config' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<div class="pc-card">
+  <div class="pc-card-header">
+    <div>
+      <div class="pc-card-title">
+        <i class="ri-cake-2-line me-2" style="color:var(--accent);"></i>Configuration Details
+      </div>
+      <div class="pc-card-sub">Set the notification title, message and daily send time</div>
+    </div>
+    <span class="pc-badge {% if form.instance.pk %}pc-badge-primary{% else %}pc-badge-success{% endif %} pc-badge-no-dot">
+      <i class="ri-{% if form.instance.pk %}pencil{% else %}add{% endif %}-line"></i>
+      {% if form.instance.pk %}Editing{% else %}New Entry{% endif %}
+    </span>
+  </div>
+
+  <div class="pc-card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      {{ form.school }}
+
+      <!-- Title -->
+      <div class="pc-form-group" style="margin-bottom:18px;">
+        <label for="{{ form.title.id_for_label }}" class="pc-label">
+          Notification Title<span class="pc-required">*</span>
+        </label>
+        <div class="pc-input-group">
+          <i class="pc-input-icon ri-notification-3-line"></i>
+          {{ form.title }}
+        </div>
+        <span class="pc-help-text">This is the title shown on the push notification (e.g. "Happy Birthday!").</span>
+        {% if form.title.errors %}
+          <ul class="errorlist">{% for e in form.title.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Message -->
+      <div class="pc-form-group" style="margin-bottom:18px;">
+        <label for="{{ form.message.id_for_label }}" class="pc-label">
+          Message Template<span class="pc-required">*</span>
+        </label>
+        {{ form.message }}
+        <span class="pc-help-text">
+          <i class="ri-information-line" style="font-size:11px;"></i>
+          Use <code>{% templatetag openvariable %}student_name{% templatetag closevariable %}</code> to personalize — it will be replaced with the student's name.
+        </span>
+        {% if form.message.errors %}
+          <ul class="errorlist">{% for e in form.message.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Time -->
+      <div class="pc-form-group" style="margin-bottom:18px;">
+        <label for="{{ form.time.id_for_label }}" class="pc-label">
+          Daily Send Time<span class="pc-required">*</span>
+        </label>
+        <div class="pc-input-group">
+          <i class="pc-input-icon ri-time-line"></i>
+          {{ form.time }}
+        </div>
+        <span class="pc-help-text">
+          <i class="ri-information-line" style="font-size:11px;"></i>
+          Notifications will be sent at this time every day to students whose birthday falls on that date.
+        </span>
+        {% if form.time.errors %}
+          <ul class="errorlist">{% for e in form.time.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Active toggle -->
+      <div class="pc-form-group" style="margin-bottom:18px;">
+        <div class="toggle-row">
+          {{ form.is_active }}
+          <div>
+            <div class="toggle-label">Enable Birthday Wishes</div>
+            <div class="toggle-sub">Uncheck to pause without deleting the configuration</div>
+          </div>
+        </div>
+        {% if form.is_active.errors %}
+          <ul class="errorlist">{% for e in form.is_active.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="pc-form-actions">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Configuration
+        </button>
+        <button type="reset" class="pc-btn pc-btn-outline">
+          <i class="ri-refresh-line"></i> Reset
+        </button>
+        <a href="{% url 'birthday_wish_config' %}" class="pc-btn pc-btn-outline" style="margin-left:auto;">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="pc-card-flat" style="margin-top:20px;">
+  <div style="display:flex;gap:16px;align-items:start;">
+    <div style="flex-shrink:0;">
+      <div style="width:40px;height:40px;background:var(--accent-lt);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--accent);">
+        <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">Tips for a great birthday message</div>
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-md);line-height:1.8;">
+        <li>Keep it warm and short — push notifications are trimmed if too long.</li>
+        <li>Use <code>{% templatetag openvariable %}student_name{% templatetag closevariable %}</code> so each student gets a personal greeting.</li>
+        <li>Set the time early in the morning (e.g. 8:00 AM) so students see it at the start of their day.</li>
+        <li>Notifications go to the student's registered mobile app (parent/student login).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

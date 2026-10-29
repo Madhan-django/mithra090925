@@ -7,7 +7,7 @@ from fees.models import addindfee,fee_reciept
 from staff.models import homework
 from academic.models import noticeboard,events
 from library.models import book_issued
-from examination.models import exam_subjectmap,exams,admit_card,exam_result,exam_group
+from examination.models import exam_subjectmap,exams,admit_card,exam_result,exam_group,GradeScale
 from pushnotify.models import GeneralNotification
 from .utils import render_to_pdf
 from django.contrib.auth import logout
@@ -490,6 +490,8 @@ def bulk_print_result(request):
             return HttpResponse(error_msg)
 
 
+
+
 @login_required(login_url='/login_user/')
 def single_total_result(request):
     usr = request.user.username
@@ -556,12 +558,11 @@ def single_total_result(request):
     marks_totals = []
 
     class MarksTotal:
-        def __init__(self, exm_group, exam_subjects, total_marks):
+        def __init__(self, exm_group, exam_subjects, total_marks, total_max=None):
             self.exm_group = exm_group
             self.exam_subjects = exam_subjects
             self.total_marks = total_marks
-            
-            
+            self.total_max = total_max
 
         def __str__(self):
             return str(self.exm_group)
@@ -578,13 +579,23 @@ def single_total_result(request):
                         adm_card__exam_label__exam_class=cls,
                         adm_card__exam_stu=stud,
                         adm_card__exam_label__exm_grp=grp,
-                        adm_card__exam_label__published=True  # ✅ add this line
+                        adm_card__exam_label__published=True
                     )
                     .aggregate(Sum('obtained_marks'))['obtained_marks__sum']
                 )
+                total_max = (
+                    exam_subjectmap.objects
+                    .filter(
+                        exam_subjects=sb,
+                        exname__exam_class=cls,
+                        exname__exm_grp=grp,
+                        exname__published=True
+                    )
+                    .aggregate(Sum('max_marks'))['max_marks__sum']
+                )
 
                 if total_marks:  # skip if total is None
-                    marks_totals.append(MarksTotal(grp, sb, total_marks))
+                    marks_totals.append(MarksTotal(grp, sb, total_marks, total_max))
 
     for subject_data in average_marks_by_subject:
         subject_name = subject_data['exam_sub__exam_subjects']
@@ -604,8 +615,8 @@ def single_total_result(request):
         'totalmarks': marks_totals,
         'extitle':extitle,
         'exgroup':exgroup,
-        'exmcnt':exmcnt
-
+        'exmcnt':exmcnt,
+        'show_grades': GradeScale.objects.filter(school=sdata).exists(),
     }
 
     pdf = render_to_pdf('studentportal/student_print_result.html', edata)

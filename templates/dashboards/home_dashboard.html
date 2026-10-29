@@ -4,537 +4,722 @@
 
 <style>
 /* ════════════════════════════════════════
-   Dashboard Design System v3 — home.html
+   Dashboard v4 — new design + full content
    ════════════════════════════════════════ */
 :root {
-  --db-accent:   #4f46e5;
-  --db-accent-lt:#eef2ff;
-  --db-green:    #059669;
-  --db-green-lt: #ecfdf5;
-  --db-amber:    #d97706;
-  --db-amber-lt: #fffbeb;
-  --db-rose:     #e11d48;
-  --db-rose-lt:  #fff1f2;
-  --db-sky:      #0284c7;
-  --db-sky-lt:   #e0f2fe;
-  --db-purple:   #7c3aed;
-  --db-purple-lt:#f5f3ff;
-  --db-surface:  #fff;
-  --db-border:   #e2e8f4;
-  --db-muted:    #94a3b8;
-  --db-text:     #0f172a;
-  --db-text-md:  #475569;
-  --db-r:        18px;
-  --db-sh:       0 2px 8px rgba(15,23,42,.06);
-  --db-sh-hover: 0 8px 28px rgba(15,23,42,.11);
-  --db-spring:   cubic-bezier(0.34,1.56,0.64,1);
+  --dv-gold:     #d4af37;
+  --dv-gold-lt:  #e6c869;
+  --dv-gold-050: #fbf3dc;
+  --dv-surface:  #ffffff;
+  --dv-bg:       #f6f5f1;
+  --dv-text:     #14151c;
+  --dv-text-2:   #5b5c6b;
+  --dv-muted:    #8b8c99;
+  --dv-border:   rgba(11,11,11,0.08);
+  --dv-good:     #0ca30c;
+  --dv-good-bg:  #e8f7e6;
+  --dv-crit:     #d03b3b;
+  --dv-crit-bg:  #fceaea;
+  --dv-amber:    #c98500;
+  --dv-amber-bg: #fdf1de;
+  --dv-blue:     #2a78d6;
+  --dv-blue-bg:  #e8f0fc;
+  --dv-purple:   #6c3aed;
+  --dv-purple-bg:#f0ebfd;
+  --dv-sh-sm:    0 1px 2px rgba(20,21,28,.04), 0 1px 1px rgba(20,21,28,.03);
+  --dv-sh-md:    0 8px 24px rgba(20,21,28,.08), 0 2px 6px rgba(20,21,28,.04);
 }
 
-.db-page { padding: 4px 0 36px; }
+.dv-page { padding: 4px 0 40px; }
 
-.db-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--db-muted);
-  margin: 26px 0 13px;
+/* ── Greeting ── */
+.dv-greeting {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--dv-border);
+}
+.dv-greeting h1 {
+  font-size: 20px; font-weight: 700; color: var(--dv-text);
+  margin: 0 0 6px; letter-spacing: -0.2px;
+}
+.dv-term {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--dv-text-2); font-size: 12.5px; font-weight: 600;
+  background: #fff; border: 1px solid var(--dv-border);
+  padding: 3px 10px 3px 8px; border-radius: 20px;
+}
+
+/* ── Section Label ── */
+.dv-section-label {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 1.1px;
+  color: var(--dv-muted); text-transform: uppercase; margin: 24px 0 12px;
 }
 
 /* ── Stat Grid ── */
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 14px;
+.dv-stat-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
 }
-.stat-card {
-  background: var(--db-surface);
-  border: 1px solid var(--db-border);
-  border-radius: var(--db-r);
-  padding: 18px 18px 16px;
-  box-shadow: var(--db-sh);
-  transition: box-shadow .2s, transform .2s var(--db-spring);
-  position: relative;
-  overflow: hidden;
+.dv-stat-card {
+  background: var(--dv-surface); border-radius: 16px; padding: 18px;
+  border: 1px solid var(--dv-border); box-shadow: var(--dv-sh-sm);
+  position: relative; overflow: hidden; transition: .15s;
 }
-.stat-card:hover { box-shadow: var(--db-sh-hover); transform: translateY(-3px); }
-.stat-card::after {
-  content:''; position:absolute; top:-18px; right:-18px;
-  width:70px; height:70px; border-radius:50%; opacity:.07;
+.dv-stat-card:hover { box-shadow: var(--dv-sh-md); transform: translateY(-2px); }
+.dv-stat-card::after {
+  content: ""; position: absolute; width: 90px; height: 90px; border-radius: 50%;
+  top: -30px; right: -30px; background: var(--sc-tint, rgba(212,175,55,.10));
 }
-.stat-card.c-indigo::after { background:var(--db-accent); }
-.stat-card.c-green::after  { background:var(--db-green); }
-.stat-card.c-amber::after  { background:var(--db-amber); }
-.stat-card.c-rose::after   { background:var(--db-rose); }
-.stat-card.c-sky::after    { background:var(--db-sky); }
-.stat-card.c-purple::after { background:var(--db-purple); }
+.dv-stat-icon {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sc-icon-bg, linear-gradient(135deg, #e6c869, #d4af37));
+  color: #fff; margin-bottom: 14px; position: relative; z-index: 1;
+  box-shadow: 0 6px 14px -4px var(--sc-icon-sh, rgba(212,175,55,.55));
+}
+.dv-stat-value {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+  position: relative; z-index: 1; color: var(--dv-text);
+}
+.dv-stat-label {
+  font-size: 11.8px; color: var(--dv-text-2); font-weight: 600;
+  margin-top: 2px; position: relative; z-index: 1;
+}
+.dv-stat-delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 700; margin-top: 9px;
+  padding: 2px 7px; border-radius: 20px; position: relative; z-index: 1;
+}
+.dv-stat-delta.up   { color: var(--dv-good); background: var(--dv-good-bg); }
+.dv-stat-delta.flat { color: var(--dv-muted); background: #f1f1ee; }
 
-.stat-icon {
-  width:40px; height:40px; border-radius:11px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px; margin-bottom:14px;
-}
-.stat-icon.c-indigo { background:var(--db-accent-lt); color:var(--db-accent); }
-.stat-icon.c-green  { background:var(--db-green-lt);  color:var(--db-green); }
-.stat-icon.c-amber  { background:var(--db-amber-lt);  color:var(--db-amber); }
-.stat-icon.c-rose   { background:var(--db-rose-lt);   color:var(--db-rose); }
-.stat-icon.c-sky    { background:var(--db-sky-lt);    color:var(--db-sky); }
-.stat-icon.c-purple { background:var(--db-purple-lt); color:var(--db-purple); }
+/* ── 2-col main grid ── */
+.dv-grid-2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; margin-top: 8px; }
 
-.stat-value { font-size:26px; font-weight:800; color:var(--db-text); letter-spacing:-.8px; line-height:1; margin-bottom:4px; }
-.stat-label { font-size:11px; font-weight:600; color:var(--db-muted); text-transform:uppercase; letter-spacing:.5px; }
+/* ── Cards ── */
+.mk-card {
+  background: var(--dv-surface); border-radius: 16px; padding: 20px 22px;
+  border: 1px solid var(--dv-border); box-shadow: var(--dv-sh-sm);
+}
+.mk-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.mk-head h3 { font-size: 14.5px; margin: 0; font-weight: 700; color: var(--dv-text); }
+.mk-head .sub { font-size: 11.3px; color: var(--dv-muted); margin-top: 2px; }
 
-/* ── Content Cards ── */
-.dash-card {
-  background:var(--db-surface);
-  border:1px solid var(--db-border);
-  border-radius:var(--db-r);
-  box-shadow:var(--db-sh);
-  overflow:hidden;
-  transition:box-shadow .2s;
+/* ── Live Pill ── */
+.dv-live {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.8px; font-weight: 700; color: var(--dv-good);
+  background: var(--dv-good-bg); padding: 3px 9px; border-radius: 20px;
 }
-.dash-card:hover { box-shadow:var(--db-sh-hover); }
-.dash-card-header {
-  padding:16px 20px 12px;
-  border-bottom:1px solid #f0f4fb;
-  display:flex; align-items:center; justify-content:space-between;
+.dv-live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--dv-good);
+  animation: dv-pulse 1.6s infinite;
 }
-.dash-card-title  { font-size:13.5px; font-weight:700; color:var(--db-text); }
-.dash-card-sub    { font-size:11px; color:var(--db-muted); margin-top:2px; }
-.dash-card-badge  {
-  font-size:10.5px; font-weight:600; padding:3px 10px;
-  border-radius:20px; background:var(--db-accent-lt); color:var(--db-accent);
+@keyframes dv-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(12,163,12,.45); }
+  70%  { box-shadow: 0 0 0 6px rgba(12,163,12,0); }
+  100% { box-shadow: 0 0 0 0 rgba(12,163,12,0); }
 }
-.dash-card-body   { padding:18px 20px; }
 
-/* ── Today live pill ── */
-.live-pill {
-  display:inline-flex; align-items:center; gap:6px;
-  background:var(--db-accent-lt); color:var(--db-accent);
-  font-size:11px; font-weight:700;
-  padding:4px 11px; border-radius:20px;
+/* ── Fee ── */
+.dv-fee-total { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+.dv-fee-total .amt { font-size: 24px; font-weight: 800; color: var(--dv-text); }
+.dv-fee-total .lbl { font-size: 12px; color: var(--dv-muted); }
+.dv-track {
+  height: 10px; border-radius: 8px; background: #eeede8;
+  overflow: hidden; display: flex; margin-bottom: 10px;
 }
-.live-dot {
-  width:6px; height:6px; border-radius:50%;
-  background:var(--db-accent);
-  animation: livepulse 1.4s ease-in-out infinite;
+.dv-track .seg-good {
+  height: 100%; background: linear-gradient(90deg, #0ca30c, #1cbf1c);
+  border-radius: 8px 0 0 8px; transition: width .7s ease;
 }
-@keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.dv-track .seg-crit { height: 100%; background: var(--dv-crit-bg); }
+.dv-fee-legend { display: flex; gap: 22px; margin-bottom: 4px; }
+.dv-fee-legend .li {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--dv-text-2);
+}
+.dv-fee-legend .sw { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.dv-fee-legend .val { font-weight: 700; color: var(--dv-text); margin-left: 3px; }
 
-/* ── Today sub-panel ── */
-.today-panel {
-  background:#f8fafd;
-  border:1px solid var(--db-border);
-  border-radius:13px;
-  padding:14px 16px;
-  margin-bottom:12px;
-}
-.today-panel:last-child { margin-bottom:0; }
-.today-panel-title {
-  font-size:10.5px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.7px; color:var(--db-muted); margin-bottom:10px;
-  display:flex; align-items:center; gap:6px;
-}
-.t-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:6px 0; border-bottom:1px solid #edf0f9;
-}
-.t-row:last-child { border-bottom:none; padding-bottom:0; }
-.t-name { font-size:12.5px; font-weight:500; color:var(--db-text-md); display:flex; align-items:center; gap:7px; }
-.t-val  { font-size:14px; font-weight:700; font-feature-settings:"tnum"; }
-.t-val.g { color:var(--db-green); }
-.t-val.r { color:var(--db-rose); }
-.t-val.a { color:var(--db-amber); }
-.t-val.b { color:var(--db-accent); }
-.t-val.s { color:var(--db-sky); }
+.dv-divider { height: 1px; background: var(--dv-border); margin: 16px 0; }
 
-/* ── Fee items ── */
-.fee-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:11px 0; border-bottom:1px solid #f0f4fb;
+.dv-mini-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.dv-mini { flex: 1; min-width: 80px; background: var(--dv-bg); border-radius: 12px; padding: 10px 12px; }
+.dv-mini .n { font-size: 16px; font-weight: 800; color: var(--dv-text); }
+.dv-mini .l { font-size: 10.5px; color: var(--dv-muted); font-weight: 600; margin-top: 1px; }
+
+/* ── Today Rows ── */
+.dv-today-panel {
+  background: var(--dv-bg); border-radius: 13px; padding: 12px 14px; margin-bottom: 10px;
 }
-.fee-row:last-child { border-bottom:none; }
-.fee-icon {
-  width:34px; height:34px; border-radius:9px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:15px; margin-right:11px; flex-shrink:0;
+.dv-today-panel:last-child { margin-bottom: 0; }
+.dv-today-title {
+  font-size: 10.2px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
+  color: var(--dv-muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
 }
-.fee-label { font-size:13px; font-weight:600; color:var(--db-text); }
-.fee-sub   { font-size:11px; color:var(--db-muted); margin-top:1px; }
-.fee-amt   { font-size:15px; font-weight:700; font-feature-settings:"tnum"; }
-.fee-amt.total   { color:var(--db-accent); }
-.fee-amt.collect { color:var(--db-green); }
-.fee-amt.pend    { color:var(--db-rose); }
+.dv-t-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 0; border-bottom: 1px solid var(--dv-border);
+}
+.dv-t-row:last-child { border-bottom: none; padding-bottom: 0; }
+.dv-t-name {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.3px; font-weight: 500; color: var(--dv-text-2);
+}
+.dv-t-val { font-size: 13.5px; font-weight: 700; }
+.dv-t-val.g { color: var(--dv-good); }
+.dv-t-val.r { color: var(--dv-crit); }
+.dv-t-val.a { color: var(--dv-amber); }
+.dv-t-val.b { color: var(--dv-blue); }
+.dv-t-val.s { color: var(--dv-blue); }
+
+/* ── Donut ── */
+.dv-donut-wrap { display: flex; align-items: center; gap: 20px; margin-bottom: 14px; }
+.dv-donut-figs { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+.dv-df-row {
+  display: flex; align-items: center; justify-content: space-between; font-size: 12.3px;
+}
+.dv-df-row .k { display: flex; align-items: center; gap: 8px; color: var(--dv-text-2); font-weight: 600; }
+.dv-df-row .sw { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.dv-df-row .v { font-weight: 800; color: var(--dv-text); }
 
 /* ── Notice ── */
-.notice-item { display:flex; gap:12px; padding:11px 0; border-bottom:1px solid #f0f4fb; }
-.notice-item:last-child { border-bottom:none; }
-.notice-dot { width:8px; height:8px; border-radius:50%; background:var(--db-accent); margin-top:5px; flex-shrink:0; }
-.notice-title { font-size:13px; font-weight:600; color:var(--db-text); }
-.notice-date  { font-size:11px; color:var(--db-muted); margin:2px 0 4px; }
-.notice-body  { font-size:12.5px; color:var(--db-text-md); line-height:1.55; }
+.dv-notice {
+  display: flex; gap: 12px; padding: 11px 0;
+  border-bottom: 1px solid var(--dv-border);
+}
+.dv-notice:last-child { border-bottom: none; padding-bottom: 0; }
+.dv-notice .nt-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--dv-gold); margin-top: 5px; flex-shrink: 0;
+}
+.dv-notice h4 { margin: 0 0 2px; font-size: 13px; font-weight: 700; color: #fff; background: #d4af37; display: inline-block; padding: 2px 8px; border-radius: 6px; animation: wn-star-blink 1.5s infinite; }
+.dv-notice .date { font-size: 10.8px; color: var(--dv-muted); font-weight: 600; margin-bottom: 3px; }
+.dv-notice p { margin: 0; font-size: 12.2px; color: var(--dv-text-2); line-height: 1.5; }
 
 /* ── Birthday ── */
-.bday-item { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid #f0f4fb; }
-.bday-item:last-child { border-bottom:none; }
-.bday-avatar { width:44px; height:44px; border-radius:11px; object-fit:cover; border:2px solid var(--db-border); flex-shrink:0; }
-.bday-name { font-size:13px; font-weight:600; color:var(--db-text); }
-.bday-meta { font-size:11.5px; color:var(--db-muted); margin-top:2px; }
-.bday-empty { text-align:center; padding:22px 0; color:var(--db-muted); font-size:13px; }
-.bday-empty i { font-size:28px; display:block; margin-bottom:6px; opacity:.35; }
-
-/* ── Events ── */
-.event-item { display:flex; gap:13px; align-items:flex-start; padding:10px 0; border-bottom:1px solid #f0f4fb; }
-.event-item:last-child { border-bottom:none; }
-.event-date {
-  min-width:42px; background:var(--db-accent-lt); border-radius:10px;
-  text-align:center; padding:5px 4px; flex-shrink:0;
+.dv-bday-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--dv-border);
 }
-.event-dd  { font-size:16px; font-weight:800; color:var(--db-accent); line-height:1; }
-.event-mm  { font-size:9px; font-weight:700; color:var(--db-accent); text-transform:uppercase; letter-spacing:.4px; }
-.event-title { font-size:13px; font-weight:600; color:var(--db-text); margin-bottom:2px; }
-.event-loc   { font-size:11.5px; color:var(--db-muted); }
-.event-range { font-size:11px; color:var(--db-accent); font-weight:500; margin-top:2px; }
+.dv-bday-item:last-child { border-bottom: none; }
+.dv-bday-img {
+  width: 44px; height: 44px; border-radius: 11px; object-fit: cover;
+  border: 2px solid var(--dv-border); flex-shrink: 0;
+}
+.dv-bday-name { font-size: 13px; font-weight: 600; color: var(--dv-text); }
+.dv-bday-meta { font-size: 11.5px; color: var(--dv-muted); margin-top: 2px; }
 
-.empty-state { text-align:center; padding:26px 0; color:var(--db-muted); font-size:13px; }
-.empty-state i { font-size:30px; display:block; margin-bottom:7px; opacity:.33; }
+/* ── Event ── */
+.dv-event-item {
+  display: flex; gap: 13px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--dv-border);
+}
+.dv-event-item:last-child { border-bottom: none; }
+.dv-event-date {
+  min-width: 42px; background: var(--dv-purple-bg); border-radius: 10px;
+  text-align: center; padding: 5px 4px; flex-shrink: 0;
+}
+.dv-event-dd { font-size: 16px; font-weight: 800; color: var(--dv-purple); line-height: 1; }
+.dv-event-mm { font-size: 9px; font-weight: 700; color: var(--dv-purple); text-transform: uppercase; letter-spacing: .4px; }
+.dv-event-title { font-size: 13px; font-weight: 600; color: var(--dv-text); margin-bottom: 2px; }
+.dv-event-loc   { font-size: 11.5px; color: var(--dv-muted); }
+.dv-event-range { font-size: 11px; color: var(--dv-purple); font-weight: 500; margin-top: 2px; }
 
-@media (max-width:767px) {
-  .stat-grid { grid-template-columns:repeat(2,1fr); }
+.dv-empty {
+  text-align: center; padding: 22px 0; color: var(--dv-muted); font-size: 13px;
+}
+.dv-empty i { font-size: 28px; display: block; margin-bottom: 7px; opacity: .33; }
+
+/* ── Certificate quick links ── */
+.dv-cert-link {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none !important; transition: .15s;
+}
+.dv-cert-link:hover {
+  box-shadow: var(--dv-sh-md); transform: translateY(-2px); text-decoration: none;
+}
+.dv-cert-icon {
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+}
+
+/* ── 3-col row ── */
+.dv-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 18px; }
+
+@media (max-width: 1100px) {
+  .dv-stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .dv-row-3     { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px)  {
+  .dv-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .dv-grid-2    { grid-template-columns: 1fr; }
+  .dv-row-3     { grid-template-columns: 1fr; }
+}
+
+/* ── What's New ── */
+.wn-item {
+  display: flex; gap: 12px; padding: 11px 0;
+  border-bottom: 1px solid var(--dv-border); align-items: flex-start;
+}
+.wn-item:last-child { border-bottom: none; padding-bottom: 0; }
+.wn-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.wn-badge {
+  display: inline-block; font-size: 9.5px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase;
+  padding: 1px 8px; border-radius: 20px; margin-bottom: 3px;
+}
+.wn-badge.wn-new {
+  background: #d03b3b; color: #fff;
+  display: inline-flex; align-items: center; gap: 4px;
+  animation: wn-star-blink 1.5s infinite;
+}
+.wn-badge.wn-new i { font-size: 9px; }
+.wn-badge.wn-improved { background: var(--dv-blue-bg);  color: var(--dv-blue); }
+.wn-badge.wn-fixed    { background: var(--dv-amber-bg); color: var(--dv-amber); }
+.wn-title { font-size: 13px; font-weight: 700; color: var(--dv-text); margin-bottom: 2px; }
+.wn-desc  { font-size: 12px; color: var(--dv-text-2); line-height: 1.45; }
+.wn-date  { font-size: 10.5px; color: var(--dv-muted); margin-top: 4px; font-weight: 600; }
+@keyframes wn-star-blink {
+  0%,100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: .55; transform: scale(.9); }
 }
 </style>
 
-<div class="db-page">
-<div class="container-xxl">
+<div class="dv-page">
 
-  <!-- ═══════════════════════════════
-       ROW 1 · HERO STAT OVERVIEW
-       ═══════════════════════════════ -->
-  <p class="db-section-title">School Overview</p>
-  <div class="stat-grid mb-4">
+  <!-- GREETING -->
+  <div class="dv-greeting">
+    <div>
+      <h1 id="dv-greet">Good day, {{ request.user.username }} 👋</h1>
+      <span class="dv-term">🏫 {{ skool }} &nbsp;·&nbsp; {{ year }}</span>
+    </div>
+  </div>
 
-    <div class="stat-card c-indigo">
-      <div class="stat-icon c-indigo"><i class="ri-user-3-line"></i></div>
-      <div class="stat-value">{{studentcount}}</div>
-      <div class="stat-label">Students</div>
+  <!-- ══════════════════════════════
+       STAT GRID
+       ══════════════════════════════ -->
+  <p class="dv-section-label">School Overview</p>
+  <div class="dv-stat-grid mb-4">
+
+    <div class="dv-stat-card" style="--sc-tint:rgba(212,175,55,0.12);">
+      <div class="dv-stat-icon" style="--sc-icon-bg:linear-gradient(135deg,#e6c869,#d4af37);--sc-icon-sh:rgba(212,175,55,.5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="dv-stat-value">{{ studentcount }}</div>
+      <div class="dv-stat-label">Students</div>
+      <div class="dv-stat-delta up">&#x2191; active this year</div>
     </div>
 
-    <div class="stat-card c-sky">
-      <div class="stat-icon c-sky"><i class="ri-group-line"></i></div>
-      <div class="stat-value">{{stf}}</div>
-      <div class="stat-label">Staff</div>
+    <div class="dv-stat-card" style="--sc-tint:rgba(42,120,214,0.10);">
+      <div class="dv-stat-icon" style="--sc-icon-bg:linear-gradient(135deg,#3987e5,#2a78d6);--sc-icon-sh:rgba(42,120,214,.5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="dv-stat-value">{{ stf }}</div>
+      <div class="dv-stat-label">Staff</div>
+      <div class="dv-stat-delta flat">&#x2014; active</div>
     </div>
 
-    <div class="stat-card c-purple">
-      <div class="stat-icon c-purple"><i class="ri-book-open-line"></i></div>
-      <div class="stat-value">{{classescount}}</div>
-      <div class="stat-label">Classes</div>
+    <div class="dv-stat-card" style="--sc-tint:rgba(27,175,122,0.10);">
+      <div class="dv-stat-icon" style="--sc-icon-bg:linear-gradient(135deg,#2fd196,#1baf7a);--sc-icon-sh:rgba(27,175,122,.5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <div class="dv-stat-value">{{ classescount }}</div>
+      <div class="dv-stat-label">Classes</div>
+      <div class="dv-stat-delta flat">&#x2014; steady</div>
     </div>
 
-    <div class="stat-card c-amber">
-      <div class="stat-icon c-amber"><i class="ri-layout-grid-line"></i></div>
-      <div class="stat-value">{{sectioncount}}</div>
-      <div class="stat-label">Sections</div>
+    <div class="dv-stat-card" style="--sc-tint:rgba(232,123,164,0.10);">
+      <div class="dv-stat-icon" style="--sc-icon-bg:linear-gradient(135deg,#f096b8,#e87ba4);--sc-icon-sh:rgba(232,123,164,.5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+      </div>
+      <div class="dv-stat-value">{{ sectioncount }}</div>
+      <div class="dv-stat-label">Sections</div>
+      <div class="dv-stat-delta flat">&#x2014; steady</div>
     </div>
 
-    <div class="stat-card c-green">
-      <div class="stat-icon c-green"><i class="ri-book-2-line"></i></div>
-      <div class="stat-value">{{books}}</div>
-      <div class="stat-label">Library Books</div>
+    <div class="dv-stat-card" style="--sc-tint:rgba(74,58,167,0.10);">
+      <div class="dv-stat-icon" style="--sc-icon-bg:linear-gradient(135deg,#8b7ce0,#4a3aa7);--sc-icon-sh:rgba(74,58,167,.5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <div class="dv-stat-value">{{ books }}</div>
+      <div class="dv-stat-label">Library Books</div>
+      <div class="dv-stat-delta flat">&#x2014; in collection</div>
     </div>
 
   </div>
 
-  <!-- ═══════════════════════════════
-       ROW 2 · TODAY · FEE · NOTICES
-       ═══════════════════════════════ -->
-  <p class="db-section-title">Today — {{tdy}}</p>
-  <div class="row g-3 mb-3">
+  <!-- ══════════════════════════════
+       2-COLUMN GRID
+       ══════════════════════════════ -->
+  <p class="dv-section-label">Today &mdash; {{ tdy }}</p>
+  <div class="dv-grid-2">
 
-    <!-- TODAY GLANCE -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card h-100">
-        <div class="dash-card-header">
+    <!-- ═══ LEFT COLUMN ═══ -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+
+      <!-- FEE SUMMARY (admin/accounts only) -->
+      {% if request.user.groups.all.0.name != "Teacher" %}
+      <div class="mk-card">
+        <div class="mk-head">
           <div>
-            <div class="dash-card-title">Today at a Glance</div>
-            <div class="dash-card-sub">{{tdy}}</div>
+            <h3>Fee Summary</h3>
+            <div class="sub">Annual &middot; {{ year }}</div>
           </div>
-          <span class="live-pill"><span class="live-dot"></span>Live</span>
+          <span class="dv-live"><span class="dv-live-dot"></span>Live</span>
         </div>
-        <div class="dash-card-body">
-
-          <!-- Students today -->
-          <div class="today-panel">
-            <div class="today-panel-title">
-              <i class="ri-user-3-line"></i> Students
-              <span style="font-weight:500;color:var(--db-text-md);text-transform:none;letter-spacing:0;">· Total {{studentcount}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-checkbox-circle-line" style="color:var(--db-green);"></i>Present</span>
-              <span class="t-val g">{{present}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-close-circle-line" style="color:var(--db-rose);"></i>Absent</span>
-              <span class="t-val r">{{absent}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-cake-2-line" style="color:var(--db-amber);"></i>Birthdays</span>
-              <span class="t-val a">{{birthday_cnt}}</span>
-            </div>
+        <div class="dv-fee-total">
+          <span class="amt">&#8377;{{ totalfee }}</span>
+          <span class="lbl">total fee for the year</span>
+        </div>
+        <div class="dv-track">
+          <div class="seg-good" id="dv-seg-good" style="width:0%;"></div>
+          <div class="seg-crit" id="dv-seg-crit" style="width:100%;"></div>
+        </div>
+        <div class="dv-fee-legend">
+          <div class="li">
+            <span class="sw" style="background:#0ca30c;"></span>
+            Collected<span class="val">&#8377;{{ collected_fee }}</span>
           </div>
-
-          <!-- Staff today -->
-          <div class="today-panel">
-            <div class="today-panel-title">
-              <i class="ri-group-line"></i> Staff
-              <span style="font-weight:500;color:var(--db-text-md);text-transform:none;letter-spacing:0;">· Total {{stf}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-checkbox-circle-line" style="color:var(--db-green);"></i>Present</span>
-              <span class="t-val g">{{stf_present}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-close-circle-line" style="color:var(--db-rose);"></i>Absent</span>
-              <span class="t-val r">{{stf_absent}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-cake-2-line" style="color:var(--db-amber);"></i>Birthdays</span>
-              <span class="t-val a">{{stf_birthday_cnt}}</span>
-            </div>
+          <div class="li">
+            <span class="sw" style="background:var(--dv-crit-bg);border:1px solid var(--dv-crit);"></span>
+            Pending<span class="val" style="color:var(--dv-crit);">&#8377;{{ fee_pend }}</span>
           </div>
-
+        </div>
+        <div class="dv-divider"></div>
+        <div class="dv-mini-row">
+          <div class="dv-mini"><div class="n">&#8377;{{ tdy_collected_fee }}</div><div class="l">Collected Today</div></div>
+          <div class="dv-mini"><div class="n">{{ tdy_paid_cnt }}</div><div class="l">Fee Payers Today</div></div>
+          <div class="dv-mini"><div class="n">{{ visit }}</div><div class="l">Visitors Today</div></div>
+          <div class="dv-mini"><div class="n">{{ enq_tdy }}</div><div class="l">Enquiries Today</div></div>
         </div>
       </div>
-    </div>
+      {% endif %}
 
-    <!-- FEE SUMMARY (Admin / Accounts only) -->
-    {% if request.user.groups.all.0.name == "Admin" or request.user.groups.all.0.name == "superadmin" or request.user.groups.all.0.name == "Accounts" %}
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card h-100">
-        <div class="dash-card-header">
+      <!-- TODAY AT A GLANCE (detailed rows) -->
+      <div class="mk-card">
+        <div class="mk-head">
+          <div><h3>Today at a Glance</h3><div class="sub">{{ tdy }}</div></div>
+          <span class="dv-live"><span class="dv-live-dot"></span>Live</span>
+        </div>
+
+        <!-- Donut + quick figures -->
+        <div class="dv-donut-wrap">
+          <svg width="110" height="110" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#eeede8" stroke-width="14"/>
+            <circle id="dv-donut-arc" cx="60" cy="60" r="48" fill="none" stroke="#d4af37"
+              stroke-width="14" stroke-dasharray="301.6" stroke-dashoffset="301.6"
+              stroke-linecap="round" transform="rotate(-90 60 60)"/>
+            <text x="60" y="56" text-anchor="middle" font-size="20" font-weight="800" fill="#14151c">{{ studentcount }}</text>
+            <text x="60" y="73" text-anchor="middle" font-size="9.5" fill="#8b8c99">enrolled</text>
+          </svg>
+          <div class="dv-donut-figs">
+            <div class="dv-df-row">
+              <span class="k"><span class="sw" style="background:#0ca30c;"></span>Students present</span>
+              <span class="v">{{ present }}</span>
+            </div>
+            <div class="dv-df-row">
+              <span class="k"><span class="sw" style="background:#d03b3b;"></span>Students absent</span>
+              <span class="v">{{ absent }}</span>
+            </div>
+            <div class="dv-df-row">
+              <span class="k"><span class="sw" style="background:#d4af37;"></span>Student birthdays</span>
+              <span class="v">{{ birthday_cnt }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Staff panel -->
+        <div class="dv-today-panel">
+          <div class="dv-today-title">
+            <i class="ri-group-line"></i> Staff &nbsp;&middot;&nbsp;
+            <span style="font-weight:500;text-transform:none;letter-spacing:0;">Total {{ stf }}</span>
+          </div>
+          <div class="dv-t-row">
+            <span class="dv-t-name"><i class="ri-checkbox-circle-line" style="color:var(--dv-good);"></i>Present</span>
+            <span class="dv-t-val g">{{ stf_present }}</span>
+          </div>
+          <div class="dv-t-row">
+            <span class="dv-t-name"><i class="ri-close-circle-line" style="color:var(--dv-crit);"></i>Absent</span>
+            <span class="dv-t-val r">{{ stf_absent }}</span>
+          </div>
+          <div class="dv-t-row">
+            <span class="dv-t-name"><i class="ri-cake-2-line" style="color:var(--dv-amber);"></i>Birthdays</span>
+            <span class="dv-t-val a">{{ stf_birthday_cnt }}</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- /left column -->
+
+    <!-- ═══ RIGHT COLUMN ═══ -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+
+      <!-- NOTICE BOARD -->
+      <div class="mk-card">
+        <div class="mk-head">
+          <div><h3>Notice Board</h3><div class="sub">Latest updates</div></div>
+          <i class="ri-notification-3-line" style="font-size:18px;color:var(--dv-gold);"></i>
+        </div>
+        {% for note in ntboard %}
+        <div class="dv-notice">
+          <div class="nt-dot"></div>
           <div>
-            <div class="dash-card-title">Fee Summary</div>
-            <div class="dash-card-sub">{{year}}</div>
+            <h4>{{ note.title }}</h4>
+            <div class="date"><i class="ri-calendar-line me-1"></i>{{ note.notice_date }}</div>
+            <p>{{ note.content }}</p>
           </div>
-          <span class="dash-card-badge">Annual</span>
         </div>
-        <div class="dash-card-body">
-
-          <div class="fee-row">
-            <div style="display:flex;align-items:center;">
-              <div class="fee-icon" style="background:var(--db-accent-lt);color:var(--db-accent);">
-                <i class="ri-bank-card-line"></i>
-              </div>
-              <div>
-                <div class="fee-label">Total Fee</div>
-                <div class="fee-sub">{{year}}</div>
-              </div>
-            </div>
-            <div class="fee-amt total">₹{{totalfee}}</div>
-          </div>
-
-          <div class="fee-row">
-            <div style="display:flex;align-items:center;">
-              <div class="fee-icon" style="background:var(--db-green-lt);color:var(--db-green);">
-                <i class="ri-money-rupee-circle-line"></i>
-              </div>
-              <div>
-                <div class="fee-label">Fee Collected</div>
-                <div class="fee-sub">{{year}}</div>
-              </div>
-            </div>
-            <div class="fee-amt collect">+₹{{collected_fee}}</div>
-          </div>
-
-          <div class="fee-row">
-            <div style="display:flex;align-items:center;">
-              <div class="fee-icon" style="background:var(--db-rose-lt);color:var(--db-rose);">
-                <i class="ri-error-warning-line"></i>
-              </div>
-              <div>
-                <div class="fee-label">Fee Pending</div>
-                <div class="fee-sub">{{year}}</div>
-              </div>
-            </div>
-            <div class="fee-amt pend">-₹{{fee_pend}}</div>
-          </div>
-
-          <!-- Today fee activity -->
-          <div class="today-panel mt-3" style="margin-bottom:0;">
-            <div class="today-panel-title"><i class="ri-calendar-line"></i> Today's Activity</div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-coins-line" style="color:var(--db-green);"></i>Fee Collected</span>
-              <span class="t-val g">₹{{tdy_collected_fee}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-user-follow-line" style="color:var(--db-accent);"></i>Fee Payers</span>
-              <span class="t-val b">{{tdy_paid_cnt}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-walk-line" style="color:var(--db-sky);"></i>Visitors</span>
-              <span class="t-val s">{{visit}}</span>
-            </div>
-            <div class="t-row">
-              <span class="t-name"><i class="ri-question-answer-line" style="color:var(--db-amber);"></i>Enquiries</span>
-              <span class="t-val a">{{enq_tdy}}</span>
-            </div>
-          </div>
-
+        {% empty %}
+        <div class="dv-empty">
+          <i class="ri-notification-off-line"></i>
+          No notices at the moment.
         </div>
+        {% endfor %}
       </div>
-    </div>
-    {% endif %}
 
-    <!-- NOTICE BOARD -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card h-100">
-        <div class="dash-card-header">
-          <div class="dash-card-title">Notice Board</div>
-          <i class="ri-notification-3-line" style="font-size:18px;color:var(--db-accent);"></i>
+      <!-- WHAT'S NEW -->
+      <div class="mk-card">
+        <div class="mk-head">
+          <div><h3>What's New</h3><div class="sub">Latest feature updates</div></div>
+          <i class="ri-sparkling-2-line" style="font-size:20px;color:var(--dv-purple);"></i>
         </div>
-        <div class="dash-card-body">
-          {% for note in ntboard %}
-          <div class="notice-item">
-            <div class="notice-dot"></div>
-            <div>
-              <div class="notice-title">{{note.title}}</div>
-              <div class="notice-date"><i class="ri-calendar-line me-1"></i>{{note.notice_date}}</div>
-              <div class="notice-body">{{note.content}}</div>
+        {% for update in app_updates %}
+        <div class="wn-item">
+          <div class="wn-icon" style="{% if update.badge == 'New' %}background:var(--dv-good-bg);color:var(--dv-good);{% elif update.badge == 'Improved' %}background:var(--dv-blue-bg);color:var(--dv-blue);{% else %}background:var(--dv-amber-bg);color:var(--dv-amber);{% endif %}">
+            <i class="{{ update.icon }}"></i>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <span class="wn-badge {% if update.badge == 'New' %}wn-new{% elif update.badge == 'Improved' %}wn-improved{% else %}wn-fixed{% endif %}">
+                {% if update.badge == 'New' %}<i class="ri-star-fill"></i>{% endif %}{{ update.badge }}
+              </span>
             </div>
+            <div class="wn-title">{{ update.title }}</div>
+            <div class="wn-desc">{{ update.description }}</div>
+            <div class="wn-date"><i class="ri-calendar-line me-1"></i>{{ update.date }}</div>
           </div>
-          {% empty %}
-          <div class="empty-state">
-            <i class="ri-notification-off-line"></i>
-            No notices at the moment.
-          </div>
-          {% endfor %}
         </div>
+        {% empty %}
+        <div class="dv-empty">
+          <i class="ri-sparkling-2-line"></i>
+          No updates yet.
+        </div>
+        {% endfor %}
       </div>
+
+      <!-- STAFF ANNOUNCEMENTS -->
+      <div class="mk-card">
+        <div class="mk-head">
+          <div><h3>Announcements</h3><div class="sub">From school admin</div></div>
+          <i class="ri-megaphone-line" style="font-size:20px;color:var(--dv-amber);"></i>
+        </div>
+        {% for ann in announcements %}
+        <div class="dv-notice">
+          <div class="nt-dot" style="background:var(--dv-amber);"></div>
+          <div>
+            <h4 style="background:var(--dv-amber-bg);color:var(--dv-amber);">{{ ann.title }}</h4>
+            <div class="date"><i class="ri-time-line me-1"></i>{{ ann.created_at|date:"d M Y" }}{% if ann.expires_on %} &middot; Expires {{ ann.expires_on|date:"d M" }}{% endif %}</div>
+            <p>{{ ann.body }}</p>
+          </div>
+        </div>
+        {% empty %}
+        <div class="dv-empty">
+          <i class="ri-megaphone-line"></i>
+          No announcements right now.
+        </div>
+        {% endfor %}
+      </div>
+
     </div>
+    <!-- /right column -->
 
   </div>
-  <!-- /row 2 -->
+  <!-- /grid-2 -->
 
-  <!-- ═══════════════════════════════
-       ROW 3 · BIRTHDAYS + EVENTS
-       ═══════════════════════════════ -->
-  <p class="db-section-title">Birthdays &amp; Upcoming Events</p>
-  <div class="row g-3 mb-2">
+  <!-- ══════════════════════════════
+       CERTIFICATES
+       ══════════════════════════════ -->
+  {% if menu_perm.certificates and group_perm.certificates %}
+  <p class="dv-section-label">Certificates</p>
+  <div class="dv-row-3" style="margin-top:0;">
+    <a href="{% url 'cert_generate' %}" class="mk-card dv-cert-link" style="flex-direction:row;align-items:center;gap:16px;text-decoration:none;">
+      <span class="dv-cert-icon" style="background:linear-gradient(135deg,#2fd196,#1baf7a);width:44px;height:44px;border-radius:13px;font-size:20px;flex-shrink:0;">
+        <i class="ri-file-download-line"></i>
+      </span>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:var(--dv-text);">Generate Certificate</div>
+        <div style="font-size:12px;color:var(--dv-muted);margin-top:2px;">TC, Bonafide, Character &amp; more</div>
+      </div>
+      <i class="ri-arrow-right-s-line" style="color:var(--dv-muted);font-size:20px;"></i>
+    </a>
+    <a href="{% url 'cert_issued_list' %}" class="mk-card dv-cert-link" style="flex-direction:row;align-items:center;gap:16px;text-decoration:none;">
+      <span class="dv-cert-icon" style="background:linear-gradient(135deg,#3987e5,#2a78d6);width:44px;height:44px;border-radius:13px;font-size:20px;flex-shrink:0;">
+        <i class="ri-history-line"></i>
+      </span>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:var(--dv-text);">Issued Certificates</div>
+        <div style="font-size:12px;color:var(--dv-muted);margin-top:2px;">Search &amp; re-download past certificates</div>
+      </div>
+      <i class="ri-arrow-right-s-line" style="color:var(--dv-muted);font-size:20px;"></i>
+    </a>
+    <a href="{% url 'cert_template_list' %}" class="mk-card dv-cert-link" style="flex-direction:row;align-items:center;gap:16px;text-decoration:none;">
+      <span class="dv-cert-icon" style="background:linear-gradient(135deg,#e6c869,#d4af37);width:44px;height:44px;border-radius:13px;font-size:20px;flex-shrink:0;">
+        <i class="ri-file-upload-line"></i>
+      </span>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:var(--dv-text);">Manage Templates</div>
+        <div style="font-size:12px;color:var(--dv-muted);margin-top:2px;">Upload &amp; organise .docx templates</div>
+      </div>
+      <i class="ri-arrow-right-s-line" style="color:var(--dv-muted);font-size:20px;"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- ══════════════════════════════
+       BIRTHDAYS & EVENTS ROW
+       ══════════════════════════════ -->
+  <p class="dv-section-label">Birthdays &amp; Upcoming Events</p>
+  <div class="dv-row-3">
 
     <!-- STUDENT BIRTHDAYS -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card h-100">
-        <div class="dash-card-header">
-          <div>
-            <div class="dash-card-title">Student Birthdays</div>
-            <div class="dash-card-sub">{{tdy}}</div>
-          </div>
-          <i class="ri-cake-2-line" style="font-size:20px;color:var(--db-amber);"></i>
+    <div class="mk-card">
+      <div class="mk-head">
+        <div>
+          <h3>Student Birthdays</h3>
+          <div class="sub">{{ tdy }}</div>
         </div>
-        <div class="dash-card-body">
-          {% if birthday %}
-            {% for birth in birthday %}
-            <div class="bday-item">
-              <img
-                src="{% if birth.student_photo %}https://mithran.co.in/media/{{birth.student_photo}}{% else %}https://ui-avatars.com/api/?name={{birth.first_name}}+{{birth.last_name}}&background=fffbeb&color=d97706&size=44{% endif %}"
-                alt="{{birth.first_name}}" class="bday-avatar">
-              <div>
-                <div class="bday-name">{{birth.first_name}} {{birth.last_name}}</div>
-                <div class="bday-meta">
-                  <i class="ri-group-2-line me-1"></i>{{birth.class_name}}-{{birth.secs}}
-                  &nbsp;·&nbsp;
-                  <i class="ri-calendar-heart-line me-1"></i>{{birth.dob_date}}
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-          {% else %}
-          <div class="bday-empty">
-            <i class="ri-emotion-happy-line"></i>
-            No student birthdays today.
-          </div>
-          {% endif %}
-        </div>
+        <i class="ri-cake-2-line" style="font-size:20px;color:var(--dv-amber);"></i>
       </div>
+      {% if birthday %}
+        {% for birth in birthday %}
+        <div class="dv-bday-item">
+          <img
+            src="{% if birth.student_photo %}https://mithran.co.in/media/{{ birth.student_photo }}{% else %}https://ui-avatars.com/api/?name={{ birth.first_name }}+{{ birth.last_name }}&background=fdf1de&color=c98500&size=44{% endif %}"
+            alt="{{ birth.first_name }}" class="dv-bday-img">
+          <div>
+            <div class="dv-bday-name">{{ birth.first_name }} {{ birth.last_name }}</div>
+            <div class="dv-bday-meta">
+              <i class="ri-group-2-line me-1"></i>{{ birth.class_name }}-{{ birth.secs }}
+              &nbsp;&middot;&nbsp;
+              <i class="ri-calendar-heart-line me-1"></i>{{ birth.dob_date }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="dv-empty">
+        <i class="ri-emotion-happy-line"></i>
+        No student birthdays today.
+      </div>
+      {% endif %}
     </div>
 
     <!-- STAFF BIRTHDAYS -->
-    <div class="col-lg-4 col-md-6">
-      <div class="dash-card h-100">
-        <div class="dash-card-header">
-          <div>
-            <div class="dash-card-title">Staff Birthdays</div>
-            <div class="dash-card-sub">{{tdy}}</div>
-          </div>
-          <i class="ri-cake-line" style="font-size:20px;color:var(--db-rose);"></i>
+    <div class="mk-card">
+      <div class="mk-head">
+        <div>
+          <h3>Staff Birthdays</h3>
+          <div class="sub">{{ tdy }}</div>
         </div>
-        <div class="dash-card-body">
-          {% if stf_birthday %}
-            {% for birth in stf_birthday %}
-            <div class="bday-item">
-              <img
-                src="{% if birth.staff_photo %}https://mithran.co.in/media/{{birth.staff_photo}}{% else %}https://ui-avatars.com/api/?name={{birth.first_name}}+{{birth.last_name}}&background=fff1f2&color=e11d48&size=44{% endif %}"
-                alt="{{birth.first_name}}" class="bday-avatar">
-              <div>
-                <div class="bday-name">{{birth.first_name}} {{birth.last_name}}</div>
-                <div class="bday-meta">
-                  <i class="ri-calendar-heart-line me-1"></i>{{birth.dob}}
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-          {% else %}
-          <div class="bday-empty">
-            <i class="ri-emotion-happy-line"></i>
-            No staff birthdays today.
-          </div>
-          {% endif %}
-        </div>
+        <i class="ri-cake-line" style="font-size:20px;color:var(--dv-crit);"></i>
       </div>
+      {% if stf_birthday %}
+        {% for birth in stf_birthday %}
+        <div class="dv-bday-item">
+          <img
+            src="{% if birth.staff_photo %}https://mithran.co.in/media/{{ birth.staff_photo }}{% else %}https://ui-avatars.com/api/?name={{ birth.first_name }}+{{ birth.last_name }}&background=fceaea&color=d03b3b&size=44{% endif %}"
+            alt="{{ birth.first_name }}" class="dv-bday-img">
+          <div>
+            <div class="dv-bday-name">{{ birth.first_name }} {{ birth.last_name }}</div>
+            <div class="dv-bday-meta">
+              <i class="ri-calendar-heart-line me-1"></i>{{ birth.dob }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="dv-empty">
+        <i class="ri-emotion-happy-line"></i>
+        No staff birthdays today.
+      </div>
+      {% endif %}
     </div>
 
     <!-- UPCOMING EVENTS -->
-    <div class="col-lg-4 col-md-12">
-      <div class="dash-card h-100">
-        <div class="dash-card-header">
-          <div>
-            <div class="dash-card-title">Upcoming Events</div>
-            <div class="dash-card-sub">What's ahead</div>
-          </div>
-          <i class="ri-calendar-event-line" style="font-size:20px;color:var(--db-purple);"></i>
+    <div class="mk-card">
+      <div class="mk-head">
+        <div>
+          <h3>Upcoming Events</h3>
+          <div class="sub">What's ahead</div>
         </div>
-        <div class="dash-card-body">
-          {% for event in eve %}
-          <div class="event-item">
-            <div class="event-date">
-              <div class="event-dd">{{event.start_date|date:"d"}}</div>
-              <div class="event-mm">{{event.start_date|date:"M"}}</div>
-            </div>
-            <div>
-              <div class="event-title">{{event.title}}</div>
-              {% if event.event_location %}
-              <div class="event-loc"><i class="ri-map-pin-2-line me-1"></i>{{event.event_location}}</div>
-              {% endif %}
-              <div class="event-range">
-                <i class="ri-calendar-range-line me-1"></i>
-                {{event.start_date}} — {{event.end_date}}
-              </div>
-            </div>
+        <i class="ri-calendar-event-line" style="font-size:20px;color:var(--dv-purple);"></i>
+      </div>
+      {% for event in eve %}
+      <div class="dv-event-item">
+        <div class="dv-event-date">
+          <div class="dv-event-dd">{{ event.start_date|date:"d" }}</div>
+          <div class="dv-event-mm">{{ event.start_date|date:"M" }}</div>
+        </div>
+        <div>
+          <div class="dv-event-title">{{ event.title }}</div>
+          {% if event.event_location %}
+          <div class="dv-event-loc"><i class="ri-map-pin-2-line me-1"></i>{{ event.event_location }}</div>
+          {% endif %}
+          <div class="dv-event-range">
+            <i class="ri-calendar-range-line me-1"></i>
+            {{ event.start_date }} &mdash; {{ event.end_date }}
           </div>
-          {% empty %}
-          <div class="empty-state">
-            <i class="ri-calendar-2-line"></i>
-            No upcoming events.
-          </div>
-          {% endfor %}
         </div>
       </div>
+      {% empty %}
+      <div class="dv-empty">
+        <i class="ri-calendar-2-line"></i>
+        No upcoming events.
+      </div>
+      {% endfor %}
     </div>
 
   </div>
-  <!-- /row 3 -->
+  <!-- /birthday-events row -->
 
-</div><!-- /container -->
-</div><!-- /db-page -->
+</div>
+<!-- /dv-page -->
 
+<script>
+(function () {
+  /* Greeting */
+  var h = new Date().getHours();
+  var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  var el = document.getElementById('dv-greet');
+  if (el) el.textContent = g + ', {{ request.user.username }} 👋';
+
+  /* Fee track */
+  var total = parseFloat('{{ totalfee|default:0 }}') || 0;
+  var coll  = parseFloat('{{ collected_fee|default:0 }}') || 0;
+  if (total > 0) {
+    var pct = Math.min(100, Math.round(coll / total * 1000) / 10);
+    var sg = document.getElementById('dv-seg-good');
+    var sc = document.getElementById('dv-seg-crit');
+    if (sg) sg.style.width = pct + '%';
+    if (sc) sc.style.width = (100 - pct) + '%';
+  }
+
+  /* Donut arc (student attendance) */
+  var enrolled = parseInt('{{ studentcount|default:0 }}') || 0;
+  var present  = parseInt('{{ present|default:0 }}') || 0;
+  var arc = document.getElementById('dv-donut-arc');
+  if (arc && enrolled > 0) {
+    var circ   = 301.6;
+    var offset = circ - (present / enrolled * circ);
+    arc.setAttribute('stroke-dashoffset', offset.toFixed(1));
+  }
+})();
+</script>
 {% endblock %}

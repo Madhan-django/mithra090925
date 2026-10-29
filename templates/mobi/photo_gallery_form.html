@@ -1,0 +1,375 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .gf-wrap { display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start; }
+  @media(max-width:960px){ .gf-wrap{ grid-template-columns:1fr; } .gf-sticky{ position:static !important; } }
+
+  .gf-section {
+    border-radius: var(--r);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--sh-sm);
+    transition: box-shadow var(--t) ease;
+  }
+  .gf-section:hover { box-shadow: var(--sh-md); }
+
+  .gf-section-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border-bottom: 1.5px solid var(--border);
+  }
+  .gf-section-head .gf-ico {
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .gf-section-head .gf-ico.indigo { background: var(--accent-lt); color: var(--accent); }
+  .gf-section-head .gf-ico.amber  { background: #fffbeb; color: #d97706; }
+  .gf-section-head .gf-ico.green  { background: var(--green-lt); color: var(--green); }
+  .gf-section-head .gf-ico.sky    { background: var(--sky-lt); color: var(--sky); }
+
+  .gf-section-title { font-size: 13.5px; font-weight: 700; color: var(--text); line-height:1.2; }
+  .gf-section-sub   { font-size: 11.5px; color: var(--muted); }
+  .gf-section-body  { padding: 18px 18px 6px; }
+
+  .gf-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:600px){ .gf-row{ grid-template-columns:1fr; } }
+
+  .gf-hint {
+    font-size: 11.5px; color: var(--muted);
+    margin-top: 5px; display: flex; align-items: flex-start; gap: 5px; line-height: 1.5;
+  }
+  .gf-hint i { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  /* status toggle pills */
+  .gf-toggle { display: flex; gap: 8px; }
+  .gf-toggle label {
+    flex: 1; text-align: center;
+    padding: 8px 12px; border-radius: var(--r);
+    border: 1.5px solid var(--border-dark);
+    cursor: pointer; font-size: 13px; font-weight: 600;
+    transition: all var(--t) ease;
+    user-select: none;
+  }
+  .gf-toggle input[type=radio] { display: none; }
+  .gf-toggle input[value="active"]:checked  + label { background: var(--green-lt);  border-color: var(--green); color: var(--green); }
+  .gf-toggle input[value="inactive"]:checked + label { background: var(--rose-lt); border-color: var(--rose);  color: var(--rose); }
+  .gf-toggle label:hover { border-color: var(--accent); }
+
+  /* preview panel */
+  .gf-preview-card {
+    border-radius: var(--r-lg); overflow: hidden;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--sh-md);
+  }
+  .gf-preview-thumb {
+    aspect-ratio: 16/9;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .gf-preview-thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+  .gf-preview-thumb .gf-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 12px;
+  }
+  .gf-preview-thumb .gf-placeholder i { font-size: 36px; opacity: .4; }
+  .gf-preview-info { padding: 14px 16px; }
+  .gf-preview-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; min-height: 20px; }
+  .gf-preview-desc  { font-size: 12px; color: var(--muted); min-height: 16px; }
+  .gf-preview-meta  {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-top: 1px solid var(--border);
+    background: var(--surface2); font-size: 11.5px; color: var(--muted);
+  }
+
+  /* tip box */
+  .gf-tip {
+    background: var(--accent-lt); border: 1px solid var(--accent-mid);
+    border-radius: var(--r); padding: 12px 14px;
+    font-size: 12px; color: var(--accent); line-height: 1.6;
+  }
+  .gf-tip-title { font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .gf-tip ul { margin: 0; padding-left: 16px; }
+  .gf-tip li { margin-bottom: 3px; }
+
+  /* save bar */
+  .gf-save-bar {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--r); padding: 16px 18px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--sh-sm);
+  }
+  .gf-sticky { position: sticky; top: 80px; }
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'photo_gallery_list' %}">Photo Gallery</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{{ action }}</span>
+    </div>
+    <div class="pc-page-title">{{ action }} Photo Album</div>
+    <div class="pc-page-sub">Add a Drive album link, image URL, or album page — shown in the student app</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'photo_gallery_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<form method="POST" id="photoForm">
+  {% csrf_token %}
+
+  <div class="gf-wrap">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div>
+
+      <!-- Section 1: Album Info -->
+      <div class="gf-section">
+        <div class="gf-section-head">
+          <div class="gf-ico indigo"><i class="ri-image-line"></i></div>
+          <div>
+            <div class="gf-section-title">Album Info</div>
+            <div class="gf-section-sub">Basic details visible in the app</div>
+          </div>
+        </div>
+        <div class="gf-section-body">
+
+          <div class="pc-form-group">
+            <label class="pc-label">Album Title <span class="req">*</span></label>
+            <div class="pc-input-group">
+              <i class="pc-input-icon ri-text"></i>
+              {{ form.PTitle }}
+            </div>
+          </div>
+
+          <div class="pc-form-group">
+            <label class="pc-label">Description <span style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            {{ form.Pdesc }}
+            <div class="gf-hint"><i class="ri-information-line"></i> A short caption shown below the album title in the app.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 2: Album Link -->
+      <div class="gf-section">
+        <div class="gf-section-head">
+          <div class="gf-ico sky"><i class="ri-links-line"></i></div>
+          <div>
+            <div class="gf-section-title">Album Link</div>
+            <div class="gf-section-sub">Where the photos live — Drive, website, or direct image</div>
+          </div>
+        </div>
+        <div class="gf-section-body">
+
+          <div class="pc-form-group">
+            <label class="pc-label">Link URL</label>
+            <div class="pc-input-group">
+              <i class="pc-input-icon ri-link-m"></i>
+              {{ form.Plink }}
+            </div>
+            <div class="gf-hint"><i class="ri-lightbulb-line"></i> Paste a Google Drive folder, an album page URL, or a direct image URL. The app will auto-fetch photos from this link.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 3: Thumbnail -->
+      <div class="gf-section">
+        <div class="gf-section-head">
+          <div class="gf-ico amber"><i class="ri-image-2-line"></i></div>
+          <div>
+            <div class="gf-section-title">Cover Thumbnail</div>
+            <div class="gf-section-sub">Shown in the album grid — leave blank to auto-detect</div>
+          </div>
+        </div>
+        <div class="gf-section-body">
+
+          <div class="pc-form-group">
+            <label class="pc-label">Thumbnail URL <span style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <div class="pc-input-group">
+              <i class="pc-input-icon ri-image-fill"></i>
+              {{ form.PThumbnail }}
+            </div>
+            <div class="gf-hint"><i class="ri-information-line"></i> Direct link to a cover image (JPG/PNG). The preview on the right updates live.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 4: Settings -->
+      <div class="gf-section">
+        <div class="gf-section-head">
+          <div class="gf-ico green"><i class="ri-settings-3-line"></i></div>
+          <div>
+            <div class="gf-section-title">Settings</div>
+            <div class="gf-section-sub">Date and visibility controls</div>
+          </div>
+        </div>
+        <div class="gf-section-body">
+
+          <div class="gf-row">
+            <div class="pc-form-group">
+              <label class="pc-label">Album Date <span style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+              <div class="pc-input-group">
+                <i class="pc-input-icon ri-calendar-line"></i>
+                {{ form.Pdate }}
+              </div>
+            </div>
+
+            <div class="pc-form-group">
+              <label class="pc-label">Visibility Status</label>
+              <div class="gf-toggle">
+                <input type="radio" name="status" id="status_active"   value="active"
+                  {% if not form.status.value or form.status.value == 'active' %}checked{% endif %}>
+                <label for="status_active"><i class="ri-eye-line"></i> Active</label>
+                <input type="radio" name="status" id="status_inactive" value="inactive"
+                  {% if form.status.value == 'inactive' %}checked{% endif %}>
+                <label for="status_inactive"><i class="ri-eye-off-line"></i> Hidden</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Save bar -->
+      <div class="gf-save-bar">
+        <button type="submit" class="pc-btn pc-btn-primary" id="saveBtn">
+          <i class="ri-save-line"></i> Save Album
+        </button>
+        <a href="{% url 'photo_gallery_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+        {% if action == 'Edit' and obj %}
+        <a href="{% url 'photo_gallery_delete' obj.pk %}"
+           onclick="return confirm('Delete this album?')"
+           class="pc-btn pc-btn-danger" style="margin-left:auto;">
+          <i class="ri-delete-bin-line"></i> Delete
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT COLUMN (sticky preview) ── -->
+    <div class="gf-sticky">
+
+      <!-- Live Preview -->
+      <div class="gf-preview-card" style="margin-bottom:16px;">
+        <div class="gf-preview-thumb" id="previewThumbBox">
+          <img id="previewThumbImg" src="" alt="" style="display:none;">
+          <div class="gf-placeholder" id="previewPlaceholder">
+            <i class="ri-image-line"></i>
+            <span>Thumbnail preview</span>
+          </div>
+        </div>
+        <div class="gf-preview-info">
+          <div class="gf-preview-title" id="previewTitle">Album title will appear here</div>
+          <div class="gf-preview-desc"  id="previewDesc">Description</div>
+        </div>
+        <div class="gf-preview-meta">
+          <span id="previewDate"><i class="ri-calendar-line" style="margin-right:4px;"></i>No date set</span>
+          <span id="previewStatus" style="font-weight:600;color:var(--green);">
+            <i class="ri-eye-line" style="margin-right:3px;"></i>Active
+          </span>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="gf-tip">
+        <div class="gf-tip-title"><i class="ri-lightbulb-flash-line"></i> Link Tips</div>
+        <ul>
+          <li>Google Drive <strong>folder</strong> → app shows all images inside</li>
+          <li>Google Drive <strong>file</strong> → single image album</li>
+          <li>Direct image URL (.jpg/.png) → opens that image</li>
+          <li>Website/album page → app scrapes photos from it</li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div><!-- /.gf-wrap -->
+</form>
+
+<script>
+(function () {
+  var titleEl   = document.getElementById('id_PTitle');
+  var descEl    = document.getElementById('id_Pdesc');
+  var thumbEl   = document.getElementById('id_PThumbnail');
+  var dateEl    = document.getElementById('id_Pdate');
+  var statusEls = document.querySelectorAll('input[name="status"]');
+
+  var pTitle  = document.getElementById('previewTitle');
+  var pDesc   = document.getElementById('previewDesc');
+  var pDate   = document.getElementById('previewDate');
+  var pStatus = document.getElementById('previewStatus');
+  var pImg    = document.getElementById('previewThumbImg');
+  var pPh     = document.getElementById('previewPlaceholder');
+
+  function syncTitle()  { pTitle.textContent = titleEl.value.trim() || 'Album title will appear here'; }
+  function syncDesc()   { pDesc.textContent  = descEl.value.trim()  || 'Description'; }
+  function syncDate()   {
+    var d = dateEl.value;
+    pDate.innerHTML = d
+      ? '<i class="ri-calendar-line" style="margin-right:4px;"></i>' + d
+      : '<i class="ri-calendar-line" style="margin-right:4px;"></i>No date set';
+  }
+  function syncStatus() {
+    var val = document.querySelector('input[name="status"]:checked').value;
+    if (val === 'active') {
+      pStatus.innerHTML = '<i class="ri-eye-line" style="margin-right:3px;"></i>Active';
+      pStatus.style.color = 'var(--green)';
+    } else {
+      pStatus.innerHTML = '<i class="ri-eye-off-line" style="margin-right:3px;"></i>Hidden';
+      pStatus.style.color = 'var(--rose)';
+    }
+  }
+  function syncThumb() {
+    var url = thumbEl.value.trim();
+    if (url) {
+      pImg.onload  = function () { pImg.style.display = 'block'; pPh.style.display = 'none'; };
+      pImg.onerror = function () { pImg.style.display = 'none';  pPh.style.display = 'flex'; };
+      pImg.src = url;
+    } else {
+      pImg.style.display = 'none'; pPh.style.display = 'flex';
+    }
+  }
+
+  titleEl.addEventListener('input', syncTitle);
+  descEl.addEventListener('input', syncDesc);
+  thumbEl.addEventListener('input', syncThumb);
+  dateEl.addEventListener('change', syncDate);
+  statusEls.forEach(function(el){ el.addEventListener('change', syncStatus); });
+
+  /* init on edit */
+  syncTitle(); syncDesc(); syncThumb(); syncDate(); syncStatus();
+
+  /* save button loading */
+  document.getElementById('photoForm').addEventListener('submit', function () {
+    var btn = document.getElementById('saveBtn');
+    btn.innerHTML = '<i class="ri-loader-4-line"></i> Saving…';
+    btn.disabled = true;
+  });
+})();
+</script>
+
+{% endblock %}

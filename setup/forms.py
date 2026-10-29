@@ -1,5 +1,5 @@
 from django import forms
-from .models import academicyr,currentacademicyr,sclass,section,subjects,receipt_template,homework_time
+from .models import academicyr,currentacademicyr,sclass,section,subjects,receipt_template,homework_time,birthday_wish_config,AppUpdate,StaffAnnouncement
 
 receipt =[
     ('fee/reciept_show.html','Receipt1'),
@@ -100,3 +100,60 @@ class add_homeworktime_form(forms.ModelForm):
             'homework_school': forms.HiddenInput()
         }
 
+
+class birthday_wish_config_form(forms.ModelForm):
+    class Meta:
+        model = birthday_wish_config
+        fields = '__all__'
+
+        widgets = {
+            'school': forms.HiddenInput(),
+            'title': forms.TextInput(attrs={'class': 'pc-input', 'placeholder': 'e.g. Happy Birthday, {{student_name}}!'}),
+            'message': forms.Textarea(attrs={
+                'class': 'pc-input',
+                'rows': 4,
+                'placeholder': 'Use {{student_name}} to personalize. e.g. Wishing {{student_name}} a Happy Birthday!',
+            }),
+            'time': forms.TimeInput(attrs={'class': 'pc-input', 'type': 'time'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class AppUpdateForm(forms.ModelForm):
+    class Meta:
+        model = AppUpdate
+        fields = ('title', 'description', 'date', 'badge', 'icon', 'is_active')
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'pc-input',
+                'placeholder': 'e.g. Morning Report',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'pc-input',
+                'rows': 3,
+                'placeholder': 'Short description of the feature...',
+            }),
+            'date': forms.DateInput(attrs={
+                'class': 'pc-input',
+                'type': 'date',
+            }),
+            'badge': forms.Select(attrs={'class': 'pc-input'}),
+            'icon': forms.TextInput(attrs={
+                'class': 'pc-input',
+                'placeholder': 'e.g. ri-star-line',
+                'id': 'icon-input',
+            }),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class StaffAnnouncementForm(forms.ModelForm):
+    class Meta:
+        model = StaffAnnouncement
+        fields = ['title', 'body', 'expires_on', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'pc-input', 'placeholder': 'Announcement title'}),
+            'body': forms.Textarea(attrs={'class': 'pc-input', 'rows': 4, 'placeholder': 'Announcement details...'}),
+            'expires_on': forms.DateInput(attrs={'class': 'pc-input', 'type': 'date'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }

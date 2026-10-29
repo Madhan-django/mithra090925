@@ -31,27 +31,27 @@
                         <div class="row">
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">School</label>
+                                <label class="form-label text-dark">School</label>
                                 {{ form.school_name }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Department</label>
+                                <label class="form-label text-dark">Department</label>
                                 {{ form.department }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Report Date</label>
+                                <label class="form-label text-dark">Report Submitted On</label>
                                 {{ form.report_date }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Reporting Time</label>
+                                <label class="form-label text-dark">Reporting Time</label>
                                 {{ form.reporting_time }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Submitted By</label>
+                                <label class="form-label text-dark">Report Submitted By</label>
                                 {{ form.report_submitted_by }}
                             </div>
 
@@ -64,43 +64,76 @@
                 <!-- ===================================== -->
 
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
-                    <div class="card-header bg-dark text-white">MORNING SESSION</div>
+                    <div class="card-header bg-dark text-white">DAILY CHECKING</div>
                     <div class="card-body">
                         <div class="row">
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Late Comers [Teachers]</label>
+                                <label class="form-label text-dark">Late Comers [Teachers]</label>
                                 {{ form.late_comers_teachers }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Late Comers [Duty Teachers]</label>
+                                <label class="form-label text-dark">Late Comers [Pupils]</label>
+                                {{ form.late_comers_pupils }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">Late Comers [Duty Teachers]</label>
                                 {{ form.late_comers_duty_teachers }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Absentees [Teachers]</label>
+                                <label class="form-label text-dark">Absentees [Teachers]</label>
                                 {{ form.absentees_teachers }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Assembly Arrangements</label>
+                                <label class="form-label text-dark">Arrangements</label>
                                 {{ form.assembly_arrangements }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Class Teachers Morals</label>
+                                <label class="form-label text-dark">Morals (Given / Not Given)</label>
                                 {{ form.class_teachers_morals }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Dispersing Time</label>
+                                <label class="form-label text-dark">Dispersing</label>
                                 {{ form.dispersing_time }}
                             </div>
 
                             <div class="col-md-2 mb-3 d-flex align-items-center gap-2 mt-4">
                                 {{ form.zero_hour_maintained }}
-                                <label class="form-check-label">Zero Hour Maintained</label>
+                                <label class="form-check-label text-dark">Zero Hour Maintained</label>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- MORNING SPECIAL CLASS -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">MORNING SPECIAL CLASS</div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">Schedule</label>
+                                {{ form.morning_spl_class_schedule }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">Late Comers</label>
+                                {{ form.morning_spl_late_comers }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">Duty Alteration (if any)</label>
+                                {{ form.duty_alteration }}
                             </div>
 
                         </div>
@@ -112,28 +145,48 @@
                 <!-- ===================================== -->
 
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
-                    <div class="card-header bg-dark text-white">LUNCH BREAK</div>
+                    <div class="card-header bg-dark text-white">ASSEMBLY</div>
                     <div class="card-body">
                         <div class="row">
 
                             <div class="col-md-2 mb-3 d-flex align-items-center gap-2 mt-4">
                                 {{ form.ct_availability }}
-                                <label class="form-check-label">C/T Available</label>
+                                <label class="form-check-label text-dark">Availability of C/T (Yes / No)</label>
                             </div>
 
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Children Without Lunch</label>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-dark">Children Had Breakfast</label>
+                                {{ form.breakfast_count }}
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-dark">No. of Children Not Brought Lunch</label>
                                 {{ form.children_without_lunch }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Lunch Atmosphere</label>
+                                <label class="form-label text-dark">Atmosphere During Lunch Time (Calm / Noisy)</label>
                                 {{ form.lunch_atmosphere }}
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Noise Level (if Noisy)</label>
+                                <label class="form-label text-dark">Level of Noise (High / Moderate / Low)</label>
                                 {{ form.noise_level }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">Children Permission Details</label>
+                                {{ form.children_permission }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">PET Class Details</label>
+                                {{ form.pet_class_details }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-dark">Intimation to Parents</label>
+                                {{ form.parent_intimation }}
                             </div>
 
                         </div>
@@ -145,37 +198,47 @@
                 <!-- ===================================== -->
 
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
-                    <div class="card-header bg-dark text-white">AFTERNOON SESSION</div>
+                    <div class="card-header bg-dark text-white">LUNCH BREAK</div>
                     <div class="card-body">
                         <div class="row">
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Cram Conducted</label>
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label text-dark">Cram (Subject &amp; No. of Crams)</label>
                                 {{ form.cram_conducted }}
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Special Class</label>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-dark">Cram Status</label>
+                                {{ form.cram_status }}
+                            </div>
+
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label text-dark">Special Class</label>
                                 {{ form.special_class }}
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Activity Class</label>
+                                <label class="form-label text-dark">Activity Class</label>
                                 {{ form.activity_class }}
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Accident Details</label>
+                                <label class="form-label text-dark">Accident if Any</label>
                                 {{ form.accident_details }}
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Incidents</label>
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label text-dark">Incidents if Any</label>
                                 {{ form.incidents }}
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Pupils Detained &amp; Reason</label>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-dark">Incident Status</label>
+                                {{ form.incident_status }}
+                            </div>
+
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label text-dark">Pupils Detained &amp; Reason</label>
                                 {{ form.pupils_detained }}
                             </div>
 
@@ -188,27 +251,37 @@
                 <!-- ===================================== -->
 
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
-                    <div class="card-header bg-dark text-white">STATUS DETAILS</div>
+                    <div class="card-header bg-dark text-white">AFTERNOON SESSION</div>
                     <div class="card-body">
                         <div class="row">
 
                             <div class="col-md-2 mb-3 d-flex align-items-center gap-2">
                                 {{ form.class_work_given }}
-                                <label class="form-check-label">Class Work Given</label>
+                                <label class="form-check-label text-dark">Class Work Given</label>
                             </div>
 
                             <div class="col-md-2 mb-3 d-flex align-items-center gap-2">
                                 {{ form.homework_corrected }}
-                                <label class="form-check-label">Homework Corrected</label>
+                                <label class="form-check-label text-dark">Home Work Corrected</label>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-dark">Homework Status</label>
+                                {{ form.homework_status }}
                             </div>
 
                             <div class="col-md-2 mb-3 d-flex align-items-center gap-2">
                                 {{ form.handbook_checked }}
-                                <label class="form-check-label">Handbook Checked</label>
+                                <label class="form-check-label text-dark">Handbook Checked</label>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-dark">Handbook Status</label>
+                                {{ form.handbook_status }}
                             </div>
 
                             <div class="col-md-12 mb-3">
-                                <label class="form-label">Supervising Report</label>
+                                <label class="form-label text-dark">Supervising Report</label>
                                 {{ form.supervising_report }}
                             </div>
 
@@ -228,8 +301,9 @@
                             <table class="table table-bordered">
                                 <thead style="background-color:#212529;color:white;">
                                     <tr>
-                                        <th width="120">SESSION</th>
-                                        <th>PERIOD</th>
+                                        <th width="110">SESSION</th>
+                                        <th width="120">PERIOD</th>
+                                        <th width="160">TIME</th>
                                         <th>DETAILS</th>
                                     </tr>
                                 </thead>
@@ -237,35 +311,43 @@
                                     <tr>
                                         <td rowspan="4" class="text-center fw-bold align-middle bg-light">MORNING</td>
                                         <td>1st Period</td>
+                                        <td>{{ form.period_1_time }}</td>
                                         <td>{{ form.period_1 }}</td>
                                     </tr>
                                     <tr>
                                         <td>2nd Period</td>
+                                        <td>{{ form.period_2_time }}</td>
                                         <td>{{ form.period_2 }}</td>
                                     </tr>
                                     <tr>
                                         <td>3rd Period</td>
+                                        <td>{{ form.period_3_time }}</td>
                                         <td>{{ form.period_3 }}</td>
                                     </tr>
                                     <tr>
                                         <td>4th Period</td>
+                                        <td>{{ form.period_4_time }}</td>
                                         <td>{{ form.period_4 }}</td>
                                     </tr>
                                     <tr>
                                         <td rowspan="4" class="text-center fw-bold align-middle bg-light">NOON</td>
                                         <td>5th Period</td>
+                                        <td>{{ form.period_5_time }}</td>
                                         <td>{{ form.period_5 }}</td>
                                     </tr>
                                     <tr>
                                         <td>6th Period</td>
+                                        <td>{{ form.period_6_time }}</td>
                                         <td>{{ form.period_6 }}</td>
                                     </tr>
                                     <tr>
                                         <td>7th Period</td>
+                                        <td>{{ form.period_7_time }}</td>
                                         <td>{{ form.period_7 }}</td>
                                     </tr>
                                     <tr>
                                         <td>8th Period</td>
+                                        <td>{{ form.period_8_time }}</td>
                                         <td>{{ form.period_8 }}</td>
                                     </tr>
                                 </tbody>
@@ -285,18 +367,23 @@
                         <div class="row">
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Circular — Teachers</label>
+                                <label class="form-label text-dark">Circular — Teachers</label>
                                 {{ form.circular_teachers }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Circular — Parents</label>
+                                <label class="form-label text-dark">Circular — Parents</label>
                                 {{ form.circular_parents }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Circular — Pupils</label>
+                                <label class="form-label text-dark">Circular — Pupils</label>
                                 {{ form.circular_pupils }}
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label text-dark">JNPS / JMS / Periyakuppam</label>
+                                {{ form.circular_school }}
                             </div>
 
                         </div>
@@ -313,32 +400,32 @@
                         <div class="row">
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Birthday</label>
+                                <label class="form-label text-dark">Birthday</label>
                                 {{ form.birthday }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Competition / Field Trip</label>
+                                <label class="form-label text-dark">Competition / Field Trip</label>
                                 {{ form.competition_field_trip }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Celebration</label>
+                                <label class="form-label text-dark">Celebration</label>
                                 {{ form.celebration }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Meeting Conducted</label>
+                                <label class="form-label text-dark">Meeting Conducted</label>
                                 {{ form.meeting_conducted }}
                             </div>
 
                             <div class="col-md-8 mb-3">
-                                <label class="form-label">Meeting Details</label>
+                                <label class="form-label text-dark">Meeting Details</label>
                                 {{ form.meeting_details }}
                             </div>
 
                             <div class="col-md-12 mb-3">
-                                <label class="form-label">Demo Class</label>
+                                <label class="form-label text-dark">Demo Class</label>
                                 {{ form.demo_class }}
                             </div>
 
@@ -353,6 +440,7 @@
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
                     <div class="card-header bg-dark text-white">ROUNDS REPORT</div>
                     <div class="card-body">
+                        <label class="form-label text-dark">Rounds Report</label>
                         {{ form.rounds_report }}
                     </div>
                 </div>
@@ -364,6 +452,7 @@
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
                     <div class="card-header bg-dark text-white">STAFF PRAYER ATTENDANCE &amp; INSTRUCTIONS</div>
                     <div class="card-body">
+                        <label class="form-label text-dark">Staff Prayer Attendance &amp; Instructions</label>
                         {{ form.staff_prayer_attendance }}
                     </div>
                 </div>
@@ -375,6 +464,7 @@
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
                     <div class="card-header bg-dark text-white">SUGGESTIONS &amp; GRIEVANCES</div>
                     <div class="card-body">
+                        <label class="form-label text-dark">Suggestions &amp; Grievances</label>
                         {{ form.suggestions_and_grievances }}
                     </div>
                 </div>
@@ -386,28 +476,27 @@
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
                     <div class="card-header bg-dark text-white">LATE EVENING CLASS</div>
                     <div class="card-body">
+                        <label class="form-label text-dark">Late Evening Class</label>
+                        {{ form.late_evening_class }}
+                    </div>
+                </div>
+
+                <!-- ===================================== -->
+                <!-- NOTE -->
+                <!-- ===================================== -->
+
+                <div class="card shadow-sm mb-4 border-0 rounded-4">
+                    <div class="card-header bg-dark text-white">IMPORTANT NOTE / FOLLOW UP</div>
+                    <div class="card-body">
                         <div class="row">
-
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Standard</label>
-                                {{ form.late_evening_class_std }}
+                            <div class="col-md-9 mb-3">
+                                <label class="form-label text-dark">Note</label>
+                                {{ form.note }}
                             </div>
-
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Subject</label>
-                                {{ form.late_evening_class_subject }}
+                                <label class="form-label text-dark">Status</label>
+                                {{ form.note_status }}
                             </div>
-
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Subject Teacher</label>
-                                {{ form.late_evening_class_teacher }}
-                            </div>
-
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">No. of Students</label>
-                                {{ form.late_evening_class_students }}
-                            </div>
-
                         </div>
                     </div>
                 </div>
@@ -419,6 +508,7 @@
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
                     <div class="card-header bg-dark text-white">TOMORROW'S ASSIGNMENT / TO-DO LIST</div>
                     <div class="card-body">
+                        <label class="form-label text-dark">Tomorrow's Assignment</label>
                         {{ form.tomorrows_assignment }}
                     </div>
                 </div>

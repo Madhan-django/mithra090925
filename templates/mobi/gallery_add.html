@@ -1,0 +1,125 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'gallery_list' %}">Photo Gallery</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Add</span>
+    </div>
+    <div class="pc-page-title">Add to Gallery</div>
+    <div class="pc-page-sub">Upload a photo to Google Drive, or paste a YouTube / image link</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'gallery_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+  <div class="pc-alert pc-alert-{% if msg.tags == 'success' %}success{% else %}danger{% endif %}" style="margin-bottom:16px;">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+{% if form.non_field_errors %}
+  <div class="pc-alert pc-alert-danger" style="margin-bottom:16px;">{{ form.non_field_errors }}</div>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div class="pc-card-title"><i class="ri-image-add-line me-2" style="color:var(--accent);"></i>Gallery Item</div>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Title <span style="color:var(--rose);">*</span></label>
+        {{ form.title }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Album</label>
+        {{ form.album }}
+        <small style="font-size:11px;color:var(--muted);">Group related items, e.g. "Annual Day 2025"</small>
+      </div>
+
+      <!-- Type toggle -->
+      <div class="pc-form-group">
+        <label class="pc-label">Add by</label>
+        <div style="display:flex;gap:12px;">
+          <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <input type="radio" name="_add_type" value="upload" checked onchange="toggleAddType(this.value)"> Upload file
+          </label>
+          <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <input type="radio" name="_add_type" value="link" onchange="toggleAddType(this.value)"> Paste link
+          </label>
+        </div>
+      </div>
+
+      <div id="upload-section" class="pc-form-group">
+        <label class="pc-label">Photo File</label>
+        {{ form.photo }}
+        <small style="font-size:11px;color:var(--muted);">JPG, PNG, WEBP — max 5 MB recommended.</small>
+      </div>
+
+      <div id="link-section" class="pc-form-group" style="display:none;">
+        <label class="pc-label">Link URL</label>
+        {{ form.link_url }}
+        <small style="font-size:11px;color:var(--muted);">YouTube link, Google Drive share link, or any direct image URL.</small>
+      </div>
+
+      <div class="pc-form-group" style="display:flex;align-items:center;gap:10px;">
+        {{ form.is_active }}
+        <label class="pc-label" style="margin:0;">Active (visible in app)</label>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:28px;">
+    <div class="pc-card-body">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="submit" class="pc-btn pc-btn-primary" id="submit-btn">
+          <i class="ri-upload-cloud-line"></i> Upload to Drive
+        </button>
+        <a href="{% url 'gallery_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+      <small style="font-size:11px;color:var(--muted);margin-top:8px;display:block;" id="submit-hint">Upload may take a few seconds.</small>
+    </div>
+  </div>
+
+</form>
+
+<script>
+function toggleAddType(val) {
+  var uploadSec = document.getElementById('upload-section');
+  var linkSec   = document.getElementById('link-section');
+  var btn       = document.getElementById('submit-btn');
+  var hint      = document.getElementById('submit-hint');
+  if (val === 'link') {
+    uploadSec.style.display = 'none';
+    linkSec.style.display   = '';
+    btn.innerHTML  = '<i class="ri-link"></i> Save Link';
+    hint.textContent = 'The link will be shown directly in the app.';
+  } else {
+    uploadSec.style.display = '';
+    linkSec.style.display   = 'none';
+    btn.innerHTML  = '<i class="ri-upload-cloud-line"></i> Upload to Drive';
+    hint.textContent = 'Upload may take a few seconds.';
+  }
+}
+</script>
+
+{% endblock %}

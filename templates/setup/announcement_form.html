@@ -1,0 +1,73 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'announcement_list' %}">Announcements</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{% if edit %}Edit{% else %}New{% endif %}</span>
+    </div>
+    <div class="pc-page-title">{% if edit %}Edit Announcement{% else %}New Announcement{% endif %}</div>
+    <div class="pc-page-sub">{% if edit %}Update the announcement details{% else %}Post a message for all staff{% endif %}</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'announcement_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<form method="POST">
+  {% csrf_token %}
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-megaphone-line me-2" style="color:var(--accent);"></i>Announcement Details</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Title <span style="color:var(--rose);">*</span></label>
+        {{ form.title }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Body <span style="color:var(--rose);">*</span></label>
+        {{ form.body }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Expires On <span style="font-size:11px;color:var(--muted);">(optional — leave blank to never expire)</span></label>
+        {{ form.expires_on }}
+      </div>
+
+      <div class="pc-form-group" style="display:flex;align-items:center;gap:10px;">
+        {{ form.is_active }}
+        <label class="pc-label" style="margin:0;">Active (visible on dashboard)</label>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:28px;">
+    <div class="pc-card-body">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> {% if edit %}Update{% else %}Post{% endif %} Announcement
+        </button>
+        <a href="{% url 'announcement_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}

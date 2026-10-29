@@ -1,0 +1,274 @@
+{% extends 'panel/index.html' %}
+{% load custom_filters %}
+{% block content %}
+
+<style>
+.tt-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.tt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 600px;
+}
+.tt-table thead {
+  background: #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.tt-table thead th {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: #94a3b8;
+  text-align: center;
+  border: none;
+  white-space: nowrap;
+}
+.tt-table thead th:first-child { text-align: left; padding-left: 16px; width: 110px; }
+.tt-table tbody tr { border-bottom: 1px solid var(--border); }
+.tt-table tbody tr:last-child { border-bottom: none; }
+.tt-table tbody td {
+  padding: 10px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  color: var(--text-md);
+  font-size: 13px;
+  vertical-align: middle;
+}
+.tt-table tbody td:last-child { border-right: none; }
+.tt-table tbody td:first-child {
+  text-align: left;
+  padding-left: 16px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface2);
+  border-right: 2px solid var(--border-dark);
+  white-space: nowrap;
+}
+.tt-section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+  margin-bottom: 22px;
+  animation: ttCardIn .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes ttCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tt-section-header {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tt-section-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview-banner {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fcd34d;
+  border-radius: var(--r-xl);
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.preview-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.preview-banner-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fef3c7;
+  border: 2px solid #fcd34d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.preview-banner-text strong { font-size: 14px; color: #92400e; display: block; }
+.preview-banner-text span  { font-size: 12.5px; color: #b45309; }
+.preview-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
+}
+.nb-modal {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(15,23,42,.5); backdrop-filter: blur(5px);
+  align-items: center; justify-content: center;
+}
+.nb-modal.active { display: flex; }
+.nb-modal-box {
+  background: var(--surface); border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg); width: 100%; max-width: 420px;
+  margin: 20px; overflow: hidden; animation: modalIn .25s var(--ease-spring);
+}
+.nb-modal-header {
+  background: var(--rose-lt); padding: 20px 22px 16px;
+  border-bottom: 1px solid #fecdd3; display: flex; align-items: center; gap: 12px;
+}
+.nb-modal-icon {
+  width: 42px; height: 42px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(225,29,72,.15); flex-shrink: 0;
+}
+.nb-modal-body { padding: 22px; }
+.nb-modal-body p { font-size: 13.5px; color: var(--text-md); margin: 0; line-height: 1.7; }
+.nb-modal-footer {
+  padding: 14px 22px; background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
+</style>
+
+<div class="col-lg-12">
+
+  <!-- Page Header -->
+  <div class="pc-page-header mb-3">
+    <div class="pc-page-header-left">
+      <nav class="pc-breadcrumb">
+        <a href="{% url 'home_dashboard' %}">Dashboard</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <a href="{% url 'view_timetable' %}">Timetable</a>
+        <span class="pc-breadcrumb-sep">›</span>
+        <span>Preview</span>
+      </nav>
+      <h1 class="pc-page-title">Timetable Preview</h1>
+      <p class="pc-page-sub">Review the auto-generated timetable before saving it.</p>
+    </div>
+  </div>
+
+  <!-- Preview Banner -->
+  <div class="preview-banner">
+    <div class="preview-banner-info">
+      <div class="preview-banner-icon">⚡</div>
+      <div class="preview-banner-text">
+        <strong>Timetable ready to import</strong>
+        <span>{{ entry_count }} period assignment{{ entry_count|pluralize }} generated across {{ section_timetables|length }} section{{ section_timetables|length|pluralize }} — not yet saved.</span>
+      </div>
+    </div>
+    <div class="preview-actions">
+      <button class="pc-btn pc-btn-outline" onclick="openDiscardModal()">
+        <i class="ri-close-line"></i> Discard
+      </button>
+      <form method="POST" action="{% url 'confirm_save_timetable' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Import &amp; Save Timetable
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section Timetables -->
+  {% for group in section_timetables %}
+  <div class="tt-section-card" style="animation-delay: {{ forloop.counter0 }}0ms;">
+    <div class="tt-section-header">
+      <div class="tt-section-name">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;display:inline-block;"></span>
+        {{ group.section.class_sec_name.name }} — {{ group.section.section_name }}
+      </div>
+      <span class="pc-badge pc-badge-primary pc-badge-no-dot">
+        <i class="ri-time-line" style="font-size:11px;"></i>
+        {{ group.grid|length }} Period{{ group.grid|length|pluralize }}
+      </span>
+    </div>
+    <div class="tt-table-wrap">
+      <table class="tt-table">
+        <thead>
+          <tr>
+            <th>Day / Period</th>
+            {% for p in group.grid %}<th>Period {{ p.period }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for day_index in group.days|length|make_range %}
+          <tr>
+            <td>{{ group.days|index:day_index }}</td>
+            {% for period_row in group.grid %}
+            <td>{{ period_row.cells|index:day_index|safe }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Bottom actions -->
+  <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:8px;padding-bottom:32px;">
+    <button class="pc-btn pc-btn-outline" onclick="openDiscardModal()">
+      <i class="ri-close-line"></i> Discard
+    </button>
+    <form method="POST" action="{% url 'confirm_save_timetable' %}" style="margin:0;">
+      {% csrf_token %}
+      <button type="submit" class="pc-btn pc-btn-primary">
+        <i class="ri-save-line"></i> Import &amp; Save Timetable
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<!-- Discard Modal -->
+<div id="discardModal" class="nb-modal">
+  <div class="nb-modal-box">
+    <div class="nb-modal-header">
+      <div class="nb-modal-icon">
+        <i class="ri-delete-bin-6-line" style="color:var(--rose);font-size:18px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Discard Timetable</div>
+        <div style="font-size:12px;color:var(--rose);font-weight:500;">Generated data will be lost</div>
+      </div>
+    </div>
+    <div class="nb-modal-body">
+      <p>Are you sure you want to discard this generated timetable? The existing saved timetable will remain unchanged.</p>
+    </div>
+    <div class="nb-modal-footer">
+      <button class="pc-btn pc-btn-outline" onclick="closeDiscardModal()">Cancel</button>
+      <a href="{% url 'view_timetable' %}" class="pc-btn pc-btn-danger">
+        <i class="ri-delete-bin-6-line"></i> Yes, Discard
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDiscardModal()  { document.getElementById('discardModal').classList.add('active'); }
+function closeDiscardModal() { document.getElementById('discardModal').classList.remove('active'); }
+document.getElementById('discardModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDiscardModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDiscardModal(); });
+</script>
+
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'banner_list' %}">Banners</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Edit</span>
+    </div>
+    <div class="pc-page-title">Edit Banner</div>
+    <div class="pc-page-sub">{{ banner.title }}</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'banner_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-image-line me-2" style="color:var(--accent);"></i>Banner Details</div>
+        <div class="pc-card-sub">Image will be shown as a full-width slide in the app</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Title <span style="color:var(--rose);">*</span></label>
+        {{ form.title }}
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Banner Image</label>
+        {% if banner.image %}
+        <div style="margin-bottom:10px;">
+          <img id="imgPreview" src="{{ banner.image.url }}" style="max-height:140px;border-radius:var(--r);border:1px solid var(--border);object-fit:cover;">
+        </div>
+        {% else %}
+        <div id="imgPreviewWrap" style="display:none;margin-bottom:10px;">
+          <img id="imgPreview" style="max-height:140px;border-radius:var(--r);border:1px solid var(--border);object-fit:cover;">
+        </div>
+        {% endif %}
+        {{ form.image }}
+        <small style="font-size:11px;color:var(--muted);">Upload a new image to replace the current one</small>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Link URL <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+        {{ form.link_url }}
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-settings-3-line me-2" style="color:var(--accent);"></i>Visibility Settings</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="pc-form-group">
+          <label class="pc-label">Start Date</label>
+          {{ form.start_date }}
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">End Date</label>
+          {{ form.end_date }}
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Display Order</label>
+        {{ form.display_order }}
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+        {{ form.is_active }}
+        <label style="font-size:13.5px;font-weight:600;color:var(--text);margin:0;cursor:pointer;">
+          Banner is active
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:28px;">
+    <div class="pc-card-body">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Update Banner
+        </button>
+        <a href="{% url 'banner_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+        <a href="{% url 'banner_delete' banner.pk %}"
+           onclick="return confirm('Delete this banner?')"
+           class="pc-btn pc-btn-danger" style="margin-left:auto;">
+          <i class="ri-delete-bin-line"></i> Delete
+        </a>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<script>
+document.getElementById('id_image').addEventListener('change', function () {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('imgPreview');
+      preview.src = e.target.result;
+      preview.closest('[style*="display:none"]') && (preview.closest('[style*="display:none"]').style.display = 'block');
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+
+{% endblock %}

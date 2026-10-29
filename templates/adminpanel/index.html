@@ -398,6 +398,13 @@ setTimeout(function() {
                         </li>
                          {% endif %}
 
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa-solid fa-beat fa-file-lines"></i><span class="hide-menu">Jacob Reports</span></a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item"><a href="{% url 'class_teacher_report_list' %}" class="sidebar-link"><i class="fa-solid fa-chalkboard-user"></i><span class="hide-menu"> Class Teacher Report</span></a></li>
+                                <li class="sidebar-item"><a href="{% url 'incharge_report_list' %}" class="sidebar-link"><i class="fa-solid fa-clipboard-list"></i><span class="hide-menu"> Incharge Report</span></a></li>
+                            </ul>
+                        </li>
+
                     </ul>
                 </nav>
                 <!-- End Sidebar navigation -->

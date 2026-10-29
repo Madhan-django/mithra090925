@@ -1,0 +1,74 @@
+{% extends 'panel/index.html' %}
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="ri-shield-user-line me-2"></i>
+        <span style="color:var(--m-accent)">{{ group.name }}</span>
+        <span class="text-muted fw-normal" style="font-size:13px;"> — {{ sch.name }}</span>
+      </h5>
+      <a href="{% url 'group_permissions_list' sch.id %}" class="btn btn-sm btn-secondary">
+        <i class="ri-arrow-left-line me-1"></i> All Groups
+      </a>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-4">
+        Toggle which sidebar sections <strong>{{ group.name }}</strong> can access in
+        <strong>{{ sch.name }}</strong>. This does not affect other schools.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% regroup modules by section as section_list %}
+        {% for section in section_list %}
+        <h6 class="mt-4 mb-3 text-uppercase fw-bold"
+            style="font-size:11px;letter-spacing:1px;color:var(--m-text-3);">
+          {{ section.grouper }}
+        </h6>
+        <div class="row g-3 mb-2">
+          {% for mod in section.list %}
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card border {% if mod.enabled %}border-success{% else %}border-secondary{% endif %} h-100"
+                 style="border-width:1.5px!important;">
+              <div class="card-body py-3 px-3 d-flex align-items-center justify-content-between">
+                <span style="font-size:13.5px;font-weight:500;">{{ mod.label }}</span>
+                <div class="form-check form-switch ms-3 mb-0">
+                  <input class="form-check-input permission-toggle" type="checkbox"
+                         name="{{ mod.field }}" id="perm_{{ mod.field }}"
+                         {% if mod.enabled %}checked{% endif %}>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="d-flex gap-3 mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="ri-save-line me-1"></i> Save Permissions
+          </button>
+          <a href="{% url 'group_permissions_list' sch.id %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.permission-toggle').forEach(function(toggle) {
+  toggle.addEventListener('change', function() {
+    var card = this.closest('.card');
+    if (this.checked) {
+      card.classList.remove('border-secondary');
+      card.classList.add('border-success');
+    } else {
+      card.classList.remove('border-success');
+      card.classList.add('border-secondary');
+    }
+  });
+});
+</script>
+{% endblock %}

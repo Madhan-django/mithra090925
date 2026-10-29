@@ -2,10 +2,11 @@ import datetime
 
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.db import models
 from admission.models import students,enquiry
 from academic.models import noticeboard,events
 from institutions.models import school
-from setup.models import currentacademicyr,academicyr,sclass,section
+from setup.models import currentacademicyr,academicyr,sclass,section,AppUpdate,StaffAnnouncement
 from staff.models import staff,staff_attendance
 from fees.models import addindfee,fees,fee_reciept
 from library.models import books,book_issued
@@ -63,7 +64,18 @@ def home_dashboard(request):
         bks_issued = book_issued.objects.filter(book_title__book_school=sdata).count()
         visit = visitors.objects.filter(check_in_time__date=tdy).count()
         ntboard = noticeboard.objects.filter(notice_school=sdata).order_by('-notice_date')
+        recent_students = students.objects.filter(school_student=sdata, student_status='Active').order_by('-id')[:4]
         eve = events.objects.filter(event_school=sdata, start_date__gt=tdy)
+        app_updates = AppUpdate.objects.filter(is_active=True).order_by('-date')[:6]
+        today_dt = datetime.date.today()
+        try:
+            announcements = StaffAnnouncement.objects.filter(
+                school=sdata, is_active=True
+            ).filter(
+                models.Q(expires_on__isnull=True) | models.Q(expires_on__gte=today_dt)
+            ).order_by('-created_at')[:5]
+        except Exception:
+            announcements = []
 
         # Calculate totals
         for fee in feestd:
@@ -82,7 +94,9 @@ def home_dashboard(request):
             'enq': enq, 'followup': followup, 'books': bks, 'books_issued': bks_issued, 'present': stud_present, 'absent': stud_absent, 'visit': visit,
             'skool': sdata, 'birthday': birthday, 'stf': stf, 'stf_birthday': stf_birthday, 'birthday_cnt': birthday_cnt, 'stf_present': stf_present,
             'stf_absent': stf_absent, 'stf_birthday_cnt': stf_birthday_cnt, 'tdy_collected_fee': tdy_collected_fee, 'tdy_paid_cnt': tdy_paid_cnt,
-            'enq_tdy': enq_tdy, 'ntboard': ntboard, 'tdy': tdy, 'eve': eve
+            'enq_tdy': enq_tdy, 'ntboard': ntboard, 'tdy': tdy, 'eve': eve,
+            'recent_students': recent_students, 'app_updates': app_updates,
+            'announcements': announcements,
         })
 
     except Exception as e:

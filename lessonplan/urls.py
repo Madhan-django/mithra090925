@@ -10,6 +10,10 @@ urlpatterns = [
     path('<int:pk>/delete/', login_required(views.lesson_plan_delete), name='lesson_plan_delete'),
     path('<int:pk>/pdf/', login_required(views.lesson_plan_pdf), name='lesson_plan_pdf'),
 
+    # topics
+    path('topic/<int:pk>/edit/',   login_required(views.topic_edit),   name='topic_edit'),
+    path('topic/<int:pk>/delete/', login_required(views.topic_delete), name='topic_delete'),
+
     # assignments
     path('assignment/<int:pk>/toggle-given/', login_required(views.toggle_given), name='toggle_given'),
     path('assignment/<int:pk>/toggle-corrected/', login_required(views.toggle_corrected), name='toggle_corrected'),

@@ -1,0 +1,100 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0">Issued Certificates</h4>
+      <small class="text-muted">{{ skool.name }}</small>
+    </div>
+    <a href="{% url 'cert_generate' %}" class="btn btn-success">
+      <i class="ri-add-line me-1"></i> Generate New
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Search</label>
+          <input type="text" name="q" class="form-control form-control-sm"
+                 value="{{ q }}" placeholder="Student name or cert number">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Type</label>
+          <select name="cert_type" class="form-select form-select-sm">
+            <option value="">All Types</option>
+            {% for val, label in cert_types %}
+            <option value="{{ val }}" {% if selected_type == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-secondary btn-sm w-100">Filter</button>
+        </div>
+        <div class="col-md-2">
+          <a href="{% url 'cert_issued_list' %}" class="btn btn-outline-secondary btn-sm w-100">Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-body p-0">
+      {% if issued %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Cert No.</th>
+              <th>Student</th>
+              <th>Type</th>
+              <th>Template</th>
+              <th>Issued Date</th>
+              <th>Issued By</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in issued %}
+            <tr>
+              <td><span class="badge bg-label-dark font-monospace">{{ c.cert_number }}</span></td>
+              <td>
+                <div class="fw-semibold">{{ c.student.first_name }} {{ c.student.last_name }}</div>
+                <small class="text-muted">Adm: {{ c.student.admn_no }}</small>
+              </td>
+              <td><span class="badge bg-label-primary">{{ c.get_cert_type_display }}</span></td>
+              <td class="text-muted small">{{ c.template.name|default:"—" }}</td>
+              <td>{{ c.issued_date|date:"d M Y" }}</td>
+              <td class="small text-muted">{{ c.issued_by.get_full_name|default:c.issued_by.username|default:"—" }}</td>
+              <td class="text-center">
+                {% if c.template and c.template.template_file %}
+                <a href="{% url 'cert_redownload' c.id %}"
+                   class="btn btn-sm btn-icon btn-outline-success" title="Re-download">
+                  <i class="ri-download-2-line"></i>
+                </a>
+                {% else %}
+                <span class="text-muted small">Template deleted</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="ri-file-text-line fs-1 d-block mb-2"></i>
+        <p>No certificates issued yet.</p>
+        <a href="{% url 'cert_generate' %}" class="btn btn-success">Generate First Certificate</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

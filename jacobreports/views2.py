@@ -13,41 +13,42 @@ from .forms import ClassTeacherReportForm, InchargeReportForm, ClassTeacherMappi
 # =========================================
 # REPORT LIST
 # =========================================
-
 def class_teacher_report_list(request):
     sch_id = request.session['sch_id']
     sdata = school.objects.get(pk=sch_id)
+    yr = currentacademicyr.objects.get(school_name=sdata)
+    year = academicyr.objects.get(acad_year=yr, school_name=sdata)
     usr = request.user
-
-    reports = ClassTeacherReport.objects.select_related(
-        'school_name',
-        'class_name',
-        'section',
-        'report_submitted_by'
-    ).order_by('-report_date', '-id')
 
     is_admin = usr.groups.filter(name__in=['superadmin', 'Admin']).exists()
 
     if is_admin:
-        reports = reports.filter(school_name=sdata)
+        reports = ClassTeacherReport.objects.select_related(
+            'school_name',
+            'class_name',
+            'section',
+            'report_submitted_by'
+        ).filter(school_name=sdata).order_by('-report_date', '-id')
     else:
         try:
             current_staff = staff.objects.get(staff_user=usr)
         except staff.DoesNotExist:
-            reports = reports.none()
+            reports = ClassTeacherReport.objects.none()
         else:
             mapped_teacher_ids = ClassTeacherMapping.objects.filter(
                 incharge=current_staff,
                 school_name=sdata
             ).values_list('class_teacher', flat=True)
 
-            # always see own report + all mapped teachers' reports
-            reports = reports.filter(
-                school_name=sdata
-            ).filter(
+            reports = ClassTeacherReport.objects.select_related(
+                'school_name',
+                'class_name',
+                'section',
+                'report_submitted_by'
+            ).filter(school_name=sdata).filter(
                 Q(report_submitted_by=current_staff) |
                 Q(report_submitted_by__in=mapped_teacher_ids)
-            )
+            ).order_by('-report_date', '-id')
 
     # =========================
     # SEARCH

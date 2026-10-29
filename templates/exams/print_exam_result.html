@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  {% load static %}
+  {% load static exam_tags %}
 
     <title>Reciept</title>
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -158,17 +158,21 @@ text-align:center;
 </thead>
 <tbody>
 			<tr>
-
-				<td>{{adm_data.exam_label}}</td>
+				<td>Marks</td>
 				{% for exam_title in data %}
-
-			<td><span class="wlsm-font-bold">{{exam_title.obtained_marks}}</span></td>
+			<td><span class="wlsm-font-bold">{{exam_title.obtained_marks}}/{{exam_title.exam_sub.max_marks}}</span></td>
                 {% endfor %}
-
 				<td><span class="wlsm-font-bold">{{tot}}</span></td>
-
 		     </tr>
-
+			 {% if show_grades %}
+			 <tr>
+				<td>Grade</td>
+				{% for exam_title in data %}
+			<td><span class="wlsm-font-bold">{% get_grade exam_title.obtained_marks exam_title.exam_sub.max_marks skool.id %}</span></td>
+                {% endfor %}
+				<td>-</td>
+		     </tr>
+			 {% endif %}
 </tbody>
 					</table><br><br>
 					<table class="table table-bordered wlsm-results-subject-wise-table wlsm-results-subject-wise-table">

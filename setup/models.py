@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from institutions.models import school
 
 
@@ -52,6 +53,24 @@ class homework_time(models.Model):
         return self.time
 
 
+class birthday_wish_config(models.Model):
+    school = models.OneToOneField(school, on_delete=models.CASCADE, related_name='birthday_wish_config')
+    title = models.CharField(
+        max_length=200,
+        default='Happy Birthday, {{student_name}}!',
+        help_text='Use {{student_name}} to include the student name in the heading.'
+    )
+    message = models.TextField(
+        default='Wishing {{student_name}} a very Happy Birthday! 🎂',
+        help_text='Use {{student_name}} to personalize the message.'
+    )
+    time = models.TimeField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Birthday Wish Config - {self.school}"
+
+
 class subjects(models.Model):
     subject_name = models.CharField(max_length=50)
     subject_code = models.CharField(max_length=10)
@@ -69,3 +88,40 @@ class receipt_template(models.Model):
 
     def __str__(self):
         return self.template
+
+
+class AppUpdate(models.Model):
+    BADGE_CHOICES = [
+        ('New', 'New'),
+        ('Improved', 'Improved'),
+        ('Fixed', 'Fixed'),
+    ]
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    date = models.DateField()
+    badge = models.CharField(max_length=20, choices=BADGE_CHOICES, default='New')
+    icon = models.CharField(max_length=60, default='ri-star-line',
+                            help_text='Remix icon class, e.g. ri-star-line')
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __str__(self):
+        return self.title
+
+
+class StaffAnnouncement(models.Model):
+    school      = models.ForeignKey(school, on_delete=models.CASCADE, related_name='staff_announcements')
+    title       = models.CharField(max_length=200)
+    body        = models.TextField()
+    posted_by   = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+    expires_on  = models.DateField(null=True, blank=True, help_text='Leave blank to never expire')
+    is_active   = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title

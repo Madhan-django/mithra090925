@@ -1,0 +1,336 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <!-- ========================= -->
+        <!-- HEADER -->
+        <!-- ========================= -->
+
+        <div class="card-header text-white d-flex align-items-center justify-content-between"
+             style="background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%); height:76px;">
+            <a href="{% url 'class_teacher_report_list' %}"
+               class="btn btn-sm"
+               style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2);">
+                <i class="ri-arrow-left-line"></i> Back
+            </a>
+            <div class="text-center">
+                <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--m-accent, #d4af37); font-weight:700;">
+                    {{ report.class_name }} - {{ report.section }} &middot; {{ report.report_date }}
+                </div>
+                <h5 class="mb-0" style="font-weight:700;">Class Teacher Report</h5>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'edit_class_teacher_report' report.id %}"
+                   class="btn btn-sm"
+                   style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2);">
+                    <i class="ri-pencil-line"></i> Edit
+                </a>
+                <a href="{% url 'add_class_teacher_report' %}?clone={{ report.id }}"
+                   class="btn btn-sm btn-primary">
+                    <i class="ri-file-copy-line"></i> Clone
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            <!-- ========================= -->
+            <!-- BASIC DETAILS -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">BASIC DETAILS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">School</div>
+                            <div class="fw-semibold">{{ report.school_name }}</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Class</div>
+                            <div class="fw-semibold">{{ report.class_name }}</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Section</div>
+                            <div class="fw-semibold">{{ report.section }}</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Submitted By</div>
+                            <div class="fw-semibold">{{ report.report_submitted_by }}</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Date</div>
+                            <div class="fw-semibold">{{ report.report_date }}</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- ATTENDANCE SUMMARY -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">ATTENDANCE SUMMARY</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0">
+                            <thead style="background:#f8fafc;">
+                                <tr>
+                                    <th></th>
+                                    <th class="text-center">Boys</th>
+                                    <th class="text-center">Girls</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold">On Roll</td>
+                                    <td class="text-center">{{ report.boys_on_roll }}</td>
+                                    <td class="text-center">{{ report.girls_on_roll }}</td>
+                                    <td class="text-center fw-bold">{{ report.total_on_roll }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Present</td>
+                                    <td class="text-center text-success">{{ report.boys_present }}</td>
+                                    <td class="text-center text-success">{{ report.girls_present }}</td>
+                                    <td class="text-center fw-bold text-success">{{ report.total_present }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Absentees</td>
+                                    <td class="text-center text-danger">{{ report.boys_absentees }}</td>
+                                    <td class="text-center text-danger">{{ report.girls_absentees }}</td>
+                                    <td class="text-center fw-bold text-danger">{{ report.total_absentees }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Uniform Defaulters</td>
+                                    <td class="text-center text-warning">{{ report.boys_uniform_defaulters }}</td>
+                                    <td class="text-center text-warning">{{ report.girls_uniform_defaulters }}</td>
+                                    <td class="text-center fw-bold text-warning">{{ report.total_uniform_defaulters }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- DAILY ROUTINE -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">DAILY ROUTINE</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.action_taken %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Action Taken</div>
+                            <div>{{ report.action_taken }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.birthday_celebration %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Birthday Celebration</div>
+                            <div>{{ report.birthday_celebration }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.accident_details %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Accident Details</div>
+                            <div class="text-danger">{{ report.accident_details }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.defaulters %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Defaulters</div>
+                            <div>{{ report.defaulters }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.homework_details %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Homework Details</div>
+                            <div>{{ report.homework_details }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.drill_work_details %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Drill Work</div>
+                            <div>{{ report.drill_work_details }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.activity_class %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Activity Class</div>
+                            <div>{{ report.activity_class }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.announcements %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Announcements</div>
+                            <div>{{ report.announcements }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if not report.action_taken and not report.birthday_celebration and not report.accident_details and not report.defaulters and not report.homework_details and not report.drill_work_details and not report.activity_class and not report.announcements %}
+                        <div class="col-12 text-muted">No details recorded.</div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- REMARKS -->
+            <!-- ========================= -->
+
+            {% if report.teachers_remark or report.parents_remark or report.pupils_remark %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">REMARKS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.teachers_remark %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Teacher's Remark</div>
+                            <div>{{ report.teachers_remark }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.parents_remark %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Parent's Remark</div>
+                            <div>{{ report.parents_remark }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.pupils_remark %}
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Pupil's Remark</div>
+                            <div>{{ report.pupils_remark }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ========================= -->
+            <!-- TRANSPORT -->
+            <!-- ========================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">TRANSPORT DETAILS</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0">
+                            <thead style="background:#f8fafc;">
+                                <tr>
+                                    <th>Mode</th>
+                                    <th class="text-center">Boys</th>
+                                    <th class="text-center">Girls</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Private Auto</td>
+                                    <td class="text-center">{{ report.private_auto_boys }}</td>
+                                    <td class="text-center">{{ report.private_auto_girls }}</td>
+                                    <td class="text-center fw-semibold">{{ report.private_auto_total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Cycle</td>
+                                    <td class="text-center">{{ report.cycle_boys }}</td>
+                                    <td class="text-center">{{ report.cycle_girls }}</td>
+                                    <td class="text-center fw-semibold">{{ report.cycle_total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Walk</td>
+                                    <td class="text-center">{{ report.walk_boys }}</td>
+                                    <td class="text-center">{{ report.walk_girls }}</td>
+                                    <td class="text-center fw-semibold">{{ report.walk_total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>School Van</td>
+                                    <td class="text-center">{{ report.school_van_boys }}</td>
+                                    <td class="text-center">{{ report.school_van_girls }}</td>
+                                    <td class="text-center fw-semibold">{{ report.school_van_total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bus</td>
+                                    <td class="text-center">{{ report.bus_boys }}</td>
+                                    <td class="text-center">{{ report.bus_girls }}</td>
+                                    <td class="text-center fw-semibold">{{ report.bus_total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Others</td>
+                                    <td class="text-center">{{ report.others_boys }}</td>
+                                    <td class="text-center">{{ report.others_girls }}</td>
+                                    <td class="text-center fw-semibold">{{ report.others_total }}</td>
+                                </tr>
+                                <tr style="background:#f0f5ff;">
+                                    <td class="fw-bold">Grand Total</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-center fw-bold text-primary">{{ report.transport_grand_total }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- MEETING / SUGGESTIONS -->
+            <!-- ========================= -->
+
+            {% if report.meeting_details or report.suggestions_and_grievances %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-dark text-white rounded-top-4">MEETING & SUGGESTIONS</div>
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        {% if report.meeting_details %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Meeting Details</div>
+                            <div>{{ report.meeting_details }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if report.suggestions_and_grievances %}
+                        <div class="col-md-6">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Suggestions & Grievances</div>
+                            <div>{{ report.suggestions_and_grievances }}</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

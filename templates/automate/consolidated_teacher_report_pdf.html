@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #111; margin: 20px; }
+    h1 { font-size: 16px; margin: 0 0 4px 0; }
+    .sub { color: #555; font-size: 11px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    th { background: #1a1d2b; color: #fff; padding: 6px 10px; text-align: left; font-size: 11px; }
+    td { padding: 5px 10px; border-bottom: 1px solid #e5e7eb; }
+    tr:last-child td { border-bottom: none; }
+    .stat-row td { font-weight: bold; background: #f9fafb; }
+    .section-title { font-size: 12px; font-weight: bold; text-transform: uppercase;
+                     letter-spacing: 0.5px; margin: 16px 0 6px 0; border-bottom: 2px solid #1a1d2b;
+                     padding-bottom: 4px; }
+    .badge-warn { color: #b45309; }
+    .badge-bad  { color: #dc2626; }
+    .badge-good { color: #059669; }
+    .footer { margin-top: 24px; font-size: 10px; color: #9ca3af; }
+</style>
+</head>
+<body>
+
+<h1>Consolidated Class Teacher Report</h1>
+<div class="sub">{{ period_label }} &nbsp;&middot;&nbsp; {{ sch }}</div>
+
+<div class="section-title">Summary</div>
+<table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr><td>Classes Reported</td><td>{{ data.classes_reported }}</td></tr>
+    <tr><td>Total On Roll</td><td>{{ data.total_on_roll }}</td></tr>
+    <tr><td>Present</td><td class="badge-good">{{ data.total_present }}</td></tr>
+    <tr><td>Absent</td><td class="badge-bad">{{ data.total_absentees }}</td></tr>
+    <tr><td>Attendance %</td><td>{{ data.att_pct }}%</td></tr>
+    <tr><td>Uniform Defaulters</td><td class="badge-warn">{{ data.total_uniform }}</td></tr>
+</table>
+
+<div class="section-title">Per-Class Breakdown</div>
+<table>
+    <tr>
+        <th>Class</th>
+        <th>Section</th>
+        <th>Teacher</th>
+        <th>On Roll</th>
+        <th>Present</th>
+        <th>Absent</th>
+        <th>Att%</th>
+        <th>Uniform</th>
+    </tr>
+    {% for r in data.qs %}
+    <tr>
+        <td>{{ r.class_name }}</td>
+        <td>{{ r.section }}</td>
+        <td>{{ r.report_submitted_by }}</td>
+        <td>{{ r.total_on_roll }}</td>
+        <td>{{ r.total_present }}</td>
+        <td>{% if r.total_absentees %}<span class="badge-bad">{{ r.total_absentees }}</span>{% else %}0{% endif %}</td>
+        <td>{{ r.attendance_pct }}%</td>
+        <td>{% if r.total_uniform_defaulters %}<span class="badge-warn">{{ r.total_uniform_defaulters }}</span>{% else %}0{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" style="text-align:center;color:#9ca3af;">No reports submitted.</td></tr>
+    {% endfor %}
+</table>
+
+{% if data.flagged %}
+<div class="section-title">Needs Attention</div>
+<table>
+    <tr>
+        <th>Class</th>
+        <th>Section</th>
+        <th>Absent</th>
+        <th>Accident / Defaulters</th>
+    </tr>
+    {% for r in data.flagged %}
+    <tr>
+        <td>{{ r.class_name }}</td>
+        <td>{{ r.section }}</td>
+        <td class="badge-bad">{{ r.total_absentees }}</td>
+        <td>
+            {% if r.accident_details %}{{ r.accident_details }}{% endif %}
+            {% if r.defaulters %}&nbsp;| Defaulters: {{ r.defaulters }}{% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if data.reports_with_remarks %}
+<div class="section-title">Remarks &amp; Daily Details</div>
+{% for r in data.reports_with_remarks %}
+<table style="margin-bottom:8px;">
+    <tr>
+        <th colspan="2">{{ r.class_name }} — {{ r.section }} &nbsp;|&nbsp; {{ r.report_submitted_by }}</th>
+    </tr>
+    {% if r.teachers_remark %}
+    <tr><td style="width:160px;color:#555;">Teacher's Remark</td><td>{{ r.teachers_remark }}</td></tr>
+    {% endif %}
+    {% if r.parents_remark %}
+    <tr><td style="color:#555;">Parent's Remark</td><td>{{ r.parents_remark }}</td></tr>
+    {% endif %}
+    {% if r.pupils_remark %}
+    <tr><td style="color:#555;">Pupil's Remark</td><td>{{ r.pupils_remark }}</td></tr>
+    {% endif %}
+    {% if r.action_taken %}
+    <tr><td style="color:#555;">Action Taken</td><td>{{ r.action_taken }}</td></tr>
+    {% endif %}
+    {% if r.birthday_celebration %}
+    <tr><td style="color:#555;">Birthday</td><td>{{ r.birthday_celebration }}</td></tr>
+    {% endif %}
+    {% if r.homework_details %}
+    <tr><td style="color:#555;">Homework</td><td>{{ r.homework_details }}</td></tr>
+    {% endif %}
+    {% if r.drill_work_details %}
+    <tr><td style="color:#555;">Drill / Work</td><td>{{ r.drill_work_details }}</td></tr>
+    {% endif %}
+    {% if r.activity_class %}
+    <tr><td style="color:#555;">Activity Class</td><td>{{ r.activity_class }}</td></tr>
+    {% endif %}
+    {% if r.announcements %}
+    <tr><td style="color:#555;">Announcements</td><td>{{ r.announcements }}</td></tr>
+    {% endif %}
+    {% if r.defaulters %}
+    <tr><td style="color:#555;">Defaulters</td><td>{{ r.defaulters }}</td></tr>
+    {% endif %}
+    {% if r.accident_details %}
+    <tr><td style="color:#555;">Accident</td><td class="badge-bad">{{ r.accident_details }}</td></tr>
+    {% endif %}
+    {% if r.meeting_details %}
+    <tr><td style="color:#555;">Meeting</td><td>{{ r.meeting_details }}</td></tr>
+    {% endif %}
+    {% if r.suggestions_and_grievances %}
+    <tr><td style="color:#555;">Suggestions</td><td>{{ r.suggestions_and_grievances }}</td></tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+<div class="section-title">Transport Summary</div>
+<table>
+    <tr>
+        <th>Mode</th>
+        <th>Total</th>
+    </tr>
+    {% for mode, cnt in data.transport.items %}
+    <tr>
+        <td>{{ mode }}</td>
+        <td>{{ cnt }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="stat-row">
+        <td>Grand Total</td>
+        <td>{{ data.transport_total }}</td>
+    </tr>
+</table>
+
+<div class="footer">Generated by Mithran ERP &nbsp;&middot;&nbsp; {{ tdy }}</div>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'banner_list' %}">Banners</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Add</span>
+    </div>
+    <div class="pc-page-title">Add Banner</div>
+    <div class="pc-page-sub">Upload a new banner image for the mobile app</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'banner_list' %}" class="pc-btn pc-btn-outline">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-image-line me-2" style="color:var(--accent);"></i>Banner Details</div>
+        <div class="pc-card-sub">Image will be shown as a full-width slide in the app</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <div class="pc-form-group">
+        <label class="pc-label">Title <span style="color:var(--rose);">*</span></label>
+        {{ form.title }}
+        <small style="font-size:11px;color:var(--muted);">For internal reference — not shown to students</small>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Banner Image <span style="color:var(--rose);">*</span></label>
+        {{ form.image }}
+        <small style="font-size:11px;color:var(--muted);">Recommended: 1200×400 px, JPG/PNG. Landscape images look best.</small>
+        <div id="imgPreviewWrap" style="display:none;margin-top:12px;">
+          <img id="imgPreview" style="max-height:160px;border-radius:var(--r);border:1px solid var(--border);object-fit:cover;">
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Link URL <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+        {{ form.link_url }}
+        <small style="font-size:11px;color:var(--muted);">Opens this URL when the student taps the banner</small>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:20px;">
+    <div class="pc-card-header">
+      <div>
+        <div class="pc-card-title"><i class="ri-settings-3-line me-2" style="color:var(--accent);"></i>Visibility Settings</div>
+        <div class="pc-card-sub">Control when and how this banner appears</div>
+      </div>
+    </div>
+    <div class="pc-card-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="pc-form-group">
+          <label class="pc-label">Start Date <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+          {{ form.start_date }}
+          <small style="font-size:11px;color:var(--muted);">Leave blank to show immediately</small>
+        </div>
+        <div class="pc-form-group">
+          <label class="pc-label">End Date <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+          {{ form.end_date }}
+          <small style="font-size:11px;color:var(--muted);">Leave blank to show indefinitely</small>
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label class="pc-label">Display Order</label>
+        {{ form.display_order }}
+        <small style="font-size:11px;color:var(--muted);">Lower numbers appear first (0 = first)</small>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+        {{ form.is_active }}
+        <label style="font-size:13.5px;font-weight:600;color:var(--text);margin:0;cursor:pointer;">
+          Banner is active
+        </label>
+      </div>
+      <small style="font-size:11px;color:var(--muted);margin-top:4px;display:block;">Uncheck to hide without deleting</small>
+
+    </div>
+  </div>
+
+  <div class="pc-card" style="margin-bottom:28px;">
+    <div class="pc-card-body">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="submit" class="pc-btn pc-btn-primary">
+          <i class="ri-save-line"></i> Save Banner
+        </button>
+        <a href="{% url 'banner_list' %}" class="pc-btn pc-btn-outline">
+          <i class="ri-close-line"></i> Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<script>
+document.getElementById('id_image').addEventListener('change', function () {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imgPreview').src = e.target.result;
+      document.getElementById('imgPreviewWrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+
+{% endblock %}

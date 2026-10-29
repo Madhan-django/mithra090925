@@ -17,10 +17,12 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('user_delete_policy/', TemplateView.as_view(template_name='user_deletion_policy.html'), name='user_delete_policy'),
     path('institutions/',include('institutions.urls')),
     path('setup/',include('setup.urls')),
     path('admission/',include('admission.urls')),
@@ -30,6 +32,7 @@ urlpatterns = [
     path('library/',include('library.urls')),
     path('staff/',include('staff.urls')),
     path('',include('authenticate.urls')),
+    path('social-auth/', include('social_django.urls', namespace='social')),
     path('inventory/',include('inventory.urls')),
     path('visitors/',include('visitors.urls')),
     path('studentportal/',include('studentportal.urls')),
@@ -55,6 +58,8 @@ urlpatterns = [
     path('transport/', include('transport.urls')),
     path('hostel/', include('hostel.urls')),
     path('lessonplan/', include('lessonplan.urls')),
+    path('certificates/', include('certificates.urls')),
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

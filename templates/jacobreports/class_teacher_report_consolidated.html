@@ -1,0 +1,544 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+    .ctr-header{
+        background: linear-gradient(120deg, var(--m-menu-bg, #0b0c14) 0%, #1a1d2b 100%);
+        border-radius: var(--m-radius-lg, 18px) var(--m-radius-lg, 18px) 0 0;
+        padding: 22px 28px;
+        color: #fff;
+    }
+
+    .ctr-header .eyebrow{
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--m-accent, #d4af37);
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .ctr-header h4{
+        margin: 0;
+        font-weight: 700;
+        font-size: 20px;
+    }
+
+    .ctr-header .sub{
+        color: rgba(255,255,255,0.6);
+        font-size: 13px;
+        margin-top: 2px;
+    }
+
+    .ctr-datebar{
+        background: #fff;
+        border: 1px solid var(--m-border, #e3e8f0);
+        border-radius: var(--m-radius, 12px);
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        box-shadow: var(--m-shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+    }
+
+    .ctr-nav-btn{
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1.5px solid var(--m-border, #e3e8f0);
+        background: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--m-text-2, #4b5563);
+        text-decoration: none;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .ctr-nav-btn:hover{
+        border-color: var(--m-accent, #d4af37);
+        color: var(--m-accent-2, #b8930a);
+    }
+
+    .stat-grid{
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+        margin: 22px 0;
+    }
+
+    @media (max-width: 1199px){ .stat-grid{ grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 575px){ .stat-grid{ grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card{
+        background: #fff;
+        border: 1px solid var(--m-border, #e3e8f0);
+        border-radius: var(--m-radius, 12px);
+        padding: 16px;
+        box-shadow: var(--m-shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+    }
+
+    .stat-card .stat-label{
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        color: var(--m-text-3, #9ca3af);
+        margin-bottom: 6px;
+    }
+
+    .stat-card .stat-value{
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--m-text, #111827);
+        line-height: 1.1;
+    }
+
+    .stat-card .stat-value.good{ color: #059669; }
+    .stat-card .stat-value.bad{ color: #dc2626; }
+    .stat-card .stat-value.warn{ color: #c98500; }
+    .stat-card .stat-value.accent{ color: var(--m-accent-2, #b8930a); }
+
+    .section-card{
+        background: #fff;
+        border: 1px solid var(--m-border, #e3e8f0);
+        border-radius: var(--m-radius-lg, 18px);
+        box-shadow: var(--m-shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+        margin-bottom: 22px;
+        overflow: hidden;
+    }
+
+    .section-card .section-title{
+        padding: 14px 20px;
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--m-text, #111827);
+        border-bottom: 1px solid var(--m-border-soft, #edf1f7);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-card.alert-card .section-title{ color: #c98500; }
+    .section-card.flag-card .section-title{ color: #dc2626; }
+
+    .mini-bar{
+        width: 100%;
+        height: 6px;
+        border-radius: 6px;
+        background: #eef0f4;
+        overflow: hidden;
+    }
+
+    .mini-bar span{
+        display: block;
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #0ca30c, #34d058);
+    }
+
+    .pill-chip{
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 700;
+        background: #fdf1de;
+        color: #c98500;
+    }
+
+    @media print {
+        #layout-menu, .layout-navbar, .no-print { display: none !important; }
+        .layout-page, .content-wrapper { margin: 0 !important; padding: 0 !important; }
+        .section-card, .stat-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+        .ctr-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+</style>
+
+<div class="container-fluid mt-4">
+
+    <div class="section-card">
+
+        <!-- ===================================== -->
+        <!-- PAGE HEADER -->
+        <!-- ===================================== -->
+
+        <div class="ctr-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'class_teacher_report_list' %}"
+                   class="ctr-nav-btn no-print"
+                   style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); color:#fff;"
+                   title="Back to list">
+                    <i class="ri-arrow-left-line"></i>
+                </a>
+                <div>
+                    <div class="eyebrow">Consolidated Report</div>
+                    <h4>Class Teacher Report — All Classes</h4>
+                    <div class="sub">{{ report_date }} &middot; {{ classes_reported }} of {{ classes_total }} classes submitted</div>
+                </div>
+            </div>
+
+            <button class="btn btn-sm no-print"
+                    style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2);"
+                    onclick="window.print()">
+                <i class="ri-printer-line"></i> Print
+            </button>
+
+        </div>
+
+        <div class="p-4">
+
+            <!-- ===================================== -->
+            <!-- DATE BAR -->
+            <!-- ===================================== -->
+
+            <div class="ctr-datebar no-print">
+
+                <a href="?report_date={{ prev_date }}" class="ctr-nav-btn" title="Previous day">
+                    <i class="ri-arrow-left-s-line"></i>
+                </a>
+
+                <form method="GET" class="d-flex align-items-center gap-2 flex-wrap flex-grow-1">
+                    <input type="date"
+                           name="report_date"
+                           value="{{ report_date }}"
+                           class="form-control"
+                           style="max-width:180px;">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="ri-search-line"></i> Load
+                    </button>
+                    {% if not is_today %}
+                    <a href="?" class="btn btn-secondary btn-sm">Today</a>
+                    {% endif %}
+                </form>
+
+                <a href="?report_date={{ next_date }}" class="ctr-nav-btn" title="Next day">
+                    <i class="ri-arrow-right-s-line"></i>
+                </a>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- STAT CARDS -->
+            <!-- ===================================== -->
+
+            <div class="stat-grid">
+
+                <div class="stat-card">
+                    <div class="stat-label">Classes Reported</div>
+                    <div class="stat-value accent">{{ classes_reported }}/{{ classes_total }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Total On Roll</div>
+                    <div class="stat-value">{{ total_on_roll }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Present</div>
+                    <div class="stat-value good">{{ total_present }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Absent</div>
+                    <div class="stat-value bad">{{ total_absentees }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Attendance %</div>
+                    <div class="stat-value good">{{ attendance_pct }}%</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Uniform Defaulters</div>
+                    <div class="stat-value warn">{{ total_uniform_defaulters }}</div>
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- PENDING SECTIONS -->
+            <!-- ===================================== -->
+
+            {% if pending_sections %}
+            <div class="section-card alert-card">
+                <div class="section-title">
+                    <i class="ri-error-warning-line"></i>
+                    Not Yet Submitted ({{ pending_sections|length }})
+                </div>
+                <div class="p-3 d-flex flex-wrap gap-2">
+                    {% for sec in pending_sections %}
+                    <span class="pill-chip">{{ sec.class_sec_name }} - {{ sec.section_name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ===================================== -->
+            <!-- FLAGGED ITEMS -->
+            <!-- ===================================== -->
+
+            {% if flagged_reports %}
+            <div class="section-card flag-card">
+                <div class="section-title">
+                    <i class="ri-alarm-warning-line"></i>
+                    Needs Attention ({{ flagged_reports|length }})
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle mb-0">
+                        <tbody>
+                            {% for r in flagged_reports %}
+                            <tr style="border-top:1px solid var(--m-border-soft, #edf1f7);">
+                                <td class="fw-semibold" style="width:160px;">{{ r.class_name }} - {{ r.section }}</td>
+                                <td>
+                                    {% if r.total_absentees > 0 %}
+                                        <span class="text-danger">{{ r.total_absentees }} absent</span>
+                                    {% endif %}
+                                    {% if r.accident_details and r.accident_details|lower != 'nil' %}
+                                        <span class="ms-2">&middot; Accident: {{ r.accident_details }}</span>
+                                    {% endif %}
+                                    {% if r.defaulters and r.defaulters|lower != 'nil' %}
+                                        <span class="ms-2">&middot; Defaulters: {{ r.defaulters }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end" style="width:90px;">
+                                    <a href="{% url 'view_class_teacher_report' r.id %}"
+                                       class="btn btn-sm btn-secondary no-print">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ===================================== -->
+            <!-- PER-CLASS BREAKDOWN -->
+            <!-- ===================================== -->
+
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="ri-table-line"></i>
+                    Per-Class Breakdown
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead style="background:var(--m-bg, #f0f3f9);">
+                            <tr>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Teacher</th>
+                                <th class="text-center">On Roll</th>
+                                <th class="text-center">Present</th>
+                                <th class="text-center">Absent</th>
+                                <th style="width:140px;">Attendance</th>
+                                <th class="text-center">Uniform</th>
+                                <th class="text-center no-print">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr>
+                                <td class="fw-semibold">{{ report.class_name }}</td>
+                                <td>{{ report.section }}</td>
+                                <td>{{ report.report_submitted_by }}</td>
+                                <td class="text-center">{{ report.total_on_roll }}</td>
+                                <td class="text-center text-success">{{ report.total_present }}</td>
+                                <td class="text-center {% if report.total_absentees > 0 %}text-danger{% endif %}">{{ report.total_absentees }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="mini-bar"><span style="width:{{ report.attendance_pct }}%;"></span></div>
+                                        <span style="font-size:11.5px; color:var(--m-text-2, #4b5563); white-space:nowrap;">{{ report.attendance_pct }}%</span>
+                                    </div>
+                                </td>
+                                <td class="text-center {% if report.total_uniform_defaulters > 0 %}text-warning{% endif %}">{{ report.total_uniform_defaulters }}</td>
+                                <td class="text-center no-print">
+                                    <a href="{% url 'view_class_teacher_report' report.id %}"
+                                       class="btn btn-sm btn-secondary">View</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    No class teacher reports submitted for this date.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===================================== -->
+            <!-- REMARKS & DAILY DETAILS -->
+            <!-- ===================================== -->
+
+            {% if reports_with_remarks %}
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="ri-chat-3-line"></i>
+                    Remarks &amp; Daily Details
+                </div>
+                <div class="p-0">
+                    {% for report in reports_with_remarks %}
+                    <div style="border-top: 1px solid var(--m-border-soft, #edf1f7); padding: 14px 20px;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="fw-bold" style="font-size:13px;">{{ report.class_name }} — {{ report.section }}</span>
+                            <span class="text-muted" style="font-size:12px;">{{ report.report_submitted_by }}</span>
+                        </div>
+                        <div class="row g-2" style="font-size:13px;">
+
+                            {% if report.teachers_remark %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Teacher's Remark</span>
+                                <div>{{ report.teachers_remark }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.parents_remark %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Parent's Remark</span>
+                                <div>{{ report.parents_remark }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.pupils_remark %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Pupil's Remark</span>
+                                <div>{{ report.pupils_remark }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.action_taken %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Action Taken</span>
+                                <div>{{ report.action_taken }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.birthday_celebration %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Birthday Celebration</span>
+                                <div>{{ report.birthday_celebration }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.homework_details %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Homework Details</span>
+                                <div>{{ report.homework_details }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.drill_work_details %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Drill / Work Details</span>
+                                <div>{{ report.drill_work_details }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.activity_class %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Activity Class</span>
+                                <div>{{ report.activity_class }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.announcements %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Announcements</span>
+                                <div>{{ report.announcements }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.defaulters %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Defaulters</span>
+                                <div>{{ report.defaulters }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.accident_details %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Accident Details</span>
+                                <div class="text-danger">{{ report.accident_details }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.meeting_details %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Meeting Details</span>
+                                <div>{{ report.meeting_details }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.suggestions_and_grievances %}
+                            <div class="col-12 col-md-4">
+                                <span class="fw-semibold text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Suggestions &amp; Grievances</span>
+                                <div>{{ report.suggestions_and_grievances }}</div>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ===================================== -->
+            <!-- CONSOLIDATED TRANSPORT -->
+            <!-- ===================================== -->
+
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="ri-bus-line"></i>
+                    Consolidated Transport
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead style="background:var(--m-bg, #f0f3f9);">
+                            <tr>
+                                <th>Mode</th>
+                                <th class="text-center">Boys</th>
+                                <th class="text-center">Girls</th>
+                                <th class="text-center">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in transport_rows %}
+                            <tr>
+                                <td>{{ row.mode }}</td>
+                                <td class="text-center">{{ row.boys }}</td>
+                                <td class="text-center">{{ row.girls }}</td>
+                                <td class="text-center fw-semibold">{{ row.total }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr style="background:var(--m-bg, #f0f3f9);">
+                                <td class="fw-bold">Grand Total</td>
+                                <td></td>
+                                <td></td>
+                                <td class="text-center fw-bold" style="color:var(--m-accent-2, #b8930a);">{{ transport_grand_total }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,315 @@
+{% extends 'panel/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  /* ── stats strip ── */
+  .gl-stats {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .gl-stat {
+    flex: 1; min-width: 120px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--r); padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--sh-sm);
+  }
+  .gl-stat-ico {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .gl-stat-ico.indigo { background: var(--accent-lt); color: var(--accent); }
+  .gl-stat-ico.green  { background: var(--green-lt);  color: var(--green); }
+  .gl-stat-ico.rose   { background: var(--rose-lt);   color: var(--rose); }
+  .gl-stat-val  { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
+  .gl-stat-lbl  { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+  /* ── toolbar ── */
+  .gl-toolbar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .gl-search {
+    position: relative; flex: 1; min-width: 200px; max-width: 320px;
+  }
+  .gl-search input {
+    width: 100%; padding: 8px 12px 8px 36px;
+    border: 1.5px solid var(--border-dark); border-radius: var(--r);
+    font-size: 13px; color: var(--text); background: var(--surface);
+    outline: none; transition: border-color var(--t);
+  }
+  .gl-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.1); }
+  .gl-search i {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 15px; pointer-events: none;
+  }
+  .gl-filter {
+    display: flex; gap: 6px;
+  }
+  .gl-filter-btn {
+    padding: 7px 14px; border-radius: var(--r); border: 1.5px solid var(--border-dark);
+    font-size: 12.5px; font-weight: 600; cursor: pointer; background: var(--surface);
+    color: var(--text-sm); transition: all var(--t); white-space: nowrap;
+  }
+  .gl-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .gl-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .gl-count {
+    margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap;
+  }
+
+  /* ── grid ── */
+  .gl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── card ── */
+  .gl-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--r-lg); overflow: hidden;
+    box-shadow: var(--sh-sm);
+    transition: box-shadow var(--t), transform var(--t);
+    display: flex; flex-direction: column;
+  }
+  .gl-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+
+  .gl-card-thumb {
+    aspect-ratio: 16/9; background: var(--surface2); position: relative;
+    overflow: hidden;
+  }
+  .gl-card-thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+  .gl-card:hover .gl-card-thumb img { transform: scale(1.04); }
+  .gl-card-thumb .gl-no-thumb {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+    color: var(--muted); font-size: 12px;
+  }
+  .gl-card-thumb .gl-no-thumb i { font-size: 32px; opacity: .35; }
+
+  .gl-card-status {
+    position: absolute; top: 10px; right: 10px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+    backdrop-filter: blur(6px);
+  }
+  .gl-card-status.active   { background: rgba(5,150,105,.15); color: #065f46; border: 1px solid rgba(5,150,105,.3); }
+  .gl-card-status.inactive { background: rgba(225,29,72,.12); color: #9f1239; border: 1px solid rgba(225,29,72,.25); }
+
+  .gl-card-body { padding: 13px 15px; flex: 1; display: flex; flex-direction: column; }
+  .gl-card-title {
+    font-size: 13.5px; font-weight: 700; color: var(--text);
+    margin-bottom: 4px; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .gl-card-desc {
+    font-size: 12px; color: var(--muted); line-height: 1.5; flex: 1;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .gl-card-link {
+    font-size: 11px; color: var(--accent);
+    display: flex; align-items: center; gap: 4px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 10px; text-decoration: none;
+  }
+  .gl-card-link:hover { text-decoration: underline; }
+
+  .gl-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 15px; border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .gl-card-date { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .gl-card-actions { display: flex; gap: 6px; }
+
+  /* ── empty state ── */
+  .gl-empty {
+    grid-column: 1 / -1;
+    padding: 60px 20px; text-align: center;
+    background: var(--surface); border: 1.5px dashed var(--border-dark);
+    border-radius: var(--r-lg);
+  }
+  .gl-empty-icon {
+    width: 72px; height: 72px; margin: 0 auto 16px;
+    background: var(--accent-lt); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: var(--accent);
+  }
+  .gl-empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .gl-empty-sub   { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+</style>
+
+<div class="pc-page-header">
+  <div class="pc-page-header-left">
+    <div class="pc-breadcrumb">
+      <a href="{% url 'home_dashboard' %}">Dashboard</a>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Mobile App</span>
+      <span class="pc-breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Photo Gallery</span>
+    </div>
+    <div class="pc-page-title">Photo Gallery</div>
+    <div class="pc-page-sub">Albums and photos shown in the student app gallery section</div>
+  </div>
+  <div class="pc-page-header-right">
+    <a href="{% url 'photo_gallery_add' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> Add Album
+    </a>
+  </div>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+  <div class="pc-alert pc-alert-{% if msg.tags == 'success' %}success{% else %}danger{% endif %}" style="margin-bottom:16px;">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+<!-- Stats -->
+{% if photos %}
+<div class="gl-stats">
+  <div class="gl-stat">
+    <div class="gl-stat-ico indigo"><i class="ri-image-line"></i></div>
+    <div>
+      <div class="gl-stat-val">{{ photos|length }}</div>
+      <div class="gl-stat-lbl">Total Albums</div>
+    </div>
+  </div>
+  <div class="gl-stat">
+    <div class="gl-stat-ico green"><i class="ri-eye-line"></i></div>
+    <div>
+      <div class="gl-stat-val">{{ photos|length }}</div>
+      <div class="gl-stat-lbl">Active</div>
+    </div>
+  </div>
+  <div class="gl-stat">
+    <div class="gl-stat-ico rose"><i class="ri-eye-off-line"></i></div>
+    <div>
+      <div class="gl-stat-val">0</div>
+      <div class="gl-stat-lbl">Hidden</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Toolbar -->
+{% if photos %}
+<div class="gl-toolbar">
+  <div class="gl-search">
+    <i class="ri-search-line"></i>
+    <input type="text" id="searchInput" placeholder="Search albums…">
+  </div>
+  <div class="gl-filter">
+    <button class="gl-filter-btn active" data-filter="all">All</button>
+    <button class="gl-filter-btn" data-filter="active">Active</button>
+    <button class="gl-filter-btn" data-filter="inactive">Hidden</button>
+  </div>
+  <span class="gl-count" id="visibleCount">{{ photos|length }} album{{ photos|length|pluralize }}</span>
+</div>
+{% endif %}
+
+<!-- Grid -->
+<div class="gl-grid" id="albumGrid">
+
+{% if photos %}
+  {% for p in photos %}
+  <div class="gl-card" data-status="{{ p.status }}" data-title="{{ p.PTitle|lower }}">
+
+    <div class="gl-card-thumb">
+      {% if p.PThumbnail %}
+      <img src="{{ p.PThumbnail }}" alt="{{ p.PTitle }}" onerror="this.parentElement.innerHTML='<div class=\'gl-no-thumb\'><i class=\'ri-image-line\'></i><span>No thumbnail</span></div>'">
+      {% else %}
+      <div class="gl-no-thumb">
+        <i class="ri-image-line"></i>
+        <span>No thumbnail</span>
+      </div>
+      {% endif %}
+      <span class="gl-card-status {{ p.status }}">
+        {% if p.status == 'active' %}<i class="ri-eye-line"></i> Active{% else %}<i class="ri-eye-off-line"></i> Hidden{% endif %}
+      </span>
+    </div>
+
+    <div class="gl-card-body">
+      <div class="gl-card-title">{{ p.PTitle }}</div>
+      {% if p.Pdesc %}
+      <div class="gl-card-desc">{{ p.Pdesc }}</div>
+      {% endif %}
+      {% if p.Plink %}
+      <a href="{{ p.Plink }}" target="_blank" rel="noopener" class="gl-card-link">
+        <i class="ri-links-line"></i>
+        <span>{{ p.Plink|truncatechars:40 }}</span>
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="gl-card-footer">
+      <span class="gl-card-date">
+        <i class="ri-calendar-line"></i>
+        {{ p.Pdate|default:"No date" }}
+      </span>
+      <div class="gl-card-actions">
+        <a href="{% url 'photo_gallery_edit' p.pk %}" class="pc-btn pc-btn-outline pc-btn-sm" title="Edit">
+          <i class="ri-edit-line"></i>
+        </a>
+        <a href="{% url 'photo_gallery_delete' p.pk %}"
+           onclick="return confirm('Delete \'{{ p.PTitle }}\'?')"
+           class="pc-btn pc-btn-danger pc-btn-sm" title="Delete">
+          <i class="ri-delete-bin-line"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="gl-empty">
+    <div class="gl-empty-icon"><i class="ri-image-line"></i></div>
+    <div class="gl-empty-title">No photo albums yet</div>
+    <div class="gl-empty-sub">Add albums with a Google Drive link or image URL — they'll show up in the student app gallery.</div>
+    <a href="{% url 'photo_gallery_add' %}" class="pc-btn pc-btn-primary">
+      <i class="ri-add-line"></i> Add First Album
+    </a>
+  </div>
+{% endif %}
+
+</div><!-- /.gl-grid -->
+
+<script>
+(function () {
+  var searchEl  = document.getElementById('searchInput');
+  var countEl   = document.getElementById('visibleCount');
+  var filterBtns= document.querySelectorAll('.gl-filter-btn');
+  var cards     = document.querySelectorAll('.gl-card');
+  var activeFilter = 'all';
+
+  function applyFilters() {
+    var q = searchEl ? searchEl.value.toLowerCase() : '';
+    var shown = 0;
+    cards.forEach(function (card) {
+      var matchFilter = activeFilter === 'all' || card.dataset.status === activeFilter;
+      var matchSearch = !q || card.dataset.title.includes(q);
+      var visible = matchFilter && matchSearch;
+      card.style.display = visible ? '' : 'none';
+      if (visible) shown++;
+    });
+    if (countEl) countEl.textContent = shown + ' album' + (shown !== 1 ? 's' : '');
+  }
+
+  if (searchEl) searchEl.addEventListener('input', applyFilters);
+
+  filterBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      filterBtns.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
+})();
+</script>
+
+{% endblock %}
