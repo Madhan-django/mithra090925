@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse,redirect
-from .models import SchoolProfile, Banner, PhotoGallery, VideoGallery, GalleryPhoto
+from .models import SchoolProfile, Banner, PhotoGallery, VideoGallery
 VideoGalleryModel = VideoGallery  # alias kept for existing API views
-from .forms import SchoolProfileForm, BannerForm, GalleryPhotoForm, PhotoGalleryForm, VideoGalleryForm
+from .forms import SchoolProfileForm, BannerForm, PhotoGalleryForm, VideoGalleryForm
 from authenticate.decorators import allowed_users
 from students.models import attendancegen
 from staff.models import temp_homework
@@ -444,22 +444,7 @@ class PhotoGalleryView(APIView):
         serializer = PhotoGallerySerializer(photos, many=True)
         data = list(serializer.data)
 
-        # Photos added from Gallery Manage (GalleryPhoto) — same shape as PhotoGallery
-        school_data = schoolserializer(sdata).data
-        for gp in GalleryPhoto.objects.filter(school=sdata, is_active=True):
-            data.append({
-                'id': f'g{gp.id}',
-                'PTitle': gp.title,
-                'PThumbnail': '',
-                'Plink': gp.view_url,
-                'Pdesc': gp.album,
-                'Pdate': None,
-                'Ppostdate': gp.created_at.date().isoformat() if gp.created_at else None,
-                'Pschool': school_data,
-                'status': 'active',
-            })
-
-        # No thumbnail (Drive folder / website album / image link) → first image as cover
+        # No thumbnail → first image as cover
         for item in data:
             if not item.get('PThumbnail'):
                 try:
@@ -546,8 +531,6 @@ class PhotoAlbumView(APIView):
     GET /mobi/photos/album/?username=<usernm>&id=<photo id from /mobi/photos/>
     Returns {"title": ..., "images": [{"id","name","thumb","full"}, ...]}
     If no images can be found: {"title": ..., "images": [], "web_url": <link>} → app opens browser
-    id = number  → PhotoGallery
-    id = g<num>  → GalleryPhoto (Gallery Manage)
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -564,11 +547,7 @@ class PhotoAlbumView(APIView):
         sdata = school.objects.get(name=stud.school_student)
 
         title, link = '', ''
-        if photo_id.startswith('g') and photo_id[1:].isdigit():
-            gp = GalleryPhoto.objects.filter(pk=int(photo_id[1:]), school=sdata, is_active=True).first()
-            if gp:
-                title, link = gp.title, gp.view_url
-        elif photo_id.isdigit():
+        if photo_id.isdigit():
             pg = PhotoGallery.objects.filter(pk=int(photo_id), Pschool=sdata, status='active').first()
             if pg:
                 title, link = pg.PTitle, pg.Plink
@@ -1159,73 +1138,6 @@ class TimetableAPI(APIView):
         return Response(serializer.data)
 
 
-# ── Gallery Admin CRUD ──────────────────────────────────────────────────────
-
-@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
-def gallery_list(request):
-    from django.contrib import messages as msg
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    photos = GalleryPhoto.objects.filter(school=sdata)
-    albums = photos.values_list('album', flat=True).distinct()
-    return render(request, 'mobi/gallery_list.html', {
-        'skool': sdata, 'photos': photos, 'albums': [a for a in albums if a]
-    })
-
-
-@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
-def gallery_add(request):
-    from django.contrib import messages as msg
-    from lessonplan.drive_utils import upload_gallery_photo
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    if request.method == 'POST':
-        form = GalleryPhotoForm(request.POST, request.FILES)
-        if form.is_valid():
-            add_type = request.POST.get('_add_type', 'upload')
-            title    = form.cleaned_data['title']
-            album    = form.cleaned_data.get('album', '')
-            is_active = form.cleaned_data.get('is_active', True)
-            drive_file_id = ''
-            view_url = ''
-            if add_type == 'upload' and form.cleaned_data.get('photo'):
-                photo_file = form.cleaned_data['photo']
-                try:
-                    drive_file_id, view_url = upload_gallery_photo(
-                        photo_file,
-                        photo_file.name,
-                        photo_file.content_type,
-                        sdata.name,
-                        album or 'General',
-                    )
-                except Exception as e:
-                    msg.error(request, f'Drive upload failed: {e}')
-                    return render(request, 'mobi/gallery_add.html', {'skool': sdata, 'form': form})
-            else:
-                view_url = form.cleaned_data.get('link_url', '')
-            GalleryPhoto.objects.create(
-                title=title, album=album, drive_file_id=drive_file_id,
-                view_url=view_url, is_active=is_active, school=sdata
-            )
-            msg.success(request, 'Photo added to gallery.')
-            return redirect('gallery_list')
-    else:
-        form = GalleryPhotoForm()
-    return render(request, 'mobi/gallery_add.html', {'skool': sdata, 'form': form})
-
-
-@allowed_users(allowed_roles=['superadmin', 'Admin', 'Accounts'])
-def gallery_delete(request, pk):
-    from lessonplan.drive_utils import delete_note
-    sch_id = request.session['sch_id']
-    sdata = school.objects.get(pk=sch_id)
-    photo = GalleryPhoto.objects.filter(pk=pk, school=sdata).first()
-    if photo:
-        if photo.drive_file_id:
-            delete_note(photo.drive_file_id)
-        photo.delete()
-    return redirect('gallery_list')
-
 
 # ── Photo Gallery Admin CRUD ────────────────────────────────────────────────
 
@@ -1323,4 +1235,80 @@ def video_gallery_delete(request, pk):
     sdata = school.objects.get(pk=sch_id)
     VideoGallery.objects.filter(pk=pk, Vschool=sdata).delete()
     return redirect('video_gallery_list')
+
+
+# ─── Transport API (parent-facing) ────────────────────────────────────────────
+
+class TransportAPI(APIView):
+    """
+    Returns the student's bus assignment, stop timings, driver contact,
+    and the live GPS position of the assigned vehicle (if available).
+
+    GET /mobi/transport/?username=<username>
+    Authorization: Bearer <token>
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from transport.models import StudentTransport, VehiclePosition
+
+        username = request.query_params.get('username')
+        if not username:
+            return Response({'error': 'username required'}, status=400)
+
+        try:
+            student = students.objects.get(usernm=username)
+        except students.DoesNotExist:
+            return Response({'error': 'student not found'}, status=404)
+
+        alloc = (StudentTransport.objects
+                 .filter(student=student, is_active=True)
+                 .select_related('route', 'route__vehicle', 'stop')
+                 .first())
+
+        if not alloc:
+            return Response({'transport': None})
+
+        route   = alloc.route
+        stop    = alloc.stop
+        vehicle = route.vehicle
+        driver  = (vehicle.drivers.filter(status='Active').first()
+                   if vehicle else None)
+
+        live = None
+        if vehicle:
+            try:
+                p = vehicle.position  # OneToOne reverse
+                live = {
+                    'lat':       float(p.latitude),
+                    'lng':       float(p.longitude),
+                    'speed_kmh': float(p.speed_kmh),
+                    'heading':   p.heading,
+                    'timestamp': p.timestamp.isoformat(),
+                }
+            except VehiclePosition.DoesNotExist:
+                pass
+
+        return Response({
+            'route': {
+                'code': route.route_code,
+                'name': route.route_name,
+            },
+            'stop': {
+                'name':        stop.stop_name,
+                'area':        stop.area,
+                'pickup_time': stop.pickup_time.strftime('%H:%M') if stop.pickup_time else None,
+                'drop_time':   stop.drop_time.strftime('%H:%M') if stop.drop_time else None,
+            },
+            'vehicle': {
+                'name':   vehicle.vehicle_name,
+                'number': vehicle.vehicle_number,
+            } if vehicle else None,
+            'driver': {
+                'name':   driver.name,
+                'mobile': driver.mobile,
+            } if driver else None,
+            'live': live,
+        })
 

@@ -7,13 +7,15 @@ from .views import (studentsapi, homeworkapi, attendanceapi, indfeeApi, noticebo
                     GrievanceAPI,
                     BannerAPI, banner_list, banner_add, banner_edit, banner_delete,
                     PhotoGalleryView, PhotoAlbumView,
-                    gallery_list, gallery_add, gallery_delete,
                     photo_gallery_list, photo_gallery_add, photo_gallery_edit, photo_gallery_delete,
-                    video_gallery_list, video_gallery_add, video_gallery_edit, video_gallery_delete)
+                    video_gallery_list, video_gallery_add, video_gallery_edit, video_gallery_delete,
+                    TransportAPI)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+
+from . import leave_api
 
 urlpatterns = [
     path('', studentsapi.as_view(), name='mobstudents'),
@@ -46,11 +48,16 @@ urlpatterns = [
     path('teacher/students/<int:class_id>/<int:sec_id>/<str:date>/', StudentsAttendanceAPI.as_view(),
          name='teacher_students'),
     path('teacher/attendance/submit/', SubmitAttendanceAPI.as_view(), name='teacher_attendance_submit'),
+    path('teacher/leave/', leave_api.TeacherLeaveAPI.as_view(), name='teacher_leave'),
+    path('teacher/leave/<int:pk>/cancel/', leave_api.TeacherLeaveCancelAPI.as_view(), name='teacher_leave_cancel'),
 
     # ✅ Add these two
     path('teacher/subjects/', SubjectsAPI.as_view(), name='teacher_subjects'),
     path('teacher/homework/', TeacherHomeworkAddAPI.as_view(), name='teacher_homework'),
     path('teacher/StudentNotification/',GeneralNotificationAPI.as_view(),name='StudentNotification'),
+
+    # Transport (parent-facing)
+    path('transport/', TransportAPI.as_view(), name='transport_api'),
 
     # Grievance
     path('grievance/', GrievanceAPI.as_view(), name='grievance_api'),
@@ -66,11 +73,6 @@ urlpatterns = [
     path('banner-manage/add/', banner_add, name='banner_add'),
     path('banner-manage/<int:pk>/edit/', banner_edit, name='banner_edit'),
     path('banner-manage/<int:pk>/delete/', banner_delete, name='banner_delete'),
-
-    # Gallery — admin CRUD (Drive uploads)
-    path('gallery-manage/', gallery_list, name='gallery_list'),
-    path('gallery-manage/add/', gallery_add, name='gallery_add'),
-    path('gallery-manage/<int:pk>/delete/', gallery_delete, name='gallery_delete'),
 
     # Photo Gallery — admin CRUD
     path('photo-gallery/', photo_gallery_list, name='photo_gallery_list'),

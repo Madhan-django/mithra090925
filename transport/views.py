@@ -13,8 +13,10 @@ from authenticate.decorators import allowed_users
 
 from .models import (VehicleType, Vehicle, Driver, Route, Stop, StudentTransport,
                      GpsSettings, VehiclePosition, VehiclePositionHistory,
-                     BoardingAttendance)
-from .forms import VehicleTypeForm, VehicleForm, DriverForm, RouteForm, StopForm, StudentTransportForm
+                     BoardingAttendance, VTSVendor, VehicleLog)
+from .forms import (VehicleTypeForm, VehicleForm, DriverForm, RouteForm, StopForm,
+                    StudentTransportForm, VTSVendorForm, VehicleLogForm)
+from .notify import send_boarding_fcm
 
 
 def _base(request):
@@ -399,9 +401,15 @@ def gps_push(request):
     if not all([device_id, lat, lng]):
         return JsonResponse({'error': 'device_id, lat, lng required'}, status=400)
 
-    vehicle = Vehicle.objects.filter(gps_device_id=device_id).first()
+    vehicle = Vehicle.objects.filter(gps_device_id=device_id).select_related('sch').first()
     if not vehicle:
         return JsonResponse({'error': 'Unknown device_id'}, status=404)
+
+    # Token check: if the school has any VTSVendor records, the push must supply a matching api_key.
+    token = body.get('token') or request.headers.get('X-Api-Key', '')
+    vendors = VTSVendor.objects.filter(sch=vehicle.sch)
+    if vendors.exists() and not vendors.filter(api_key=token).exists():
+        return JsonResponse({'error': 'Invalid token'}, status=403)
 
     if ts_raw:
         from django.utils.dateparse import parse_datetime
@@ -564,7 +572,7 @@ def boarding_mark(request):
         status = request.POST.get(f'status_{alloc.student_id}')
         if not status:
             continue
-        BoardingAttendance.objects.update_or_create(
+        _, created = BoardingAttendance.objects.update_or_create(
             student=alloc.student,
             date=att_date,
             trip=trip,
@@ -575,6 +583,14 @@ def boarding_mark(request):
                 'status':    status,
                 'marked_by': request.user,
             }
+        )
+        send_boarding_fcm(
+            student=alloc.student,
+            status=status,
+            trip=trip,
+            route_name=route_obj.route_name,
+            stop_name=alloc.stop.stop_name,
+            school_obj=sdata,
         )
 
     messages.success(request, f'Boarding attendance saved for {att_date} ({trip}).')
@@ -619,3 +635,110 @@ def boarding_report(request):
         'trip': trip, 'selected_route': route_id,
         'trip_choices': BoardingAttendance.TRIP_CHOICES,
     })
+
+
+# ─── VTS Vendor ───────────────────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vts_vendor_list(request):
+    sdata, year = _base(request)
+    vendors = VTSVendor.objects.filter(sch=sdata)
+    return render(request, 'transport/vts_vendor_list.html',
+                  {'vendors': vendors, 'skool': sdata, 'year': year})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vts_vendor_add(request):
+    sdata, year = _base(request)
+    if request.method == 'POST':
+        form = VTSVendorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'VTS Vendor added.')
+            return redirect('vts_vendor_list')
+    else:
+        form = VTSVendorForm(initial={'sch': sdata})
+    return render(request, 'transport/vts_vendor_form.html',
+                  {'form': form, 'title': 'Add VTS Vendor', 'skool': sdata, 'year': year})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vts_vendor_edit(request, pk):
+    sdata, year = _base(request)
+    obj = get_object_or_404(VTSVendor, pk=pk, sch=sdata)
+    if request.method == 'POST':
+        form = VTSVendorForm(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'VTS Vendor updated.')
+            return redirect('vts_vendor_list')
+    else:
+        form = VTSVendorForm(instance=obj)
+    return render(request, 'transport/vts_vendor_form.html',
+                  {'form': form, 'title': 'Edit VTS Vendor', 'skool': sdata, 'year': year})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vts_vendor_delete(request, pk):
+    sdata, _ = _base(request)
+    obj = get_object_or_404(VTSVendor, pk=pk, sch=sdata)
+    obj.delete()
+    messages.success(request, 'VTS Vendor deleted.')
+    return redirect('vts_vendor_list')
+
+
+# ─── Vehicle Log ──────────────────────────────────────────────────────────────
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vehicle_log_list(request):
+    sdata, year = _base(request)
+    vehicle_id = request.GET.get('vehicle')
+    logs = VehicleLog.objects.filter(sch=sdata).select_related('vehicle')
+    if vehicle_id:
+        logs = logs.filter(vehicle_id=vehicle_id)
+    vehicles = Vehicle.objects.filter(sch=sdata, status='Active')
+    return render(request, 'transport/vehicle_log_list.html',
+                  {'logs': logs, 'vehicles': vehicles, 'selected_vehicle': vehicle_id,
+                   'skool': sdata, 'year': year})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vehicle_log_add(request):
+    sdata, year = _base(request)
+    if request.method == 'POST':
+        form = VehicleLogForm(request.POST, sch=sdata)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.recorded_by = request.user
+            obj.save()
+            messages.success(request, 'Vehicle log added.')
+            return redirect('vehicle_log_list')
+    else:
+        form = VehicleLogForm(sch=sdata, initial={'sch': sdata})
+    return render(request, 'transport/vehicle_log_form.html',
+                  {'form': form, 'title': 'Add Vehicle Log', 'skool': sdata, 'year': year})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vehicle_log_edit(request, pk):
+    sdata, year = _base(request)
+    obj = get_object_or_404(VehicleLog, pk=pk, sch=sdata)
+    if request.method == 'POST':
+        form = VehicleLogForm(request.POST, instance=obj, sch=sdata)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Vehicle log updated.')
+            return redirect('vehicle_log_list')
+    else:
+        form = VehicleLogForm(instance=obj, sch=sdata)
+    return render(request, 'transport/vehicle_log_form.html',
+                  {'form': form, 'title': 'Edit Vehicle Log', 'skool': sdata, 'year': year})
+
+
+@allowed_users(allowed_roles=['superadmin', 'Admin'])
+def vehicle_log_delete(request, pk):
+    sdata, _ = _base(request)
+    obj = get_object_or_404(VehicleLog, pk=pk, sch=sdata)
+    obj.delete()
+    messages.success(request, 'Vehicle log deleted.')
+    return redirect('vehicle_log_list')

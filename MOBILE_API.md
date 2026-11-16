@@ -400,3 +400,81 @@ https://mithran.co.in/media/school/banners/annual_day.jpg
 | 401  | Unauthorised — token missing or expired |
 | 404  | Resource not found |
 | 500  | Server error |
+
+---
+
+## Teacher leave (MithraTeach) — added 3 Nov 2026
+
+Auth: `Authorization: Bearer <access token>` from `/mobi/api/token/` (same as other `/mobi/teacher/` APIs).
+
+### GET `/mobi/teacher/leave/?year=2026`
+```json
+{
+  "balance": {"total_cl": 12, "used_cl": 2, "pending_cl": 1, "remaining_cl": 10,
+              "total_ml": 6, "used_ml": 0, "pending_ml": 0, "remaining_ml": 6, "lop": 1},
+  "leave_types": [{"code": "CL", "name": "Casual Leave"}, {"code": "ML", "name": "Medical Leave"},
+                  {"code": "LOP", "name": "Loss of Pay"}, {"code": "PERMISSION", "name": "Permission"}],
+  "items": [{"id": 5, "leave_type": "CL", "leave_type_name": "Casual Leave", "from_date": "2026-11-06",
+             "to_date": "2026-11-07", "days": 2.0, "from_time": null, "to_time": null, "reason": "...",
+             "status": "Pending", "admin_remarks": "", "applied_on": "2026-11-03 10:15", "can_cancel": true}]
+}
+```
+
+### POST `/mobi/teacher/leave/` (form-data or JSON)
+Fields: `leave_type` (CL/ML/LOP/PERMISSION), `from_date` (YYYY-MM-DD), `to_date` (optional, = from_date if empty),
+`from_time` + `to_time` (HH:MM, required for PERMISSION), `reason`, `attachment` (file, optional).
+- 201 `{"success": true, "item": {...}}`
+- 400 `{"success": false, "errors": ["Only 1 CL available ...", ...]}` — same checks as the web form
+  (balance after pending, overlap, Sundays/holidays, finalized payroll, permission hours / per-month limit).
+
+### POST `/mobi/teacher/leave/<id>/cancel/`
+Cancels the teacher's own **Pending** request. Approved leave can only be cancelled by the office (web).
+
+### Push notification
+When the office approves / rejects / cancels a leave on the web, the teacher's device (staff.fcm_token, saved via
+the existing FCM save API) gets a notification:
+`title = "Leave approved"`, `data = {"type": "leave", "leave_id": "5", "status": "Approved"}` — open the leave screen on tap.
+
+---
+
+## Transport
+
+### Get Bus Info + Live Location
+```
+GET /mobi/transport/?username=<username>
+Authorization: Bearer <token>
+```
+Returns the student's bus assignment, stop timings, driver contact, and current GPS position.
+
+**Response (student has transport allocation):**
+```json
+{
+  "route": { "code": "R01", "name": "Coimbatore North Route" },
+  "stop": {
+    "name": "Gandhipuram",
+    "area": "Town",
+    "pickup_time": "07:30",
+    "drop_time": "16:15"
+  },
+  "vehicle": { "name": "School Bus 4", "number": "TN33 AB 1234" },
+  "driver":  { "name": "Rajan", "mobile": "9876543210" },
+  "live": {
+    "lat": 11.0168, "lng": 76.9558,
+    "speed_kmh": 32.5, "heading": 180,
+    "timestamp": "2026-11-16T07:42:00Z"
+  }
+}
+```
+`live` is `null` when the vehicle has no GPS position yet.  
+`vehicle` and `driver` are `null` when no vehicle/driver is assigned to the route.
+
+**Response (student not allocated to any route):**
+```json
+{ "transport": null }
+```
+
+### Boarding Push Notifications (automatic)
+When staff marks boarding attendance, parents receive FCM notifications automatically:
+- **Boarded:** "Ravi Kumar has boarded Coimbatore North Route at Gandhipuram (07:42 AM)."
+- **Missed:** "Ravi Kumar has missed the morning bus at Gandhipuram. Please check."
+- **Absent:** *(silent)*
